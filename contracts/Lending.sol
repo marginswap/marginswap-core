@@ -33,10 +33,13 @@ contract Lending is RoleAware {
         HourlyBondAccount storage account = hourlyBondAccounts[msg.sender];
         uint yieldQuotient = account.bondYieldQuotientsFP[token];
         if (yieldQuotient > 0) {
-            // 1 * FP / FP = 1
-            account.bonds[token] = account.bonds[token]
-                * hourlyBondYieldAccumulators[token].accumulatorFP
-                / account.bondYieldQuotientsFP[token];
+            YieldAccumulator storage yA = getUpdatedCumulativeYield(token,
+                                                                    hourlyBondYieldAccumulators,
+                                                                    block.timestamp);
+
+            account.bonds[token] = applyInterest(account.bonds[token],
+                                                 yA.accumulatorFP,
+                                                 account.bondYieldQuotientsFP[token]);
         }
         account.bondYieldQuotientsFP[token] = hourlyBondYieldAccumulators[token].accumulatorFP;
         account.moduloHour = block.timestamp % (1 hours);
@@ -44,6 +47,19 @@ contract Lending is RoleAware {
                 "Could not transfer bond deposit token to fund");
         account.bonds[token] += amount;
         totalHourlyBond[token] += amount;
+    }
+
+    function applyInterest(uint balance, uint accumulatorFP, uint yieldQuotientFP) internal returns (uint) {
+        // 1 * FP / FP = 1
+        return balance * accumulatorFP / yieldQuotientFP;
+    }
+
+    function applyBorrowInterest(uint balance, address token, uint yieldQuotientFP)
+        external returns (uint) {
+        YieldAccumulator storage yA = getUpdatedCumulativeYield(token,
+                                                                borrowYieldAccumulators,
+                                                                block.timestamp);
+        return applyInterest(balance, yA.accumulatorFP, yieldQuotientFP);
     }
 
     function withdrawHourlyBonds(address token, uint amount) external {

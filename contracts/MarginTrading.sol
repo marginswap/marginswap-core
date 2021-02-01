@@ -70,17 +70,16 @@ contract MarginTrading is RoleAware, Ownable {
             account.borrowedYieldQuotientsFP[borrowToken] = Lending(lending())
                 .viewBorrowingYield(borrowToken);
         } else {
-            applyInterest(account, borrowToken);
+            account.borrowed[borrowToken] = Lending(lending())
+                .applyBorrowInterest(account.borrowed[borrowToken],
+                                     borrowToken,
+                                     account.borrowedYieldQuotientsFP[borrowToken]);
         }
         account.borrowed[borrowToken] += borrowAmount;
         addHolding(account, borrowToken, borrowAmount);
 
         require(positiveBalance(account),
                 "Can't borrow: insufficient balance");
-    }
-
-    function applyInterest(MarginAccount storage, address) internal {
-        // TODO update yeild accumulator
     }
 
     function withdraw(address withdrawToken, uint withdrawAmount) external {
@@ -106,7 +105,10 @@ contract MarginTrading is RoleAware, Ownable {
     function extinguishDebt(address debtToken, uint extinguishAmount) external {
         MarginAccount storage account = marginAccounts[msg.sender];
         // SafeMath will throw if insufficient funds
-        applyInterest(account, debtToken);
+        account.borrowed[debtToken] = Lending(lending())
+            .applyBorrowInterest(account.borrowed[debtToken],
+                                 debtToken,
+                                 account.borrowedYieldQuotientsFP[debtToken]);
         account.borrowed[debtToken] -= extinguishAmount;
         account.holdings[debtToken] -= extinguishAmount;
         Lending(lending()).payOff(debtToken, extinguishAmount);
