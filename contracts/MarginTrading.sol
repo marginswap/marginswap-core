@@ -3,10 +3,14 @@ pragma solidity ^0.7.0;
 import '@openzeppelin/contracts/token/ERC20/IERC20.sol';
 import '@openzeppelin/contracts/access/Ownable.sol';
 import '@openzeppelin/contracts/math/SafeMath.sol';
+
 import './Fund.sol';
 import './Lending.sol';
 import './RoleAware.sol';
 import './MarginRouter.sol';
+
+// Goal: all external functions only accessible to margintrader role
+// except for view functions of course
 
 struct MarginAccount {
     address[] borrowTokens;
@@ -39,19 +43,15 @@ contract MarginTrading is RoleAware, Ownable {
         liquidationThresholdPercent = threshold;
     }
 
-    function deposit(address depositToken, uint depositAmount) external {
-        require(Fund(fund()).activeTokens(depositToken),
-                "Not an approved token");
-        require(IERC20(depositToken).transferFrom(msg.sender,
-                                                  fund(),
-                                                  depositAmount),
-                "Cannot transfer deposit to margin account");
-        addHolding(marginAccounts[msg.sender], depositToken, depositAmount);
-    }
-
-    function depositETH() external payable {
-        Fund(fund()).depositToWETH{value: msg.value}();
-        addHolding(marginAccounts[msg.sender], WETH, msg.value);
+    function registerDeposit(address trader,
+                             address token,
+                             uint depositAmount) external returns (uint extinguishableDebt) {
+        require(isMarginTrader(msg.sender), "Calling contract not authorized to deposit");
+        MarginAccount storage account = marginAccounts[trader];
+        addHolding(account, token, depositAmount);
+        if (account.borrowed[token] > 0) {
+            extinguishableDebt = min(depositAmount, account.borrowed[token]);
+        }
     }
 
     function addHolding(MarginAccount storage account, address token, uint depositAmount) internal {
@@ -62,9 +62,13 @@ contract MarginTrading is RoleAware, Ownable {
         account.holdings[token] += depositAmount;
     }
     
-    function borrow(address borrowToken, uint borrowAmount) external {
-        MarginAccount storage account = marginAccounts[msg.sender];
+    function registerBorrow(address trader, address borrowToken, uint borrowAmount) external {
+        require(isMarginTrader(msg.sender), "Calling contract not authorized to deposit");
+        MarginAccount storage account = marginAccounts[trader];
+        borrow(account, borrowToken, borrowAmount);
+    }
 
+    function borrow(MarginAccount storage account, address borrowToken, uint borrowAmount) internal {
         if (!hasBorrowedToken(account, borrowToken)) {
             account.borrowTokens.push(borrowToken);
             account.borrowedYieldQuotientsFP[borrowToken] = Lending(lending())
@@ -82,15 +86,15 @@ contract MarginTrading is RoleAware, Ownable {
                 "Can't borrow: insufficient balance");
     }
 
-    function withdraw(address withdrawToken, uint withdrawAmount) external {
-        MarginAccount storage account = marginAccounts[msg.sender];
+
+    function registerWithdrawal(address trader, address withdrawToken, uint withdrawAmount) external {
+        require(isMarginTrader(msg.sender), "Calling contract not authorized to deposit");
+        MarginAccount storage account = marginAccounts[trader];
 
         // SafeMath throws on underflow 
-        account.holdings[withdrawToken] -= withdrawAmount;
+        account.holdings[withdrawToken] = account.holdings[withdrawToken].sub(withdrawAmount);
         require(positiveBalance(account),
                 "Account balance is too low to withdraw");
-        require(Fund(fund()).withdraw(withdrawToken, msg.sender, withdrawAmount),
-                "Could not withdraw from fund");
     }
 
     function positiveBalance(MarginAccount storage account) internal returns (bool) {
@@ -102,16 +106,21 @@ contract MarginTrading is RoleAware, Ownable {
         return holdings * (leverage + 1) >= loan * leverage;
     }
 
-    function extinguishDebt(address debtToken, uint extinguishAmount) external {
-        MarginAccount storage account = marginAccounts[msg.sender];
+    function registerPayOff(address trader, address debtToken, uint extinguishAmount) external {
+        require(isMarginTrader(msg.sender), "Calling contract not authorized to deposit");
+        extinguishDebt(marginAccounts[trader], debtToken, extinguishAmount);
+    }
+
+    function extinguishDebt(MarginAccount storage account,
+                            address debtToken,
+                            uint extinguishAmount) internal {
         // SafeMath will throw if insufficient funds
         account.borrowed[debtToken] = Lending(lending())
             .applyBorrowInterest(account.borrowed[debtToken],
                                  debtToken,
                                  account.borrowedYieldQuotientsFP[debtToken]);
-        account.borrowed[debtToken] -= extinguishAmount;
-        account.holdings[debtToken] -= extinguishAmount;
-        Lending(lending()).payOff(debtToken, extinguishAmount);
+        account.borrowed[debtToken] = account.borrowed[debtToken].sub(extinguishAmount);
+        account.holdings[debtToken] = account.holdings[debtToken].sub(extinguishAmount);
     }
 
     function hasHoldingToken(MarginAccount storage account, address token) internal view returns (bool) {
@@ -141,9 +150,34 @@ contract MarginTrading is RoleAware, Ownable {
         return holdings * leverage * 100 >= (100 * leverage + liquidationThresholdPercent) * loan;
     }
 
-    function canSell(MarginAccount storage account, address token, uint amount)
+    function canBorrow(MarginAccount storage account, address token, uint amount)
         internal view returns (bool) {
         return account.holdings[token] >= amount;
+    }
+
+    function getTradeBorrowAmount(address trader, address token, uint amount)
+        external returns (uint borrowAmount) {
+        require(isMarginTrader(msg.sender), "Calling contract is not an authorized margin trader");
+        MarginAccount storage account = marginAccounts[trader];
+        borrowAmount = amount - account.holdings[token];
+        require(canBorrow(account, token, borrowAmount), "Can't borrow full amount");
+    }
+
+    function registerTradeAndBorrow(address trader,
+                                    address tokenFrom,
+                                    address tokenTo,
+                                    uint inAmount,
+                                    uint outAmount) external returns (uint borrowAmount) {
+        require(isMarginTrader(msg.sender), "Calling contract is not an authorized margin trader agent");
+
+        MarginAccount storage account = marginAccounts[trader];
+        uint sellAmount = inAmount;
+        if (inAmount > account.holdings[tokenFrom]) {
+            sellAmount = account.holdings[tokenFrom];
+            borrowAmount =  inAmount - sellAmount;
+            borrow(account, tokenFrom, borrowAmount);
+        }
+        adjustAmounts(account, tokenFrom, tokenTo, sellAmount, outAmount);
     }
 
     function sellPath(address sourceToken, address targetToken)
@@ -166,7 +200,7 @@ contract MarginTrading is RoleAware, Ownable {
     function spotConversionAmount(address inToken, address outToken, uint inAmount)
         internal returns (uint) {
         address[] memory path = sellPath(inToken, outToken);
-        uint[] memory pathAmounts = MarginRouter(router()).getAmountsOut(inAmount, path);
+        uint[] memory pathAmounts = MarginRouter(router()).getAmountsOut(AMM.uni, inAmount, path);
         return pathAmounts[pathAmounts.length - 1];
     }
 
@@ -178,7 +212,7 @@ contract MarginTrading is RoleAware, Ownable {
             address[] memory path = new address[](2);
             path[0] = token;
             path[1] = WETH;
-            uint[] memory pathAmounts = MarginRouter(router()).getAmountsOut(amount, path);
+            uint[] memory pathAmounts = MarginRouter(router()).getAmountsOut(AMM.uni, amount, path);
             return pathAmounts[pathAmounts.length - 1];
         }
     }
@@ -205,45 +239,19 @@ contract MarginTrading is RoleAware, Ownable {
     }
 
     function adjustAmounts(MarginAccount storage account,
-                           address[] memory path,
-                           uint[] memory amounts) internal {
-        uint soldAmount = amounts[0];
-        uint boughtAmount = amounts[amounts.length - 1];
-
-        account.holdings[path[0]] -= soldAmount;
-        address targetToken = path[path.length - 1];
-        addHolding(account, targetToken, boughtAmount);
+                           address fromToken,
+                           address toToken,
+                           uint soldAmount,
+                           uint boughtAmount) internal {
+        account.holdings[fromToken] = account.holdings[fromToken].sub(soldAmount);
+        addHolding(account, toToken, boughtAmount);
     }
 
-    function swapExactTokensForTokens(uint amountIn,
-                                      uint amountOutMin,
-                                      address[] calldata path,
-                                      uint deadline)
-        external returns (uint[] memory amounts) {
-        MarginAccount storage account = marginAccounts[msg.sender];
-        address startingToken = path[0];
-        require(canSell(account, startingToken, amountIn));
-        amounts = MarginRouter(router()).swapExactTokensForTokens(amountIn,
-                                                                  amountOutMin,
-                                                                  path,
-                                                                  deadline);
-        adjustAmounts(account, path, amounts);
-        return amounts;
-    }
-
-    function swapTokensForExactTokens(uint amountOut,
-                                      uint amountInMax,
-                                      address[] calldata path,
-                                      uint deadline)
-        external returns (uint[] memory amounts) {
-        MarginAccount storage account = marginAccounts[msg.sender];
-        address startingToken = path[0];
-        require(canSell(account, startingToken, amountInMax));
-        amounts = MarginRouter(router()).swapTokensForExactTokens(amountOut,
-                                                                  amountInMax,
-                                                                  path,
-                                                                  deadline);
-        adjustAmounts(account, path, amounts);
-        return amounts;
+    function min(uint a, uint b) internal returns (uint) {
+        if (a > b) {
+            return b;
+        } else {
+            return a;
+        }
     }
 }

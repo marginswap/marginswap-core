@@ -3,7 +3,7 @@ import '../interfaces/IWETH.sol';
 import './RoleAware.sol';
 
 contract Fund is RoleAware {
-    address WETH;
+    address public WETH;
     address[] public approvedTokens;
     mapping(address => bool) public activeTokens;
     
@@ -14,6 +14,14 @@ contract Fund is RoleAware {
     function deposit(address depositToken, uint depositAmount) external returns (bool) {
         require(activeTokens[depositToken], "Deposit token is not active");
         return IERC20(depositToken).transferFrom(msg.sender,
+                                                 address(this),
+                                                 depositAmount);
+    }
+
+    function depositFor(address sender, address depositToken, uint depositAmount) external returns (bool) {
+        require(activeTokens[depositToken], "Deposit token is not active");
+        require(isWithdrawer(msg.sender), "Contract not authorized to deposit");
+        return IERC20(depositToken).transferFrom(sender,
                                                  address(this),
                                                  depositAmount);
     }
@@ -35,5 +43,11 @@ contract Fund is RoleAware {
         require(isWithdrawer(msg.sender), "Not authorized to withdraw");
         IWETH(WETH).withdraw(withdrawalAmount);
         payable(recipient).transfer(withdrawalAmount);
+    }
+
+    // withdrawers role
+    function sendTokenTo(address token, address recipient, uint amount) external returns (bool) {
+        require(isWithdrawer(msg.sender), "Not authorized to withdraw");
+        return IERC20(token).transfer(recipient, amount);
     }
 }

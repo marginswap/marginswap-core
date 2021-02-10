@@ -26,7 +26,29 @@ contract Lending is RoleAware {
 
     mapping(address => YieldAccumulator) public borrowYieldAccumulators;
 
+    // token => end-day => yield
+    mapping(address => mapping(uint => uint)) public bondYieldFP;
+
+    // token => end-day => portion of total target lending
+    mapping(address => mapping(uint => uint)) public bondTargetNumerator;
+    // The totality by which we divide above targets
+    uint public bondTotalTargetQuotient;
+
+    // TODO replace with function
+    uint public bondTotalDailyTarget;
+    mapping(uint => uint) public dailyMaturing;
+
     constructor( address _roles) RoleAware(_roles) {
+    }
+
+    function getUpdatedRate(address token, uint runtime) external {
+        uint supply;
+        uint demand;
+        uint rate;
+
+        //uint timeDelta = block.timestamp - lastUpdated;
+        //uint rateUpdateNumerator = (demand + reserve) * rate / supply;
+        //uint rateUpdateQuotient =  
     }
 
     function buyHourlyBondSubscription(address token, uint amount) external {
@@ -76,7 +98,7 @@ contract Lending is RoleAware {
         totalHourlyBond[token] -= amount;
     }
     
-    function borrow(address token, uint amount) external {
+    function registerBorrow(address token, uint amount) external {
         require(isBorrower(msg.sender),
                 "Not an approved borrower");
         require(Fund(fund()).activeTokens(token),
