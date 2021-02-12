@@ -35,6 +35,17 @@ contract MarginTrading is RoleAware, Ownable {
         liquidationThresholdPercent = 20;
     }
 
+    function getHoldingAmounts(address trader) external view returns (address[] memory holdingTokens, uint[] memory holdingAmounts) {
+        MarginAccount storage account = marginAccounts[trader];
+        holdingTokens = account.holdingTokens;
+
+        holdingAmounts = new uint[] (account.holdingTokens.length);
+        for (uint idx = 0; holdingTokens.length > idx; idx++) {
+            address tokenAddress = holdingTokens[idx];
+            holdingAmounts[idx] = account.holdings[tokenAddress];
+        }  
+    }
+
     function setLeverage(uint _leverage) external onlyOwner {
         leverage = _leverage;
     }
