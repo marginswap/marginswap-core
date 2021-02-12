@@ -26,9 +26,9 @@
       "type": "function"
     }
   ],
-  "metadata": "{\"compiler\":{\"version\":\"0.7.0+commit.9e61f92b\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_roles\",\"type\":\"address\"}],\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"inputs\":[],\"name\":\"roles\",\"outputs\":[{\"internalType\":\"contract Roles\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"}],\"devdoc\":{\"kind\":\"dev\",\"methods\":{},\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{},\"version\":1}},\"settings\":{\"compilationTarget\":{\"/home/tixelbook/projects/marginswap-core/contracts/RoleAware.sol\":\"RoleAware\"},\"evmVersion\":\"istanbul\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\"},\"optimizer\":{\"enabled\":false,\"runs\":200},\"remappings\":[]},\"sources\":{\"/home/tixelbook/projects/marginswap-core/contracts/RoleAware.sol\":{\"keccak256\":\"0xbc44a89d84dadda149b525e272d5f9cfd6cf01d97e8908aa24c862893c0c60e3\",\"urls\":[\"bzz-raw://c24f74e8be1bc68cf01f1d20d31567e69ed750ec13ed66f1305efa0b5ed40937\",\"dweb:/ipfs/QmPRpSYXvPwLXwFcz4ACaVSi8m1SqoNPL2p6237oJ7t3eD\"]},\"/home/tixelbook/projects/marginswap-core/contracts/Roles.sol\":{\"keccak256\":\"0x440e80547db3a2718a719fc3590ab1be3d6fe44fdcb7837c303c567777d01d4e\",\"urls\":[\"bzz-raw://3ee7a1e1c70ab3029161e933549e18c071412237f84f9d38ffae4c0ea513d7a0\",\"dweb:/ipfs/QmcdWfqn61Uw543ETD4MVSAd3To2sEtYDtfCDRXAi1uN7V\"]},\"@openzeppelin/contracts/GSN/Context.sol\":{\"keccak256\":\"0x8d3cb350f04ff49cfb10aef08d87f19dcbaecc8027b0bed12f3275cd12f38cf0\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://ded47ec7c96750f9bd04bbbc84f659992d4ba901cb7b532a52cd468272cf378f\",\"dweb:/ipfs/QmfBrGtQP7rZEqEg6Wz6jh2N2Kukpj1z5v3CGWmAqrzm96\"]},\"@openzeppelin/contracts/access/Ownable.sol\":{\"keccak256\":\"0xf7c39c7e6d06ed3bda90cfefbcbf2ddc32c599c3d6721746546ad64946efccaa\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://cb57a28e189cd8b05748db44bdd51d608e6f1364dd1b35ad921e1bc82c10631e\",\"dweb:/ipfs/QmaWWTBbVu2pRR9XUbE4iC159NoP59cRF9ZJwhf4ghFN9i\"]}},\"version\":1}",
-  "bytecode": "0x608060405234801561001057600080fd5b5060405161014c38038061014c8339818101604052602081101561003357600080fd5b8101908080519060200190929190505050806000806101000a81548173ffffffffffffffffffffffffffffffffffffffff021916908373ffffffffffffffffffffffffffffffffffffffff1602179055505060b9806100936000396000f3fe6080604052348015600f57600080fd5b506004361060285760003560e01c8063392f5f6414602d575b600080fd5b6033605f565b604051808273ffffffffffffffffffffffffffffffffffffffff16815260200191505060405180910390f35b60008054906101000a900473ffffffffffffffffffffffffffffffffffffffff168156fea2646970667358221220712c66a70e32e4aa9739fa797aedd19d607a1bfc45914977cfc28612ed34b7b164736f6c63430007000033",
-  "deployedBytecode": "0x6080604052348015600f57600080fd5b506004361060285760003560e01c8063392f5f6414602d575b600080fd5b6033605f565b604051808273ffffffffffffffffffffffffffffffffffffffff16815260200191505060405180910390f35b60008054906101000a900473ffffffffffffffffffffffffffffffffffffffff168156fea2646970667358221220712c66a70e32e4aa9739fa797aedd19d607a1bfc45914977cfc28612ed34b7b164736f6c63430007000033",
+  "metadata": "{\"compiler\":{\"version\":\"0.7.0+commit.9e61f92b\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_roles\",\"type\":\"address\"}],\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"inputs\":[],\"name\":\"roles\",\"outputs\":[{\"internalType\":\"contract Roles\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"}],\"devdoc\":{\"kind\":\"dev\",\"methods\":{},\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{},\"version\":1}},\"settings\":{\"compilationTarget\":{\"/home/tixelbook/projects/marginswap-core/contracts/RoleAware.sol\":\"RoleAware\"},\"evmVersion\":\"istanbul\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\"},\"optimizer\":{\"enabled\":false,\"runs\":200},\"remappings\":[]},\"sources\":{\"/home/tixelbook/projects/marginswap-core/contracts/RoleAware.sol\":{\"keccak256\":\"0xbc44a89d84dadda149b525e272d5f9cfd6cf01d97e8908aa24c862893c0c60e3\",\"urls\":[\"bzz-raw://c24f74e8be1bc68cf01f1d20d31567e69ed750ec13ed66f1305efa0b5ed40937\",\"dweb:/ipfs/QmPRpSYXvPwLXwFcz4ACaVSi8m1SqoNPL2p6237oJ7t3eD\"]},\"/home/tixelbook/projects/marginswap-core/contracts/Roles.sol\":{\"keccak256\":\"0x3a21b1c3b09fb8e92366bde002b718324bb5ca73775ec01ce0dd6584fd00c89f\",\"urls\":[\"bzz-raw://09dba34ee4ba56ec150209948c777c03f0d95da9cade8b6267af377f72e394f9\",\"dweb:/ipfs/QmQZNzK4qcFTPQ1WDoBR8DVdVWVkeYYEHfmmztEGR3YVUz\"]},\"@openzeppelin/contracts/GSN/Context.sol\":{\"keccak256\":\"0x8d3cb350f04ff49cfb10aef08d87f19dcbaecc8027b0bed12f3275cd12f38cf0\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://ded47ec7c96750f9bd04bbbc84f659992d4ba901cb7b532a52cd468272cf378f\",\"dweb:/ipfs/QmfBrGtQP7rZEqEg6Wz6jh2N2Kukpj1z5v3CGWmAqrzm96\"]},\"@openzeppelin/contracts/access/Ownable.sol\":{\"keccak256\":\"0xf7c39c7e6d06ed3bda90cfefbcbf2ddc32c599c3d6721746546ad64946efccaa\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://cb57a28e189cd8b05748db44bdd51d608e6f1364dd1b35ad921e1bc82c10631e\",\"dweb:/ipfs/QmaWWTBbVu2pRR9XUbE4iC159NoP59cRF9ZJwhf4ghFN9i\"]}},\"version\":1}",
+  "bytecode": "0x608060405234801561001057600080fd5b5060405161014c38038061014c8339818101604052602081101561003357600080fd5b8101908080519060200190929190505050806000806101000a81548173ffffffffffffffffffffffffffffffffffffffff021916908373ffffffffffffffffffffffffffffffffffffffff1602179055505060b9806100936000396000f3fe6080604052348015600f57600080fd5b506004361060285760003560e01c8063392f5f6414602d575b600080fd5b6033605f565b604051808273ffffffffffffffffffffffffffffffffffffffff16815260200191505060405180910390f35b60008054906101000a900473ffffffffffffffffffffffffffffffffffffffff168156fea2646970667358221220ca25b16018996f9524ca697a6ce162536040c693b67136b811a33e53d60d121564736f6c63430007000033",
+  "deployedBytecode": "0x6080604052348015600f57600080fd5b506004361060285760003560e01c8063392f5f6414602d575b600080fd5b6033605f565b604051808273ffffffffffffffffffffffffffffffffffffffff16815260200191505060405180910390f35b60008054906101000a900473ffffffffffffffffffffffffffffffffffffffff168156fea2646970667358221220ca25b16018996f9524ca697a6ce162536040c693b67136b811a33e53d60d121564736f6c63430007000033",
   "immutableReferences": {},
   "sourceMap": "23:1709:7:-:0;;;539:66;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;591:6;577:5;;:21;;;;;;;;;;;;;;;;;;539:66;23:1709;;;;;;",
   "deployedSourceMap": "23:1709:7:-:0;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;515:18;;;:::i;:::-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;:::o",
@@ -38,20 +38,20 @@
     "absolutePath": "/home/tixelbook/projects/marginswap-core/contracts/RoleAware.sol",
     "exportedSymbols": {
       "RoleAware": [
-        2911
+        2972
       ]
     },
-    "id": 2912,
+    "id": 2973,
     "license": null,
     "nodeType": "SourceUnit",
     "nodes": [
       {
         "absolutePath": "/home/tixelbook/projects/marginswap-core/contracts/Roles.sol",
         "file": "./Roles.sol",
-        "id": 2752,
+        "id": 2813,
         "nodeType": "ImportDirective",
-        "scope": 2912,
-        "sourceUnit": 2995,
+        "scope": 2973,
+        "sourceUnit": 3056,
         "src": "0:21:7",
         "symbolAliases": [],
         "unitAlias": ""
@@ -63,21 +63,21 @@
         "contractKind": "contract",
         "documentation": null,
         "fullyImplemented": true,
-        "id": 2911,
+        "id": 2972,
         "linearizedBaseContracts": [
-          2911
+          2972
         ],
         "name": "RoleAware",
         "nodeType": "ContractDefinition",
         "nodes": [
           {
             "constant": true,
-            "id": 2755,
+            "id": 2816,
             "mutability": "constant",
             "name": "FUND_CHARACTER",
             "nodeType": "VariableDeclaration",
             "overrides": null,
-            "scope": 2911,
+            "scope": 2972,
             "src": "65:33:7",
             "stateVariable": true,
             "storageLocation": "default",
@@ -86,7 +86,7 @@
               "typeString": "uint8"
             },
             "typeName": {
-              "id": 2753,
+              "id": 2814,
               "name": "uint8",
               "nodeType": "ElementaryTypeName",
               "src": "65:5:7",
@@ -98,7 +98,7 @@
             "value": {
               "argumentTypes": null,
               "hexValue": "31",
-              "id": 2754,
+              "id": 2815,
               "isConstant": false,
               "isLValue": false,
               "isPure": true,
@@ -117,12 +117,12 @@
           },
           {
             "constant": true,
-            "id": 2758,
+            "id": 2819,
             "mutability": "constant",
             "name": "LENDING_CHARACTER",
             "nodeType": "VariableDeclaration",
             "overrides": null,
-            "scope": 2911,
+            "scope": 2972,
             "src": "104:36:7",
             "stateVariable": true,
             "storageLocation": "default",
@@ -131,7 +131,7 @@
               "typeString": "uint8"
             },
             "typeName": {
-              "id": 2756,
+              "id": 2817,
               "name": "uint8",
               "nodeType": "ElementaryTypeName",
               "src": "104:5:7",
@@ -143,7 +143,7 @@
             "value": {
               "argumentTypes": null,
               "hexValue": "32",
-              "id": 2757,
+              "id": 2818,
               "isConstant": false,
               "isLValue": false,
               "isPure": true,
@@ -162,12 +162,12 @@
           },
           {
             "constant": true,
-            "id": 2761,
+            "id": 2822,
             "mutability": "constant",
             "name": "ROUTER_CHARACTER",
             "nodeType": "VariableDeclaration",
             "overrides": null,
-            "scope": 2911,
+            "scope": 2972,
             "src": "146:35:7",
             "stateVariable": true,
             "storageLocation": "default",
@@ -176,7 +176,7 @@
               "typeString": "uint8"
             },
             "typeName": {
-              "id": 2759,
+              "id": 2820,
               "name": "uint8",
               "nodeType": "ElementaryTypeName",
               "src": "146:5:7",
@@ -188,7 +188,7 @@
             "value": {
               "argumentTypes": null,
               "hexValue": "33",
-              "id": 2760,
+              "id": 2821,
               "isConstant": false,
               "isLValue": false,
               "isPure": true,
@@ -207,12 +207,12 @@
           },
           {
             "constant": true,
-            "id": 2764,
+            "id": 2825,
             "mutability": "constant",
             "name": "MARGIN_TRADING",
             "nodeType": "VariableDeclaration",
             "overrides": null,
-            "scope": 2911,
+            "scope": 2972,
             "src": "187:33:7",
             "stateVariable": true,
             "storageLocation": "default",
@@ -221,7 +221,7 @@
               "typeString": "uint8"
             },
             "typeName": {
-              "id": 2762,
+              "id": 2823,
               "name": "uint8",
               "nodeType": "ElementaryTypeName",
               "src": "187:5:7",
@@ -233,7 +233,7 @@
             "value": {
               "argumentTypes": null,
               "hexValue": "34",
-              "id": 2763,
+              "id": 2824,
               "isConstant": false,
               "isLValue": false,
               "isPure": true,
@@ -252,12 +252,12 @@
           },
           {
             "constant": true,
-            "id": 2767,
+            "id": 2828,
             "mutability": "constant",
             "name": "FEE_CONTROLLER",
             "nodeType": "VariableDeclaration",
             "overrides": null,
-            "scope": 2911,
+            "scope": 2972,
             "src": "226:33:7",
             "stateVariable": true,
             "storageLocation": "default",
@@ -266,7 +266,7 @@
               "typeString": "uint8"
             },
             "typeName": {
-              "id": 2765,
+              "id": 2826,
               "name": "uint8",
               "nodeType": "ElementaryTypeName",
               "src": "226:5:7",
@@ -278,7 +278,7 @@
             "value": {
               "argumentTypes": null,
               "hexValue": "35",
-              "id": 2766,
+              "id": 2827,
               "isConstant": false,
               "isLValue": false,
               "isPure": true,
@@ -297,12 +297,12 @@
           },
           {
             "constant": true,
-            "id": 2770,
+            "id": 2831,
             "mutability": "constant",
             "name": "MTRADER_ROLE",
             "nodeType": "VariableDeclaration",
             "overrides": null,
-            "scope": 2911,
+            "scope": 2972,
             "src": "266:33:7",
             "stateVariable": true,
             "storageLocation": "default",
@@ -311,7 +311,7 @@
               "typeString": "uint8"
             },
             "typeName": {
-              "id": 2768,
+              "id": 2829,
               "name": "uint8",
               "nodeType": "ElementaryTypeName",
               "src": "266:5:7",
@@ -323,7 +323,7 @@
             "value": {
               "argumentTypes": null,
               "hexValue": "313031",
-              "id": 2769,
+              "id": 2830,
               "isConstant": false,
               "isLValue": false,
               "isPure": true,
@@ -342,12 +342,12 @@
           },
           {
             "constant": true,
-            "id": 2773,
+            "id": 2834,
             "mutability": "constant",
             "name": "WITHDRAWER_ROLE",
             "nodeType": "VariableDeclaration",
             "overrides": null,
-            "scope": 2911,
+            "scope": 2972,
             "src": "305:36:7",
             "stateVariable": true,
             "storageLocation": "default",
@@ -356,7 +356,7 @@
               "typeString": "uint8"
             },
             "typeName": {
-              "id": 2771,
+              "id": 2832,
               "name": "uint8",
               "nodeType": "ElementaryTypeName",
               "src": "305:5:7",
@@ -368,7 +368,7 @@
             "value": {
               "argumentTypes": null,
               "hexValue": "313032",
-              "id": 2772,
+              "id": 2833,
               "isConstant": false,
               "isLValue": false,
               "isPure": true,
@@ -387,12 +387,12 @@
           },
           {
             "constant": true,
-            "id": 2776,
+            "id": 2837,
             "mutability": "constant",
             "name": "MARGIN_CALLER_ROLE",
             "nodeType": "VariableDeclaration",
             "overrides": null,
-            "scope": 2911,
+            "scope": 2972,
             "src": "347:39:7",
             "stateVariable": true,
             "storageLocation": "default",
@@ -401,7 +401,7 @@
               "typeString": "uint8"
             },
             "typeName": {
-              "id": 2774,
+              "id": 2835,
               "name": "uint8",
               "nodeType": "ElementaryTypeName",
               "src": "347:5:7",
@@ -413,7 +413,7 @@
             "value": {
               "argumentTypes": null,
               "hexValue": "313033",
-              "id": 2775,
+              "id": 2836,
               "isConstant": false,
               "isLValue": false,
               "isPure": true,
@@ -432,12 +432,12 @@
           },
           {
             "constant": true,
-            "id": 2779,
+            "id": 2840,
             "mutability": "constant",
             "name": "BORROWER_ROLE",
             "nodeType": "VariableDeclaration",
             "overrides": null,
-            "scope": 2911,
+            "scope": 2972,
             "src": "392:34:7",
             "stateVariable": true,
             "storageLocation": "default",
@@ -446,7 +446,7 @@
               "typeString": "uint8"
             },
             "typeName": {
-              "id": 2777,
+              "id": 2838,
               "name": "uint8",
               "nodeType": "ElementaryTypeName",
               "src": "392:5:7",
@@ -458,7 +458,7 @@
             "value": {
               "argumentTypes": null,
               "hexValue": "313034",
-              "id": 2778,
+              "id": 2839,
               "isConstant": false,
               "isLValue": false,
               "isPure": true,
@@ -477,12 +477,12 @@
           },
           {
             "constant": true,
-            "id": 2782,
+            "id": 2843,
             "mutability": "constant",
             "name": "MARGIN_TRADER_ROLE",
             "nodeType": "VariableDeclaration",
             "overrides": null,
-            "scope": 2911,
+            "scope": 2972,
             "src": "432:39:7",
             "stateVariable": true,
             "storageLocation": "default",
@@ -491,7 +491,7 @@
               "typeString": "uint8"
             },
             "typeName": {
-              "id": 2780,
+              "id": 2841,
               "name": "uint8",
               "nodeType": "ElementaryTypeName",
               "src": "432:5:7",
@@ -503,7 +503,7 @@
             "value": {
               "argumentTypes": null,
               "hexValue": "313035",
-              "id": 2781,
+              "id": 2842,
               "isConstant": false,
               "isLValue": false,
               "isPure": true,
@@ -522,12 +522,12 @@
           },
           {
             "constant": true,
-            "id": 2785,
+            "id": 2846,
             "mutability": "constant",
             "name": "FEE_SOURCE",
             "nodeType": "VariableDeclaration",
             "overrides": null,
-            "scope": 2911,
+            "scope": 2972,
             "src": "477:31:7",
             "stateVariable": true,
             "storageLocation": "default",
@@ -536,7 +536,7 @@
               "typeString": "uint8"
             },
             "typeName": {
-              "id": 2783,
+              "id": 2844,
               "name": "uint8",
               "nodeType": "ElementaryTypeName",
               "src": "477:5:7",
@@ -548,7 +548,7 @@
             "value": {
               "argumentTypes": null,
               "hexValue": "313036",
-              "id": 2784,
+              "id": 2845,
               "isConstant": false,
               "isLValue": false,
               "isPure": true,
@@ -568,28 +568,28 @@
           {
             "constant": false,
             "functionSelector": "392f5f64",
-            "id": 2787,
+            "id": 2848,
             "mutability": "mutable",
             "name": "roles",
             "nodeType": "VariableDeclaration",
             "overrides": null,
-            "scope": 2911,
+            "scope": 2972,
             "src": "515:18:7",
             "stateVariable": true,
             "storageLocation": "default",
             "typeDescriptions": {
-              "typeIdentifier": "t_contract$_Roles_$2994",
+              "typeIdentifier": "t_contract$_Roles_$3055",
               "typeString": "contract Roles"
             },
             "typeName": {
               "contractScope": null,
-              "id": 2786,
+              "id": 2847,
               "name": "Roles",
               "nodeType": "UserDefinedTypeName",
-              "referencedDeclaration": 2994,
+              "referencedDeclaration": 3055,
               "src": "515:5:7",
               "typeDescriptions": {
-                "typeIdentifier": "t_contract$_Roles_$2994",
+                "typeIdentifier": "t_contract$_Roles_$3055",
                 "typeString": "contract Roles"
               }
             },
@@ -598,28 +598,28 @@
           },
           {
             "body": {
-              "id": 2798,
+              "id": 2859,
               "nodeType": "Block",
               "src": "567:38:7",
               "statements": [
                 {
                   "expression": {
                     "argumentTypes": null,
-                    "id": 2796,
+                    "id": 2857,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
                     "lValueRequested": false,
                     "leftHandSide": {
                       "argumentTypes": null,
-                      "id": 2792,
+                      "id": 2853,
                       "name": "roles",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 2787,
+                      "referencedDeclaration": 2848,
                       "src": "577:5:7",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_contract$_Roles_$2994",
+                        "typeIdentifier": "t_contract$_Roles_$3055",
                         "typeString": "contract Roles"
                       }
                     },
@@ -630,11 +630,11 @@
                       "arguments": [
                         {
                           "argumentTypes": null,
-                          "id": 2794,
+                          "id": 2855,
                           "name": "_roles",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 2789,
+                          "referencedDeclaration": 2850,
                           "src": "591:6:7",
                           "typeDescriptions": {
                             "typeIdentifier": "t_address",
@@ -649,18 +649,18 @@
                             "typeString": "address"
                           }
                         ],
-                        "id": 2793,
+                        "id": 2854,
                         "name": "Roles",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 2994,
+                        "referencedDeclaration": 3055,
                         "src": "585:5:7",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_type$_t_contract$_Roles_$2994_$",
+                          "typeIdentifier": "t_type$_t_contract$_Roles_$3055_$",
                           "typeString": "type(contract Roles)"
                         }
                       },
-                      "id": 2795,
+                      "id": 2856,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": false,
@@ -671,24 +671,24 @@
                       "src": "585:13:7",
                       "tryCall": false,
                       "typeDescriptions": {
-                        "typeIdentifier": "t_contract$_Roles_$2994",
+                        "typeIdentifier": "t_contract$_Roles_$3055",
                         "typeString": "contract Roles"
                       }
                     },
                     "src": "577:21:7",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_contract$_Roles_$2994",
+                      "typeIdentifier": "t_contract$_Roles_$3055",
                       "typeString": "contract Roles"
                     }
                   },
-                  "id": 2797,
+                  "id": 2858,
                   "nodeType": "ExpressionStatement",
                   "src": "577:21:7"
                 }
               ]
             },
             "documentation": null,
-            "id": 2799,
+            "id": 2860,
             "implemented": true,
             "kind": "constructor",
             "modifiers": [],
@@ -696,17 +696,17 @@
             "nodeType": "FunctionDefinition",
             "overrides": null,
             "parameters": {
-              "id": 2790,
+              "id": 2851,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 2789,
+                  "id": 2850,
                   "mutability": "mutable",
                   "name": "_roles",
                   "nodeType": "VariableDeclaration",
                   "overrides": null,
-                  "scope": 2799,
+                  "scope": 2860,
                   "src": "551:14:7",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -715,7 +715,7 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 2788,
+                    "id": 2849,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "551:7:7",
@@ -732,12 +732,12 @@
               "src": "550:16:7"
             },
             "returnParameters": {
-              "id": 2791,
+              "id": 2852,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "567:0:7"
             },
-            "scope": 2911,
+            "scope": 2972,
             "src": "539:66:7",
             "stateMutability": "nonpayable",
             "virtual": false,
@@ -745,7 +745,7 @@
           },
           {
             "body": {
-              "id": 2809,
+              "id": 2870,
               "nodeType": "Block",
               "src": "659:60:7",
               "statements": [
@@ -755,11 +755,11 @@
                     "arguments": [
                       {
                         "argumentTypes": null,
-                        "id": 2806,
+                        "id": 2867,
                         "name": "FUND_CHARACTER",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 2755,
+                        "referencedDeclaration": 2816,
                         "src": "697:14:7",
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint8",
@@ -776,32 +776,32 @@
                       ],
                       "expression": {
                         "argumentTypes": null,
-                        "id": 2804,
+                        "id": 2865,
                         "name": "roles",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 2787,
+                        "referencedDeclaration": 2848,
                         "src": "676:5:7",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_contract$_Roles_$2994",
+                          "typeIdentifier": "t_contract$_Roles_$3055",
                           "typeString": "contract Roles"
                         }
                       },
-                      "id": 2805,
+                      "id": 2866,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": false,
                       "lValueRequested": false,
                       "memberName": "mainCharacters",
                       "nodeType": "MemberAccess",
-                      "referencedDeclaration": 2925,
+                      "referencedDeclaration": 2986,
                       "src": "676:20:7",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_external_view$_t_uint8_$returns$_t_address_$",
                         "typeString": "function (uint8) view external returns (address)"
                       }
                     },
-                    "id": 2807,
+                    "id": 2868,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -816,15 +816,15 @@
                       "typeString": "address"
                     }
                   },
-                  "functionReturnParameters": 2803,
-                  "id": 2808,
+                  "functionReturnParameters": 2864,
+                  "id": 2869,
                   "nodeType": "Return",
                   "src": "669:43:7"
                 }
               ]
             },
             "documentation": null,
-            "id": 2810,
+            "id": 2871,
             "implemented": true,
             "kind": "function",
             "modifiers": [],
@@ -832,23 +832,23 @@
             "nodeType": "FunctionDefinition",
             "overrides": null,
             "parameters": {
-              "id": 2800,
+              "id": 2861,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "624:2:7"
             },
             "returnParameters": {
-              "id": 2803,
+              "id": 2864,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 2802,
+                  "id": 2863,
                   "mutability": "mutable",
                   "name": "",
                   "nodeType": "VariableDeclaration",
                   "overrides": null,
-                  "scope": 2810,
+                  "scope": 2871,
                   "src": "650:7:7",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -857,7 +857,7 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 2801,
+                    "id": 2862,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "650:7:7",
@@ -873,7 +873,7 @@
               ],
               "src": "649:9:7"
             },
-            "scope": 2911,
+            "scope": 2972,
             "src": "611:108:7",
             "stateMutability": "view",
             "virtual": false,
@@ -881,7 +881,7 @@
           },
           {
             "body": {
-              "id": 2820,
+              "id": 2881,
               "nodeType": "Block",
               "src": "776:63:7",
               "statements": [
@@ -891,11 +891,11 @@
                     "arguments": [
                       {
                         "argumentTypes": null,
-                        "id": 2817,
+                        "id": 2878,
                         "name": "LENDING_CHARACTER",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 2758,
+                        "referencedDeclaration": 2819,
                         "src": "814:17:7",
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint8",
@@ -912,32 +912,32 @@
                       ],
                       "expression": {
                         "argumentTypes": null,
-                        "id": 2815,
+                        "id": 2876,
                         "name": "roles",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 2787,
+                        "referencedDeclaration": 2848,
                         "src": "793:5:7",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_contract$_Roles_$2994",
+                          "typeIdentifier": "t_contract$_Roles_$3055",
                           "typeString": "contract Roles"
                         }
                       },
-                      "id": 2816,
+                      "id": 2877,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": false,
                       "lValueRequested": false,
                       "memberName": "mainCharacters",
                       "nodeType": "MemberAccess",
-                      "referencedDeclaration": 2925,
+                      "referencedDeclaration": 2986,
                       "src": "793:20:7",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_external_view$_t_uint8_$returns$_t_address_$",
                         "typeString": "function (uint8) view external returns (address)"
                       }
                     },
-                    "id": 2818,
+                    "id": 2879,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -952,15 +952,15 @@
                       "typeString": "address"
                     }
                   },
-                  "functionReturnParameters": 2814,
-                  "id": 2819,
+                  "functionReturnParameters": 2875,
+                  "id": 2880,
                   "nodeType": "Return",
                   "src": "786:46:7"
                 }
               ]
             },
             "documentation": null,
-            "id": 2821,
+            "id": 2882,
             "implemented": true,
             "kind": "function",
             "modifiers": [],
@@ -968,23 +968,23 @@
             "nodeType": "FunctionDefinition",
             "overrides": null,
             "parameters": {
-              "id": 2811,
+              "id": 2872,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "741:2:7"
             },
             "returnParameters": {
-              "id": 2814,
+              "id": 2875,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 2813,
+                  "id": 2874,
                   "mutability": "mutable",
                   "name": "",
                   "nodeType": "VariableDeclaration",
                   "overrides": null,
-                  "scope": 2821,
+                  "scope": 2882,
                   "src": "767:7:7",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -993,7 +993,7 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 2812,
+                    "id": 2873,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "767:7:7",
@@ -1009,7 +1009,7 @@
               ],
               "src": "766:9:7"
             },
-            "scope": 2911,
+            "scope": 2972,
             "src": "725:114:7",
             "stateMutability": "view",
             "virtual": false,
@@ -1017,7 +1017,7 @@
           },
           {
             "body": {
-              "id": 2831,
+              "id": 2892,
               "nodeType": "Block",
               "src": "895:62:7",
               "statements": [
@@ -1027,11 +1027,11 @@
                     "arguments": [
                       {
                         "argumentTypes": null,
-                        "id": 2828,
+                        "id": 2889,
                         "name": "ROUTER_CHARACTER",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 2761,
+                        "referencedDeclaration": 2822,
                         "src": "933:16:7",
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint8",
@@ -1048,32 +1048,32 @@
                       ],
                       "expression": {
                         "argumentTypes": null,
-                        "id": 2826,
+                        "id": 2887,
                         "name": "roles",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 2787,
+                        "referencedDeclaration": 2848,
                         "src": "912:5:7",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_contract$_Roles_$2994",
+                          "typeIdentifier": "t_contract$_Roles_$3055",
                           "typeString": "contract Roles"
                         }
                       },
-                      "id": 2827,
+                      "id": 2888,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": false,
                       "lValueRequested": false,
                       "memberName": "mainCharacters",
                       "nodeType": "MemberAccess",
-                      "referencedDeclaration": 2925,
+                      "referencedDeclaration": 2986,
                       "src": "912:20:7",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_external_view$_t_uint8_$returns$_t_address_$",
                         "typeString": "function (uint8) view external returns (address)"
                       }
                     },
-                    "id": 2829,
+                    "id": 2890,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -1088,15 +1088,15 @@
                       "typeString": "address"
                     }
                   },
-                  "functionReturnParameters": 2825,
-                  "id": 2830,
+                  "functionReturnParameters": 2886,
+                  "id": 2891,
                   "nodeType": "Return",
                   "src": "905:45:7"
                 }
               ]
             },
             "documentation": null,
-            "id": 2832,
+            "id": 2893,
             "implemented": true,
             "kind": "function",
             "modifiers": [],
@@ -1104,23 +1104,23 @@
             "nodeType": "FunctionDefinition",
             "overrides": null,
             "parameters": {
-              "id": 2822,
+              "id": 2883,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "860:2:7"
             },
             "returnParameters": {
-              "id": 2825,
+              "id": 2886,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 2824,
+                  "id": 2885,
                   "mutability": "mutable",
                   "name": "",
                   "nodeType": "VariableDeclaration",
                   "overrides": null,
-                  "scope": 2832,
+                  "scope": 2893,
                   "src": "886:7:7",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -1129,7 +1129,7 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 2823,
+                    "id": 2884,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "886:7:7",
@@ -1145,7 +1145,7 @@
               ],
               "src": "885:9:7"
             },
-            "scope": 2911,
+            "scope": 2972,
             "src": "845:112:7",
             "stateMutability": "view",
             "virtual": false,
@@ -1153,7 +1153,7 @@
           },
           {
             "body": {
-              "id": 2842,
+              "id": 2903,
               "nodeType": "Block",
               "src": "1020:60:7",
               "statements": [
@@ -1163,11 +1163,11 @@
                     "arguments": [
                       {
                         "argumentTypes": null,
-                        "id": 2839,
+                        "id": 2900,
                         "name": "MARGIN_TRADING",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 2764,
+                        "referencedDeclaration": 2825,
                         "src": "1058:14:7",
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint8",
@@ -1184,32 +1184,32 @@
                       ],
                       "expression": {
                         "argumentTypes": null,
-                        "id": 2837,
+                        "id": 2898,
                         "name": "roles",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 2787,
+                        "referencedDeclaration": 2848,
                         "src": "1037:5:7",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_contract$_Roles_$2994",
+                          "typeIdentifier": "t_contract$_Roles_$3055",
                           "typeString": "contract Roles"
                         }
                       },
-                      "id": 2838,
+                      "id": 2899,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": false,
                       "lValueRequested": false,
                       "memberName": "mainCharacters",
                       "nodeType": "MemberAccess",
-                      "referencedDeclaration": 2925,
+                      "referencedDeclaration": 2986,
                       "src": "1037:20:7",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_external_view$_t_uint8_$returns$_t_address_$",
                         "typeString": "function (uint8) view external returns (address)"
                       }
                     },
-                    "id": 2840,
+                    "id": 2901,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -1224,15 +1224,15 @@
                       "typeString": "address"
                     }
                   },
-                  "functionReturnParameters": 2836,
-                  "id": 2841,
+                  "functionReturnParameters": 2897,
+                  "id": 2902,
                   "nodeType": "Return",
                   "src": "1030:43:7"
                 }
               ]
             },
             "documentation": null,
-            "id": 2843,
+            "id": 2904,
             "implemented": true,
             "kind": "function",
             "modifiers": [],
@@ -1240,23 +1240,23 @@
             "nodeType": "FunctionDefinition",
             "overrides": null,
             "parameters": {
-              "id": 2833,
+              "id": 2894,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "985:2:7"
             },
             "returnParameters": {
-              "id": 2836,
+              "id": 2897,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 2835,
+                  "id": 2896,
                   "mutability": "mutable",
                   "name": "",
                   "nodeType": "VariableDeclaration",
                   "overrides": null,
-                  "scope": 2843,
+                  "scope": 2904,
                   "src": "1011:7:7",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -1265,7 +1265,7 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 2834,
+                    "id": 2895,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "1011:7:7",
@@ -1281,7 +1281,7 @@
               ],
               "src": "1010:9:7"
             },
-            "scope": 2911,
+            "scope": 2972,
             "src": "963:117:7",
             "stateMutability": "view",
             "virtual": false,
@@ -1289,7 +1289,7 @@
           },
           {
             "body": {
-              "id": 2853,
+              "id": 2914,
               "nodeType": "Block",
               "src": "1143:60:7",
               "statements": [
@@ -1299,11 +1299,11 @@
                     "arguments": [
                       {
                         "argumentTypes": null,
-                        "id": 2850,
+                        "id": 2911,
                         "name": "FEE_CONTROLLER",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 2767,
+                        "referencedDeclaration": 2828,
                         "src": "1181:14:7",
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint8",
@@ -1320,32 +1320,32 @@
                       ],
                       "expression": {
                         "argumentTypes": null,
-                        "id": 2848,
+                        "id": 2909,
                         "name": "roles",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 2787,
+                        "referencedDeclaration": 2848,
                         "src": "1160:5:7",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_contract$_Roles_$2994",
+                          "typeIdentifier": "t_contract$_Roles_$3055",
                           "typeString": "contract Roles"
                         }
                       },
-                      "id": 2849,
+                      "id": 2910,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": false,
                       "lValueRequested": false,
                       "memberName": "mainCharacters",
                       "nodeType": "MemberAccess",
-                      "referencedDeclaration": 2925,
+                      "referencedDeclaration": 2986,
                       "src": "1160:20:7",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_external_view$_t_uint8_$returns$_t_address_$",
                         "typeString": "function (uint8) view external returns (address)"
                       }
                     },
-                    "id": 2851,
+                    "id": 2912,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -1360,15 +1360,15 @@
                       "typeString": "address"
                     }
                   },
-                  "functionReturnParameters": 2847,
-                  "id": 2852,
+                  "functionReturnParameters": 2908,
+                  "id": 2913,
                   "nodeType": "Return",
                   "src": "1153:43:7"
                 }
               ]
             },
             "documentation": null,
-            "id": 2854,
+            "id": 2915,
             "implemented": true,
             "kind": "function",
             "modifiers": [],
@@ -1376,23 +1376,23 @@
             "nodeType": "FunctionDefinition",
             "overrides": null,
             "parameters": {
-              "id": 2844,
+              "id": 2905,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "1108:2:7"
             },
             "returnParameters": {
-              "id": 2847,
+              "id": 2908,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 2846,
+                  "id": 2907,
                   "mutability": "mutable",
                   "name": "",
                   "nodeType": "VariableDeclaration",
                   "overrides": null,
-                  "scope": 2854,
+                  "scope": 2915,
                   "src": "1134:7:7",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -1401,7 +1401,7 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 2845,
+                    "id": 2906,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "1134:7:7",
@@ -1417,7 +1417,7 @@
               ],
               "src": "1133:9:7"
             },
-            "scope": 2911,
+            "scope": 2972,
             "src": "1086:117:7",
             "stateMutability": "view",
             "virtual": false,
@@ -1425,7 +1425,7 @@
           },
           {
             "body": {
-              "id": 2867,
+              "id": 2928,
               "nodeType": "Block",
               "src": "1273:59:7",
               "statements": [
@@ -1435,11 +1435,11 @@
                     "arguments": [
                       {
                         "argumentTypes": null,
-                        "id": 2863,
+                        "id": 2924,
                         "name": "contr",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 2856,
+                        "referencedDeclaration": 2917,
                         "src": "1304:5:7",
                         "typeDescriptions": {
                           "typeIdentifier": "t_address",
@@ -1448,11 +1448,11 @@
                       },
                       {
                         "argumentTypes": null,
-                        "id": 2864,
+                        "id": 2925,
                         "name": "BORROWER_ROLE",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 2779,
+                        "referencedDeclaration": 2840,
                         "src": "1311:13:7",
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint8",
@@ -1473,32 +1473,32 @@
                       ],
                       "expression": {
                         "argumentTypes": null,
-                        "id": 2861,
+                        "id": 2922,
                         "name": "roles",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 2787,
+                        "referencedDeclaration": 2848,
                         "src": "1290:5:7",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_contract$_Roles_$2994",
+                          "typeIdentifier": "t_contract$_Roles_$3055",
                           "typeString": "contract Roles"
                         }
                       },
-                      "id": 2862,
+                      "id": 2923,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": false,
                       "lValueRequested": false,
                       "memberName": "getRole",
                       "nodeType": "MemberAccess",
-                      "referencedDeclaration": 2993,
+                      "referencedDeclaration": 3054,
                       "src": "1290:13:7",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_external_view$_t_address_$_t_uint8_$returns$_t_bool_$",
                         "typeString": "function (address,uint8) view external returns (bool)"
                       }
                     },
-                    "id": 2865,
+                    "id": 2926,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -1513,15 +1513,15 @@
                       "typeString": "bool"
                     }
                   },
-                  "functionReturnParameters": 2860,
-                  "id": 2866,
+                  "functionReturnParameters": 2921,
+                  "id": 2927,
                   "nodeType": "Return",
                   "src": "1283:42:7"
                 }
               ]
             },
             "documentation": null,
-            "id": 2868,
+            "id": 2929,
             "implemented": true,
             "kind": "function",
             "modifiers": [],
@@ -1529,17 +1529,17 @@
             "nodeType": "FunctionDefinition",
             "overrides": null,
             "parameters": {
-              "id": 2857,
+              "id": 2918,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 2856,
+                  "id": 2917,
                   "mutability": "mutable",
                   "name": "contr",
                   "nodeType": "VariableDeclaration",
                   "overrides": null,
-                  "scope": 2868,
+                  "scope": 2929,
                   "src": "1229:13:7",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -1548,7 +1548,7 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 2855,
+                    "id": 2916,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "1229:7:7",
@@ -1565,17 +1565,17 @@
               "src": "1228:15:7"
             },
             "returnParameters": {
-              "id": 2860,
+              "id": 2921,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 2859,
+                  "id": 2920,
                   "mutability": "mutable",
                   "name": "",
                   "nodeType": "VariableDeclaration",
                   "overrides": null,
-                  "scope": 2868,
+                  "scope": 2929,
                   "src": "1267:4:7",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -1584,7 +1584,7 @@
                     "typeString": "bool"
                   },
                   "typeName": {
-                    "id": 2858,
+                    "id": 2919,
                     "name": "bool",
                     "nodeType": "ElementaryTypeName",
                     "src": "1267:4:7",
@@ -1599,7 +1599,7 @@
               ],
               "src": "1266:6:7"
             },
-            "scope": 2911,
+            "scope": 2972,
             "src": "1209:123:7",
             "stateMutability": "view",
             "virtual": false,
@@ -1607,7 +1607,7 @@
           },
           {
             "body": {
-              "id": 2881,
+              "id": 2942,
               "nodeType": "Block",
               "src": "1404:61:7",
               "statements": [
@@ -1617,11 +1617,11 @@
                     "arguments": [
                       {
                         "argumentTypes": null,
-                        "id": 2877,
+                        "id": 2938,
                         "name": "contr",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 2870,
+                        "referencedDeclaration": 2931,
                         "src": "1435:5:7",
                         "typeDescriptions": {
                           "typeIdentifier": "t_address",
@@ -1630,11 +1630,11 @@
                       },
                       {
                         "argumentTypes": null,
-                        "id": 2878,
+                        "id": 2939,
                         "name": "WITHDRAWER_ROLE",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 2773,
+                        "referencedDeclaration": 2834,
                         "src": "1442:15:7",
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint8",
@@ -1655,32 +1655,32 @@
                       ],
                       "expression": {
                         "argumentTypes": null,
-                        "id": 2875,
+                        "id": 2936,
                         "name": "roles",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 2787,
+                        "referencedDeclaration": 2848,
                         "src": "1421:5:7",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_contract$_Roles_$2994",
+                          "typeIdentifier": "t_contract$_Roles_$3055",
                           "typeString": "contract Roles"
                         }
                       },
-                      "id": 2876,
+                      "id": 2937,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": false,
                       "lValueRequested": false,
                       "memberName": "getRole",
                       "nodeType": "MemberAccess",
-                      "referencedDeclaration": 2993,
+                      "referencedDeclaration": 3054,
                       "src": "1421:13:7",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_external_view$_t_address_$_t_uint8_$returns$_t_bool_$",
                         "typeString": "function (address,uint8) view external returns (bool)"
                       }
                     },
-                    "id": 2879,
+                    "id": 2940,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -1695,15 +1695,15 @@
                       "typeString": "bool"
                     }
                   },
-                  "functionReturnParameters": 2874,
-                  "id": 2880,
+                  "functionReturnParameters": 2935,
+                  "id": 2941,
                   "nodeType": "Return",
                   "src": "1414:44:7"
                 }
               ]
             },
             "documentation": null,
-            "id": 2882,
+            "id": 2943,
             "implemented": true,
             "kind": "function",
             "modifiers": [],
@@ -1711,17 +1711,17 @@
             "nodeType": "FunctionDefinition",
             "overrides": null,
             "parameters": {
-              "id": 2871,
+              "id": 2932,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 2870,
+                  "id": 2931,
                   "mutability": "mutable",
                   "name": "contr",
                   "nodeType": "VariableDeclaration",
                   "overrides": null,
-                  "scope": 2882,
+                  "scope": 2943,
                   "src": "1360:13:7",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -1730,7 +1730,7 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 2869,
+                    "id": 2930,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "1360:7:7",
@@ -1747,17 +1747,17 @@
               "src": "1359:15:7"
             },
             "returnParameters": {
-              "id": 2874,
+              "id": 2935,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 2873,
+                  "id": 2934,
                   "mutability": "mutable",
                   "name": "",
                   "nodeType": "VariableDeclaration",
                   "overrides": null,
-                  "scope": 2882,
+                  "scope": 2943,
                   "src": "1398:4:7",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -1766,7 +1766,7 @@
                     "typeString": "bool"
                   },
                   "typeName": {
-                    "id": 2872,
+                    "id": 2933,
                     "name": "bool",
                     "nodeType": "ElementaryTypeName",
                     "src": "1398:4:7",
@@ -1781,7 +1781,7 @@
               ],
               "src": "1397:6:7"
             },
-            "scope": 2911,
+            "scope": 2972,
             "src": "1338:127:7",
             "stateMutability": "view",
             "virtual": false,
@@ -1789,7 +1789,7 @@
           },
           {
             "body": {
-              "id": 2895,
+              "id": 2956,
               "nodeType": "Block",
               "src": "1539:64:7",
               "statements": [
@@ -1799,11 +1799,11 @@
                     "arguments": [
                       {
                         "argumentTypes": null,
-                        "id": 2891,
+                        "id": 2952,
                         "name": "contr",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 2884,
+                        "referencedDeclaration": 2945,
                         "src": "1570:5:7",
                         "typeDescriptions": {
                           "typeIdentifier": "t_address",
@@ -1812,11 +1812,11 @@
                       },
                       {
                         "argumentTypes": null,
-                        "id": 2892,
+                        "id": 2953,
                         "name": "MARGIN_TRADER_ROLE",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 2782,
+                        "referencedDeclaration": 2843,
                         "src": "1577:18:7",
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint8",
@@ -1837,32 +1837,32 @@
                       ],
                       "expression": {
                         "argumentTypes": null,
-                        "id": 2889,
+                        "id": 2950,
                         "name": "roles",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 2787,
+                        "referencedDeclaration": 2848,
                         "src": "1556:5:7",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_contract$_Roles_$2994",
+                          "typeIdentifier": "t_contract$_Roles_$3055",
                           "typeString": "contract Roles"
                         }
                       },
-                      "id": 2890,
+                      "id": 2951,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": false,
                       "lValueRequested": false,
                       "memberName": "getRole",
                       "nodeType": "MemberAccess",
-                      "referencedDeclaration": 2993,
+                      "referencedDeclaration": 3054,
                       "src": "1556:13:7",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_external_view$_t_address_$_t_uint8_$returns$_t_bool_$",
                         "typeString": "function (address,uint8) view external returns (bool)"
                       }
                     },
-                    "id": 2893,
+                    "id": 2954,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -1877,15 +1877,15 @@
                       "typeString": "bool"
                     }
                   },
-                  "functionReturnParameters": 2888,
-                  "id": 2894,
+                  "functionReturnParameters": 2949,
+                  "id": 2955,
                   "nodeType": "Return",
                   "src": "1549:47:7"
                 }
               ]
             },
             "documentation": null,
-            "id": 2896,
+            "id": 2957,
             "implemented": true,
             "kind": "function",
             "modifiers": [],
@@ -1893,17 +1893,17 @@
             "nodeType": "FunctionDefinition",
             "overrides": null,
             "parameters": {
-              "id": 2885,
+              "id": 2946,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 2884,
+                  "id": 2945,
                   "mutability": "mutable",
                   "name": "contr",
                   "nodeType": "VariableDeclaration",
                   "overrides": null,
-                  "scope": 2896,
+                  "scope": 2957,
                   "src": "1495:13:7",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -1912,7 +1912,7 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 2883,
+                    "id": 2944,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "1495:7:7",
@@ -1929,17 +1929,17 @@
               "src": "1494:15:7"
             },
             "returnParameters": {
-              "id": 2888,
+              "id": 2949,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 2887,
+                  "id": 2948,
                   "mutability": "mutable",
                   "name": "",
                   "nodeType": "VariableDeclaration",
                   "overrides": null,
-                  "scope": 2896,
+                  "scope": 2957,
                   "src": "1533:4:7",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -1948,7 +1948,7 @@
                     "typeString": "bool"
                   },
                   "typeName": {
-                    "id": 2886,
+                    "id": 2947,
                     "name": "bool",
                     "nodeType": "ElementaryTypeName",
                     "src": "1533:4:7",
@@ -1963,7 +1963,7 @@
               ],
               "src": "1532:6:7"
             },
-            "scope": 2911,
+            "scope": 2972,
             "src": "1471:132:7",
             "stateMutability": "view",
             "virtual": false,
@@ -1971,7 +1971,7 @@
           },
           {
             "body": {
-              "id": 2909,
+              "id": 2970,
               "nodeType": "Block",
               "src": "1674:56:7",
               "statements": [
@@ -1981,11 +1981,11 @@
                     "arguments": [
                       {
                         "argumentTypes": null,
-                        "id": 2905,
+                        "id": 2966,
                         "name": "contr",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 2898,
+                        "referencedDeclaration": 2959,
                         "src": "1705:5:7",
                         "typeDescriptions": {
                           "typeIdentifier": "t_address",
@@ -1994,11 +1994,11 @@
                       },
                       {
                         "argumentTypes": null,
-                        "id": 2906,
+                        "id": 2967,
                         "name": "FEE_SOURCE",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 2785,
+                        "referencedDeclaration": 2846,
                         "src": "1712:10:7",
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint8",
@@ -2019,32 +2019,32 @@
                       ],
                       "expression": {
                         "argumentTypes": null,
-                        "id": 2903,
+                        "id": 2964,
                         "name": "roles",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 2787,
+                        "referencedDeclaration": 2848,
                         "src": "1691:5:7",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_contract$_Roles_$2994",
+                          "typeIdentifier": "t_contract$_Roles_$3055",
                           "typeString": "contract Roles"
                         }
                       },
-                      "id": 2904,
+                      "id": 2965,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": false,
                       "lValueRequested": false,
                       "memberName": "getRole",
                       "nodeType": "MemberAccess",
-                      "referencedDeclaration": 2993,
+                      "referencedDeclaration": 3054,
                       "src": "1691:13:7",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_external_view$_t_address_$_t_uint8_$returns$_t_bool_$",
                         "typeString": "function (address,uint8) view external returns (bool)"
                       }
                     },
-                    "id": 2907,
+                    "id": 2968,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -2059,15 +2059,15 @@
                       "typeString": "bool"
                     }
                   },
-                  "functionReturnParameters": 2902,
-                  "id": 2908,
+                  "functionReturnParameters": 2963,
+                  "id": 2969,
                   "nodeType": "Return",
                   "src": "1684:39:7"
                 }
               ]
             },
             "documentation": null,
-            "id": 2910,
+            "id": 2971,
             "implemented": true,
             "kind": "function",
             "modifiers": [],
@@ -2075,17 +2075,17 @@
             "nodeType": "FunctionDefinition",
             "overrides": null,
             "parameters": {
-              "id": 2899,
+              "id": 2960,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 2898,
+                  "id": 2959,
                   "mutability": "mutable",
                   "name": "contr",
                   "nodeType": "VariableDeclaration",
                   "overrides": null,
-                  "scope": 2910,
+                  "scope": 2971,
                   "src": "1630:13:7",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -2094,7 +2094,7 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 2897,
+                    "id": 2958,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "1630:7:7",
@@ -2111,17 +2111,17 @@
               "src": "1629:15:7"
             },
             "returnParameters": {
-              "id": 2902,
+              "id": 2963,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 2901,
+                  "id": 2962,
                   "mutability": "mutable",
                   "name": "",
                   "nodeType": "VariableDeclaration",
                   "overrides": null,
-                  "scope": 2910,
+                  "scope": 2971,
                   "src": "1668:4:7",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -2130,7 +2130,7 @@
                     "typeString": "bool"
                   },
                   "typeName": {
-                    "id": 2900,
+                    "id": 2961,
                     "name": "bool",
                     "nodeType": "ElementaryTypeName",
                     "src": "1668:4:7",
@@ -2145,14 +2145,14 @@
               ],
               "src": "1667:6:7"
             },
-            "scope": 2911,
+            "scope": 2972,
             "src": "1609:121:7",
             "stateMutability": "view",
             "virtual": false,
             "visibility": "internal"
           }
         ],
-        "scope": 2912,
+        "scope": 2973,
         "src": "23:1709:7"
       }
     ],
@@ -2163,7 +2163,7 @@
       "absolutePath": "/home/tixelbook/projects/marginswap-core/contracts/RoleAware.sol",
       "exportedSymbols": {
         "RoleAware": [
-          2911
+          2972
         ]
       },
       "license": null
@@ -2171,16 +2171,16 @@
     "children": [
       {
         "attributes": {
-          "SourceUnit": 2995,
+          "SourceUnit": 3056,
           "absolutePath": "/home/tixelbook/projects/marginswap-core/contracts/Roles.sol",
           "file": "./Roles.sol",
-          "scope": 2912,
+          "scope": 2973,
           "symbolAliases": [
             null
           ],
           "unitAlias": ""
         },
-        "id": 2752,
+        "id": 2813,
         "name": "ImportDirective",
         "src": "0:21:7"
       },
@@ -2197,10 +2197,10 @@
           "documentation": null,
           "fullyImplemented": true,
           "linearizedBaseContracts": [
-            2911
+            2972
           ],
           "name": "RoleAware",
-          "scope": 2912
+          "scope": 2973
         },
         "children": [
           {
@@ -2209,7 +2209,7 @@
               "mutability": "constant",
               "name": "FUND_CHARACTER",
               "overrides": null,
-              "scope": 2911,
+              "scope": 2972,
               "stateVariable": true,
               "storageLocation": "default",
               "type": "uint8",
@@ -2221,7 +2221,7 @@
                   "name": "uint8",
                   "type": "uint8"
                 },
-                "id": 2753,
+                "id": 2814,
                 "name": "ElementaryTypeName",
                 "src": "65:5:7"
               },
@@ -2238,12 +2238,12 @@
                   "type": "int_const 1",
                   "value": "1"
                 },
-                "id": 2754,
+                "id": 2815,
                 "name": "Literal",
                 "src": "97:1:7"
               }
             ],
-            "id": 2755,
+            "id": 2816,
             "name": "VariableDeclaration",
             "src": "65:33:7"
           },
@@ -2253,7 +2253,7 @@
               "mutability": "constant",
               "name": "LENDING_CHARACTER",
               "overrides": null,
-              "scope": 2911,
+              "scope": 2972,
               "stateVariable": true,
               "storageLocation": "default",
               "type": "uint8",
@@ -2265,7 +2265,7 @@
                   "name": "uint8",
                   "type": "uint8"
                 },
-                "id": 2756,
+                "id": 2817,
                 "name": "ElementaryTypeName",
                 "src": "104:5:7"
               },
@@ -2282,12 +2282,12 @@
                   "type": "int_const 2",
                   "value": "2"
                 },
-                "id": 2757,
+                "id": 2818,
                 "name": "Literal",
                 "src": "139:1:7"
               }
             ],
-            "id": 2758,
+            "id": 2819,
             "name": "VariableDeclaration",
             "src": "104:36:7"
           },
@@ -2297,7 +2297,7 @@
               "mutability": "constant",
               "name": "ROUTER_CHARACTER",
               "overrides": null,
-              "scope": 2911,
+              "scope": 2972,
               "stateVariable": true,
               "storageLocation": "default",
               "type": "uint8",
@@ -2309,7 +2309,7 @@
                   "name": "uint8",
                   "type": "uint8"
                 },
-                "id": 2759,
+                "id": 2820,
                 "name": "ElementaryTypeName",
                 "src": "146:5:7"
               },
@@ -2326,12 +2326,12 @@
                   "type": "int_const 3",
                   "value": "3"
                 },
-                "id": 2760,
+                "id": 2821,
                 "name": "Literal",
                 "src": "180:1:7"
               }
             ],
-            "id": 2761,
+            "id": 2822,
             "name": "VariableDeclaration",
             "src": "146:35:7"
           },
@@ -2341,7 +2341,7 @@
               "mutability": "constant",
               "name": "MARGIN_TRADING",
               "overrides": null,
-              "scope": 2911,
+              "scope": 2972,
               "stateVariable": true,
               "storageLocation": "default",
               "type": "uint8",
@@ -2353,7 +2353,7 @@
                   "name": "uint8",
                   "type": "uint8"
                 },
-                "id": 2762,
+                "id": 2823,
                 "name": "ElementaryTypeName",
                 "src": "187:5:7"
               },
@@ -2370,12 +2370,12 @@
                   "type": "int_const 4",
                   "value": "4"
                 },
-                "id": 2763,
+                "id": 2824,
                 "name": "Literal",
                 "src": "219:1:7"
               }
             ],
-            "id": 2764,
+            "id": 2825,
             "name": "VariableDeclaration",
             "src": "187:33:7"
           },
@@ -2385,7 +2385,7 @@
               "mutability": "constant",
               "name": "FEE_CONTROLLER",
               "overrides": null,
-              "scope": 2911,
+              "scope": 2972,
               "stateVariable": true,
               "storageLocation": "default",
               "type": "uint8",
@@ -2397,7 +2397,7 @@
                   "name": "uint8",
                   "type": "uint8"
                 },
-                "id": 2765,
+                "id": 2826,
                 "name": "ElementaryTypeName",
                 "src": "226:5:7"
               },
@@ -2414,12 +2414,12 @@
                   "type": "int_const 5",
                   "value": "5"
                 },
-                "id": 2766,
+                "id": 2827,
                 "name": "Literal",
                 "src": "258:1:7"
               }
             ],
-            "id": 2767,
+            "id": 2828,
             "name": "VariableDeclaration",
             "src": "226:33:7"
           },
@@ -2429,7 +2429,7 @@
               "mutability": "constant",
               "name": "MTRADER_ROLE",
               "overrides": null,
-              "scope": 2911,
+              "scope": 2972,
               "stateVariable": true,
               "storageLocation": "default",
               "type": "uint8",
@@ -2441,7 +2441,7 @@
                   "name": "uint8",
                   "type": "uint8"
                 },
-                "id": 2768,
+                "id": 2829,
                 "name": "ElementaryTypeName",
                 "src": "266:5:7"
               },
@@ -2458,12 +2458,12 @@
                   "type": "int_const 101",
                   "value": "101"
                 },
-                "id": 2769,
+                "id": 2830,
                 "name": "Literal",
                 "src": "296:3:7"
               }
             ],
-            "id": 2770,
+            "id": 2831,
             "name": "VariableDeclaration",
             "src": "266:33:7"
           },
@@ -2473,7 +2473,7 @@
               "mutability": "constant",
               "name": "WITHDRAWER_ROLE",
               "overrides": null,
-              "scope": 2911,
+              "scope": 2972,
               "stateVariable": true,
               "storageLocation": "default",
               "type": "uint8",
@@ -2485,7 +2485,7 @@
                   "name": "uint8",
                   "type": "uint8"
                 },
-                "id": 2771,
+                "id": 2832,
                 "name": "ElementaryTypeName",
                 "src": "305:5:7"
               },
@@ -2502,12 +2502,12 @@
                   "type": "int_const 102",
                   "value": "102"
                 },
-                "id": 2772,
+                "id": 2833,
                 "name": "Literal",
                 "src": "338:3:7"
               }
             ],
-            "id": 2773,
+            "id": 2834,
             "name": "VariableDeclaration",
             "src": "305:36:7"
           },
@@ -2517,7 +2517,7 @@
               "mutability": "constant",
               "name": "MARGIN_CALLER_ROLE",
               "overrides": null,
-              "scope": 2911,
+              "scope": 2972,
               "stateVariable": true,
               "storageLocation": "default",
               "type": "uint8",
@@ -2529,7 +2529,7 @@
                   "name": "uint8",
                   "type": "uint8"
                 },
-                "id": 2774,
+                "id": 2835,
                 "name": "ElementaryTypeName",
                 "src": "347:5:7"
               },
@@ -2546,12 +2546,12 @@
                   "type": "int_const 103",
                   "value": "103"
                 },
-                "id": 2775,
+                "id": 2836,
                 "name": "Literal",
                 "src": "383:3:7"
               }
             ],
-            "id": 2776,
+            "id": 2837,
             "name": "VariableDeclaration",
             "src": "347:39:7"
           },
@@ -2561,7 +2561,7 @@
               "mutability": "constant",
               "name": "BORROWER_ROLE",
               "overrides": null,
-              "scope": 2911,
+              "scope": 2972,
               "stateVariable": true,
               "storageLocation": "default",
               "type": "uint8",
@@ -2573,7 +2573,7 @@
                   "name": "uint8",
                   "type": "uint8"
                 },
-                "id": 2777,
+                "id": 2838,
                 "name": "ElementaryTypeName",
                 "src": "392:5:7"
               },
@@ -2590,12 +2590,12 @@
                   "type": "int_const 104",
                   "value": "104"
                 },
-                "id": 2778,
+                "id": 2839,
                 "name": "Literal",
                 "src": "423:3:7"
               }
             ],
-            "id": 2779,
+            "id": 2840,
             "name": "VariableDeclaration",
             "src": "392:34:7"
           },
@@ -2605,7 +2605,7 @@
               "mutability": "constant",
               "name": "MARGIN_TRADER_ROLE",
               "overrides": null,
-              "scope": 2911,
+              "scope": 2972,
               "stateVariable": true,
               "storageLocation": "default",
               "type": "uint8",
@@ -2617,7 +2617,7 @@
                   "name": "uint8",
                   "type": "uint8"
                 },
-                "id": 2780,
+                "id": 2841,
                 "name": "ElementaryTypeName",
                 "src": "432:5:7"
               },
@@ -2634,12 +2634,12 @@
                   "type": "int_const 105",
                   "value": "105"
                 },
-                "id": 2781,
+                "id": 2842,
                 "name": "Literal",
                 "src": "468:3:7"
               }
             ],
-            "id": 2782,
+            "id": 2843,
             "name": "VariableDeclaration",
             "src": "432:39:7"
           },
@@ -2649,7 +2649,7 @@
               "mutability": "constant",
               "name": "FEE_SOURCE",
               "overrides": null,
-              "scope": 2911,
+              "scope": 2972,
               "stateVariable": true,
               "storageLocation": "default",
               "type": "uint8",
@@ -2661,7 +2661,7 @@
                   "name": "uint8",
                   "type": "uint8"
                 },
-                "id": 2783,
+                "id": 2844,
                 "name": "ElementaryTypeName",
                 "src": "477:5:7"
               },
@@ -2678,12 +2678,12 @@
                   "type": "int_const 106",
                   "value": "106"
                 },
-                "id": 2784,
+                "id": 2845,
                 "name": "Literal",
                 "src": "505:3:7"
               }
             ],
-            "id": 2785,
+            "id": 2846,
             "name": "VariableDeclaration",
             "src": "477:31:7"
           },
@@ -2694,7 +2694,7 @@
               "mutability": "mutable",
               "name": "roles",
               "overrides": null,
-              "scope": 2911,
+              "scope": 2972,
               "stateVariable": true,
               "storageLocation": "default",
               "type": "contract Roles",
@@ -2706,15 +2706,15 @@
                 "attributes": {
                   "contractScope": null,
                   "name": "Roles",
-                  "referencedDeclaration": 2994,
+                  "referencedDeclaration": 3055,
                   "type": "contract Roles"
                 },
-                "id": 2786,
+                "id": 2847,
                 "name": "UserDefinedTypeName",
                 "src": "515:5:7"
               }
             ],
-            "id": 2787,
+            "id": 2848,
             "name": "VariableDeclaration",
             "src": "515:18:7"
           },
@@ -2729,7 +2729,7 @@
               ],
               "name": "",
               "overrides": null,
-              "scope": 2911,
+              "scope": 2972,
               "stateMutability": "nonpayable",
               "virtual": false,
               "visibility": "public"
@@ -2743,7 +2743,7 @@
                       "mutability": "mutable",
                       "name": "_roles",
                       "overrides": null,
-                      "scope": 2799,
+                      "scope": 2860,
                       "stateVariable": false,
                       "storageLocation": "default",
                       "type": "address",
@@ -2757,17 +2757,17 @@
                           "stateMutability": "nonpayable",
                           "type": "address"
                         },
-                        "id": 2788,
+                        "id": 2849,
                         "name": "ElementaryTypeName",
                         "src": "551:7:7"
                       }
                     ],
-                    "id": 2789,
+                    "id": 2850,
                     "name": "VariableDeclaration",
                     "src": "551:14:7"
                   }
                 ],
-                "id": 2790,
+                "id": 2851,
                 "name": "ParameterList",
                 "src": "550:16:7"
               },
@@ -2778,7 +2778,7 @@
                   ]
                 },
                 "children": [],
-                "id": 2791,
+                "id": 2852,
                 "name": "ParameterList",
                 "src": "567:0:7"
               },
@@ -2803,11 +2803,11 @@
                               "overloadedDeclarations": [
                                 null
                               ],
-                              "referencedDeclaration": 2787,
+                              "referencedDeclaration": 2848,
                               "type": "contract Roles",
                               "value": "roles"
                             },
-                            "id": 2792,
+                            "id": 2853,
                             "name": "Identifier",
                             "src": "577:5:7"
                           },
@@ -2838,11 +2838,11 @@
                                   "overloadedDeclarations": [
                                     null
                                   ],
-                                  "referencedDeclaration": 2994,
+                                  "referencedDeclaration": 3055,
                                   "type": "type(contract Roles)",
                                   "value": "Roles"
                                 },
-                                "id": 2793,
+                                "id": 2854,
                                 "name": "Identifier",
                                 "src": "585:5:7"
                               },
@@ -2852,36 +2852,36 @@
                                   "overloadedDeclarations": [
                                     null
                                   ],
-                                  "referencedDeclaration": 2789,
+                                  "referencedDeclaration": 2850,
                                   "type": "address",
                                   "value": "_roles"
                                 },
-                                "id": 2794,
+                                "id": 2855,
                                 "name": "Identifier",
                                 "src": "591:6:7"
                               }
                             ],
-                            "id": 2795,
+                            "id": 2856,
                             "name": "FunctionCall",
                             "src": "585:13:7"
                           }
                         ],
-                        "id": 2796,
+                        "id": 2857,
                         "name": "Assignment",
                         "src": "577:21:7"
                       }
                     ],
-                    "id": 2797,
+                    "id": 2858,
                     "name": "ExpressionStatement",
                     "src": "577:21:7"
                   }
                 ],
-                "id": 2798,
+                "id": 2859,
                 "name": "Block",
                 "src": "567:38:7"
               }
             ],
-            "id": 2799,
+            "id": 2860,
             "name": "FunctionDefinition",
             "src": "539:66:7"
           },
@@ -2896,7 +2896,7 @@
               ],
               "name": "fund",
               "overrides": null,
-              "scope": 2911,
+              "scope": 2972,
               "stateMutability": "view",
               "virtual": false,
               "visibility": "internal"
@@ -2909,7 +2909,7 @@
                   ]
                 },
                 "children": [],
-                "id": 2800,
+                "id": 2861,
                 "name": "ParameterList",
                 "src": "624:2:7"
               },
@@ -2921,7 +2921,7 @@
                       "mutability": "mutable",
                       "name": "",
                       "overrides": null,
-                      "scope": 2810,
+                      "scope": 2871,
                       "stateVariable": false,
                       "storageLocation": "default",
                       "type": "address",
@@ -2935,17 +2935,17 @@
                           "stateMutability": "nonpayable",
                           "type": "address"
                         },
-                        "id": 2801,
+                        "id": 2862,
                         "name": "ElementaryTypeName",
                         "src": "650:7:7"
                       }
                     ],
-                    "id": 2802,
+                    "id": 2863,
                     "name": "VariableDeclaration",
                     "src": "650:7:7"
                   }
                 ],
-                "id": 2803,
+                "id": 2864,
                 "name": "ParameterList",
                 "src": "649:9:7"
               },
@@ -2953,7 +2953,7 @@
                 "children": [
                   {
                     "attributes": {
-                      "functionReturnParameters": 2803
+                      "functionReturnParameters": 2864
                     },
                     "children": [
                       {
@@ -2985,7 +2985,7 @@
                               "isPure": false,
                               "lValueRequested": false,
                               "member_name": "mainCharacters",
-                              "referencedDeclaration": 2925,
+                              "referencedDeclaration": 2986,
                               "type": "function (uint8) view external returns (address)"
                             },
                             "children": [
@@ -2995,16 +2995,16 @@
                                   "overloadedDeclarations": [
                                     null
                                   ],
-                                  "referencedDeclaration": 2787,
+                                  "referencedDeclaration": 2848,
                                   "type": "contract Roles",
                                   "value": "roles"
                                 },
-                                "id": 2804,
+                                "id": 2865,
                                 "name": "Identifier",
                                 "src": "676:5:7"
                               }
                             ],
-                            "id": 2805,
+                            "id": 2866,
                             "name": "MemberAccess",
                             "src": "676:20:7"
                           },
@@ -3014,31 +3014,31 @@
                               "overloadedDeclarations": [
                                 null
                               ],
-                              "referencedDeclaration": 2755,
+                              "referencedDeclaration": 2816,
                               "type": "uint8",
                               "value": "FUND_CHARACTER"
                             },
-                            "id": 2806,
+                            "id": 2867,
                             "name": "Identifier",
                             "src": "697:14:7"
                           }
                         ],
-                        "id": 2807,
+                        "id": 2868,
                         "name": "FunctionCall",
                         "src": "676:36:7"
                       }
                     ],
-                    "id": 2808,
+                    "id": 2869,
                     "name": "Return",
                     "src": "669:43:7"
                   }
                 ],
-                "id": 2809,
+                "id": 2870,
                 "name": "Block",
                 "src": "659:60:7"
               }
             ],
-            "id": 2810,
+            "id": 2871,
             "name": "FunctionDefinition",
             "src": "611:108:7"
           },
@@ -3053,7 +3053,7 @@
               ],
               "name": "lending",
               "overrides": null,
-              "scope": 2911,
+              "scope": 2972,
               "stateMutability": "view",
               "virtual": false,
               "visibility": "internal"
@@ -3066,7 +3066,7 @@
                   ]
                 },
                 "children": [],
-                "id": 2811,
+                "id": 2872,
                 "name": "ParameterList",
                 "src": "741:2:7"
               },
@@ -3078,7 +3078,7 @@
                       "mutability": "mutable",
                       "name": "",
                       "overrides": null,
-                      "scope": 2821,
+                      "scope": 2882,
                       "stateVariable": false,
                       "storageLocation": "default",
                       "type": "address",
@@ -3092,17 +3092,17 @@
                           "stateMutability": "nonpayable",
                           "type": "address"
                         },
-                        "id": 2812,
+                        "id": 2873,
                         "name": "ElementaryTypeName",
                         "src": "767:7:7"
                       }
                     ],
-                    "id": 2813,
+                    "id": 2874,
                     "name": "VariableDeclaration",
                     "src": "767:7:7"
                   }
                 ],
-                "id": 2814,
+                "id": 2875,
                 "name": "ParameterList",
                 "src": "766:9:7"
               },
@@ -3110,7 +3110,7 @@
                 "children": [
                   {
                     "attributes": {
-                      "functionReturnParameters": 2814
+                      "functionReturnParameters": 2875
                     },
                     "children": [
                       {
@@ -3142,7 +3142,7 @@
                               "isPure": false,
                               "lValueRequested": false,
                               "member_name": "mainCharacters",
-                              "referencedDeclaration": 2925,
+                              "referencedDeclaration": 2986,
                               "type": "function (uint8) view external returns (address)"
                             },
                             "children": [
@@ -3152,16 +3152,16 @@
                                   "overloadedDeclarations": [
                                     null
                                   ],
-                                  "referencedDeclaration": 2787,
+                                  "referencedDeclaration": 2848,
                                   "type": "contract Roles",
                                   "value": "roles"
                                 },
-                                "id": 2815,
+                                "id": 2876,
                                 "name": "Identifier",
                                 "src": "793:5:7"
                               }
                             ],
-                            "id": 2816,
+                            "id": 2877,
                             "name": "MemberAccess",
                             "src": "793:20:7"
                           },
@@ -3171,31 +3171,31 @@
                               "overloadedDeclarations": [
                                 null
                               ],
-                              "referencedDeclaration": 2758,
+                              "referencedDeclaration": 2819,
                               "type": "uint8",
                               "value": "LENDING_CHARACTER"
                             },
-                            "id": 2817,
+                            "id": 2878,
                             "name": "Identifier",
                             "src": "814:17:7"
                           }
                         ],
-                        "id": 2818,
+                        "id": 2879,
                         "name": "FunctionCall",
                         "src": "793:39:7"
                       }
                     ],
-                    "id": 2819,
+                    "id": 2880,
                     "name": "Return",
                     "src": "786:46:7"
                   }
                 ],
-                "id": 2820,
+                "id": 2881,
                 "name": "Block",
                 "src": "776:63:7"
               }
             ],
-            "id": 2821,
+            "id": 2882,
             "name": "FunctionDefinition",
             "src": "725:114:7"
           },
@@ -3210,7 +3210,7 @@
               ],
               "name": "router",
               "overrides": null,
-              "scope": 2911,
+              "scope": 2972,
               "stateMutability": "view",
               "virtual": false,
               "visibility": "internal"
@@ -3223,7 +3223,7 @@
                   ]
                 },
                 "children": [],
-                "id": 2822,
+                "id": 2883,
                 "name": "ParameterList",
                 "src": "860:2:7"
               },
@@ -3235,7 +3235,7 @@
                       "mutability": "mutable",
                       "name": "",
                       "overrides": null,
-                      "scope": 2832,
+                      "scope": 2893,
                       "stateVariable": false,
                       "storageLocation": "default",
                       "type": "address",
@@ -3249,17 +3249,17 @@
                           "stateMutability": "nonpayable",
                           "type": "address"
                         },
-                        "id": 2823,
+                        "id": 2884,
                         "name": "ElementaryTypeName",
                         "src": "886:7:7"
                       }
                     ],
-                    "id": 2824,
+                    "id": 2885,
                     "name": "VariableDeclaration",
                     "src": "886:7:7"
                   }
                 ],
-                "id": 2825,
+                "id": 2886,
                 "name": "ParameterList",
                 "src": "885:9:7"
               },
@@ -3267,7 +3267,7 @@
                 "children": [
                   {
                     "attributes": {
-                      "functionReturnParameters": 2825
+                      "functionReturnParameters": 2886
                     },
                     "children": [
                       {
@@ -3299,7 +3299,7 @@
                               "isPure": false,
                               "lValueRequested": false,
                               "member_name": "mainCharacters",
-                              "referencedDeclaration": 2925,
+                              "referencedDeclaration": 2986,
                               "type": "function (uint8) view external returns (address)"
                             },
                             "children": [
@@ -3309,16 +3309,16 @@
                                   "overloadedDeclarations": [
                                     null
                                   ],
-                                  "referencedDeclaration": 2787,
+                                  "referencedDeclaration": 2848,
                                   "type": "contract Roles",
                                   "value": "roles"
                                 },
-                                "id": 2826,
+                                "id": 2887,
                                 "name": "Identifier",
                                 "src": "912:5:7"
                               }
                             ],
-                            "id": 2827,
+                            "id": 2888,
                             "name": "MemberAccess",
                             "src": "912:20:7"
                           },
@@ -3328,31 +3328,31 @@
                               "overloadedDeclarations": [
                                 null
                               ],
-                              "referencedDeclaration": 2761,
+                              "referencedDeclaration": 2822,
                               "type": "uint8",
                               "value": "ROUTER_CHARACTER"
                             },
-                            "id": 2828,
+                            "id": 2889,
                             "name": "Identifier",
                             "src": "933:16:7"
                           }
                         ],
-                        "id": 2829,
+                        "id": 2890,
                         "name": "FunctionCall",
                         "src": "912:38:7"
                       }
                     ],
-                    "id": 2830,
+                    "id": 2891,
                     "name": "Return",
                     "src": "905:45:7"
                   }
                 ],
-                "id": 2831,
+                "id": 2892,
                 "name": "Block",
                 "src": "895:62:7"
               }
             ],
-            "id": 2832,
+            "id": 2893,
             "name": "FunctionDefinition",
             "src": "845:112:7"
           },
@@ -3367,7 +3367,7 @@
               ],
               "name": "marginTrading",
               "overrides": null,
-              "scope": 2911,
+              "scope": 2972,
               "stateMutability": "view",
               "virtual": false,
               "visibility": "internal"
@@ -3380,7 +3380,7 @@
                   ]
                 },
                 "children": [],
-                "id": 2833,
+                "id": 2894,
                 "name": "ParameterList",
                 "src": "985:2:7"
               },
@@ -3392,7 +3392,7 @@
                       "mutability": "mutable",
                       "name": "",
                       "overrides": null,
-                      "scope": 2843,
+                      "scope": 2904,
                       "stateVariable": false,
                       "storageLocation": "default",
                       "type": "address",
@@ -3406,17 +3406,17 @@
                           "stateMutability": "nonpayable",
                           "type": "address"
                         },
-                        "id": 2834,
+                        "id": 2895,
                         "name": "ElementaryTypeName",
                         "src": "1011:7:7"
                       }
                     ],
-                    "id": 2835,
+                    "id": 2896,
                     "name": "VariableDeclaration",
                     "src": "1011:7:7"
                   }
                 ],
-                "id": 2836,
+                "id": 2897,
                 "name": "ParameterList",
                 "src": "1010:9:7"
               },
@@ -3424,7 +3424,7 @@
                 "children": [
                   {
                     "attributes": {
-                      "functionReturnParameters": 2836
+                      "functionReturnParameters": 2897
                     },
                     "children": [
                       {
@@ -3456,7 +3456,7 @@
                               "isPure": false,
                               "lValueRequested": false,
                               "member_name": "mainCharacters",
-                              "referencedDeclaration": 2925,
+                              "referencedDeclaration": 2986,
                               "type": "function (uint8) view external returns (address)"
                             },
                             "children": [
@@ -3466,16 +3466,16 @@
                                   "overloadedDeclarations": [
                                     null
                                   ],
-                                  "referencedDeclaration": 2787,
+                                  "referencedDeclaration": 2848,
                                   "type": "contract Roles",
                                   "value": "roles"
                                 },
-                                "id": 2837,
+                                "id": 2898,
                                 "name": "Identifier",
                                 "src": "1037:5:7"
                               }
                             ],
-                            "id": 2838,
+                            "id": 2899,
                             "name": "MemberAccess",
                             "src": "1037:20:7"
                           },
@@ -3485,31 +3485,31 @@
                               "overloadedDeclarations": [
                                 null
                               ],
-                              "referencedDeclaration": 2764,
+                              "referencedDeclaration": 2825,
                               "type": "uint8",
                               "value": "MARGIN_TRADING"
                             },
-                            "id": 2839,
+                            "id": 2900,
                             "name": "Identifier",
                             "src": "1058:14:7"
                           }
                         ],
-                        "id": 2840,
+                        "id": 2901,
                         "name": "FunctionCall",
                         "src": "1037:36:7"
                       }
                     ],
-                    "id": 2841,
+                    "id": 2902,
                     "name": "Return",
                     "src": "1030:43:7"
                   }
                 ],
-                "id": 2842,
+                "id": 2903,
                 "name": "Block",
                 "src": "1020:60:7"
               }
             ],
-            "id": 2843,
+            "id": 2904,
             "name": "FunctionDefinition",
             "src": "963:117:7"
           },
@@ -3524,7 +3524,7 @@
               ],
               "name": "feeController",
               "overrides": null,
-              "scope": 2911,
+              "scope": 2972,
               "stateMutability": "view",
               "virtual": false,
               "visibility": "internal"
@@ -3537,7 +3537,7 @@
                   ]
                 },
                 "children": [],
-                "id": 2844,
+                "id": 2905,
                 "name": "ParameterList",
                 "src": "1108:2:7"
               },
@@ -3549,7 +3549,7 @@
                       "mutability": "mutable",
                       "name": "",
                       "overrides": null,
-                      "scope": 2854,
+                      "scope": 2915,
                       "stateVariable": false,
                       "storageLocation": "default",
                       "type": "address",
@@ -3563,17 +3563,17 @@
                           "stateMutability": "nonpayable",
                           "type": "address"
                         },
-                        "id": 2845,
+                        "id": 2906,
                         "name": "ElementaryTypeName",
                         "src": "1134:7:7"
                       }
                     ],
-                    "id": 2846,
+                    "id": 2907,
                     "name": "VariableDeclaration",
                     "src": "1134:7:7"
                   }
                 ],
-                "id": 2847,
+                "id": 2908,
                 "name": "ParameterList",
                 "src": "1133:9:7"
               },
@@ -3581,7 +3581,7 @@
                 "children": [
                   {
                     "attributes": {
-                      "functionReturnParameters": 2847
+                      "functionReturnParameters": 2908
                     },
                     "children": [
                       {
@@ -3613,7 +3613,7 @@
                               "isPure": false,
                               "lValueRequested": false,
                               "member_name": "mainCharacters",
-                              "referencedDeclaration": 2925,
+                              "referencedDeclaration": 2986,
                               "type": "function (uint8) view external returns (address)"
                             },
                             "children": [
@@ -3623,16 +3623,16 @@
                                   "overloadedDeclarations": [
                                     null
                                   ],
-                                  "referencedDeclaration": 2787,
+                                  "referencedDeclaration": 2848,
                                   "type": "contract Roles",
                                   "value": "roles"
                                 },
-                                "id": 2848,
+                                "id": 2909,
                                 "name": "Identifier",
                                 "src": "1160:5:7"
                               }
                             ],
-                            "id": 2849,
+                            "id": 2910,
                             "name": "MemberAccess",
                             "src": "1160:20:7"
                           },
@@ -3642,31 +3642,31 @@
                               "overloadedDeclarations": [
                                 null
                               ],
-                              "referencedDeclaration": 2767,
+                              "referencedDeclaration": 2828,
                               "type": "uint8",
                               "value": "FEE_CONTROLLER"
                             },
-                            "id": 2850,
+                            "id": 2911,
                             "name": "Identifier",
                             "src": "1181:14:7"
                           }
                         ],
-                        "id": 2851,
+                        "id": 2912,
                         "name": "FunctionCall",
                         "src": "1160:36:7"
                       }
                     ],
-                    "id": 2852,
+                    "id": 2913,
                     "name": "Return",
                     "src": "1153:43:7"
                   }
                 ],
-                "id": 2853,
+                "id": 2914,
                 "name": "Block",
                 "src": "1143:60:7"
               }
             ],
-            "id": 2854,
+            "id": 2915,
             "name": "FunctionDefinition",
             "src": "1086:117:7"
           },
@@ -3681,7 +3681,7 @@
               ],
               "name": "isBorrower",
               "overrides": null,
-              "scope": 2911,
+              "scope": 2972,
               "stateMutability": "view",
               "virtual": false,
               "visibility": "internal"
@@ -3695,7 +3695,7 @@
                       "mutability": "mutable",
                       "name": "contr",
                       "overrides": null,
-                      "scope": 2868,
+                      "scope": 2929,
                       "stateVariable": false,
                       "storageLocation": "default",
                       "type": "address",
@@ -3709,17 +3709,17 @@
                           "stateMutability": "nonpayable",
                           "type": "address"
                         },
-                        "id": 2855,
+                        "id": 2916,
                         "name": "ElementaryTypeName",
                         "src": "1229:7:7"
                       }
                     ],
-                    "id": 2856,
+                    "id": 2917,
                     "name": "VariableDeclaration",
                     "src": "1229:13:7"
                   }
                 ],
-                "id": 2857,
+                "id": 2918,
                 "name": "ParameterList",
                 "src": "1228:15:7"
               },
@@ -3731,7 +3731,7 @@
                       "mutability": "mutable",
                       "name": "",
                       "overrides": null,
-                      "scope": 2868,
+                      "scope": 2929,
                       "stateVariable": false,
                       "storageLocation": "default",
                       "type": "bool",
@@ -3744,17 +3744,17 @@
                           "name": "bool",
                           "type": "bool"
                         },
-                        "id": 2858,
+                        "id": 2919,
                         "name": "ElementaryTypeName",
                         "src": "1267:4:7"
                       }
                     ],
-                    "id": 2859,
+                    "id": 2920,
                     "name": "VariableDeclaration",
                     "src": "1267:4:7"
                   }
                 ],
-                "id": 2860,
+                "id": 2921,
                 "name": "ParameterList",
                 "src": "1266:6:7"
               },
@@ -3762,7 +3762,7 @@
                 "children": [
                   {
                     "attributes": {
-                      "functionReturnParameters": 2860
+                      "functionReturnParameters": 2921
                     },
                     "children": [
                       {
@@ -3798,7 +3798,7 @@
                               "isPure": false,
                               "lValueRequested": false,
                               "member_name": "getRole",
-                              "referencedDeclaration": 2993,
+                              "referencedDeclaration": 3054,
                               "type": "function (address,uint8) view external returns (bool)"
                             },
                             "children": [
@@ -3808,16 +3808,16 @@
                                   "overloadedDeclarations": [
                                     null
                                   ],
-                                  "referencedDeclaration": 2787,
+                                  "referencedDeclaration": 2848,
                                   "type": "contract Roles",
                                   "value": "roles"
                                 },
-                                "id": 2861,
+                                "id": 2922,
                                 "name": "Identifier",
                                 "src": "1290:5:7"
                               }
                             ],
-                            "id": 2862,
+                            "id": 2923,
                             "name": "MemberAccess",
                             "src": "1290:13:7"
                           },
@@ -3827,11 +3827,11 @@
                               "overloadedDeclarations": [
                                 null
                               ],
-                              "referencedDeclaration": 2856,
+                              "referencedDeclaration": 2917,
                               "type": "address",
                               "value": "contr"
                             },
-                            "id": 2863,
+                            "id": 2924,
                             "name": "Identifier",
                             "src": "1304:5:7"
                           },
@@ -3841,31 +3841,31 @@
                               "overloadedDeclarations": [
                                 null
                               ],
-                              "referencedDeclaration": 2779,
+                              "referencedDeclaration": 2840,
                               "type": "uint8",
                               "value": "BORROWER_ROLE"
                             },
-                            "id": 2864,
+                            "id": 2925,
                             "name": "Identifier",
                             "src": "1311:13:7"
                           }
                         ],
-                        "id": 2865,
+                        "id": 2926,
                         "name": "FunctionCall",
                         "src": "1290:35:7"
                       }
                     ],
-                    "id": 2866,
+                    "id": 2927,
                     "name": "Return",
                     "src": "1283:42:7"
                   }
                 ],
-                "id": 2867,
+                "id": 2928,
                 "name": "Block",
                 "src": "1273:59:7"
               }
             ],
-            "id": 2868,
+            "id": 2929,
             "name": "FunctionDefinition",
             "src": "1209:123:7"
           },
@@ -3880,7 +3880,7 @@
               ],
               "name": "isWithdrawer",
               "overrides": null,
-              "scope": 2911,
+              "scope": 2972,
               "stateMutability": "view",
               "virtual": false,
               "visibility": "internal"
@@ -3894,7 +3894,7 @@
                       "mutability": "mutable",
                       "name": "contr",
                       "overrides": null,
-                      "scope": 2882,
+                      "scope": 2943,
                       "stateVariable": false,
                       "storageLocation": "default",
                       "type": "address",
@@ -3908,17 +3908,17 @@
                           "stateMutability": "nonpayable",
                           "type": "address"
                         },
-                        "id": 2869,
+                        "id": 2930,
                         "name": "ElementaryTypeName",
                         "src": "1360:7:7"
                       }
                     ],
-                    "id": 2870,
+                    "id": 2931,
                     "name": "VariableDeclaration",
                     "src": "1360:13:7"
                   }
                 ],
-                "id": 2871,
+                "id": 2932,
                 "name": "ParameterList",
                 "src": "1359:15:7"
               },
@@ -3930,7 +3930,7 @@
                       "mutability": "mutable",
                       "name": "",
                       "overrides": null,
-                      "scope": 2882,
+                      "scope": 2943,
                       "stateVariable": false,
                       "storageLocation": "default",
                       "type": "bool",
@@ -3943,17 +3943,17 @@
                           "name": "bool",
                           "type": "bool"
                         },
-                        "id": 2872,
+                        "id": 2933,
                         "name": "ElementaryTypeName",
                         "src": "1398:4:7"
                       }
                     ],
-                    "id": 2873,
+                    "id": 2934,
                     "name": "VariableDeclaration",
                     "src": "1398:4:7"
                   }
                 ],
-                "id": 2874,
+                "id": 2935,
                 "name": "ParameterList",
                 "src": "1397:6:7"
               },
@@ -3961,7 +3961,7 @@
                 "children": [
                   {
                     "attributes": {
-                      "functionReturnParameters": 2874
+                      "functionReturnParameters": 2935
                     },
                     "children": [
                       {
@@ -3997,7 +3997,7 @@
                               "isPure": false,
                               "lValueRequested": false,
                               "member_name": "getRole",
-                              "referencedDeclaration": 2993,
+                              "referencedDeclaration": 3054,
                               "type": "function (address,uint8) view external returns (bool)"
                             },
                             "children": [
@@ -4007,16 +4007,16 @@
                                   "overloadedDeclarations": [
                                     null
                                   ],
-                                  "referencedDeclaration": 2787,
+                                  "referencedDeclaration": 2848,
                                   "type": "contract Roles",
                                   "value": "roles"
                                 },
-                                "id": 2875,
+                                "id": 2936,
                                 "name": "Identifier",
                                 "src": "1421:5:7"
                               }
                             ],
-                            "id": 2876,
+                            "id": 2937,
                             "name": "MemberAccess",
                             "src": "1421:13:7"
                           },
@@ -4026,11 +4026,11 @@
                               "overloadedDeclarations": [
                                 null
                               ],
-                              "referencedDeclaration": 2870,
+                              "referencedDeclaration": 2931,
                               "type": "address",
                               "value": "contr"
                             },
-                            "id": 2877,
+                            "id": 2938,
                             "name": "Identifier",
                             "src": "1435:5:7"
                           },
@@ -4040,31 +4040,31 @@
                               "overloadedDeclarations": [
                                 null
                               ],
-                              "referencedDeclaration": 2773,
+                              "referencedDeclaration": 2834,
                               "type": "uint8",
                               "value": "WITHDRAWER_ROLE"
                             },
-                            "id": 2878,
+                            "id": 2939,
                             "name": "Identifier",
                             "src": "1442:15:7"
                           }
                         ],
-                        "id": 2879,
+                        "id": 2940,
                         "name": "FunctionCall",
                         "src": "1421:37:7"
                       }
                     ],
-                    "id": 2880,
+                    "id": 2941,
                     "name": "Return",
                     "src": "1414:44:7"
                   }
                 ],
-                "id": 2881,
+                "id": 2942,
                 "name": "Block",
                 "src": "1404:61:7"
               }
             ],
-            "id": 2882,
+            "id": 2943,
             "name": "FunctionDefinition",
             "src": "1338:127:7"
           },
@@ -4079,7 +4079,7 @@
               ],
               "name": "isMarginTrader",
               "overrides": null,
-              "scope": 2911,
+              "scope": 2972,
               "stateMutability": "view",
               "virtual": false,
               "visibility": "internal"
@@ -4093,7 +4093,7 @@
                       "mutability": "mutable",
                       "name": "contr",
                       "overrides": null,
-                      "scope": 2896,
+                      "scope": 2957,
                       "stateVariable": false,
                       "storageLocation": "default",
                       "type": "address",
@@ -4107,17 +4107,17 @@
                           "stateMutability": "nonpayable",
                           "type": "address"
                         },
-                        "id": 2883,
+                        "id": 2944,
                         "name": "ElementaryTypeName",
                         "src": "1495:7:7"
                       }
                     ],
-                    "id": 2884,
+                    "id": 2945,
                     "name": "VariableDeclaration",
                     "src": "1495:13:7"
                   }
                 ],
-                "id": 2885,
+                "id": 2946,
                 "name": "ParameterList",
                 "src": "1494:15:7"
               },
@@ -4129,7 +4129,7 @@
                       "mutability": "mutable",
                       "name": "",
                       "overrides": null,
-                      "scope": 2896,
+                      "scope": 2957,
                       "stateVariable": false,
                       "storageLocation": "default",
                       "type": "bool",
@@ -4142,17 +4142,17 @@
                           "name": "bool",
                           "type": "bool"
                         },
-                        "id": 2886,
+                        "id": 2947,
                         "name": "ElementaryTypeName",
                         "src": "1533:4:7"
                       }
                     ],
-                    "id": 2887,
+                    "id": 2948,
                     "name": "VariableDeclaration",
                     "src": "1533:4:7"
                   }
                 ],
-                "id": 2888,
+                "id": 2949,
                 "name": "ParameterList",
                 "src": "1532:6:7"
               },
@@ -4160,7 +4160,7 @@
                 "children": [
                   {
                     "attributes": {
-                      "functionReturnParameters": 2888
+                      "functionReturnParameters": 2949
                     },
                     "children": [
                       {
@@ -4196,7 +4196,7 @@
                               "isPure": false,
                               "lValueRequested": false,
                               "member_name": "getRole",
-                              "referencedDeclaration": 2993,
+                              "referencedDeclaration": 3054,
                               "type": "function (address,uint8) view external returns (bool)"
                             },
                             "children": [
@@ -4206,16 +4206,16 @@
                                   "overloadedDeclarations": [
                                     null
                                   ],
-                                  "referencedDeclaration": 2787,
+                                  "referencedDeclaration": 2848,
                                   "type": "contract Roles",
                                   "value": "roles"
                                 },
-                                "id": 2889,
+                                "id": 2950,
                                 "name": "Identifier",
                                 "src": "1556:5:7"
                               }
                             ],
-                            "id": 2890,
+                            "id": 2951,
                             "name": "MemberAccess",
                             "src": "1556:13:7"
                           },
@@ -4225,11 +4225,11 @@
                               "overloadedDeclarations": [
                                 null
                               ],
-                              "referencedDeclaration": 2884,
+                              "referencedDeclaration": 2945,
                               "type": "address",
                               "value": "contr"
                             },
-                            "id": 2891,
+                            "id": 2952,
                             "name": "Identifier",
                             "src": "1570:5:7"
                           },
@@ -4239,31 +4239,31 @@
                               "overloadedDeclarations": [
                                 null
                               ],
-                              "referencedDeclaration": 2782,
+                              "referencedDeclaration": 2843,
                               "type": "uint8",
                               "value": "MARGIN_TRADER_ROLE"
                             },
-                            "id": 2892,
+                            "id": 2953,
                             "name": "Identifier",
                             "src": "1577:18:7"
                           }
                         ],
-                        "id": 2893,
+                        "id": 2954,
                         "name": "FunctionCall",
                         "src": "1556:40:7"
                       }
                     ],
-                    "id": 2894,
+                    "id": 2955,
                     "name": "Return",
                     "src": "1549:47:7"
                   }
                 ],
-                "id": 2895,
+                "id": 2956,
                 "name": "Block",
                 "src": "1539:64:7"
               }
             ],
-            "id": 2896,
+            "id": 2957,
             "name": "FunctionDefinition",
             "src": "1471:132:7"
           },
@@ -4278,7 +4278,7 @@
               ],
               "name": "isFeeSource",
               "overrides": null,
-              "scope": 2911,
+              "scope": 2972,
               "stateMutability": "view",
               "virtual": false,
               "visibility": "internal"
@@ -4292,7 +4292,7 @@
                       "mutability": "mutable",
                       "name": "contr",
                       "overrides": null,
-                      "scope": 2910,
+                      "scope": 2971,
                       "stateVariable": false,
                       "storageLocation": "default",
                       "type": "address",
@@ -4306,17 +4306,17 @@
                           "stateMutability": "nonpayable",
                           "type": "address"
                         },
-                        "id": 2897,
+                        "id": 2958,
                         "name": "ElementaryTypeName",
                         "src": "1630:7:7"
                       }
                     ],
-                    "id": 2898,
+                    "id": 2959,
                     "name": "VariableDeclaration",
                     "src": "1630:13:7"
                   }
                 ],
-                "id": 2899,
+                "id": 2960,
                 "name": "ParameterList",
                 "src": "1629:15:7"
               },
@@ -4328,7 +4328,7 @@
                       "mutability": "mutable",
                       "name": "",
                       "overrides": null,
-                      "scope": 2910,
+                      "scope": 2971,
                       "stateVariable": false,
                       "storageLocation": "default",
                       "type": "bool",
@@ -4341,17 +4341,17 @@
                           "name": "bool",
                           "type": "bool"
                         },
-                        "id": 2900,
+                        "id": 2961,
                         "name": "ElementaryTypeName",
                         "src": "1668:4:7"
                       }
                     ],
-                    "id": 2901,
+                    "id": 2962,
                     "name": "VariableDeclaration",
                     "src": "1668:4:7"
                   }
                 ],
-                "id": 2902,
+                "id": 2963,
                 "name": "ParameterList",
                 "src": "1667:6:7"
               },
@@ -4359,7 +4359,7 @@
                 "children": [
                   {
                     "attributes": {
-                      "functionReturnParameters": 2902
+                      "functionReturnParameters": 2963
                     },
                     "children": [
                       {
@@ -4395,7 +4395,7 @@
                               "isPure": false,
                               "lValueRequested": false,
                               "member_name": "getRole",
-                              "referencedDeclaration": 2993,
+                              "referencedDeclaration": 3054,
                               "type": "function (address,uint8) view external returns (bool)"
                             },
                             "children": [
@@ -4405,16 +4405,16 @@
                                   "overloadedDeclarations": [
                                     null
                                   ],
-                                  "referencedDeclaration": 2787,
+                                  "referencedDeclaration": 2848,
                                   "type": "contract Roles",
                                   "value": "roles"
                                 },
-                                "id": 2903,
+                                "id": 2964,
                                 "name": "Identifier",
                                 "src": "1691:5:7"
                               }
                             ],
-                            "id": 2904,
+                            "id": 2965,
                             "name": "MemberAccess",
                             "src": "1691:13:7"
                           },
@@ -4424,11 +4424,11 @@
                               "overloadedDeclarations": [
                                 null
                               ],
-                              "referencedDeclaration": 2898,
+                              "referencedDeclaration": 2959,
                               "type": "address",
                               "value": "contr"
                             },
-                            "id": 2905,
+                            "id": 2966,
                             "name": "Identifier",
                             "src": "1705:5:7"
                           },
@@ -4438,41 +4438,41 @@
                               "overloadedDeclarations": [
                                 null
                               ],
-                              "referencedDeclaration": 2785,
+                              "referencedDeclaration": 2846,
                               "type": "uint8",
                               "value": "FEE_SOURCE"
                             },
-                            "id": 2906,
+                            "id": 2967,
                             "name": "Identifier",
                             "src": "1712:10:7"
                           }
                         ],
-                        "id": 2907,
+                        "id": 2968,
                         "name": "FunctionCall",
                         "src": "1691:32:7"
                       }
                     ],
-                    "id": 2908,
+                    "id": 2969,
                     "name": "Return",
                     "src": "1684:39:7"
                   }
                 ],
-                "id": 2909,
+                "id": 2970,
                 "name": "Block",
                 "src": "1674:56:7"
               }
             ],
-            "id": 2910,
+            "id": 2971,
             "name": "FunctionDefinition",
             "src": "1609:121:7"
           }
         ],
-        "id": 2911,
+        "id": 2972,
         "name": "ContractDefinition",
         "src": "23:1709:7"
       }
     ],
-    "id": 2912,
+    "id": 2973,
     "name": "SourceUnit",
     "src": "0:1733:7"
   },
@@ -4482,7 +4482,7 @@
   },
   "networks": {},
   "schemaVersion": "3.3.3",
-  "updatedAt": "2021-02-10T00:46:33.627Z",
+  "updatedAt": "2021-02-12T21:14:04.715Z",
   "devdoc": {
     "kind": "dev",
     "methods": {},
