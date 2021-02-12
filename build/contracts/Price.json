@@ -1,0 +1,402 @@
+{
+  "contractName": "Price",
+  "abi": [
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "_roles",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "constructor"
+    },
+    {
+      "inputs": [],
+      "name": "roles",
+      "outputs": [
+        {
+          "internalType": "contract Roles",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    }
+  ],
+  "metadata": "{\"compiler\":{\"version\":\"0.7.0+commit.9e61f92b\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_roles\",\"type\":\"address\"}],\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"inputs\":[],\"name\":\"roles\",\"outputs\":[{\"internalType\":\"contract Roles\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"}],\"devdoc\":{\"kind\":\"dev\",\"methods\":{},\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{},\"version\":1}},\"settings\":{\"compilationTarget\":{\"/home/tixelbook/projects/marginswap-core/contracts/Price.sol\":\"Price\"},\"evmVersion\":\"istanbul\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\"},\"optimizer\":{\"enabled\":false,\"runs\":200},\"remappings\":[]},\"sources\":{\"/home/tixelbook/projects/marginswap-core/contracts/Price.sol\":{\"keccak256\":\"0x0fc888d2ab1907efc59b50c61201234c4738ee33ef429028e46d04b7d2c1ea99\",\"urls\":[\"bzz-raw://eadcc36bb57ffc25b19ef6c6a8d9ee3892fa43e598ad3904e694ec2185dd0398\",\"dweb:/ipfs/QmNboP37J1qqGKHagn7QSYFCbEbJSU6rdhRuvzTEz9Rvwb\"]},\"/home/tixelbook/projects/marginswap-core/contracts/RoleAware.sol\":{\"keccak256\":\"0xbc44a89d84dadda149b525e272d5f9cfd6cf01d97e8908aa24c862893c0c60e3\",\"urls\":[\"bzz-raw://c24f74e8be1bc68cf01f1d20d31567e69ed750ec13ed66f1305efa0b5ed40937\",\"dweb:/ipfs/QmPRpSYXvPwLXwFcz4ACaVSi8m1SqoNPL2p6237oJ7t3eD\"]},\"/home/tixelbook/projects/marginswap-core/contracts/Roles.sol\":{\"keccak256\":\"0x440e80547db3a2718a719fc3590ab1be3d6fe44fdcb7837c303c567777d01d4e\",\"urls\":[\"bzz-raw://3ee7a1e1c70ab3029161e933549e18c071412237f84f9d38ffae4c0ea513d7a0\",\"dweb:/ipfs/QmcdWfqn61Uw543ETD4MVSAd3To2sEtYDtfCDRXAi1uN7V\"]},\"@openzeppelin/contracts/GSN/Context.sol\":{\"keccak256\":\"0x8d3cb350f04ff49cfb10aef08d87f19dcbaecc8027b0bed12f3275cd12f38cf0\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://ded47ec7c96750f9bd04bbbc84f659992d4ba901cb7b532a52cd468272cf378f\",\"dweb:/ipfs/QmfBrGtQP7rZEqEg6Wz6jh2N2Kukpj1z5v3CGWmAqrzm96\"]},\"@openzeppelin/contracts/access/Ownable.sol\":{\"keccak256\":\"0xf7c39c7e6d06ed3bda90cfefbcbf2ddc32c599c3d6721746546ad64946efccaa\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://cb57a28e189cd8b05748db44bdd51d608e6f1364dd1b35ad921e1bc82c10631e\",\"dweb:/ipfs/QmaWWTBbVu2pRR9XUbE4iC159NoP59cRF9ZJwhf4ghFN9i\"]}},\"version\":1}",
+  "bytecode": "0x608060405234801561001057600080fd5b5060405161014e38038061014e8339818101604052602081101561003357600080fd5b810190808051906020019092919050505080806000806101000a81548173ffffffffffffffffffffffffffffffffffffffff021916908373ffffffffffffffffffffffffffffffffffffffff160217905550505060b9806100956000396000f3fe6080604052348015600f57600080fd5b506004361060285760003560e01c8063392f5f6414602d575b600080fd5b6033605f565b604051808273ffffffffffffffffffffffffffffffffffffffff16815260200191505060405180910390f35b60008054906101000a900473ffffffffffffffffffffffffffffffffffffffff168156fea26469706673582212206aa2cd6abcef33549fe8f4420586bd14aadee1b549025d0ef0e9caf4fffd910a64736f6c63430007000033",
+  "deployedBytecode": "0x6080604052348015600f57600080fd5b506004361060285760003560e01c8063392f5f6414602d575b600080fd5b6033605f565b604051808273ffffffffffffffffffffffffffffffffffffffff16815260200191505060405180910390f35b60008054906101000a900473ffffffffffffffffffffffffffffffffffffffff168156fea26469706673582212206aa2cd6abcef33549fe8f4420586bd14aadee1b549025d0ef0e9caf4fffd910a64736f6c63430007000033",
+  "immutableReferences": {},
+  "sourceMap": "27:90:6:-:0;;;61:54;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;99:6;591::7;577:5;;:21;;;;;;;;;;;;;;;;;;539:66;61:54:6;27:90;;;;;;",
+  "deployedSourceMap": "27:90:6:-:0;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;515:18:7;;;:::i;:::-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;:::o",
+  "source": "import './RoleAware.sol';\n\ncontract Price is RoleAware {\n    constructor(address _roles) RoleAware(_roles) {\n\n    }\n}\n",
+  "sourcePath": "/home/tixelbook/projects/marginswap-core/contracts/Price.sol",
+  "ast": {
+    "absolutePath": "/home/tixelbook/projects/marginswap-core/contracts/Price.sol",
+    "exportedSymbols": {
+      "Price": [
+        2750
+      ]
+    },
+    "id": 2751,
+    "license": null,
+    "nodeType": "SourceUnit",
+    "nodes": [
+      {
+        "absolutePath": "/home/tixelbook/projects/marginswap-core/contracts/RoleAware.sol",
+        "file": "./RoleAware.sol",
+        "id": 2738,
+        "nodeType": "ImportDirective",
+        "scope": 2751,
+        "sourceUnit": 2912,
+        "src": "0:25:6",
+        "symbolAliases": [],
+        "unitAlias": ""
+      },
+      {
+        "abstract": false,
+        "baseContracts": [
+          {
+            "arguments": null,
+            "baseName": {
+              "contractScope": null,
+              "id": 2739,
+              "name": "RoleAware",
+              "nodeType": "UserDefinedTypeName",
+              "referencedDeclaration": 2911,
+              "src": "45:9:6",
+              "typeDescriptions": {
+                "typeIdentifier": "t_contract$_RoleAware_$2911",
+                "typeString": "contract RoleAware"
+              }
+            },
+            "id": 2740,
+            "nodeType": "InheritanceSpecifier",
+            "src": "45:9:6"
+          }
+        ],
+        "contractDependencies": [
+          2911
+        ],
+        "contractKind": "contract",
+        "documentation": null,
+        "fullyImplemented": true,
+        "id": 2750,
+        "linearizedBaseContracts": [
+          2750,
+          2911
+        ],
+        "name": "Price",
+        "nodeType": "ContractDefinition",
+        "nodes": [
+          {
+            "body": {
+              "id": 2748,
+              "nodeType": "Block",
+              "src": "107:8:6",
+              "statements": []
+            },
+            "documentation": null,
+            "id": 2749,
+            "implemented": true,
+            "kind": "constructor",
+            "modifiers": [
+              {
+                "arguments": [
+                  {
+                    "argumentTypes": null,
+                    "id": 2745,
+                    "name": "_roles",
+                    "nodeType": "Identifier",
+                    "overloadedDeclarations": [],
+                    "referencedDeclaration": 2742,
+                    "src": "99:6:6",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  }
+                ],
+                "id": 2746,
+                "modifierName": {
+                  "argumentTypes": null,
+                  "id": 2744,
+                  "name": "RoleAware",
+                  "nodeType": "Identifier",
+                  "overloadedDeclarations": [],
+                  "referencedDeclaration": 2911,
+                  "src": "89:9:6",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_type$_t_contract$_RoleAware_$2911_$",
+                    "typeString": "type(contract RoleAware)"
+                  }
+                },
+                "nodeType": "ModifierInvocation",
+                "src": "89:17:6"
+              }
+            ],
+            "name": "",
+            "nodeType": "FunctionDefinition",
+            "overrides": null,
+            "parameters": {
+              "id": 2743,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 2742,
+                  "mutability": "mutable",
+                  "name": "_roles",
+                  "nodeType": "VariableDeclaration",
+                  "overrides": null,
+                  "scope": 2749,
+                  "src": "73:14:6",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 2741,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "73:7:6",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "72:16:6"
+            },
+            "returnParameters": {
+              "id": 2747,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "107:0:6"
+            },
+            "scope": 2750,
+            "src": "61:54:6",
+            "stateMutability": "nonpayable",
+            "virtual": false,
+            "visibility": "public"
+          }
+        ],
+        "scope": 2751,
+        "src": "27:90:6"
+      }
+    ],
+    "src": "0:118:6"
+  },
+  "legacyAST": {
+    "attributes": {
+      "absolutePath": "/home/tixelbook/projects/marginswap-core/contracts/Price.sol",
+      "exportedSymbols": {
+        "Price": [
+          2750
+        ]
+      },
+      "license": null
+    },
+    "children": [
+      {
+        "attributes": {
+          "SourceUnit": 2912,
+          "absolutePath": "/home/tixelbook/projects/marginswap-core/contracts/RoleAware.sol",
+          "file": "./RoleAware.sol",
+          "scope": 2751,
+          "symbolAliases": [
+            null
+          ],
+          "unitAlias": ""
+        },
+        "id": 2738,
+        "name": "ImportDirective",
+        "src": "0:25:6"
+      },
+      {
+        "attributes": {
+          "abstract": false,
+          "contractDependencies": [
+            2911
+          ],
+          "contractKind": "contract",
+          "documentation": null,
+          "fullyImplemented": true,
+          "linearizedBaseContracts": [
+            2750,
+            2911
+          ],
+          "name": "Price",
+          "scope": 2751
+        },
+        "children": [
+          {
+            "attributes": {
+              "arguments": null
+            },
+            "children": [
+              {
+                "attributes": {
+                  "contractScope": null,
+                  "name": "RoleAware",
+                  "referencedDeclaration": 2911,
+                  "type": "contract RoleAware"
+                },
+                "id": 2739,
+                "name": "UserDefinedTypeName",
+                "src": "45:9:6"
+              }
+            ],
+            "id": 2740,
+            "name": "InheritanceSpecifier",
+            "src": "45:9:6"
+          },
+          {
+            "attributes": {
+              "documentation": null,
+              "implemented": true,
+              "isConstructor": true,
+              "kind": "constructor",
+              "name": "",
+              "overrides": null,
+              "scope": 2750,
+              "stateMutability": "nonpayable",
+              "virtual": false,
+              "visibility": "public"
+            },
+            "children": [
+              {
+                "children": [
+                  {
+                    "attributes": {
+                      "constant": false,
+                      "mutability": "mutable",
+                      "name": "_roles",
+                      "overrides": null,
+                      "scope": 2749,
+                      "stateVariable": false,
+                      "storageLocation": "default",
+                      "type": "address",
+                      "value": null,
+                      "visibility": "internal"
+                    },
+                    "children": [
+                      {
+                        "attributes": {
+                          "name": "address",
+                          "stateMutability": "nonpayable",
+                          "type": "address"
+                        },
+                        "id": 2741,
+                        "name": "ElementaryTypeName",
+                        "src": "73:7:6"
+                      }
+                    ],
+                    "id": 2742,
+                    "name": "VariableDeclaration",
+                    "src": "73:14:6"
+                  }
+                ],
+                "id": 2743,
+                "name": "ParameterList",
+                "src": "72:16:6"
+              },
+              {
+                "attributes": {
+                  "parameters": [
+                    null
+                  ]
+                },
+                "children": [],
+                "id": 2747,
+                "name": "ParameterList",
+                "src": "107:0:6"
+              },
+              {
+                "children": [
+                  {
+                    "attributes": {
+                      "argumentTypes": null,
+                      "overloadedDeclarations": [
+                        null
+                      ],
+                      "referencedDeclaration": 2911,
+                      "type": "type(contract RoleAware)",
+                      "value": "RoleAware"
+                    },
+                    "id": 2744,
+                    "name": "Identifier",
+                    "src": "89:9:6"
+                  },
+                  {
+                    "attributes": {
+                      "argumentTypes": null,
+                      "overloadedDeclarations": [
+                        null
+                      ],
+                      "referencedDeclaration": 2742,
+                      "type": "address",
+                      "value": "_roles"
+                    },
+                    "id": 2745,
+                    "name": "Identifier",
+                    "src": "99:6:6"
+                  }
+                ],
+                "id": 2746,
+                "name": "ModifierInvocation",
+                "src": "89:17:6"
+              },
+              {
+                "attributes": {
+                  "statements": [
+                    null
+                  ]
+                },
+                "children": [],
+                "id": 2748,
+                "name": "Block",
+                "src": "107:8:6"
+              }
+            ],
+            "id": 2749,
+            "name": "FunctionDefinition",
+            "src": "61:54:6"
+          }
+        ],
+        "id": 2750,
+        "name": "ContractDefinition",
+        "src": "27:90:6"
+      }
+    ],
+    "id": 2751,
+    "name": "SourceUnit",
+    "src": "0:118:6"
+  },
+  "compiler": {
+    "name": "solc",
+    "version": "0.7.0+commit.9e61f92b.Emscripten.clang"
+  },
+  "networks": {},
+  "schemaVersion": "3.3.3",
+  "updatedAt": "2021-02-10T00:46:33.625Z",
+  "devdoc": {
+    "kind": "dev",
+    "methods": {},
+    "version": 1
+  },
+  "userdoc": {
+    "kind": "user",
+    "methods": {},
+    "version": 1
+  }
+}
