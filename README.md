@@ -8,10 +8,16 @@ This is very work in progress, it is untested. It will have bugs. Do not let thi
 
 ## Code structure
 
-`contracts/MarginTrading.sol` is perhaps the most interesting, followed by `Lending.sol`. Missing pieces:
-* The router (taking fees and connecting to uniswap / sushiswap for now -- will be a modified copy of uniswap router v2)
-* Margin call staking contract
-* Facilities to get state in and out, as well as hooks for future plugins (to be controlled by the simple roles system)
+`contracts/MarginTrading.sol` is perhaps the most interesting. `contracts/MarginRouter.sol` is the entry point for all trading. `contracts/Admin` is where the staking happens both for fees and margin calling. `contracts/Fund.sol` holds all the cash.
+`contracts/Lending` manages spot and bond lending though this will likely be factored out into its own repo.
+
+Work in progress parts:
+* Margin calling (particularly punishing faithless stakers)
+* Fee distribution
+* Reworking the bond structure
+* Insurance
+* Price tracking
+* Incentive distribution
 
 ## Rationale
 
