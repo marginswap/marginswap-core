@@ -8,6 +8,7 @@ import './Fund.sol';
 import './Lending.sol';
 import './RoleAware.sol';
 import './MarginRouter.sol';
+import './Price.sol';
 
 // Goal: all external functions only accessible to margintrader role
 // except for view functions of course
@@ -242,11 +243,16 @@ contract MarginTrading is RoleAware, Ownable {
         internal returns (uint totalETH) {
         for (uint tokenId = 0; tokenId < tokens.length; tokenId++) {
             address token = tokens[tokenId];
-            uint yield = Lending(lending()).viewBorrowingYield(token);
-            // 1 * FP / FP = 1
-            uint amountInToken = (amounts[token] * yield) / yieldQuotientsFP[token];
-            totalETH += ethSpotPrice(token, amountInToken);
+            totalETH += yieldTokenInETH(token, amounts[token], yieldQuotientsFP);
         }
+    }
+
+    function yieldTokenInETH(address token, uint amount, mapping(address => uint) storage yieldQuotientsFP)
+        internal returns (uint) {
+        uint yield = Lending(lending()).viewBorrowingYield(token);
+        // 1 * FP / FP = 1
+        uint amountInToken = (amount * yield) / yieldQuotientsFP[token];
+        return ethSpotPrice(token, amountInToken);
     }
 
     function adjustAmounts(MarginAccount storage account,
@@ -263,6 +269,136 @@ contract MarginTrading is RoleAware, Ownable {
             return b;
         } else {
             return a;
+        }
+    }
+
+    struct Liquidation {
+        uint buy;
+        uint sell;
+        uint blockNum;
+    }
+    mapping(address => Liquidation) liquidationAmounts;
+    address[] volatileBuyTokens;
+    address[] volatileSellTokens;
+
+    function calcLiquidationAmounts(address[] memory liquidationCandidates)
+        internal returns (address[] memory sellTokens,
+                          address[] memory buyTokens,
+                          address[] memory tradersToLiquidate) {
+        for (uint traderIndex = 0; liquidationCandidates.length > traderIndex; traderIndex++) {
+            // TODO
+        }
+    }
+
+    function calcLiquidationTargetCosts(address[] memory buyTokens) internal view
+        returns (uint[] memory pegAmounts) {
+        pegAmounts = new uint[](buyTokens.length);
+        // TODO calc how much it would cost for every buy
+    }
+
+    function liquidateToPeg(address[] memory sellTokens) internal returns (uint pegAmount) {
+        for (uint tokenIndex = 0; sellTokens.length > tokenIndex; tokenIndex++) {
+            uint sellAmount = liquidationAmounts[sellTokens[tokenIndex]].sell;
+            // sell TODO
+            pegAmount += 0;
+        }
+    }
+
+    function holdings2Peg(MarginAccount storage account) internal returns (uint pegAmount) {
+        // TODO work with price module
+    }
+
+    function clearVolatileArray(address[] storage volatileTokens) internal {
+        while (volatileTokens.length > 0) {
+            volatileTokens.pop();
+        }
+    }
+
+    function updateVolatileArrays(address[] memory sellTokens, address[] memory buyTokens) internal {
+        clearVolatileArray(volatileSellTokens);
+        clearVolatileArray(volatileBuyTokens);
+
+        for (uint idx = 0; sellTokens.length > idx; idx++) {
+            // TODO check if price went down bigly and add to volatileSelltokens
+        }
+
+        for (uint idx = 0; buyTokens.length > idx; idx++) {
+            // TODO check if price went up bigly and add to volatileBuytokens
+        }
+    }
+
+    function callMargin(address[] memory liquidationCandidates) external returns (uint) {
+        require(isMarginCaller(msg.sender), "Calling address doesn't have margin caller role");
+
+        (address[] memory sellTokens,
+         address[] memory buyTokens,
+         address[] memory tradersToLiquidate) = calcLiquidationAmounts(liquidationCandidates);
+
+        uint sale2pegAmount = liquidateToPeg(sellTokens);
+        uint[] memory peg2targetCosts = calcLiquidationTargetCosts(buyTokens);
+        updateVolatileArrays(sellTokens, buyTokens);
+
+        uint marginCallerCut = 0;
+        for (uint traderIdx = 0; tradersToLiquidate.length > traderIdx; traderIdx++) {
+            MarginAccount storage account = marginAccounts[tradersToLiquidate[traderIdx]];
+
+            uint holdingsValue = holdings2Peg(account);
+            uint borrowValue = loanInETH(account);
+            // half of the liquidation threshold
+            uint mcCut4account = borrowValue * liquidationThresholdPercent / 100 / leverage / 2;
+            marginCallerCut += mcCut4account;
+            if (holdingsValue >= mcCut4account + borrowValue) {
+                // TODO send back remainder to trader
+            } else {
+                uint shortfall = (borrowValue + mcCut4account) - holdingsValue;
+                // find the bag holder
+                // iterate over tokens by losses
+                // weighted sum
+                uint[] memory sellWeights = new uint[](volatileSellTokens.length);
+                uint[] memory buyWeights = new uint[](volatileBuyTokens.length);
+                uint totalWeights = 0;
+
+                for (uint sellIdx = 0; volatileSellTokens.length > sellIdx; sellIdx++) {
+                    address token = volatileSellTokens[sellIdx];
+                    if (account.holdsToken[token]) {
+                        uint maxDrop = 0; // TODO
+                        uint weight = maxDrop * ethSpotPrice(token, account.holdings[token]);
+                        sellWeights[sellIdx] = weight;
+                        totalWeights += weight;
+                    }
+                }
+
+                for (uint buyIdx = 0; volatileBuyTokens.length > buyIdx; buyIdx++) {
+                    address token = volatileBuyTokens[buyIdx];
+                    if (account.borrowed[token] > 0) {
+                        uint maxRise = 0; // TODO
+                        uint weight = maxRise * yieldTokenInETH(token,
+                                                                account.borrowed[token],
+                                                                account.borrowedYieldQuotientsFP);
+                        buyWeights[buyIdx] = weight;
+                        totalWeights += weight;
+                    }
+                }
+
+                if (totalWeights > 0) {
+                    for (uint sellIdx = 0; volatileSellTokens.length > sellIdx; sellIdx++) {
+                        if (sellWeights[sellIdx] > 0) {
+                            address token = volatileSellTokens[sellIdx];
+                            Price(price()).claimInsurance(token, shortfall * sellWeights[sellIdx] / totalWeights);
+                        }
+                    }
+
+                    for (uint buyIdx = 0; volatileBuyTokens.length > buyIdx; buyIdx++) {
+                        if (buyWeights[buyIdx] > 0) {
+                            address token = volatileBuyTokens[buyIdx];
+                            Price(price()).claimInsurance(token, shortfall * buyWeights[buyIdx] / totalWeights);
+                        }
+                    }
+                } else {
+                    // TODO we have a problem and either there's a bug or margin callers didn't do their job
+                    // we probably want to raise an event here, not an exception so as to not paralize margin calling
+                }
+            }
         }
     }
 }

@@ -13,8 +13,7 @@ contract Admin is RoleAware, Ownable {
 
     uint feesPer10k;
     mapping(address => uint) public collectedFees;
-    
-    
+
     constructor(uint _feesPer10k, address _MFI, address _roles) RoleAware(_roles) Ownable() {
         MFI = _MFI;
         feesPer10k = _feesPer10k;

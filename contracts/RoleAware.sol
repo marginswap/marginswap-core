@@ -1,12 +1,13 @@
 import './Roles.sol';
 
 contract RoleAware {
-    // TODO enum
+    // TODO enum?
     uint8 constant FUND_CHARACTER = 1;
     uint8 constant LENDING_CHARACTER = 2;
     uint8 constant ROUTER_CHARACTER = 3;
     uint8 constant MARGIN_TRADING = 4;
     uint8 constant FEE_CONTROLLER = 5;
+    uint8 constant PRICE_CONTROLLER = 6;
 
     uint8 constant MTRADER_ROLE = 101;
     uint8 constant WITHDRAWER_ROLE = 102;
@@ -14,6 +15,7 @@ contract RoleAware {
     uint8 constant BORROWER_ROLE = 104;
     uint8 constant MARGIN_TRADER_ROLE = 105;
     uint8 constant FEE_SOURCE = 106;
+    uint8 constant INSURANCE_CLAIMANT = 107;
 
     Roles public roles;
     constructor(address _roles) {
@@ -40,6 +42,10 @@ contract RoleAware {
         return roles.mainCharacters(FEE_CONTROLLER);
     }
 
+    function price() internal view returns (address) {
+        return roles.mainCharacters(PRICE_CONTROLLER);
+    }
+
     function isBorrower(address contr) internal view returns (bool) {
         return roles.getRole(contr, BORROWER_ROLE);
     }
@@ -54,5 +60,13 @@ contract RoleAware {
 
     function isFeeSource(address contr) internal view returns (bool) {
         return roles.getRole(contr, FEE_SOURCE);
+    }
+
+    function isMarginCaller(address contr) internal view returns (bool) {
+        return roles.getRole(contr, MARGIN_CALLER_ROLE);
+    }
+
+    function isInsuranceClaimant(address contr) internal view returns (bool) {
+        return roles.getRole(contr, INSURANCE_CLAIMANT);
     }
 }
