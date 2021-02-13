@@ -384,7 +384,8 @@ contract MarginTrading is RoleAware, Ownable {
                     for (uint sellIdx = 0; volatileSellTokens.length > sellIdx; sellIdx++) {
                         if (sellWeights[sellIdx] > 0) {
                             address token = volatileSellTokens[sellIdx];
-                            Price(price()).claimInsurance(token, shortfall * sellWeights[sellIdx] / totalWeights);
+                            Price(price()).claimInsurance(token,
+                                                          shortfall * sellWeights[sellIdx] / totalWeights);
                         }
                     }
 
