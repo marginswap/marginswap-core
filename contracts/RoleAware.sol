@@ -22,6 +22,11 @@ contract RoleAware {
         roles = Roles(_roles);
     }
 
+    modifier noIntermediary() {
+        require(msg.sender == tx.origin, "Currently no intermediaries allowed for this function call");
+        _;
+    }
+
     function fund() internal view returns (address) {
         return roles.mainCharacters(FUND_CHARACTER);
     }

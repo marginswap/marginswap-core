@@ -19,7 +19,7 @@ contract MarginRouter is RoleAware {
         WETH = _WETH;
     }
 
-    function deposit(address depositToken, uint depositAmount) external {
+    function deposit(address depositToken, uint depositAmount) external noIntermediary {
         require(Fund(fund()).depositFor(msg.sender, depositToken, depositAmount),
                 "Cannot transfer deposit to margin account");
         uint extinguishAmount = MarginTrading(marginTrading())
@@ -30,7 +30,7 @@ contract MarginRouter is RoleAware {
         }
     }
 
-    function depositETH() external payable {
+    function depositETH() external payable noIntermediary {
         Fund(fund()).depositToWETH{value: msg.value}();
         uint extinguishAmount = MarginTrading(marginTrading()).registerDeposit(msg.sender, WETH, msg.value);
         if (extinguishAmount > 0) {
@@ -39,23 +39,23 @@ contract MarginRouter is RoleAware {
         }
     }
 
-    function withdraw(address withdrawToken, uint withdrawAmount) external {
+    function withdraw(address withdrawToken, uint withdrawAmount) external noIntermediary {
         MarginTrading(marginTrading()).registerWithdrawal(msg.sender, withdrawToken, withdrawAmount);
         require(Fund(fund()).withdraw(withdrawToken, msg.sender, withdrawAmount),
                 "Could not withdraw from fund");
     }
 
-    function withdrawETH(uint withdrawAmount) external {
+    function withdrawETH(uint withdrawAmount) external noIntermediary {
         MarginTrading(marginTrading()).registerWithdrawal(msg.sender, WETH, withdrawAmount);
         Fund(fund()).withdrawETH(msg.sender, withdrawAmount);
     }
     
-    function borrow(address borrowToken, uint borrowAmount) external {
+    function borrow(address borrowToken, uint borrowAmount) external noIntermediary {
         Lending(lending()).registerBorrow(borrowToken, borrowAmount);
         MarginTrading(marginTrading()).registerBorrow(msg.sender, borrowToken, borrowAmount);
     }
 
-    function extinguishDebt(address debtToken, uint extinguishAmount) external {
+    function extinguishDebt(address debtToken, uint extinguishAmount) external noIntermediary {
         MarginTrading(marginTrading()).registerPayOff(msg.sender, debtToken, extinguishAmount);
         Lending(lending()).payOff(debtToken, extinguishAmount);
     }
@@ -123,7 +123,7 @@ contract MarginRouter is RoleAware {
                                       uint amountOutMin,
                                       address[] calldata path,
                                       uint deadline)
-        external returns (uint[] memory amounts) {
+        external noIntermediary returns (uint[] memory amounts) {
         // calc fees
         uint fees = Admin(feeController()).subtractTradingFees(path[0], amountIn);
 
@@ -147,7 +147,7 @@ contract MarginRouter is RoleAware {
                                       uint amountInMax,
                                       address[] calldata path,
                                       uint deadline)
-        external returns (uint[] memory amounts) {
+        external noIntermediary returns (uint[] memory amounts) {
         // calc fees
         uint fees = Admin(feeController()).addTradingFees(path[path.length - 1], amountOut);
 
