@@ -29,10 +29,8 @@ contract MarginTrading is RoleAware, Ownable {
     uint public leverage;
     uint public liquidationThresholdPercent;
     mapping(address => MarginAccount) marginAccounts;
-    address WETH;
 
-    constructor(address _WETH, address _roles) RoleAware(_roles) Ownable() {
-        WETH = _WETH;
+    constructor(address _roles) RoleAware(_roles) Ownable() {
         liquidationThresholdPercent = 20;
     }
 
@@ -110,8 +108,8 @@ contract MarginTrading is RoleAware, Ownable {
     }
 
     function positiveBalance(MarginAccount storage account) internal returns (bool) {
-        uint loan = loanInETH(account);
-        uint holdings = holdingsInETH(account);
+        uint loan = loanInPeg(account);
+        uint holdings = holdingsInPeg(account);
         // The following condition should hold:
         // holdings / loan >= (leverage + 1) / leverage
         // =>
@@ -143,19 +141,19 @@ contract MarginTrading is RoleAware, Ownable {
         return account.borrowedYieldQuotientsFP[token] > 0;
     }
     
-    function loanInETH(MarginAccount storage account) internal returns (uint) {
-        return sumTokensInETHWithYield(account.borrowTokens,
+    function loanInPeg(MarginAccount storage account) internal returns (uint) {
+        return sumTokensInPegWithYield(account.borrowTokens,
                                        account.borrowed,
                                        account.borrowedYieldQuotientsFP);
     }
 
-    function holdingsInETH(MarginAccount storage account) internal view returns (uint) {
-        return sumTokensInETH(account.holdingTokens, account.holdings);
+    function holdingsInPeg(MarginAccount storage account) internal returns (uint) {
+        return sumTokensInPeg(account.holdingTokens, account.holdings);
     }
 
     function marginCallable(MarginAccount storage account) internal returns (bool) {
-        uint loan = loanInETH(account);
-        uint holdings = holdingsInETH(account);
+        uint loan = loanInPeg(account);
+        uint holdings = holdingsInPeg(account);
         // The following should hold:
         // holdings / loan >= (leverage + liquidationThresholdPercent / 100) / leverage
         // =>
@@ -192,67 +190,30 @@ contract MarginTrading is RoleAware, Ownable {
         adjustAmounts(account, tokenFrom, tokenTo, sellAmount, outAmount);
     }
 
-    function sellPath(address sourceToken, address targetToken)
-        internal view returns (address[] memory) {
-        if (targetToken == WETH || sourceToken == WETH) {
-            // TODO both source and target the same?
-            address[] memory path = new address[](2);
-            path[0] = sourceToken;
-            path[1] = targetToken;
-            return path;
-        } else {
-            address[] memory path = new address[](3);
-            path[0] = sourceToken;
-            path[1] = WETH;
-            path[2] = targetToken;
-            return path;
-        }
-    }
-
-    function spotConversionAmount(address inToken, address outToken, uint inAmount)
-        internal returns (uint) {
-        address[] memory path = sellPath(inToken, outToken);
-        uint[] memory pathAmounts = MarginRouter(router()).getAmountsOut(AMM.uni, inAmount, path);
-        return pathAmounts[pathAmounts.length - 1];
-    }
-
-    function ethSpotPrice(address token, uint amount)
-        internal view returns (uint) {
-        if (token == WETH) {
-            return 1;
-        } else {
-            address[] memory path = new address[](2);
-            path[0] = token;
-            path[1] = WETH;
-            uint[] memory pathAmounts = MarginRouter(router()).getAmountsOut(AMM.uni, amount, path);
-            return pathAmounts[pathAmounts.length - 1];
-        }
-    }
-
-    function sumTokensInETH(address[] storage tokens, mapping(address => uint) storage amounts)
-        internal view returns (uint totalETH) {
+    function sumTokensInPeg(address[] storage tokens, mapping(address => uint) storage amounts)
+        internal returns (uint totalPeg) {
         for (uint tokenId = 0; tokenId < tokens.length; tokenId++) {
             address token = tokens[tokenId];
-            totalETH += ethSpotPrice(token, amounts[token]);
+            totalPeg += Price(price()).getUpdatedPriceInPeg(token, amounts[token]);
         }
     }
     
-    function sumTokensInETHWithYield(address[] storage tokens,
+    function sumTokensInPegWithYield(address[] storage tokens,
                                      mapping(address => uint) storage amounts,
                                      mapping(address => uint) storage yieldQuotientsFP)
-        internal returns (uint totalETH) {
+        internal returns (uint totalPeg) {
         for (uint tokenId = 0; tokenId < tokens.length; tokenId++) {
             address token = tokens[tokenId];
-            totalETH += yieldTokenInETH(token, amounts[token], yieldQuotientsFP);
+            totalPeg += yieldTokenInPeg(token, amounts[token], yieldQuotientsFP);
         }
     }
 
-    function yieldTokenInETH(address token, uint amount, mapping(address => uint) storage yieldQuotientsFP)
+    function yieldTokenInPeg(address token, uint amount, mapping(address => uint) storage yieldQuotientsFP)
         internal returns (uint) {
         uint yield = Lending(lending()).viewBorrowingYield(token);
         // 1 * FP / FP = 1
         uint amountInToken = (amount * yield) / yieldQuotientsFP[token];
-        return ethSpotPrice(token, amountInToken);
+        return Price(price()).getUpdatedPriceInPeg(token, amountInToken);
     }
 
     function adjustAmounts(MarginAccount storage account,
@@ -343,7 +304,7 @@ contract MarginTrading is RoleAware, Ownable {
             MarginAccount storage account = marginAccounts[tradersToLiquidate[traderIdx]];
 
             uint holdingsValue = holdings2Peg(account);
-            uint borrowValue = loanInETH(account);
+            uint borrowValue = loanInPeg(account);
             // half of the liquidation threshold
             uint mcCut4account = borrowValue * liquidationThresholdPercent / 100 / leverage / 2;
             marginCallerCut += mcCut4account;
@@ -362,7 +323,7 @@ contract MarginTrading is RoleAware, Ownable {
                     address token = volatileSellTokens[sellIdx];
                     if (account.holdsToken[token]) {
                         uint maxDrop = 0; // TODO
-                        uint weight = maxDrop * ethSpotPrice(token, account.holdings[token]);
+                        uint weight = maxDrop * Price(price()).getUpdatedPriceInPeg(token, account.holdings[token]);
                         sellWeights[sellIdx] = weight;
                         totalWeights += weight;
                     }
@@ -372,7 +333,7 @@ contract MarginTrading is RoleAware, Ownable {
                     address token = volatileBuyTokens[buyIdx];
                     if (account.borrowed[token] > 0) {
                         uint maxRise = 0; // TODO
-                        uint weight = maxRise * yieldTokenInETH(token,
+                        uint weight = maxRise * yieldTokenInPeg(token,
                                                                 account.borrowed[token],
                                                                 account.borrowedYieldQuotientsFP);
                         buyWeights[buyIdx] = weight;

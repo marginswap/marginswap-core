@@ -1,20 +1,41 @@
 import './RoleAware.sol';
+import './MarginRouter.sol';
 
 // Token price with rolling window
 struct TokenPrice {
     uint blockLastUpdated;
-    uint[] priceHistory;
-    uint8 currentPriceIndex;
+    uint[] tokenPer1kHistory;
+    uint currentPriceIndex;
+    address[] liquidationPath;
 }
 
 contract Price is RoleAware {
-    constructor(address _roles) RoleAware(_roles) {
+    address peg;
+    mapping(address => TokenPrice) tokenPrices;
+    uint constant PRICE_HIST_LENGTH = 30;
 
+    constructor(address _peg, address _roles) RoleAware(_roles) {
+        peg = _peg;
     }
 
-    function getUpdatedPriceInPeg(address token, uint amount) external returns (uint pegPrice) {
-        // TODO take minimum of 1000 USD or input amount
-        pegPrice = 0;
+    function getCurrentPriceInPeg(address token, uint inAmount) external view returns (uint) {
+        TokenPrice storage tokenPrice = tokenPrices[token];
+        require(tokenPrice.liquidationPath.length > 1, "Token does not have a liquidation path");
+        return inAmount * 1000 ether / tokenPrice.tokenPer1kHistory[tokenPrice.currentPriceIndex];
+    }
+
+    function getUpdatedPriceInPeg(address token, uint inAmount) external returns (uint) {
+        if (token == peg) {
+            return inAmount;
+        } else {
+            TokenPrice storage tokenPrice = tokenPrices[token];
+            require(tokenPrice.liquidationPath.length > 1, "Token does not have a liquidation path");
+            uint[] memory pathAmounts = MarginRouter(router()).getAmountsOut(AMM.uni, inAmount, tokenPrice.liquidationPath);
+            uint outAmount = pathAmounts[pathAmounts.length - 1];
+            tokenPrice.currentPriceIndex = (tokenPrice.currentPriceIndex + 1) % tokenPrice.tokenPer1kHistory.length;
+            tokenPrice.tokenPer1kHistory[tokenPrice.currentPriceIndex] = 1000 ether * inAmount / outAmount;
+            return outAmount;
+        }
     }
 
     function forceUpdatedPriceInPeg(address token, uint amount) external returns (uint pegPrice) {
