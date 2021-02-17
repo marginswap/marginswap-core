@@ -1,4 +1,4 @@
-import './Roles.sol';
+import "./Roles.sol";
 
 contract RoleAware {
     // TODO enum?
@@ -18,12 +18,16 @@ contract RoleAware {
     uint8 constant INSURANCE_CLAIMANT = 107;
 
     Roles public roles;
+
     constructor(address _roles) {
         roles = Roles(_roles);
     }
 
     modifier noIntermediary() {
-        require(msg.sender == tx.origin, "Currently no intermediaries allowed for this function call");
+        require(
+            msg.sender == tx.origin,
+            "Currently no intermediaries allowed for this function call"
+        );
         _;
     }
 
