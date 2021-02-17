@@ -99,6 +99,7 @@ contract MarginRouter is RoleAware {
                               address[] calldata path,
                               uint deadline)
         internal returns (uint[] memory amounts) {
+        // TODO minimum trade?
         amounts = UniswapV2Library.getAmountsIn(factory, amountOut, path);
         require(amounts[0] <= amountInMax, 'UniswapV2Router: EXCESSIVE_INPUT_AMOUNT');
         require(Fund(fund()).sendTokenTo(path[0],

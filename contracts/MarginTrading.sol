@@ -34,7 +34,8 @@ contract MarginTrading is RoleAware, Ownable {
         liquidationThresholdPercent = 20;
     }
 
-    function getHoldingAmounts(address trader) external view returns (address[] memory holdingTokens, uint[] memory holdingAmounts) {
+    function getHoldingAmounts(address trader) external view
+        returns (address[] memory holdingTokens, uint[] memory holdingAmounts) {
         MarginAccount storage account = marginAccounts[trader];
         holdingTokens = account.holdingTokens;
 
@@ -81,6 +82,8 @@ contract MarginTrading is RoleAware, Ownable {
     function borrow(MarginAccount storage account, address borrowToken, uint borrowAmount) internal {
         if (!hasBorrowedToken(account, borrowToken)) {
             account.borrowTokens.push(borrowToken);
+
+
             account.borrowedYieldQuotientsFP[borrowToken] = Lending(lending())
                 .viewBorrowingYield(borrowToken);
         } else {
@@ -242,27 +245,91 @@ contract MarginTrading is RoleAware, Ownable {
     address[] volatileBuyTokens;
     address[] volatileSellTokens;
 
-    function calcLiquidationAmounts(address[] memory liquidationCandidates)
-        internal returns (address[] memory sellTokens,
-                          address[] memory buyTokens,
-                          address[] memory tradersToLiquidate) {
+    address[] sellTokens;
+    address[] buyTokens;
+    address[] tradersToLiquidate;
+
+
+    // TODO bake records after margin calling
+    struct MCRecord {
+        uint blockNum;
+        uint amount;
+        uint stakeAttacker;
+    }
+    mapping(address => MCRecord) stakeAttackRecords;
+
+    uint mcAttackWindow = 80;
+
+    function calcLiquidationAmounts(address[] memory liquidationCandidates, bool isAuthorized)
+        internal returns (uint attackReturns) {
+        sellTokens = new address[](0);
+        buyTokens = new address[](0);
+        tradersToLiquidate = new address[](0);
+        // TODO test
         for (uint traderIndex = 0; liquidationCandidates.length > traderIndex; traderIndex++) {
-            // TODO
+            address traderAddress = liquidationCandidates[traderIndex];
+            MarginAccount storage account = marginAccounts[traderAddress];
+            if (marginCallable(account)) {
+                // TODO optimize maybe put in the whole account?
+                // TODO unique?
+                tradersToLiquidate.push(traderAddress);
+                for(uint sellIdx = 0; account.holdingTokens.length > sellIdx; sellIdx++) {
+                    address token = account.holdingTokens[sellIdx];
+                    Liquidation storage liquidation = liquidationAmounts[token];
+                    if (liquidation.blockNum != block.number) {
+                        // TODO delete liquidationAmounts at end of call
+                        liquidation.sell = account.holdings[token];
+                        liquidation.buy = 0;
+                        liquidation.blockNum = block.number;
+                        sellTokens.push(token);
+                    } else {
+                        liquidation.sell += account.holdings[token];
+                    }
+                }
+                for (uint buyIdx = 0; account.borrowTokens.length > buyIdx; buyIdx++) {
+                    address token = account.borrowTokens[buyIdx];
+                    Liquidation storage liquidation = liquidationAmounts[token];
+
+                    uint yield = Lending(lending()).viewBorrowingYield(token);
+                    uint loanAmount = (account.borrowed[token] * yield) / account.borrowedYieldQuotientsFP[token];
+
+                    if (liquidation.blockNum != block.number) {
+                        liquidation.sell = 0;
+                        liquidation.buy = loanAmount;
+                        liquidation.blockNum = block.number;
+                        buyTokens.push(token);
+                    } else {
+                        liquidation.buy += loanAmount;
+                    }
+                }
+            }
+            MCRecord storage mcRecord = stakeAttackRecords[traderAddress];
+            if (mcRecord.amount > 0 && isAuthorized) {
+                // validate attack records, if any
+                uint blockDif = min(1 + block.number - mcRecord.blockNum, mcAttackWindow);
+                uint attackerCut = blockDif * mcRecord.amount / mcAttackWindow;
+                // TODO send attackerCut to mcRecord.stakeAttacker
+                attackReturns += mcRecord.amount - attackerCut;
+            }
         }
     }
 
-    function calcLiquidationTargetCosts(address[] memory buyTokens) internal view
+    function calcLiquidationTargetCosts() internal view
         returns (uint[] memory pegAmounts) {
         pegAmounts = new uint[](buyTokens.length);
         // TODO calc how much it would cost for every buy
     }
 
-    function liquidateToPeg(address[] memory sellTokens) internal returns (uint pegAmount) {
+    function liquidateToPeg() internal returns (uint pegAmount) {
         for (uint tokenIndex = 0; sellTokens.length > tokenIndex; tokenIndex++) {
             uint sellAmount = liquidationAmounts[sellTokens[tokenIndex]].sell;
             // sell TODO
             pegAmount += 0;
         }
+    }
+
+    function deleteAccount(MarginAccount storage account) internal {
+        // TODO
     }
 
     function holdings2Peg(MarginAccount storage account) internal returns (uint pegAmount) {
@@ -275,7 +342,7 @@ contract MarginTrading is RoleAware, Ownable {
         }
     }
 
-    function updateVolatileArrays(address[] memory sellTokens, address[] memory buyTokens) internal {
+    function updateVolatileArrays() internal {
         clearVolatileArray(volatileSellTokens);
         clearVolatileArray(volatileBuyTokens);
 
@@ -288,28 +355,38 @@ contract MarginTrading is RoleAware, Ownable {
         }
     }
 
-    function callMargin(address[] memory liquidationCandidates) external returns (uint) {
+    function callMargin(address[] memory liquidationCandidates,
+                        address responsibleStaker,
+                        address currentCaller,
+                        bool isAuthorized) external returns (uint marginCallerCut) {
         require(isMarginCaller(msg.sender), "Calling address doesn't have margin caller role");
 
-        (address[] memory sellTokens,
-         address[] memory buyTokens,
-         address[] memory tradersToLiquidate) = calcLiquidationAmounts(liquidationCandidates);
+        //(address[] memory sellTokens,
+        //address[] memory buyTokens,
+        // address[] memory tradersToLiquidate) =
+        // TODO distribute attackReturns
+        uint attackReturns = calcLiquidationAmounts(liquidationCandidates, isAuthorized);
 
-        uint sale2pegAmount = liquidateToPeg(sellTokens);
-        uint[] memory peg2targetCosts = calcLiquidationTargetCosts(buyTokens);
-        updateVolatileArrays(sellTokens, buyTokens);
+        uint sale2pegAmount = liquidateToPeg();
+        uint[] memory peg2targetCosts = calcLiquidationTargetCosts();
+        updateVolatileArrays();
 
-        uint marginCallerCut = 0;
         for (uint traderIdx = 0; tradersToLiquidate.length > traderIdx; traderIdx++) {
-            MarginAccount storage account = marginAccounts[tradersToLiquidate[traderIdx]];
+            address traderAddress = tradersToLiquidate[traderIdx];
+            MarginAccount storage account = marginAccounts[traderAddress];
 
             uint holdingsValue = holdings2Peg(account);
             uint borrowValue = loanInPeg(account);
             // half of the liquidation threshold
             uint mcCut4account = borrowValue * liquidationThresholdPercent / 100 / leverage / 2;
             marginCallerCut += mcCut4account;
+
             if (holdingsValue >= mcCut4account + borrowValue) {
-                // TODO send back remainder to trader
+                // send remaining funds back to trader
+                Fund(fund()).withdraw(Price(price()).peg(),
+                                      traderAddress,
+                                      holdingsValue - borrowValue - mcCut4account);
+
             } else {
                 uint shortfall = (borrowValue + mcCut4account) - holdingsValue;
                 // find the bag holder
@@ -361,6 +438,8 @@ contract MarginTrading is RoleAware, Ownable {
                     // we probably want to raise an event here, not an exception so as to not paralize margin calling
                 }
             }
+
+            deleteAccount(account);
         }
     }
 }

@@ -3,6 +3,7 @@ import '@openzeppelin/contracts/math/SafeMath.sol';
 
 import './RoleAware.sol';
 import './Fund.sol';
+import './MarginTrading.sol';
 
 struct MarginCallingStake {
     uint stake;
@@ -20,6 +21,7 @@ contract Admin is RoleAware, Ownable {
 
     uint mcStakePerBlock;
     mapping(address => MarginCallingStake) public mcStakes;
+    mapping(address => mapping(address => bool)) public mcDelegatedTo;
     address currentMCStaker;
     address prevMCStaker;
     uint currentStakerStartBlock;
@@ -81,4 +83,39 @@ contract Admin is RoleAware, Ownable {
         }
         return currentMCStaker;
     }
+
+    function addDelegate(address forStaker, address delegate) external {
+        require(msg.sender == forStaker || mcDelegatedTo[forStaker][msg.sender],
+                "msg.sender not authorized to delegate for staker");
+        mcDelegatedTo[forStaker][delegate] = true;
+    }
+
+    function removeDelegate(address forStaker, address delegate) external {
+        require(msg.sender == forStaker || mcDelegatedTo[forStaker][msg.sender],
+                "msg.sender not authorized to delegate for staker");
+        mcDelegatedTo[forStaker][delegate] = false;
+    }
+
+    function callMargin(address[] memory traders) external noIntermediary {
+        address currentStaker = getUpdatedCurrentStaker();
+        bool isAuthorized = currentStaker == msg.sender || mcDelegatedTo[currentStaker][msg.sender];
+
+        uint mcFees = MarginTrading(marginTrading()).callMargin(traders,
+                                                                getUpdatedCurrentStaker(),
+                                                                msg.sender,
+                                                                isAuthorized);
+        // attacker mode
+            // store both the returns and who was originally responsible
+            // if the responsible address doesn't update within a certain time window, they lose their staked token
+            // and they lose a portion of their earnings with every step..
+            // if the current caller isn't the responsible party they may still be reclaiming what was called before
+            // probably 5 seconds is the window? I.e. 50 blocks?
+
+            // store first past the post attacker
+            //
+    }
 }
+
+
+// what if it keeps climbing beyond insurance? do we close position? -- I think we have to.
+// we just shouldn't make new loans to that

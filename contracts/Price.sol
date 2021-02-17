@@ -10,7 +10,7 @@ struct TokenPrice {
 }
 
 contract Price is RoleAware {
-    address peg;
+    address public peg;
     mapping(address => TokenPrice) tokenPrices;
     uint constant PRICE_HIST_LENGTH = 30;
 
