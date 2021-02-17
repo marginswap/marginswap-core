@@ -49,6 +49,8 @@ contract MarginTrading is RoleAware, Ownable {
             address tokenAddress = holdingTokens[idx];
             holdingAmounts[idx] = account.holdings[tokenAddress];
         }
+
+        (holdingTokens, holdingAmounts);
     }
 
     function setLeverage(uint256 _leverage) external onlyOwner {
