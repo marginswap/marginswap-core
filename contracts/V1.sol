@@ -10,6 +10,14 @@ import "./MarginTrading.sol";
 import "./Price.sol";
 
 contract V1 is Ownable {
+    Roles public roles;
+    Fund public fund;
+    Admin public admin;
+    MarginTrading public marginTrading;
+    Lending public lending;
+    MarginRouter public marginRouter;
+    Price public price;
+
     constructor(
         address targetOwner,
         address WETH,
@@ -19,37 +27,36 @@ contract V1 is Ownable {
         address sushiswapFactory,
         address peg
     ) Ownable() {
-        Roles roles = new Roles();
+        roles = new Roles();
 
-        Fund fund = new Fund(WETH, address(roles));
+        fund = new Fund(WETH, address(roles));
         fund.transferOwnership(targetOwner);
         roles.setMainCharacter(Characters.FUND, address(fund));
 
-        Admin admin = new Admin(feesPer10k, MFI, address(roles));
+        admin = new Admin(feesPer10k, MFI, address(roles));
         admin.transferOwnership(targetOwner);
         roles.setMainCharacter(Characters.FEE_CONTROLLER, address(admin));
 
-        MarginTrading marginTrading = new MarginTrading(address(roles));
+        marginTrading = new MarginTrading(address(roles));
         marginTrading.transferOwnership(targetOwner);
         roles.setMainCharacter(
             Characters.MARGIN_TRADING,
             address(marginTrading)
         );
 
-        Lending lending = new Lending(address(roles));
+        lending = new Lending(address(roles));
         lending.transferOwnership(targetOwner);
         roles.setMainCharacter(Characters.LENDING, address(lending));
 
-        MarginRouter marginRouter =
-            new MarginRouter(
-                uniswapFactory,
-                sushiswapFactory,
-                WETH,
-                address(roles)
-            );
+        marginRouter = new MarginRouter(
+            uniswapFactory,
+            sushiswapFactory,
+            WETH,
+            address(roles)
+        );
         roles.setMainCharacter(Characters.ROUTER, address(marginRouter));
 
-        Price price = new Price(peg, address(roles));
+        price = new Price(peg, address(roles));
         roles.setMainCharacter(Characters.PRICE_CONTROLLER, address(price));
 
         roles.giveRole(ContractRoles.WITHDRAWER, address(admin));
