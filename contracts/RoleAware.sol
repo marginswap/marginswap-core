@@ -1,22 +1,6 @@
 import "./Roles.sol";
 
 contract RoleAware {
-    // TODO enum?
-    uint8 constant FUND_CHARACTER = 1;
-    uint8 constant LENDING_CHARACTER = 2;
-    uint8 constant ROUTER_CHARACTER = 3;
-    uint8 constant MARGIN_TRADING = 4;
-    uint8 constant FEE_CONTROLLER = 5;
-    uint8 constant PRICE_CONTROLLER = 6;
-
-    uint8 constant MTRADER_ROLE = 101;
-    uint8 constant WITHDRAWER_ROLE = 102;
-    uint8 constant MARGIN_CALLER_ROLE = 103;
-    uint8 constant BORROWER_ROLE = 104;
-    uint8 constant MARGIN_TRADER_ROLE = 105;
-    uint8 constant FEE_SOURCE = 106;
-    uint8 constant INSURANCE_CLAIMANT = 107;
-
     Roles public roles;
 
     constructor(address _roles) {
@@ -32,50 +16,50 @@ contract RoleAware {
     }
 
     function fund() internal view returns (address) {
-        return roles.mainCharacters(FUND_CHARACTER);
+        return roles.mainCharacters(Characters.FUND);
     }
 
     function lending() internal view returns (address) {
-        return roles.mainCharacters(LENDING_CHARACTER);
+        return roles.mainCharacters(Characters.LENDING);
     }
 
     function router() internal view returns (address) {
-        return roles.mainCharacters(ROUTER_CHARACTER);
+        return roles.mainCharacters(Characters.ROUTER);
     }
 
     function marginTrading() internal view returns (address) {
-        return roles.mainCharacters(MARGIN_TRADING);
+        return roles.mainCharacters(Characters.MARGIN_TRADING);
     }
 
     function feeController() internal view returns (address) {
-        return roles.mainCharacters(FEE_CONTROLLER);
+        return roles.mainCharacters(Characters.FEE_CONTROLLER);
     }
 
     function price() internal view returns (address) {
-        return roles.mainCharacters(PRICE_CONTROLLER);
+        return roles.mainCharacters(Characters.PRICE_CONTROLLER);
     }
 
     function isBorrower(address contr) internal view returns (bool) {
-        return roles.getRole(contr, BORROWER_ROLE);
+        return roles.getRole(contr, ContractRoles.BORROWER);
     }
 
     function isWithdrawer(address contr) internal view returns (bool) {
-        return roles.getRole(contr, WITHDRAWER_ROLE);
+        return roles.getRole(contr, ContractRoles.WITHDRAWER);
     }
 
     function isMarginTrader(address contr) internal view returns (bool) {
-        return roles.getRole(contr, MARGIN_TRADER_ROLE);
+        return roles.getRole(contr, ContractRoles.MARGIN_TRADER);
     }
 
     function isFeeSource(address contr) internal view returns (bool) {
-        return roles.getRole(contr, FEE_SOURCE);
+        return roles.getRole(contr, ContractRoles.FEE_SOURCE);
     }
 
     function isMarginCaller(address contr) internal view returns (bool) {
-        return roles.getRole(contr, MARGIN_CALLER_ROLE);
+        return roles.getRole(contr, ContractRoles.MARGIN_CALLER);
     }
 
     function isInsuranceClaimant(address contr) internal view returns (bool) {
-        return roles.getRole(contr, INSURANCE_CLAIMANT);
+        return roles.getRole(contr, ContractRoles.INSURANCE_CLAIMANT);
     }
 }

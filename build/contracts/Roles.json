@@ -23,7 +23,7 @@
     {
       "inputs": [
         {
-          "internalType": "uint8",
+          "internalType": "enum Characters",
           "name": "",
           "type": "uint8"
         }
@@ -67,7 +67,7 @@
           "type": "address"
         },
         {
-          "internalType": "uint8",
+          "internalType": "enum ContractRoles",
           "name": "",
           "type": "uint8"
         }
@@ -99,14 +99,14 @@
     {
       "inputs": [
         {
+          "internalType": "enum ContractRoles",
+          "name": "role",
+          "type": "uint8"
+        },
+        {
           "internalType": "address",
           "name": "actor",
           "type": "address"
-        },
-        {
-          "internalType": "uint8",
-          "name": "role",
-          "type": "uint8"
         }
       ],
       "name": "giveRole",
@@ -117,14 +117,14 @@
     {
       "inputs": [
         {
+          "internalType": "enum ContractRoles",
+          "name": "role",
+          "type": "uint8"
+        },
+        {
           "internalType": "address",
           "name": "actor",
           "type": "address"
-        },
-        {
-          "internalType": "uint8",
-          "name": "role",
-          "type": "uint8"
         }
       ],
       "name": "removeRole",
@@ -135,7 +135,7 @@
     {
       "inputs": [
         {
-          "internalType": "uint8",
+          "internalType": "enum Characters",
           "name": "role",
           "type": "uint8"
         },
@@ -158,7 +158,7 @@
           "type": "address"
         },
         {
-          "internalType": "uint8",
+          "internalType": "enum ContractRoles",
           "name": "role",
           "type": "uint8"
         }
@@ -175,35 +175,131 @@
       "type": "function"
     }
   ],
-  "metadata": "{\"compiler\":{\"version\":\"0.7.0+commit.9e61f92b\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"previousOwner\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"newOwner\",\"type\":\"address\"}],\"name\":\"OwnershipTransferred\",\"type\":\"event\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"contr\",\"type\":\"address\"},{\"internalType\":\"uint8\",\"name\":\"role\",\"type\":\"uint8\"}],\"name\":\"getRole\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"actor\",\"type\":\"address\"},{\"internalType\":\"uint8\",\"name\":\"role\",\"type\":\"uint8\"}],\"name\":\"giveRole\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint8\",\"name\":\"\",\"type\":\"uint8\"}],\"name\":\"mainCharacters\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"owner\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"actor\",\"type\":\"address\"},{\"internalType\":\"uint8\",\"name\":\"role\",\"type\":\"uint8\"}],\"name\":\"removeRole\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"renounceOwnership\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"},{\"internalType\":\"uint8\",\"name\":\"\",\"type\":\"uint8\"}],\"name\":\"roles\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint8\",\"name\":\"role\",\"type\":\"uint8\"},{\"internalType\":\"address\",\"name\":\"actor\",\"type\":\"address\"}],\"name\":\"setMainCharacter\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"newOwner\",\"type\":\"address\"}],\"name\":\"transferOwnership\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"}],\"devdoc\":{\"kind\":\"dev\",\"methods\":{\"owner()\":{\"details\":\"Returns the address of the current owner.\"},\"renounceOwnership()\":{\"details\":\"Leaves the contract without owner. It will not be possible to call `onlyOwner` functions anymore. Can only be called by the current owner. NOTE: Renouncing ownership will leave the contract without an owner, thereby removing any functionality that is only available to the owner.\"},\"transferOwnership(address)\":{\"details\":\"Transfers ownership of the contract to a new account (`newOwner`). Can only be called by the current owner.\"}},\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{},\"version\":1}},\"settings\":{\"compilationTarget\":{\"/home/tixelbook/projects/marginswap-core/contracts/Roles.sol\":\"Roles\"},\"evmVersion\":\"istanbul\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\"},\"optimizer\":{\"enabled\":false,\"runs\":200},\"remappings\":[]},\"sources\":{\"/home/tixelbook/projects/marginswap-core/contracts/Roles.sol\":{\"keccak256\":\"0x440e80547db3a2718a719fc3590ab1be3d6fe44fdcb7837c303c567777d01d4e\",\"urls\":[\"bzz-raw://3ee7a1e1c70ab3029161e933549e18c071412237f84f9d38ffae4c0ea513d7a0\",\"dweb:/ipfs/QmcdWfqn61Uw543ETD4MVSAd3To2sEtYDtfCDRXAi1uN7V\"]},\"@openzeppelin/contracts/GSN/Context.sol\":{\"keccak256\":\"0x8d3cb350f04ff49cfb10aef08d87f19dcbaecc8027b0bed12f3275cd12f38cf0\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://ded47ec7c96750f9bd04bbbc84f659992d4ba901cb7b532a52cd468272cf378f\",\"dweb:/ipfs/QmfBrGtQP7rZEqEg6Wz6jh2N2Kukpj1z5v3CGWmAqrzm96\"]},\"@openzeppelin/contracts/access/Ownable.sol\":{\"keccak256\":\"0xf7c39c7e6d06ed3bda90cfefbcbf2ddc32c599c3d6721746546ad64946efccaa\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://cb57a28e189cd8b05748db44bdd51d608e6f1364dd1b35ad921e1bc82c10631e\",\"dweb:/ipfs/QmaWWTBbVu2pRR9XUbE4iC159NoP59cRF9ZJwhf4ghFN9i\"]}},\"version\":1}",
-  "bytecode": "0x608060405234801561001057600080fd5b5060006100216100c460201b60201c565b9050806000806101000a81548173ffffffffffffffffffffffffffffffffffffffff021916908373ffffffffffffffffffffffffffffffffffffffff1602179055508073ffffffffffffffffffffffffffffffffffffffff16600073ffffffffffffffffffffffffffffffffffffffff167f8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e060405160405180910390a3506100cc565b600033905090565b610bbd806100db6000396000f3fe608060405234801561001057600080fd5b50600436106100935760003560e01c80638da5cb5b116100665780638da5cb5b146101b55780639928253d146101e9578063a716b97f1461023a578063b74866fb146102a1578063f2fde38b146102f257610093565b80630b886c191461009857806336214c78146100ff5780633f1609ef1461015a578063715018a6146101ab575b600080fd5b6100e7600480360360408110156100ae57600080fd5b81019080803573ffffffffffffffffffffffffffffffffffffffff169060200190929190803560ff169060200190929190505050610336565b60405180821515815260200191505060405180910390f35b61012e6004803603602081101561011557600080fd5b81019080803560ff169060200190929190505050610365565b604051808273ffffffffffffffffffffffffffffffffffffffff16815260200191505060405180910390f35b6101a96004803603604081101561017057600080fd5b81019080803560ff169060200190929190803573ffffffffffffffffffffffffffffffffffffffff169060200190929190505050610398565b005b6101b36104bc565b005b6101bd610642565b604051808273ffffffffffffffffffffffffffffffffffffffff16815260200191505060405180910390f35b610238600480360360408110156101ff57600080fd5b81019080803573ffffffffffffffffffffffffffffffffffffffff169060200190929190803560ff16906020019092919050505061066b565b005b6102896004803603604081101561025057600080fd5b81019080803573ffffffffffffffffffffffffffffffffffffffff169060200190929190803560ff1690602001909291905050506107a5565b60405180821515815260200191505060405180910390f35b6102f0600480360360408110156102b757600080fd5b81019080803573ffffffffffffffffffffffffffffffffffffffff169060200190929190803560ff169060200190929190505050610813565b005b6103346004803603602081101561030857600080fd5b81019080803573ffffffffffffffffffffffffffffffffffffffff16906020019092919050505061094e565b005b60016020528160005260406000206020528060005260406000206000915091509054906101000a900460ff1681565b60026020528060005260406000206000915054906101000a900473ffffffffffffffffffffffffffffffffffffffff1681565b6103a0610b59565b73ffffffffffffffffffffffffffffffffffffffff1660008054906101000a900473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff1614610460576040517f08c379a00000000000000000000000000000000000000000000000000000000081526004018080602001828103825260208152602001807f4f776e61626c653a2063616c6c6572206973206e6f7420746865206f776e657281525060200191505060405180910390fd5b80600260008460ff1660ff16815260200190815260200160002060006101000a81548173ffffffffffffffffffffffffffffffffffffffff021916908373ffffffffffffffffffffffffffffffffffffffff1602179055505050565b6104c4610b59565b73ffffffffffffffffffffffffffffffffffffffff1660008054906101000a900473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff1614610584576040517f08c379a00000000000000000000000000000000000000000000000000000000081526004018080602001828103825260208152602001807f4f776e61626c653a2063616c6c6572206973206e6f7420746865206f776e657281525060200191505060405180910390fd5b600073ffffffffffffffffffffffffffffffffffffffff1660008054906101000a900473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff167f8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e060405160405180910390a360008060006101000a81548173ffffffffffffffffffffffffffffffffffffffff021916908373ffffffffffffffffffffffffffffffffffffffff160217905550565b60008060009054906101000a900473ffffffffffffffffffffffffffffffffffffffff16905090565b610673610b59565b73ffffffffffffffffffffffffffffffffffffffff1660008054906101000a900473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff1614610733576040517f08c379a00000000000000000000000000000000000000000000000000000000081526004018080602001828103825260208152602001807f4f776e61626c653a2063616c6c6572206973206e6f7420746865206f776e657281525060200191505060405180910390fd5b60018060008473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16815260200190815260200160002060008360ff1660ff16815260200190815260200160002060006101000a81548160ff0219169083151502179055505050565b6000600160008473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16815260200190815260200160002060008360ff1660ff16815260200190815260200160002060009054906101000a900460ff16905092915050565b61081b610b59565b73ffffffffffffffffffffffffffffffffffffffff1660008054906101000a900473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16146108db576040517f08c379a00000000000000000000000000000000000000000000000000000000081526004018080602001828103825260208152602001807f4f776e61626c653a2063616c6c6572206973206e6f7420746865206f776e657281525060200191505060405180910390fd5b6000600160008473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16815260200190815260200160002060008360ff1660ff16815260200190815260200160002060006101000a81548160ff0219169083151502179055505050565b610956610b59565b73ffffffffffffffffffffffffffffffffffffffff1660008054906101000a900473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff1614610a16576040517f08c379a00000000000000000000000000000000000000000000000000000000081526004018080602001828103825260208152602001807f4f776e61626c653a2063616c6c6572206973206e6f7420746865206f776e657281525060200191505060405180910390fd5b600073ffffffffffffffffffffffffffffffffffffffff168173ffffffffffffffffffffffffffffffffffffffff161415610a9c576040517f08c379a0000000000000000000000000000000000000000000000000000000008152600401808060200182810382526026815260200180610b626026913960400191505060405180910390fd5b8073ffffffffffffffffffffffffffffffffffffffff1660008054906101000a900473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff167f8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e060405160405180910390a3806000806101000a81548173ffffffffffffffffffffffffffffffffffffffff021916908373ffffffffffffffffffffffffffffffffffffffff16021790555050565b60003390509056fe4f776e61626c653a206e6577206f776e657220697320746865207a65726f2061646472657373a2646970667358221220eb6dbf6e7f9379943e09301c32c2ee620c8c05d8507a989188117e38c947cf6564736f6c63430007000033",
-  "deployedBytecode": "0x608060405234801561001057600080fd5b50600436106100935760003560e01c80638da5cb5b116100665780638da5cb5b146101b55780639928253d146101e9578063a716b97f1461023a578063b74866fb146102a1578063f2fde38b146102f257610093565b80630b886c191461009857806336214c78146100ff5780633f1609ef1461015a578063715018a6146101ab575b600080fd5b6100e7600480360360408110156100ae57600080fd5b81019080803573ffffffffffffffffffffffffffffffffffffffff169060200190929190803560ff169060200190929190505050610336565b60405180821515815260200191505060405180910390f35b61012e6004803603602081101561011557600080fd5b81019080803560ff169060200190929190505050610365565b604051808273ffffffffffffffffffffffffffffffffffffffff16815260200191505060405180910390f35b6101a96004803603604081101561017057600080fd5b81019080803560ff169060200190929190803573ffffffffffffffffffffffffffffffffffffffff169060200190929190505050610398565b005b6101b36104bc565b005b6101bd610642565b604051808273ffffffffffffffffffffffffffffffffffffffff16815260200191505060405180910390f35b610238600480360360408110156101ff57600080fd5b81019080803573ffffffffffffffffffffffffffffffffffffffff169060200190929190803560ff16906020019092919050505061066b565b005b6102896004803603604081101561025057600080fd5b81019080803573ffffffffffffffffffffffffffffffffffffffff169060200190929190803560ff1690602001909291905050506107a5565b60405180821515815260200191505060405180910390f35b6102f0600480360360408110156102b757600080fd5b81019080803573ffffffffffffffffffffffffffffffffffffffff169060200190929190803560ff169060200190929190505050610813565b005b6103346004803603602081101561030857600080fd5b81019080803573ffffffffffffffffffffffffffffffffffffffff16906020019092919050505061094e565b005b60016020528160005260406000206020528060005260406000206000915091509054906101000a900460ff1681565b60026020528060005260406000206000915054906101000a900473ffffffffffffffffffffffffffffffffffffffff1681565b6103a0610b59565b73ffffffffffffffffffffffffffffffffffffffff1660008054906101000a900473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff1614610460576040517f08c379a00000000000000000000000000000000000000000000000000000000081526004018080602001828103825260208152602001807f4f776e61626c653a2063616c6c6572206973206e6f7420746865206f776e657281525060200191505060405180910390fd5b80600260008460ff1660ff16815260200190815260200160002060006101000a81548173ffffffffffffffffffffffffffffffffffffffff021916908373ffffffffffffffffffffffffffffffffffffffff1602179055505050565b6104c4610b59565b73ffffffffffffffffffffffffffffffffffffffff1660008054906101000a900473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff1614610584576040517f08c379a00000000000000000000000000000000000000000000000000000000081526004018080602001828103825260208152602001807f4f776e61626c653a2063616c6c6572206973206e6f7420746865206f776e657281525060200191505060405180910390fd5b600073ffffffffffffffffffffffffffffffffffffffff1660008054906101000a900473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff167f8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e060405160405180910390a360008060006101000a81548173ffffffffffffffffffffffffffffffffffffffff021916908373ffffffffffffffffffffffffffffffffffffffff160217905550565b60008060009054906101000a900473ffffffffffffffffffffffffffffffffffffffff16905090565b610673610b59565b73ffffffffffffffffffffffffffffffffffffffff1660008054906101000a900473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff1614610733576040517f08c379a00000000000000000000000000000000000000000000000000000000081526004018080602001828103825260208152602001807f4f776e61626c653a2063616c6c6572206973206e6f7420746865206f776e657281525060200191505060405180910390fd5b60018060008473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16815260200190815260200160002060008360ff1660ff16815260200190815260200160002060006101000a81548160ff0219169083151502179055505050565b6000600160008473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16815260200190815260200160002060008360ff1660ff16815260200190815260200160002060009054906101000a900460ff16905092915050565b61081b610b59565b73ffffffffffffffffffffffffffffffffffffffff1660008054906101000a900473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16146108db576040517f08c379a00000000000000000000000000000000000000000000000000000000081526004018080602001828103825260208152602001807f4f776e61626c653a2063616c6c6572206973206e6f7420746865206f776e657281525060200191505060405180910390fd5b6000600160008473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16815260200190815260200160002060008360ff1660ff16815260200190815260200160002060006101000a81548160ff0219169083151502179055505050565b610956610b59565b73ffffffffffffffffffffffffffffffffffffffff1660008054906101000a900473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff1614610a16576040517f08c379a00000000000000000000000000000000000000000000000000000000081526004018080602001828103825260208152602001807f4f776e61626c653a2063616c6c6572206973206e6f7420746865206f776e657281525060200191505060405180910390fd5b600073ffffffffffffffffffffffffffffffffffffffff168173ffffffffffffffffffffffffffffffffffffffff161415610a9c576040517f08c379a0000000000000000000000000000000000000000000000000000000008152600401808060200182810382526026815260200180610b626026913960400191505060405180910390fd5b8073ffffffffffffffffffffffffffffffffffffffff1660008054906101000a900473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff167f8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e060405160405180910390a3806000806101000a81548173ffffffffffffffffffffffffffffffffffffffff021916908373ffffffffffffffffffffffffffffffffffffffff16021790555050565b60003390509056fe4f776e61626c653a206e6577206f776e657220697320746865207a65726f2061646472657373a2646970667358221220eb6dbf6e7f9379943e09301c32c2ee620c8c05d8507a989188117e38c947cf6564736f6c63430007000033",
+  "metadata": "{\"compiler\":{\"version\":\"0.7.0+commit.9e61f92b\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"previousOwner\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"newOwner\",\"type\":\"address\"}],\"name\":\"OwnershipTransferred\",\"type\":\"event\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"contr\",\"type\":\"address\"},{\"internalType\":\"enum ContractRoles\",\"name\":\"role\",\"type\":\"uint8\"}],\"name\":\"getRole\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"enum ContractRoles\",\"name\":\"role\",\"type\":\"uint8\"},{\"internalType\":\"address\",\"name\":\"actor\",\"type\":\"address\"}],\"name\":\"giveRole\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"enum Characters\",\"name\":\"\",\"type\":\"uint8\"}],\"name\":\"mainCharacters\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"owner\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"enum ContractRoles\",\"name\":\"role\",\"type\":\"uint8\"},{\"internalType\":\"address\",\"name\":\"actor\",\"type\":\"address\"}],\"name\":\"removeRole\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"renounceOwnership\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"},{\"internalType\":\"enum ContractRoles\",\"name\":\"\",\"type\":\"uint8\"}],\"name\":\"roles\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"enum Characters\",\"name\":\"role\",\"type\":\"uint8\"},{\"internalType\":\"address\",\"name\":\"actor\",\"type\":\"address\"}],\"name\":\"setMainCharacter\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"newOwner\",\"type\":\"address\"}],\"name\":\"transferOwnership\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"}],\"devdoc\":{\"kind\":\"dev\",\"methods\":{\"owner()\":{\"details\":\"Returns the address of the current owner.\"},\"renounceOwnership()\":{\"details\":\"Leaves the contract without owner. It will not be possible to call `onlyOwner` functions anymore. Can only be called by the current owner. NOTE: Renouncing ownership will leave the contract without an owner, thereby removing any functionality that is only available to the owner.\"},\"transferOwnership(address)\":{\"details\":\"Transfers ownership of the contract to a new account (`newOwner`). Can only be called by the current owner.\"}},\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{},\"version\":1}},\"settings\":{\"compilationTarget\":{\"/home/tixelbook/projects/marginswap-core/contracts/Roles.sol\":\"Roles\"},\"evmVersion\":\"istanbul\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\"},\"optimizer\":{\"enabled\":false,\"runs\":200},\"remappings\":[]},\"sources\":{\"/home/tixelbook/projects/marginswap-core/contracts/Roles.sol\":{\"keccak256\":\"0x37fc571511e35e2c628ad86ae7527cf2d9f029e414955e08cd4ab93044ad5891\",\"urls\":[\"bzz-raw://ddd34274d9e430ca5fee9738146acabd8a8edac2b76097a7d9fbcff26c943009\",\"dweb:/ipfs/QmW6y6anUHaAYVRYqjT9GazveRfG1Tz9qZZM5fqyeMxpC5\"]},\"@openzeppelin/contracts/GSN/Context.sol\":{\"keccak256\":\"0x8d3cb350f04ff49cfb10aef08d87f19dcbaecc8027b0bed12f3275cd12f38cf0\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://ded47ec7c96750f9bd04bbbc84f659992d4ba901cb7b532a52cd468272cf378f\",\"dweb:/ipfs/QmfBrGtQP7rZEqEg6Wz6jh2N2Kukpj1z5v3CGWmAqrzm96\"]},\"@openzeppelin/contracts/access/Ownable.sol\":{\"keccak256\":\"0xf7c39c7e6d06ed3bda90cfefbcbf2ddc32c599c3d6721746546ad64946efccaa\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://cb57a28e189cd8b05748db44bdd51d608e6f1364dd1b35ad921e1bc82c10631e\",\"dweb:/ipfs/QmaWWTBbVu2pRR9XUbE4iC159NoP59cRF9ZJwhf4ghFN9i\"]}},\"version\":1}",
+  "bytecode": "0x608060405234801561001057600080fd5b5060006100216100c460201b60201c565b9050806000806101000a81548173ffffffffffffffffffffffffffffffffffffffff021916908373ffffffffffffffffffffffffffffffffffffffff1602179055508073ffffffffffffffffffffffffffffffffffffffff16600073ffffffffffffffffffffffffffffffffffffffff167f8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e060405160405180910390a3506100cc565b600033905090565b610bfd806100db6000396000f3fe608060405234801561001057600080fd5b50600436106100935760003560e01c8063715018a611610066578063715018a6146101fc5780638a1713c6146102065780638da5cb5b14610257578063a716b97f1461028b578063f2fde38b146102f257610093565b80630b886c191461009857806336214c78146100ff5780633f1609ef1461015a57806346cd9bd1146101ab575b600080fd5b6100e7600480360360408110156100ae57600080fd5b81019080803573ffffffffffffffffffffffffffffffffffffffff169060200190929190803560ff169060200190929190505050610336565b60405180821515815260200191505060405180910390f35b61012e6004803603602081101561011557600080fd5b81019080803560ff169060200190929190505050610365565b604051808273ffffffffffffffffffffffffffffffffffffffff16815260200191505060405180910390f35b6101a96004803603604081101561017057600080fd5b81019080803560ff169060200190929190803573ffffffffffffffffffffffffffffffffffffffff169060200190929190505050610398565b005b6101fa600480360360408110156101c157600080fd5b81019080803560ff169060200190929190803573ffffffffffffffffffffffffffffffffffffffff1690602001909291905050506104cc565b005b610204610616565b005b6102556004803603604081101561021c57600080fd5b81019080803560ff169060200190929190803573ffffffffffffffffffffffffffffffffffffffff16906020019092919050505061079c565b005b61025f6108e7565b604051808273ffffffffffffffffffffffffffffffffffffffff16815260200191505060405180910390f35b6102da600480360360408110156102a157600080fd5b81019080803573ffffffffffffffffffffffffffffffffffffffff169060200190929190803560ff169060200190929190505050610910565b60405180821515815260200191505060405180910390f35b6103346004803603602081101561030857600080fd5b81019080803573ffffffffffffffffffffffffffffffffffffffff16906020019092919050505061098e565b005b60016020528160005260406000206020528060005260406000206000915091509054906101000a900460ff1681565b60026020528060005260406000206000915054906101000a900473ffffffffffffffffffffffffffffffffffffffff1681565b6103a0610b99565b73ffffffffffffffffffffffffffffffffffffffff1660008054906101000a900473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff1614610460576040517f08c379a00000000000000000000000000000000000000000000000000000000081526004018080602001828103825260208152602001807f4f776e61626c653a2063616c6c6572206973206e6f7420746865206f776e657281525060200191505060405180910390fd5b806002600084600581111561047157fe5b600581111561047c57fe5b815260200190815260200160002060006101000a81548173ffffffffffffffffffffffffffffffffffffffff021916908373ffffffffffffffffffffffffffffffffffffffff1602179055505050565b6104d4610b99565b73ffffffffffffffffffffffffffffffffffffffff1660008054906101000a900473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff1614610594576040517f08c379a00000000000000000000000000000000000000000000000000000000081526004018080602001828103825260208152602001807f4f776e61626c653a2063616c6c6572206973206e6f7420746865206f776e657281525060200191505060405180910390fd5b60018060008373ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16815260200190815260200160002060008460058111156105e257fe5b60058111156105ed57fe5b815260200190815260200160002060006101000a81548160ff0219169083151502179055505050565b61061e610b99565b73ffffffffffffffffffffffffffffffffffffffff1660008054906101000a900473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16146106de576040517f08c379a00000000000000000000000000000000000000000000000000000000081526004018080602001828103825260208152602001807f4f776e61626c653a2063616c6c6572206973206e6f7420746865206f776e657281525060200191505060405180910390fd5b600073ffffffffffffffffffffffffffffffffffffffff1660008054906101000a900473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff167f8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e060405160405180910390a360008060006101000a81548173ffffffffffffffffffffffffffffffffffffffff021916908373ffffffffffffffffffffffffffffffffffffffff160217905550565b6107a4610b99565b73ffffffffffffffffffffffffffffffffffffffff1660008054906101000a900473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff1614610864576040517f08c379a00000000000000000000000000000000000000000000000000000000081526004018080602001828103825260208152602001807f4f776e61626c653a2063616c6c6572206973206e6f7420746865206f776e657281525060200191505060405180910390fd5b6000600160008373ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16815260200190815260200160002060008460058111156108b357fe5b60058111156108be57fe5b815260200190815260200160002060006101000a81548160ff0219169083151502179055505050565b60008060009054906101000a900473ffffffffffffffffffffffffffffffffffffffff16905090565b6000600160008473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff168152602001908152602001600020600083600581111561095f57fe5b600581111561096a57fe5b815260200190815260200160002060009054906101000a900460ff16905092915050565b610996610b99565b73ffffffffffffffffffffffffffffffffffffffff1660008054906101000a900473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff1614610a56576040517f08c379a00000000000000000000000000000000000000000000000000000000081526004018080602001828103825260208152602001807f4f776e61626c653a2063616c6c6572206973206e6f7420746865206f776e657281525060200191505060405180910390fd5b600073ffffffffffffffffffffffffffffffffffffffff168173ffffffffffffffffffffffffffffffffffffffff161415610adc576040517f08c379a0000000000000000000000000000000000000000000000000000000008152600401808060200182810382526026815260200180610ba26026913960400191505060405180910390fd5b8073ffffffffffffffffffffffffffffffffffffffff1660008054906101000a900473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff167f8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e060405160405180910390a3806000806101000a81548173ffffffffffffffffffffffffffffffffffffffff021916908373ffffffffffffffffffffffffffffffffffffffff16021790555050565b60003390509056fe4f776e61626c653a206e6577206f776e657220697320746865207a65726f2061646472657373a26469706673582212207ebc1ca8ef2c701d0d3f62f0f2e6900858e3613f1d6f4d76aa66621d36dd514964736f6c63430007000033",
+  "deployedBytecode": "0x608060405234801561001057600080fd5b50600436106100935760003560e01c8063715018a611610066578063715018a6146101fc5780638a1713c6146102065780638da5cb5b14610257578063a716b97f1461028b578063f2fde38b146102f257610093565b80630b886c191461009857806336214c78146100ff5780633f1609ef1461015a57806346cd9bd1146101ab575b600080fd5b6100e7600480360360408110156100ae57600080fd5b81019080803573ffffffffffffffffffffffffffffffffffffffff169060200190929190803560ff169060200190929190505050610336565b60405180821515815260200191505060405180910390f35b61012e6004803603602081101561011557600080fd5b81019080803560ff169060200190929190505050610365565b604051808273ffffffffffffffffffffffffffffffffffffffff16815260200191505060405180910390f35b6101a96004803603604081101561017057600080fd5b81019080803560ff169060200190929190803573ffffffffffffffffffffffffffffffffffffffff169060200190929190505050610398565b005b6101fa600480360360408110156101c157600080fd5b81019080803560ff169060200190929190803573ffffffffffffffffffffffffffffffffffffffff1690602001909291905050506104cc565b005b610204610616565b005b6102556004803603604081101561021c57600080fd5b81019080803560ff169060200190929190803573ffffffffffffffffffffffffffffffffffffffff16906020019092919050505061079c565b005b61025f6108e7565b604051808273ffffffffffffffffffffffffffffffffffffffff16815260200191505060405180910390f35b6102da600480360360408110156102a157600080fd5b81019080803573ffffffffffffffffffffffffffffffffffffffff169060200190929190803560ff169060200190929190505050610910565b60405180821515815260200191505060405180910390f35b6103346004803603602081101561030857600080fd5b81019080803573ffffffffffffffffffffffffffffffffffffffff16906020019092919050505061098e565b005b60016020528160005260406000206020528060005260406000206000915091509054906101000a900460ff1681565b60026020528060005260406000206000915054906101000a900473ffffffffffffffffffffffffffffffffffffffff1681565b6103a0610b99565b73ffffffffffffffffffffffffffffffffffffffff1660008054906101000a900473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff1614610460576040517f08c379a00000000000000000000000000000000000000000000000000000000081526004018080602001828103825260208152602001807f4f776e61626c653a2063616c6c6572206973206e6f7420746865206f776e657281525060200191505060405180910390fd5b806002600084600581111561047157fe5b600581111561047c57fe5b815260200190815260200160002060006101000a81548173ffffffffffffffffffffffffffffffffffffffff021916908373ffffffffffffffffffffffffffffffffffffffff1602179055505050565b6104d4610b99565b73ffffffffffffffffffffffffffffffffffffffff1660008054906101000a900473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff1614610594576040517f08c379a00000000000000000000000000000000000000000000000000000000081526004018080602001828103825260208152602001807f4f776e61626c653a2063616c6c6572206973206e6f7420746865206f776e657281525060200191505060405180910390fd5b60018060008373ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16815260200190815260200160002060008460058111156105e257fe5b60058111156105ed57fe5b815260200190815260200160002060006101000a81548160ff0219169083151502179055505050565b61061e610b99565b73ffffffffffffffffffffffffffffffffffffffff1660008054906101000a900473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16146106de576040517f08c379a00000000000000000000000000000000000000000000000000000000081526004018080602001828103825260208152602001807f4f776e61626c653a2063616c6c6572206973206e6f7420746865206f776e657281525060200191505060405180910390fd5b600073ffffffffffffffffffffffffffffffffffffffff1660008054906101000a900473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff167f8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e060405160405180910390a360008060006101000a81548173ffffffffffffffffffffffffffffffffffffffff021916908373ffffffffffffffffffffffffffffffffffffffff160217905550565b6107a4610b99565b73ffffffffffffffffffffffffffffffffffffffff1660008054906101000a900473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff1614610864576040517f08c379a00000000000000000000000000000000000000000000000000000000081526004018080602001828103825260208152602001807f4f776e61626c653a2063616c6c6572206973206e6f7420746865206f776e657281525060200191505060405180910390fd5b6000600160008373ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16815260200190815260200160002060008460058111156108b357fe5b60058111156108be57fe5b815260200190815260200160002060006101000a81548160ff0219169083151502179055505050565b60008060009054906101000a900473ffffffffffffffffffffffffffffffffffffffff16905090565b6000600160008473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff168152602001908152602001600020600083600581111561095f57fe5b600581111561096a57fe5b815260200190815260200160002060009054906101000a900460ff16905092915050565b610996610b99565b73ffffffffffffffffffffffffffffffffffffffff1660008054906101000a900473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff1614610a56576040517f08c379a00000000000000000000000000000000000000000000000000000000081526004018080602001828103825260208152602001807f4f776e61626c653a2063616c6c6572206973206e6f7420746865206f776e657281525060200191505060405180910390fd5b600073ffffffffffffffffffffffffffffffffffffffff168173ffffffffffffffffffffffffffffffffffffffff161415610adc576040517f08c379a0000000000000000000000000000000000000000000000000000000008152600401808060200182810382526026815260200180610ba26026913960400191505060405180910390fd5b8073ffffffffffffffffffffffffffffffffffffffff1660008054906101000a900473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff167f8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e060405160405180910390a3806000806101000a81548173ffffffffffffffffffffffffffffffffffffffff021916908373ffffffffffffffffffffffffffffffffffffffff16021790555050565b60003390509056fe4f776e61626c653a206e6577206f776e657220697320746865207a65726f2061646472657373a26469706673582212207ebc1ca8ef2c701d0d3f62f0f2e6900858e3613f1d6f4d76aa66621d36dd514964736f6c63430007000033",
   "immutableReferences": {},
-  "sourceMap": "54:614:8:-:0;;;;;;;;;;;;;882:17:12;902:12;:10;;;:12;;:::i;:::-;882:32;;933:9;924:6;;:18;;;;;;;;;;;;;;;;;;990:9;957:43;;986:1;957:43;;;;;;;;;;;;848:159;54:614:8;;598:104:11;651:15;685:10;678:17;;598:104;:::o;54:614:8:-;;;;;;;",
-  "deployedSourceMap": "54:614:8:-:0;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;86:55;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;:::i;:::-;;;;;;;;;;;;;;;;;;;;;147:47;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;:::i;:::-;;;;;;;;;;;;;;;;;;;;;428:117;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;:::i;:::-;;1706:145:12;;;:::i;:::-;;1083:77;;;:::i;:::-;;;;;;;;;;;;;;;;;;;;;201:106:8;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;:::i;:::-;;551:115;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;:::i;:::-;;;;;;;;;;;;;;;;;;;;;313:109;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;:::i;:::-;;2000:240:12;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;:::i;:::-;;86:55:8;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;:::o;147:47::-;;;;;;;;;;;;;;;;;;;;;;:::o;428:117::-;1297:12:12;:10;:12::i;:::-;1287:22;;:6;;;;;;;;;;:22;;;1279:67;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;533:5:8::1;510:14;:20;525:4;510:20;;;;;;;;;;;;;;;;:28;;;;;;;;;;;;;;;;;;428:117:::0;;:::o;1706:145:12:-;1297:12;:10;:12::i;:::-;1287:22;;:6;;;;;;;;;;:22;;;1279:67;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1812:1:::1;1775:40;;1796:6;::::0;::::1;;;;;;;;1775:40;;;;;;;;;;;;1842:1;1825:6:::0;::::1;:19;;;;;;;;;;;;;;;;;;1706:145::o:0;1083:77::-;1121:7;1147:6;;;;;;;;;;;1140:13;;1083:77;:::o;201:106:8:-;1297:12:12;:10;:12::i;:::-;1287:22;;:6;;;;;;;;;;:22;;;1279:67;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;296:4:8::1;275:5:::0;:12:::1;281:5;275:12;;;;;;;;;;;;;;;:18;288:4;275:18;;;;;;;;;;;;;;;;:25;;;;;;;;;;;;;;;;;;201:106:::0;;:::o;551:115::-;618:4;641:5;:12;647:5;641:12;;;;;;;;;;;;;;;:18;654:4;641:18;;;;;;;;;;;;;;;;;;;;;;;;;634:25;;551:115;;;;:::o;313:109::-;1297:12:12;:10;:12::i;:::-;1287:22;;:6;;;;;;;;;;:22;;;1279:67;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;410:5:8::1;389;:12;395:5;389:12;;;;;;;;;;;;;;;:18;402:4;389:18;;;;;;;;;;;;;;;;:26;;;;;;;;;;;;;;;;;;313:109:::0;;:::o;2000:240:12:-;1297:12;:10;:12::i;:::-;1287:22;;:6;;;;;;;;;;:22;;;1279:67;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;2108:1:::1;2088:22;;:8;:22;;;;2080:73;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;2197:8;2168:38;;2189:6;::::0;::::1;;;;;;;;2168:38;;;;;;;;;;;;2225:8;2216:6;::::0;:17:::1;;;;;;;;;;;;;;;;;;2000:240:::0;:::o;598:104:11:-;651:15;685:10;678:17;;598:104;:::o",
-  "source": "import \"@openzeppelin/contracts/access/Ownable.sol\";\n\ncontract Roles is Ownable {\n    mapping(address => mapping(uint8 => bool)) public roles;\n    mapping(uint8 => address) public mainCharacters;\n\n    function giveRole(address actor, uint8 role) external onlyOwner {\n        roles[actor][role] = true;\n    }\n\n    function removeRole(address actor, uint8 role) external onlyOwner {\n        roles[actor][role] = false;\n    }\n\n    function setMainCharacter(uint8 role, address actor) external onlyOwner {\n        mainCharacters[role] = actor;\n    }\n\n    function getRole(address contr, uint8 role) external view returns (bool) {\n        return roles[contr][role];\n    }\n}\n// external v public\n// accessing variables // state\n// owner setters\n// role based execution\n",
+  "sourceMap": "302:656:8:-:0;;;;;;;;;;;;;882:17:13;902:12;:10;;;:12;;:::i;:::-;882:32;;933:9;924:6;;:18;;;;;;;;;;;;;;;;;;990:9;957:43;;986:1;957:43;;;;;;;;;;;;848:159;302:656:8;;598:104:12;651:15;685:10;678:17;;598:104;:::o;302:656:8:-;;;;;;;",
+  "deployedSourceMap": "302:656:8:-:0;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;334:63;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;:::i;:::-;;;;;;;;;;;;;;;;;;;;;403:52;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;:::i;:::-;;;;;;;;;;;;;;;;;;;;;705:122;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;:::i;:::-;;462:114;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;:::i;:::-;;1706:145:13;;;:::i;:::-;;582:117:8;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;:::i;:::-;;1083:77:13;;;:::i;:::-;;;;;;;;;;;;;;;;;;;;;833:123:8;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;:::i;:::-;;;;;;;;;;;;;;;;;;;;;2000:240:13;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;:::i;:::-;;334:63:8;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;:::o;403:52::-;;;;;;;;;;;;;;;;;;;;;;:::o;705:122::-;1297:12:13;:10;:12::i;:::-;1287:22;;:6;;;;;;;;;;:22;;;1279:67;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;815:5:8::1;792:14;:20;807:4;792:20;;;;;;;;;;;;;;;;;;;;;;;;;;;;:28;;;;;;;;;;;;;;;;;;705:122:::0;;:::o;462:114::-;1297:12:13;:10;:12::i;:::-;1287:22;;:6;;;;;;;;;;:22;;;1279:67;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;565:4:8::1;544:5:::0;:12:::1;550:5;544:12;;;;;;;;;;;;;;;:18;557:4;544:18;;;;;;;;;;;;;;;;;;;;;;;;;;;;:25;;;;;;;;;;;;;;;;;;462:114:::0;;:::o;1706:145:13:-;1297:12;:10;:12::i;:::-;1287:22;;:6;;;;;;;;;;:22;;;1279:67;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1812:1:::1;1775:40;;1796:6;::::0;::::1;;;;;;;;1775:40;;;;;;;;;;;;1842:1;1825:6:::0;::::1;:19;;;;;;;;;;;;;;;;;;1706:145::o:0;582:117:8:-;1297:12:13;:10;:12::i;:::-;1287:22;;:6;;;;;;;;;;:22;;;1279:67;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;687:5:8::1;666;:12;672:5;666:12;;;;;;;;;;;;;;;:18;679:4;666:18;;;;;;;;;;;;;;;;;;;;;;;;;;;;:26;;;;;;;;;;;;;;;;;;582:117:::0;;:::o;1083:77:13:-;1121:7;1147:6;;;;;;;;;;;1140:13;;1083:77;:::o;833:123:8:-;908:4;931:5;:12;937:5;931:12;;;;;;;;;;;;;;;:18;944:4;931:18;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;924:25;;833:123;;;;:::o;2000:240:13:-;1297:12;:10;:12::i;:::-;1287:22;;:6;;;;;;;;;;:22;;;1279:67;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;2108:1:::1;2088:22;;:8;:22;;;;2080:73;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;2197:8;2168:38;;2189:6;::::0;::::1;;;;;;;;2168:38;;;;;;;;;;;;2225:8;2216:6;::::0;:17:::1;;;;;;;;;;;;;;;;;;2000:240:::0;:::o;598:104:12:-;651:15;685:10;678:17;;598:104;:::o",
+  "source": "import \"@openzeppelin/contracts/access/Ownable.sol\";\n\nenum ContractRoles {\n    WITHDRAWER,\n    MARGIN_CALLER,\n    BORROWER,\n    MARGIN_TRADER,\n    FEE_SOURCE,\n    INSURANCE_CLAIMANT\n}\n\nenum Characters {\n    FUND,\n    LENDING,\n    ROUTER,\n    MARGIN_TRADING,\n    FEE_CONTROLLER,\n    PRICE_CONTROLLER\n}\n\ncontract Roles is Ownable {\n    mapping(address => mapping(ContractRoles => bool)) public roles;\n    mapping(Characters => address) public mainCharacters;\n\n    function giveRole(ContractRoles role, address actor) external onlyOwner {\n        roles[actor][role] = true;\n    }\n\n    function removeRole(ContractRoles role, address actor) external onlyOwner {\n        roles[actor][role] = false;\n    }\n\n    function setMainCharacter(Characters role, address actor) external onlyOwner {\n        mainCharacters[role] = actor;\n    }\n\n    function getRole(address contr, ContractRoles role) external view returns (bool) {\n        return roles[contr][role];\n    }\n}\n",
   "sourcePath": "/home/tixelbook/projects/marginswap-core/contracts/Roles.sol",
   "ast": {
     "absolutePath": "/home/tixelbook/projects/marginswap-core/contracts/Roles.sol",
     "exportedSymbols": {
+      "Characters": [
+        3866
+      ],
+      "ContractRoles": [
+        3859
+      ],
       "Roles": [
-        3861
+        3947
       ]
     },
-    "id": 3862,
+    "id": 3948,
     "license": null,
     "nodeType": "SourceUnit",
     "nodes": [
       {
         "absolutePath": "@openzeppelin/contracts/access/Ownable.sol",
         "file": "@openzeppelin/contracts/access/Ownable.sol",
-        "id": 3780,
+        "id": 3852,
         "nodeType": "ImportDirective",
-        "scope": 3862,
-        "sourceUnit": 4486,
+        "scope": 3948,
+        "sourceUnit": 4873,
         "src": "0:52:8",
         "symbolAliases": [],
         "unitAlias": ""
+      },
+      {
+        "canonicalName": "ContractRoles",
+        "id": 3859,
+        "members": [
+          {
+            "id": 3853,
+            "name": "WITHDRAWER",
+            "nodeType": "EnumValue",
+            "src": "79:10:8"
+          },
+          {
+            "id": 3854,
+            "name": "MARGIN_CALLER",
+            "nodeType": "EnumValue",
+            "src": "95:13:8"
+          },
+          {
+            "id": 3855,
+            "name": "BORROWER",
+            "nodeType": "EnumValue",
+            "src": "114:8:8"
+          },
+          {
+            "id": 3856,
+            "name": "MARGIN_TRADER",
+            "nodeType": "EnumValue",
+            "src": "128:13:8"
+          },
+          {
+            "id": 3857,
+            "name": "FEE_SOURCE",
+            "nodeType": "EnumValue",
+            "src": "147:10:8"
+          },
+          {
+            "id": 3858,
+            "name": "INSURANCE_CLAIMANT",
+            "nodeType": "EnumValue",
+            "src": "163:18:8"
+          }
+        ],
+        "name": "ContractRoles",
+        "nodeType": "EnumDefinition",
+        "src": "54:129:8"
+      },
+      {
+        "canonicalName": "Characters",
+        "id": 3866,
+        "members": [
+          {
+            "id": 3860,
+            "name": "FUND",
+            "nodeType": "EnumValue",
+            "src": "207:4:8"
+          },
+          {
+            "id": 3861,
+            "name": "LENDING",
+            "nodeType": "EnumValue",
+            "src": "217:7:8"
+          },
+          {
+            "id": 3862,
+            "name": "ROUTER",
+            "nodeType": "EnumValue",
+            "src": "230:6:8"
+          },
+          {
+            "id": 3863,
+            "name": "MARGIN_TRADING",
+            "nodeType": "EnumValue",
+            "src": "242:14:8"
+          },
+          {
+            "id": 3864,
+            "name": "FEE_CONTROLLER",
+            "nodeType": "EnumValue",
+            "src": "262:14:8"
+          },
+          {
+            "id": 3865,
+            "name": "PRICE_CONTROLLER",
+            "nodeType": "EnumValue",
+            "src": "282:16:8"
+          }
+        ],
+        "name": "Characters",
+        "nodeType": "EnumDefinition",
+        "src": "185:115:8"
       },
       {
         "abstract": false,
@@ -212,33 +308,33 @@
             "arguments": null,
             "baseName": {
               "contractScope": null,
-              "id": 3781,
+              "id": 3867,
               "name": "Ownable",
               "nodeType": "UserDefinedTypeName",
-              "referencedDeclaration": 4485,
-              "src": "72:7:8",
+              "referencedDeclaration": 4872,
+              "src": "320:7:8",
               "typeDescriptions": {
-                "typeIdentifier": "t_contract$_Ownable_$4485",
+                "typeIdentifier": "t_contract$_Ownable_$4872",
                 "typeString": "contract Ownable"
               }
             },
-            "id": 3782,
+            "id": 3868,
             "nodeType": "InheritanceSpecifier",
-            "src": "72:7:8"
+            "src": "320:7:8"
           }
         ],
         "contractDependencies": [
-          4376,
-          4485
+          4763,
+          4872
         ],
         "contractKind": "contract",
         "documentation": null,
         "fullyImplemented": true,
-        "id": 3861,
+        "id": 3947,
         "linearizedBaseContracts": [
-          3861,
-          4485,
-          4376
+          3947,
+          4872,
+          4763
         ],
         "name": "Roles",
         "nodeType": "ContractDefinition",
@@ -246,60 +342,62 @@
           {
             "constant": false,
             "functionSelector": "0b886c19",
-            "id": 3788,
+            "id": 3874,
             "mutability": "mutable",
             "name": "roles",
             "nodeType": "VariableDeclaration",
             "overrides": null,
-            "scope": 3861,
-            "src": "86:55:8",
+            "scope": 3947,
+            "src": "334:63:8",
             "stateVariable": true,
             "storageLocation": "default",
             "typeDescriptions": {
-              "typeIdentifier": "t_mapping$_t_address_$_t_mapping$_t_uint8_$_t_bool_$_$",
-              "typeString": "mapping(address => mapping(uint8 => bool))"
+              "typeIdentifier": "t_mapping$_t_address_$_t_mapping$_t_enum$_ContractRoles_$3859_$_t_bool_$_$",
+              "typeString": "mapping(address => mapping(enum ContractRoles => bool))"
             },
             "typeName": {
-              "id": 3787,
+              "id": 3873,
               "keyType": {
-                "id": 3783,
+                "id": 3869,
                 "name": "address",
                 "nodeType": "ElementaryTypeName",
-                "src": "94:7:8",
+                "src": "342:7:8",
                 "typeDescriptions": {
                   "typeIdentifier": "t_address",
                   "typeString": "address"
                 }
               },
               "nodeType": "Mapping",
-              "src": "86:42:8",
+              "src": "334:50:8",
               "typeDescriptions": {
-                "typeIdentifier": "t_mapping$_t_address_$_t_mapping$_t_uint8_$_t_bool_$_$",
-                "typeString": "mapping(address => mapping(uint8 => bool))"
+                "typeIdentifier": "t_mapping$_t_address_$_t_mapping$_t_enum$_ContractRoles_$3859_$_t_bool_$_$",
+                "typeString": "mapping(address => mapping(enum ContractRoles => bool))"
               },
               "valueType": {
-                "id": 3786,
+                "id": 3872,
                 "keyType": {
-                  "id": 3784,
-                  "name": "uint8",
-                  "nodeType": "ElementaryTypeName",
-                  "src": "113:5:8",
+                  "contractScope": null,
+                  "id": 3870,
+                  "name": "ContractRoles",
+                  "nodeType": "UserDefinedTypeName",
+                  "referencedDeclaration": 3859,
+                  "src": "361:13:8",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_uint8",
-                    "typeString": "uint8"
+                    "typeIdentifier": "t_enum$_ContractRoles_$3859",
+                    "typeString": "enum ContractRoles"
                   }
                 },
                 "nodeType": "Mapping",
-                "src": "105:22:8",
+                "src": "353:30:8",
                 "typeDescriptions": {
-                  "typeIdentifier": "t_mapping$_t_uint8_$_t_bool_$",
-                  "typeString": "mapping(uint8 => bool)"
+                  "typeIdentifier": "t_mapping$_t_enum$_ContractRoles_$3859_$_t_bool_$",
+                  "typeString": "mapping(enum ContractRoles => bool)"
                 },
                 "valueType": {
-                  "id": 3785,
+                  "id": 3871,
                   "name": "bool",
                   "nodeType": "ElementaryTypeName",
-                  "src": "122:4:8",
+                  "src": "378:4:8",
                   "typeDescriptions": {
                     "typeIdentifier": "t_bool",
                     "typeString": "bool"
@@ -313,42 +411,44 @@
           {
             "constant": false,
             "functionSelector": "36214c78",
-            "id": 3792,
+            "id": 3878,
             "mutability": "mutable",
             "name": "mainCharacters",
             "nodeType": "VariableDeclaration",
             "overrides": null,
-            "scope": 3861,
-            "src": "147:47:8",
+            "scope": 3947,
+            "src": "403:52:8",
             "stateVariable": true,
             "storageLocation": "default",
             "typeDescriptions": {
-              "typeIdentifier": "t_mapping$_t_uint8_$_t_address_$",
-              "typeString": "mapping(uint8 => address)"
+              "typeIdentifier": "t_mapping$_t_enum$_Characters_$3866_$_t_address_$",
+              "typeString": "mapping(enum Characters => address)"
             },
             "typeName": {
-              "id": 3791,
+              "id": 3877,
               "keyType": {
-                "id": 3789,
-                "name": "uint8",
-                "nodeType": "ElementaryTypeName",
-                "src": "155:5:8",
+                "contractScope": null,
+                "id": 3875,
+                "name": "Characters",
+                "nodeType": "UserDefinedTypeName",
+                "referencedDeclaration": 3866,
+                "src": "411:10:8",
                 "typeDescriptions": {
-                  "typeIdentifier": "t_uint8",
-                  "typeString": "uint8"
+                  "typeIdentifier": "t_enum$_Characters_$3866",
+                  "typeString": "enum Characters"
                 }
               },
               "nodeType": "Mapping",
-              "src": "147:25:8",
+              "src": "403:30:8",
               "typeDescriptions": {
-                "typeIdentifier": "t_mapping$_t_uint8_$_t_address_$",
-                "typeString": "mapping(uint8 => address)"
+                "typeIdentifier": "t_mapping$_t_enum$_Characters_$3866_$_t_address_$",
+                "typeString": "mapping(enum Characters => address)"
               },
               "valueType": {
-                "id": 3790,
+                "id": 3876,
                 "name": "address",
                 "nodeType": "ElementaryTypeName",
-                "src": "164:7:8",
+                "src": "425:7:8",
                 "stateMutability": "nonpayable",
                 "typeDescriptions": {
                   "typeIdentifier": "t_address",
@@ -361,14 +461,14 @@
           },
           {
             "body": {
-              "id": 3809,
+              "id": 3895,
               "nodeType": "Block",
-              "src": "265:42:8",
+              "src": "534:42:8",
               "statements": [
                 {
                   "expression": {
                     "argumentTypes": null,
-                    "id": 3807,
+                    "id": 3893,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -379,26 +479,26 @@
                         "argumentTypes": null,
                         "baseExpression": {
                           "argumentTypes": null,
-                          "id": 3801,
+                          "id": 3887,
                           "name": "roles",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 3788,
-                          "src": "275:5:8",
+                          "referencedDeclaration": 3874,
+                          "src": "544:5:8",
                           "typeDescriptions": {
-                            "typeIdentifier": "t_mapping$_t_address_$_t_mapping$_t_uint8_$_t_bool_$_$",
-                            "typeString": "mapping(address => mapping(uint8 => bool))"
+                            "typeIdentifier": "t_mapping$_t_address_$_t_mapping$_t_enum$_ContractRoles_$3859_$_t_bool_$_$",
+                            "typeString": "mapping(address => mapping(enum ContractRoles => bool))"
                           }
                         },
-                        "id": 3804,
+                        "id": 3890,
                         "indexExpression": {
                           "argumentTypes": null,
-                          "id": 3802,
+                          "id": 3888,
                           "name": "actor",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 3794,
-                          "src": "281:5:8",
+                          "referencedDeclaration": 3882,
+                          "src": "550:5:8",
                           "typeDescriptions": {
                             "typeIdentifier": "t_address",
                             "typeString": "address"
@@ -409,24 +509,24 @@
                         "isPure": false,
                         "lValueRequested": false,
                         "nodeType": "IndexAccess",
-                        "src": "275:12:8",
+                        "src": "544:12:8",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_mapping$_t_uint8_$_t_bool_$",
-                          "typeString": "mapping(uint8 => bool)"
+                          "typeIdentifier": "t_mapping$_t_enum$_ContractRoles_$3859_$_t_bool_$",
+                          "typeString": "mapping(enum ContractRoles => bool)"
                         }
                       },
-                      "id": 3805,
+                      "id": 3891,
                       "indexExpression": {
                         "argumentTypes": null,
-                        "id": 3803,
+                        "id": 3889,
                         "name": "role",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 3796,
-                        "src": "288:4:8",
+                        "referencedDeclaration": 3880,
+                        "src": "557:4:8",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_uint8",
-                          "typeString": "uint8"
+                          "typeIdentifier": "t_enum$_ContractRoles_$3859",
+                          "typeString": "enum ContractRoles"
                         }
                       },
                       "isConstant": false,
@@ -434,7 +534,7 @@
                       "isPure": false,
                       "lValueRequested": true,
                       "nodeType": "IndexAccess",
-                      "src": "275:18:8",
+                      "src": "544:18:8",
                       "typeDescriptions": {
                         "typeIdentifier": "t_bool",
                         "typeString": "bool"
@@ -445,14 +545,14 @@
                     "rightHandSide": {
                       "argumentTypes": null,
                       "hexValue": "74727565",
-                      "id": 3806,
+                      "id": 3892,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": true,
                       "kind": "bool",
                       "lValueRequested": false,
                       "nodeType": "Literal",
-                      "src": "296:4:8",
+                      "src": "565:4:8",
                       "subdenomination": null,
                       "typeDescriptions": {
                         "typeIdentifier": "t_bool",
@@ -460,60 +560,90 @@
                       },
                       "value": "true"
                     },
-                    "src": "275:25:8",
+                    "src": "544:25:8",
                     "typeDescriptions": {
                       "typeIdentifier": "t_bool",
                       "typeString": "bool"
                     }
                   },
-                  "id": 3808,
+                  "id": 3894,
                   "nodeType": "ExpressionStatement",
-                  "src": "275:25:8"
+                  "src": "544:25:8"
                 }
               ]
             },
             "documentation": null,
-            "functionSelector": "9928253d",
-            "id": 3810,
+            "functionSelector": "46cd9bd1",
+            "id": 3896,
             "implemented": true,
             "kind": "function",
             "modifiers": [
               {
                 "arguments": null,
-                "id": 3799,
+                "id": 3885,
                 "modifierName": {
                   "argumentTypes": null,
-                  "id": 3798,
+                  "id": 3884,
                   "name": "onlyOwner",
                   "nodeType": "Identifier",
                   "overloadedDeclarations": [],
-                  "referencedDeclaration": 4434,
-                  "src": "255:9:8",
+                  "referencedDeclaration": 4821,
+                  "src": "524:9:8",
                   "typeDescriptions": {
                     "typeIdentifier": "t_modifier$__$",
                     "typeString": "modifier ()"
                   }
                 },
                 "nodeType": "ModifierInvocation",
-                "src": "255:9:8"
+                "src": "524:9:8"
               }
             ],
             "name": "giveRole",
             "nodeType": "FunctionDefinition",
             "overrides": null,
             "parameters": {
-              "id": 3797,
+              "id": 3883,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 3794,
+                  "id": 3880,
+                  "mutability": "mutable",
+                  "name": "role",
+                  "nodeType": "VariableDeclaration",
+                  "overrides": null,
+                  "scope": 3896,
+                  "src": "480:18:8",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_enum$_ContractRoles_$3859",
+                    "typeString": "enum ContractRoles"
+                  },
+                  "typeName": {
+                    "contractScope": null,
+                    "id": 3879,
+                    "name": "ContractRoles",
+                    "nodeType": "UserDefinedTypeName",
+                    "referencedDeclaration": 3859,
+                    "src": "480:13:8",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_enum$_ContractRoles_$3859",
+                      "typeString": "enum ContractRoles"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 3882,
                   "mutability": "mutable",
                   "name": "actor",
                   "nodeType": "VariableDeclaration",
                   "overrides": null,
-                  "scope": 3810,
-                  "src": "219:13:8",
+                  "scope": 3896,
+                  "src": "500:13:8",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -521,10 +651,10 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 3793,
+                    "id": 3881,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "219:7:8",
+                    "src": "500:7:8",
                     "stateMutability": "nonpayable",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
@@ -533,60 +663,32 @@
                   },
                   "value": null,
                   "visibility": "internal"
-                },
-                {
-                  "constant": false,
-                  "id": 3796,
-                  "mutability": "mutable",
-                  "name": "role",
-                  "nodeType": "VariableDeclaration",
-                  "overrides": null,
-                  "scope": 3810,
-                  "src": "234:10:8",
-                  "stateVariable": false,
-                  "storageLocation": "default",
-                  "typeDescriptions": {
-                    "typeIdentifier": "t_uint8",
-                    "typeString": "uint8"
-                  },
-                  "typeName": {
-                    "id": 3795,
-                    "name": "uint8",
-                    "nodeType": "ElementaryTypeName",
-                    "src": "234:5:8",
-                    "typeDescriptions": {
-                      "typeIdentifier": "t_uint8",
-                      "typeString": "uint8"
-                    }
-                  },
-                  "value": null,
-                  "visibility": "internal"
                 }
               ],
-              "src": "218:27:8"
+              "src": "479:35:8"
             },
             "returnParameters": {
-              "id": 3800,
+              "id": 3886,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "265:0:8"
+              "src": "534:0:8"
             },
-            "scope": 3861,
-            "src": "201:106:8",
+            "scope": 3947,
+            "src": "462:114:8",
             "stateMutability": "nonpayable",
             "virtual": false,
             "visibility": "external"
           },
           {
             "body": {
-              "id": 3827,
+              "id": 3913,
               "nodeType": "Block",
-              "src": "379:43:8",
+              "src": "656:43:8",
               "statements": [
                 {
                   "expression": {
                     "argumentTypes": null,
-                    "id": 3825,
+                    "id": 3911,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -597,26 +699,26 @@
                         "argumentTypes": null,
                         "baseExpression": {
                           "argumentTypes": null,
-                          "id": 3819,
+                          "id": 3905,
                           "name": "roles",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 3788,
-                          "src": "389:5:8",
+                          "referencedDeclaration": 3874,
+                          "src": "666:5:8",
                           "typeDescriptions": {
-                            "typeIdentifier": "t_mapping$_t_address_$_t_mapping$_t_uint8_$_t_bool_$_$",
-                            "typeString": "mapping(address => mapping(uint8 => bool))"
+                            "typeIdentifier": "t_mapping$_t_address_$_t_mapping$_t_enum$_ContractRoles_$3859_$_t_bool_$_$",
+                            "typeString": "mapping(address => mapping(enum ContractRoles => bool))"
                           }
                         },
-                        "id": 3822,
+                        "id": 3908,
                         "indexExpression": {
                           "argumentTypes": null,
-                          "id": 3820,
+                          "id": 3906,
                           "name": "actor",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 3812,
-                          "src": "395:5:8",
+                          "referencedDeclaration": 3900,
+                          "src": "672:5:8",
                           "typeDescriptions": {
                             "typeIdentifier": "t_address",
                             "typeString": "address"
@@ -627,24 +729,24 @@
                         "isPure": false,
                         "lValueRequested": false,
                         "nodeType": "IndexAccess",
-                        "src": "389:12:8",
+                        "src": "666:12:8",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_mapping$_t_uint8_$_t_bool_$",
-                          "typeString": "mapping(uint8 => bool)"
+                          "typeIdentifier": "t_mapping$_t_enum$_ContractRoles_$3859_$_t_bool_$",
+                          "typeString": "mapping(enum ContractRoles => bool)"
                         }
                       },
-                      "id": 3823,
+                      "id": 3909,
                       "indexExpression": {
                         "argumentTypes": null,
-                        "id": 3821,
+                        "id": 3907,
                         "name": "role",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 3814,
-                        "src": "402:4:8",
+                        "referencedDeclaration": 3898,
+                        "src": "679:4:8",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_uint8",
-                          "typeString": "uint8"
+                          "typeIdentifier": "t_enum$_ContractRoles_$3859",
+                          "typeString": "enum ContractRoles"
                         }
                       },
                       "isConstant": false,
@@ -652,7 +754,7 @@
                       "isPure": false,
                       "lValueRequested": true,
                       "nodeType": "IndexAccess",
-                      "src": "389:18:8",
+                      "src": "666:18:8",
                       "typeDescriptions": {
                         "typeIdentifier": "t_bool",
                         "typeString": "bool"
@@ -663,14 +765,14 @@
                     "rightHandSide": {
                       "argumentTypes": null,
                       "hexValue": "66616c7365",
-                      "id": 3824,
+                      "id": 3910,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": true,
                       "kind": "bool",
                       "lValueRequested": false,
                       "nodeType": "Literal",
-                      "src": "410:5:8",
+                      "src": "687:5:8",
                       "subdenomination": null,
                       "typeDescriptions": {
                         "typeIdentifier": "t_bool",
@@ -678,60 +780,90 @@
                       },
                       "value": "false"
                     },
-                    "src": "389:26:8",
+                    "src": "666:26:8",
                     "typeDescriptions": {
                       "typeIdentifier": "t_bool",
                       "typeString": "bool"
                     }
                   },
-                  "id": 3826,
+                  "id": 3912,
                   "nodeType": "ExpressionStatement",
-                  "src": "389:26:8"
+                  "src": "666:26:8"
                 }
               ]
             },
             "documentation": null,
-            "functionSelector": "b74866fb",
-            "id": 3828,
+            "functionSelector": "8a1713c6",
+            "id": 3914,
             "implemented": true,
             "kind": "function",
             "modifiers": [
               {
                 "arguments": null,
-                "id": 3817,
+                "id": 3903,
                 "modifierName": {
                   "argumentTypes": null,
-                  "id": 3816,
+                  "id": 3902,
                   "name": "onlyOwner",
                   "nodeType": "Identifier",
                   "overloadedDeclarations": [],
-                  "referencedDeclaration": 4434,
-                  "src": "369:9:8",
+                  "referencedDeclaration": 4821,
+                  "src": "646:9:8",
                   "typeDescriptions": {
                     "typeIdentifier": "t_modifier$__$",
                     "typeString": "modifier ()"
                   }
                 },
                 "nodeType": "ModifierInvocation",
-                "src": "369:9:8"
+                "src": "646:9:8"
               }
             ],
             "name": "removeRole",
             "nodeType": "FunctionDefinition",
             "overrides": null,
             "parameters": {
-              "id": 3815,
+              "id": 3901,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 3812,
+                  "id": 3898,
+                  "mutability": "mutable",
+                  "name": "role",
+                  "nodeType": "VariableDeclaration",
+                  "overrides": null,
+                  "scope": 3914,
+                  "src": "602:18:8",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_enum$_ContractRoles_$3859",
+                    "typeString": "enum ContractRoles"
+                  },
+                  "typeName": {
+                    "contractScope": null,
+                    "id": 3897,
+                    "name": "ContractRoles",
+                    "nodeType": "UserDefinedTypeName",
+                    "referencedDeclaration": 3859,
+                    "src": "602:13:8",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_enum$_ContractRoles_$3859",
+                      "typeString": "enum ContractRoles"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 3900,
                   "mutability": "mutable",
                   "name": "actor",
                   "nodeType": "VariableDeclaration",
                   "overrides": null,
-                  "scope": 3828,
-                  "src": "333:13:8",
+                  "scope": 3914,
+                  "src": "622:13:8",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -739,10 +871,10 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 3811,
+                    "id": 3899,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "333:7:8",
+                    "src": "622:7:8",
                     "stateMutability": "nonpayable",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
@@ -751,60 +883,32 @@
                   },
                   "value": null,
                   "visibility": "internal"
-                },
-                {
-                  "constant": false,
-                  "id": 3814,
-                  "mutability": "mutable",
-                  "name": "role",
-                  "nodeType": "VariableDeclaration",
-                  "overrides": null,
-                  "scope": 3828,
-                  "src": "348:10:8",
-                  "stateVariable": false,
-                  "storageLocation": "default",
-                  "typeDescriptions": {
-                    "typeIdentifier": "t_uint8",
-                    "typeString": "uint8"
-                  },
-                  "typeName": {
-                    "id": 3813,
-                    "name": "uint8",
-                    "nodeType": "ElementaryTypeName",
-                    "src": "348:5:8",
-                    "typeDescriptions": {
-                      "typeIdentifier": "t_uint8",
-                      "typeString": "uint8"
-                    }
-                  },
-                  "value": null,
-                  "visibility": "internal"
                 }
               ],
-              "src": "332:27:8"
+              "src": "601:35:8"
             },
             "returnParameters": {
-              "id": 3818,
+              "id": 3904,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "379:0:8"
+              "src": "656:0:8"
             },
-            "scope": 3861,
-            "src": "313:109:8",
+            "scope": 3947,
+            "src": "582:117:8",
             "stateMutability": "nonpayable",
             "virtual": false,
             "visibility": "external"
           },
           {
             "body": {
-              "id": 3843,
+              "id": 3929,
               "nodeType": "Block",
-              "src": "500:45:8",
+              "src": "782:45:8",
               "statements": [
                 {
                   "expression": {
                     "argumentTypes": null,
-                    "id": 3841,
+                    "id": 3927,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -813,29 +917,29 @@
                       "argumentTypes": null,
                       "baseExpression": {
                         "argumentTypes": null,
-                        "id": 3837,
+                        "id": 3923,
                         "name": "mainCharacters",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 3792,
-                        "src": "510:14:8",
+                        "referencedDeclaration": 3878,
+                        "src": "792:14:8",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_mapping$_t_uint8_$_t_address_$",
-                          "typeString": "mapping(uint8 => address)"
+                          "typeIdentifier": "t_mapping$_t_enum$_Characters_$3866_$_t_address_$",
+                          "typeString": "mapping(enum Characters => address)"
                         }
                       },
-                      "id": 3839,
+                      "id": 3925,
                       "indexExpression": {
                         "argumentTypes": null,
-                        "id": 3838,
+                        "id": 3924,
                         "name": "role",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 3830,
-                        "src": "525:4:8",
+                        "referencedDeclaration": 3916,
+                        "src": "807:4:8",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_uint8",
-                          "typeString": "uint8"
+                          "typeIdentifier": "t_enum$_Characters_$3866",
+                          "typeString": "enum Characters"
                         }
                       },
                       "isConstant": false,
@@ -843,7 +947,7 @@
                       "isPure": false,
                       "lValueRequested": true,
                       "nodeType": "IndexAccess",
-                      "src": "510:20:8",
+                      "src": "792:20:8",
                       "typeDescriptions": {
                         "typeIdentifier": "t_address",
                         "typeString": "address"
@@ -853,85 +957,87 @@
                     "operator": "=",
                     "rightHandSide": {
                       "argumentTypes": null,
-                      "id": 3840,
+                      "id": 3926,
                       "name": "actor",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 3832,
-                      "src": "533:5:8",
+                      "referencedDeclaration": 3918,
+                      "src": "815:5:8",
                       "typeDescriptions": {
                         "typeIdentifier": "t_address",
                         "typeString": "address"
                       }
                     },
-                    "src": "510:28:8",
+                    "src": "792:28:8",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
                       "typeString": "address"
                     }
                   },
-                  "id": 3842,
+                  "id": 3928,
                   "nodeType": "ExpressionStatement",
-                  "src": "510:28:8"
+                  "src": "792:28:8"
                 }
               ]
             },
             "documentation": null,
             "functionSelector": "3f1609ef",
-            "id": 3844,
+            "id": 3930,
             "implemented": true,
             "kind": "function",
             "modifiers": [
               {
                 "arguments": null,
-                "id": 3835,
+                "id": 3921,
                 "modifierName": {
                   "argumentTypes": null,
-                  "id": 3834,
+                  "id": 3920,
                   "name": "onlyOwner",
                   "nodeType": "Identifier",
                   "overloadedDeclarations": [],
-                  "referencedDeclaration": 4434,
-                  "src": "490:9:8",
+                  "referencedDeclaration": 4821,
+                  "src": "772:9:8",
                   "typeDescriptions": {
                     "typeIdentifier": "t_modifier$__$",
                     "typeString": "modifier ()"
                   }
                 },
                 "nodeType": "ModifierInvocation",
-                "src": "490:9:8"
+                "src": "772:9:8"
               }
             ],
             "name": "setMainCharacter",
             "nodeType": "FunctionDefinition",
             "overrides": null,
             "parameters": {
-              "id": 3833,
+              "id": 3919,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 3830,
+                  "id": 3916,
                   "mutability": "mutable",
                   "name": "role",
                   "nodeType": "VariableDeclaration",
                   "overrides": null,
-                  "scope": 3844,
-                  "src": "454:10:8",
+                  "scope": 3930,
+                  "src": "731:15:8",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_uint8",
-                    "typeString": "uint8"
+                    "typeIdentifier": "t_enum$_Characters_$3866",
+                    "typeString": "enum Characters"
                   },
                   "typeName": {
-                    "id": 3829,
-                    "name": "uint8",
-                    "nodeType": "ElementaryTypeName",
-                    "src": "454:5:8",
+                    "contractScope": null,
+                    "id": 3915,
+                    "name": "Characters",
+                    "nodeType": "UserDefinedTypeName",
+                    "referencedDeclaration": 3866,
+                    "src": "731:10:8",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_uint8",
-                      "typeString": "uint8"
+                      "typeIdentifier": "t_enum$_Characters_$3866",
+                      "typeString": "enum Characters"
                     }
                   },
                   "value": null,
@@ -939,13 +1045,13 @@
                 },
                 {
                   "constant": false,
-                  "id": 3832,
+                  "id": 3918,
                   "mutability": "mutable",
                   "name": "actor",
                   "nodeType": "VariableDeclaration",
                   "overrides": null,
-                  "scope": 3844,
-                  "src": "466:13:8",
+                  "scope": 3930,
+                  "src": "748:13:8",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -953,10 +1059,10 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 3831,
+                    "id": 3917,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "466:7:8",
+                    "src": "748:7:8",
                     "stateMutability": "nonpayable",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
@@ -967,25 +1073,25 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "453:27:8"
+              "src": "730:32:8"
             },
             "returnParameters": {
-              "id": 3836,
+              "id": 3922,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "500:0:8"
+              "src": "782:0:8"
             },
-            "scope": 3861,
-            "src": "428:117:8",
+            "scope": 3947,
+            "src": "705:122:8",
             "stateMutability": "nonpayable",
             "virtual": false,
             "visibility": "external"
           },
           {
             "body": {
-              "id": 3859,
+              "id": 3945,
               "nodeType": "Block",
-              "src": "624:42:8",
+              "src": "914:42:8",
               "statements": [
                 {
                   "expression": {
@@ -994,26 +1100,26 @@
                       "argumentTypes": null,
                       "baseExpression": {
                         "argumentTypes": null,
-                        "id": 3853,
+                        "id": 3939,
                         "name": "roles",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 3788,
-                        "src": "641:5:8",
+                        "referencedDeclaration": 3874,
+                        "src": "931:5:8",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_mapping$_t_address_$_t_mapping$_t_uint8_$_t_bool_$_$",
-                          "typeString": "mapping(address => mapping(uint8 => bool))"
+                          "typeIdentifier": "t_mapping$_t_address_$_t_mapping$_t_enum$_ContractRoles_$3859_$_t_bool_$_$",
+                          "typeString": "mapping(address => mapping(enum ContractRoles => bool))"
                         }
                       },
-                      "id": 3855,
+                      "id": 3941,
                       "indexExpression": {
                         "argumentTypes": null,
-                        "id": 3854,
+                        "id": 3940,
                         "name": "contr",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 3846,
-                        "src": "647:5:8",
+                        "referencedDeclaration": 3932,
+                        "src": "937:5:8",
                         "typeDescriptions": {
                           "typeIdentifier": "t_address",
                           "typeString": "address"
@@ -1024,24 +1130,24 @@
                       "isPure": false,
                       "lValueRequested": false,
                       "nodeType": "IndexAccess",
-                      "src": "641:12:8",
+                      "src": "931:12:8",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_mapping$_t_uint8_$_t_bool_$",
-                        "typeString": "mapping(uint8 => bool)"
+                        "typeIdentifier": "t_mapping$_t_enum$_ContractRoles_$3859_$_t_bool_$",
+                        "typeString": "mapping(enum ContractRoles => bool)"
                       }
                     },
-                    "id": 3857,
+                    "id": 3943,
                     "indexExpression": {
                       "argumentTypes": null,
-                      "id": 3856,
+                      "id": 3942,
                       "name": "role",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 3848,
-                      "src": "654:4:8",
+                      "referencedDeclaration": 3934,
+                      "src": "944:4:8",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_uint8",
-                        "typeString": "uint8"
+                        "typeIdentifier": "t_enum$_ContractRoles_$3859",
+                        "typeString": "enum ContractRoles"
                       }
                     },
                     "isConstant": false,
@@ -1049,22 +1155,22 @@
                     "isPure": false,
                     "lValueRequested": false,
                     "nodeType": "IndexAccess",
-                    "src": "641:18:8",
+                    "src": "931:18:8",
                     "typeDescriptions": {
                       "typeIdentifier": "t_bool",
                       "typeString": "bool"
                     }
                   },
-                  "functionReturnParameters": 3852,
-                  "id": 3858,
+                  "functionReturnParameters": 3938,
+                  "id": 3944,
                   "nodeType": "Return",
-                  "src": "634:25:8"
+                  "src": "924:25:8"
                 }
               ]
             },
             "documentation": null,
             "functionSelector": "a716b97f",
-            "id": 3860,
+            "id": 3946,
             "implemented": true,
             "kind": "function",
             "modifiers": [],
@@ -1072,18 +1178,18 @@
             "nodeType": "FunctionDefinition",
             "overrides": null,
             "parameters": {
-              "id": 3849,
+              "id": 3935,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 3846,
+                  "id": 3932,
                   "mutability": "mutable",
                   "name": "contr",
                   "nodeType": "VariableDeclaration",
                   "overrides": null,
-                  "scope": 3860,
-                  "src": "568:13:8",
+                  "scope": 3946,
+                  "src": "850:13:8",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -1091,10 +1197,10 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 3845,
+                    "id": 3931,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "568:7:8",
+                    "src": "850:7:8",
                     "stateMutability": "nonpayable",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
@@ -1106,48 +1212,50 @@
                 },
                 {
                   "constant": false,
-                  "id": 3848,
+                  "id": 3934,
                   "mutability": "mutable",
                   "name": "role",
                   "nodeType": "VariableDeclaration",
                   "overrides": null,
-                  "scope": 3860,
-                  "src": "583:10:8",
+                  "scope": 3946,
+                  "src": "865:18:8",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_uint8",
-                    "typeString": "uint8"
+                    "typeIdentifier": "t_enum$_ContractRoles_$3859",
+                    "typeString": "enum ContractRoles"
                   },
                   "typeName": {
-                    "id": 3847,
-                    "name": "uint8",
-                    "nodeType": "ElementaryTypeName",
-                    "src": "583:5:8",
+                    "contractScope": null,
+                    "id": 3933,
+                    "name": "ContractRoles",
+                    "nodeType": "UserDefinedTypeName",
+                    "referencedDeclaration": 3859,
+                    "src": "865:13:8",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_uint8",
-                      "typeString": "uint8"
+                      "typeIdentifier": "t_enum$_ContractRoles_$3859",
+                      "typeString": "enum ContractRoles"
                     }
                   },
                   "value": null,
                   "visibility": "internal"
                 }
               ],
-              "src": "567:27:8"
+              "src": "849:35:8"
             },
             "returnParameters": {
-              "id": 3852,
+              "id": 3938,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 3851,
+                  "id": 3937,
                   "mutability": "mutable",
                   "name": "",
                   "nodeType": "VariableDeclaration",
                   "overrides": null,
-                  "scope": 3860,
-                  "src": "618:4:8",
+                  "scope": 3946,
+                  "src": "908:4:8",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -1155,10 +1263,10 @@
                     "typeString": "bool"
                   },
                   "typeName": {
-                    "id": 3850,
+                    "id": 3936,
                     "name": "bool",
                     "nodeType": "ElementaryTypeName",
-                    "src": "618:4:8",
+                    "src": "908:4:8",
                     "typeDescriptions": {
                       "typeIdentifier": "t_bool",
                       "typeString": "bool"
@@ -1168,27 +1276,33 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "617:6:8"
+              "src": "907:6:8"
             },
-            "scope": 3861,
-            "src": "551:115:8",
+            "scope": 3947,
+            "src": "833:123:8",
             "stateMutability": "view",
             "virtual": false,
             "visibility": "external"
           }
         ],
-        "scope": 3862,
-        "src": "54:614:8"
+        "scope": 3948,
+        "src": "302:656:8"
       }
     ],
-    "src": "0:763:8"
+    "src": "0:959:8"
   },
   "legacyAST": {
     "attributes": {
       "absolutePath": "/home/tixelbook/projects/marginswap-core/contracts/Roles.sol",
       "exportedSymbols": {
+        "Characters": [
+          3866
+        ],
+        "ContractRoles": [
+          3859
+        ],
         "Roles": [
-          3861
+          3947
         ]
       },
       "license": null
@@ -1196,36 +1310,154 @@
     "children": [
       {
         "attributes": {
-          "SourceUnit": 4486,
+          "SourceUnit": 4873,
           "absolutePath": "@openzeppelin/contracts/access/Ownable.sol",
           "file": "@openzeppelin/contracts/access/Ownable.sol",
-          "scope": 3862,
+          "scope": 3948,
           "symbolAliases": [
             null
           ],
           "unitAlias": ""
         },
-        "id": 3780,
+        "id": 3852,
         "name": "ImportDirective",
         "src": "0:52:8"
       },
       {
         "attributes": {
+          "canonicalName": "ContractRoles",
+          "name": "ContractRoles"
+        },
+        "children": [
+          {
+            "attributes": {
+              "name": "WITHDRAWER"
+            },
+            "id": 3853,
+            "name": "EnumValue",
+            "src": "79:10:8"
+          },
+          {
+            "attributes": {
+              "name": "MARGIN_CALLER"
+            },
+            "id": 3854,
+            "name": "EnumValue",
+            "src": "95:13:8"
+          },
+          {
+            "attributes": {
+              "name": "BORROWER"
+            },
+            "id": 3855,
+            "name": "EnumValue",
+            "src": "114:8:8"
+          },
+          {
+            "attributes": {
+              "name": "MARGIN_TRADER"
+            },
+            "id": 3856,
+            "name": "EnumValue",
+            "src": "128:13:8"
+          },
+          {
+            "attributes": {
+              "name": "FEE_SOURCE"
+            },
+            "id": 3857,
+            "name": "EnumValue",
+            "src": "147:10:8"
+          },
+          {
+            "attributes": {
+              "name": "INSURANCE_CLAIMANT"
+            },
+            "id": 3858,
+            "name": "EnumValue",
+            "src": "163:18:8"
+          }
+        ],
+        "id": 3859,
+        "name": "EnumDefinition",
+        "src": "54:129:8"
+      },
+      {
+        "attributes": {
+          "canonicalName": "Characters",
+          "name": "Characters"
+        },
+        "children": [
+          {
+            "attributes": {
+              "name": "FUND"
+            },
+            "id": 3860,
+            "name": "EnumValue",
+            "src": "207:4:8"
+          },
+          {
+            "attributes": {
+              "name": "LENDING"
+            },
+            "id": 3861,
+            "name": "EnumValue",
+            "src": "217:7:8"
+          },
+          {
+            "attributes": {
+              "name": "ROUTER"
+            },
+            "id": 3862,
+            "name": "EnumValue",
+            "src": "230:6:8"
+          },
+          {
+            "attributes": {
+              "name": "MARGIN_TRADING"
+            },
+            "id": 3863,
+            "name": "EnumValue",
+            "src": "242:14:8"
+          },
+          {
+            "attributes": {
+              "name": "FEE_CONTROLLER"
+            },
+            "id": 3864,
+            "name": "EnumValue",
+            "src": "262:14:8"
+          },
+          {
+            "attributes": {
+              "name": "PRICE_CONTROLLER"
+            },
+            "id": 3865,
+            "name": "EnumValue",
+            "src": "282:16:8"
+          }
+        ],
+        "id": 3866,
+        "name": "EnumDefinition",
+        "src": "185:115:8"
+      },
+      {
+        "attributes": {
           "abstract": false,
           "contractDependencies": [
-            4376,
-            4485
+            4763,
+            4872
           ],
           "contractKind": "contract",
           "documentation": null,
           "fullyImplemented": true,
           "linearizedBaseContracts": [
-            3861,
-            4485,
-            4376
+            3947,
+            4872,
+            4763
           ],
           "name": "Roles",
-          "scope": 3862
+          "scope": 3948
         },
         "children": [
           {
@@ -1237,17 +1469,17 @@
                 "attributes": {
                   "contractScope": null,
                   "name": "Ownable",
-                  "referencedDeclaration": 4485,
+                  "referencedDeclaration": 4872,
                   "type": "contract Ownable"
                 },
-                "id": 3781,
+                "id": 3867,
                 "name": "UserDefinedTypeName",
-                "src": "72:7:8"
+                "src": "320:7:8"
               }
             ],
-            "id": 3782,
+            "id": 3868,
             "name": "InheritanceSpecifier",
-            "src": "72:7:8"
+            "src": "320:7:8"
           },
           {
             "attributes": {
@@ -1256,17 +1488,17 @@
               "mutability": "mutable",
               "name": "roles",
               "overrides": null,
-              "scope": 3861,
+              "scope": 3947,
               "stateVariable": true,
               "storageLocation": "default",
-              "type": "mapping(address => mapping(uint8 => bool))",
+              "type": "mapping(address => mapping(enum ContractRoles => bool))",
               "value": null,
               "visibility": "public"
             },
             "children": [
               {
                 "attributes": {
-                  "type": "mapping(address => mapping(uint8 => bool))"
+                  "type": "mapping(address => mapping(enum ContractRoles => bool))"
                 },
                 "children": [
                   {
@@ -1274,47 +1506,49 @@
                       "name": "address",
                       "type": "address"
                     },
-                    "id": 3783,
+                    "id": 3869,
                     "name": "ElementaryTypeName",
-                    "src": "94:7:8"
+                    "src": "342:7:8"
                   },
                   {
                     "attributes": {
-                      "type": "mapping(uint8 => bool)"
+                      "type": "mapping(enum ContractRoles => bool)"
                     },
                     "children": [
                       {
                         "attributes": {
-                          "name": "uint8",
-                          "type": "uint8"
+                          "contractScope": null,
+                          "name": "ContractRoles",
+                          "referencedDeclaration": 3859,
+                          "type": "enum ContractRoles"
                         },
-                        "id": 3784,
-                        "name": "ElementaryTypeName",
-                        "src": "113:5:8"
+                        "id": 3870,
+                        "name": "UserDefinedTypeName",
+                        "src": "361:13:8"
                       },
                       {
                         "attributes": {
                           "name": "bool",
                           "type": "bool"
                         },
-                        "id": 3785,
+                        "id": 3871,
                         "name": "ElementaryTypeName",
-                        "src": "122:4:8"
+                        "src": "378:4:8"
                       }
                     ],
-                    "id": 3786,
+                    "id": 3872,
                     "name": "Mapping",
-                    "src": "105:22:8"
+                    "src": "353:30:8"
                   }
                 ],
-                "id": 3787,
+                "id": 3873,
                 "name": "Mapping",
-                "src": "86:42:8"
+                "src": "334:50:8"
               }
             ],
-            "id": 3788,
+            "id": 3874,
             "name": "VariableDeclaration",
-            "src": "86:55:8"
+            "src": "334:63:8"
           },
           {
             "attributes": {
@@ -1323,27 +1557,29 @@
               "mutability": "mutable",
               "name": "mainCharacters",
               "overrides": null,
-              "scope": 3861,
+              "scope": 3947,
               "stateVariable": true,
               "storageLocation": "default",
-              "type": "mapping(uint8 => address)",
+              "type": "mapping(enum Characters => address)",
               "value": null,
               "visibility": "public"
             },
             "children": [
               {
                 "attributes": {
-                  "type": "mapping(uint8 => address)"
+                  "type": "mapping(enum Characters => address)"
                 },
                 "children": [
                   {
                     "attributes": {
-                      "name": "uint8",
-                      "type": "uint8"
+                      "contractScope": null,
+                      "name": "Characters",
+                      "referencedDeclaration": 3866,
+                      "type": "enum Characters"
                     },
-                    "id": 3789,
-                    "name": "ElementaryTypeName",
-                    "src": "155:5:8"
+                    "id": 3875,
+                    "name": "UserDefinedTypeName",
+                    "src": "411:10:8"
                   },
                   {
                     "attributes": {
@@ -1351,30 +1587,30 @@
                       "stateMutability": "nonpayable",
                       "type": "address"
                     },
-                    "id": 3790,
+                    "id": 3876,
                     "name": "ElementaryTypeName",
-                    "src": "164:7:8"
+                    "src": "425:7:8"
                   }
                 ],
-                "id": 3791,
+                "id": 3877,
                 "name": "Mapping",
-                "src": "147:25:8"
+                "src": "403:30:8"
               }
             ],
-            "id": 3792,
+            "id": 3878,
             "name": "VariableDeclaration",
-            "src": "147:47:8"
+            "src": "403:52:8"
           },
           {
             "attributes": {
               "documentation": null,
-              "functionSelector": "9928253d",
+              "functionSelector": "46cd9bd1",
               "implemented": true,
               "isConstructor": false,
               "kind": "function",
               "name": "giveRole",
               "overrides": null,
-              "scope": 3861,
+              "scope": 3947,
               "stateMutability": "nonpayable",
               "virtual": false,
               "visibility": "external"
@@ -1386,9 +1622,39 @@
                     "attributes": {
                       "constant": false,
                       "mutability": "mutable",
+                      "name": "role",
+                      "overrides": null,
+                      "scope": 3896,
+                      "stateVariable": false,
+                      "storageLocation": "default",
+                      "type": "enum ContractRoles",
+                      "value": null,
+                      "visibility": "internal"
+                    },
+                    "children": [
+                      {
+                        "attributes": {
+                          "contractScope": null,
+                          "name": "ContractRoles",
+                          "referencedDeclaration": 3859,
+                          "type": "enum ContractRoles"
+                        },
+                        "id": 3879,
+                        "name": "UserDefinedTypeName",
+                        "src": "480:13:8"
+                      }
+                    ],
+                    "id": 3880,
+                    "name": "VariableDeclaration",
+                    "src": "480:18:8"
+                  },
+                  {
+                    "attributes": {
+                      "constant": false,
+                      "mutability": "mutable",
                       "name": "actor",
                       "overrides": null,
-                      "scope": 3810,
+                      "scope": 3896,
                       "stateVariable": false,
                       "storageLocation": "default",
                       "type": "address",
@@ -1402,47 +1668,19 @@
                           "stateMutability": "nonpayable",
                           "type": "address"
                         },
-                        "id": 3793,
+                        "id": 3881,
                         "name": "ElementaryTypeName",
-                        "src": "219:7:8"
+                        "src": "500:7:8"
                       }
                     ],
-                    "id": 3794,
+                    "id": 3882,
                     "name": "VariableDeclaration",
-                    "src": "219:13:8"
-                  },
-                  {
-                    "attributes": {
-                      "constant": false,
-                      "mutability": "mutable",
-                      "name": "role",
-                      "overrides": null,
-                      "scope": 3810,
-                      "stateVariable": false,
-                      "storageLocation": "default",
-                      "type": "uint8",
-                      "value": null,
-                      "visibility": "internal"
-                    },
-                    "children": [
-                      {
-                        "attributes": {
-                          "name": "uint8",
-                          "type": "uint8"
-                        },
-                        "id": 3795,
-                        "name": "ElementaryTypeName",
-                        "src": "234:5:8"
-                      }
-                    ],
-                    "id": 3796,
-                    "name": "VariableDeclaration",
-                    "src": "234:10:8"
+                    "src": "500:13:8"
                   }
                 ],
-                "id": 3797,
+                "id": 3883,
                 "name": "ParameterList",
-                "src": "218:27:8"
+                "src": "479:35:8"
               },
               {
                 "attributes": {
@@ -1451,9 +1689,9 @@
                   ]
                 },
                 "children": [],
-                "id": 3800,
+                "id": 3886,
                 "name": "ParameterList",
-                "src": "265:0:8"
+                "src": "534:0:8"
               },
               {
                 "attributes": {
@@ -1466,18 +1704,18 @@
                       "overloadedDeclarations": [
                         null
                       ],
-                      "referencedDeclaration": 4434,
+                      "referencedDeclaration": 4821,
                       "type": "modifier ()",
                       "value": "onlyOwner"
                     },
-                    "id": 3798,
+                    "id": 3884,
                     "name": "Identifier",
-                    "src": "255:9:8"
+                    "src": "524:9:8"
                   }
                 ],
-                "id": 3799,
+                "id": 3885,
                 "name": "ModifierInvocation",
-                "src": "255:9:8"
+                "src": "524:9:8"
               },
               {
                 "children": [
@@ -1511,7 +1749,7 @@
                                   "isLValue": true,
                                   "isPure": false,
                                   "lValueRequested": false,
-                                  "type": "mapping(uint8 => bool)"
+                                  "type": "mapping(enum ContractRoles => bool)"
                                 },
                                 "children": [
                                   {
@@ -1520,13 +1758,13 @@
                                       "overloadedDeclarations": [
                                         null
                                       ],
-                                      "referencedDeclaration": 3788,
-                                      "type": "mapping(address => mapping(uint8 => bool))",
+                                      "referencedDeclaration": 3874,
+                                      "type": "mapping(address => mapping(enum ContractRoles => bool))",
                                       "value": "roles"
                                     },
-                                    "id": 3801,
+                                    "id": 3887,
                                     "name": "Identifier",
-                                    "src": "275:5:8"
+                                    "src": "544:5:8"
                                   },
                                   {
                                     "attributes": {
@@ -1534,18 +1772,18 @@
                                       "overloadedDeclarations": [
                                         null
                                       ],
-                                      "referencedDeclaration": 3794,
+                                      "referencedDeclaration": 3882,
                                       "type": "address",
                                       "value": "actor"
                                     },
-                                    "id": 3802,
+                                    "id": 3888,
                                     "name": "Identifier",
-                                    "src": "281:5:8"
+                                    "src": "550:5:8"
                                   }
                                 ],
-                                "id": 3804,
+                                "id": 3890,
                                 "name": "IndexAccess",
-                                "src": "275:12:8"
+                                "src": "544:12:8"
                               },
                               {
                                 "attributes": {
@@ -1553,18 +1791,18 @@
                                   "overloadedDeclarations": [
                                     null
                                   ],
-                                  "referencedDeclaration": 3796,
-                                  "type": "uint8",
+                                  "referencedDeclaration": 3880,
+                                  "type": "enum ContractRoles",
                                   "value": "role"
                                 },
-                                "id": 3803,
+                                "id": 3889,
                                 "name": "Identifier",
-                                "src": "288:4:8"
+                                "src": "557:4:8"
                               }
                             ],
-                            "id": 3805,
+                            "id": 3891,
                             "name": "IndexAccess",
-                            "src": "275:18:8"
+                            "src": "544:18:8"
                           },
                           {
                             "attributes": {
@@ -1579,40 +1817,40 @@
                               "type": "bool",
                               "value": "true"
                             },
-                            "id": 3806,
+                            "id": 3892,
                             "name": "Literal",
-                            "src": "296:4:8"
+                            "src": "565:4:8"
                           }
                         ],
-                        "id": 3807,
+                        "id": 3893,
                         "name": "Assignment",
-                        "src": "275:25:8"
+                        "src": "544:25:8"
                       }
                     ],
-                    "id": 3808,
+                    "id": 3894,
                     "name": "ExpressionStatement",
-                    "src": "275:25:8"
+                    "src": "544:25:8"
                   }
                 ],
-                "id": 3809,
+                "id": 3895,
                 "name": "Block",
-                "src": "265:42:8"
+                "src": "534:42:8"
               }
             ],
-            "id": 3810,
+            "id": 3896,
             "name": "FunctionDefinition",
-            "src": "201:106:8"
+            "src": "462:114:8"
           },
           {
             "attributes": {
               "documentation": null,
-              "functionSelector": "b74866fb",
+              "functionSelector": "8a1713c6",
               "implemented": true,
               "isConstructor": false,
               "kind": "function",
               "name": "removeRole",
               "overrides": null,
-              "scope": 3861,
+              "scope": 3947,
               "stateMutability": "nonpayable",
               "virtual": false,
               "visibility": "external"
@@ -1624,9 +1862,39 @@
                     "attributes": {
                       "constant": false,
                       "mutability": "mutable",
+                      "name": "role",
+                      "overrides": null,
+                      "scope": 3914,
+                      "stateVariable": false,
+                      "storageLocation": "default",
+                      "type": "enum ContractRoles",
+                      "value": null,
+                      "visibility": "internal"
+                    },
+                    "children": [
+                      {
+                        "attributes": {
+                          "contractScope": null,
+                          "name": "ContractRoles",
+                          "referencedDeclaration": 3859,
+                          "type": "enum ContractRoles"
+                        },
+                        "id": 3897,
+                        "name": "UserDefinedTypeName",
+                        "src": "602:13:8"
+                      }
+                    ],
+                    "id": 3898,
+                    "name": "VariableDeclaration",
+                    "src": "602:18:8"
+                  },
+                  {
+                    "attributes": {
+                      "constant": false,
+                      "mutability": "mutable",
                       "name": "actor",
                       "overrides": null,
-                      "scope": 3828,
+                      "scope": 3914,
                       "stateVariable": false,
                       "storageLocation": "default",
                       "type": "address",
@@ -1640,47 +1908,19 @@
                           "stateMutability": "nonpayable",
                           "type": "address"
                         },
-                        "id": 3811,
+                        "id": 3899,
                         "name": "ElementaryTypeName",
-                        "src": "333:7:8"
+                        "src": "622:7:8"
                       }
                     ],
-                    "id": 3812,
+                    "id": 3900,
                     "name": "VariableDeclaration",
-                    "src": "333:13:8"
-                  },
-                  {
-                    "attributes": {
-                      "constant": false,
-                      "mutability": "mutable",
-                      "name": "role",
-                      "overrides": null,
-                      "scope": 3828,
-                      "stateVariable": false,
-                      "storageLocation": "default",
-                      "type": "uint8",
-                      "value": null,
-                      "visibility": "internal"
-                    },
-                    "children": [
-                      {
-                        "attributes": {
-                          "name": "uint8",
-                          "type": "uint8"
-                        },
-                        "id": 3813,
-                        "name": "ElementaryTypeName",
-                        "src": "348:5:8"
-                      }
-                    ],
-                    "id": 3814,
-                    "name": "VariableDeclaration",
-                    "src": "348:10:8"
+                    "src": "622:13:8"
                   }
                 ],
-                "id": 3815,
+                "id": 3901,
                 "name": "ParameterList",
-                "src": "332:27:8"
+                "src": "601:35:8"
               },
               {
                 "attributes": {
@@ -1689,9 +1929,9 @@
                   ]
                 },
                 "children": [],
-                "id": 3818,
+                "id": 3904,
                 "name": "ParameterList",
-                "src": "379:0:8"
+                "src": "656:0:8"
               },
               {
                 "attributes": {
@@ -1704,18 +1944,18 @@
                       "overloadedDeclarations": [
                         null
                       ],
-                      "referencedDeclaration": 4434,
+                      "referencedDeclaration": 4821,
                       "type": "modifier ()",
                       "value": "onlyOwner"
                     },
-                    "id": 3816,
+                    "id": 3902,
                     "name": "Identifier",
-                    "src": "369:9:8"
+                    "src": "646:9:8"
                   }
                 ],
-                "id": 3817,
+                "id": 3903,
                 "name": "ModifierInvocation",
-                "src": "369:9:8"
+                "src": "646:9:8"
               },
               {
                 "children": [
@@ -1749,7 +1989,7 @@
                                   "isLValue": true,
                                   "isPure": false,
                                   "lValueRequested": false,
-                                  "type": "mapping(uint8 => bool)"
+                                  "type": "mapping(enum ContractRoles => bool)"
                                 },
                                 "children": [
                                   {
@@ -1758,13 +1998,13 @@
                                       "overloadedDeclarations": [
                                         null
                                       ],
-                                      "referencedDeclaration": 3788,
-                                      "type": "mapping(address => mapping(uint8 => bool))",
+                                      "referencedDeclaration": 3874,
+                                      "type": "mapping(address => mapping(enum ContractRoles => bool))",
                                       "value": "roles"
                                     },
-                                    "id": 3819,
+                                    "id": 3905,
                                     "name": "Identifier",
-                                    "src": "389:5:8"
+                                    "src": "666:5:8"
                                   },
                                   {
                                     "attributes": {
@@ -1772,18 +2012,18 @@
                                       "overloadedDeclarations": [
                                         null
                                       ],
-                                      "referencedDeclaration": 3812,
+                                      "referencedDeclaration": 3900,
                                       "type": "address",
                                       "value": "actor"
                                     },
-                                    "id": 3820,
+                                    "id": 3906,
                                     "name": "Identifier",
-                                    "src": "395:5:8"
+                                    "src": "672:5:8"
                                   }
                                 ],
-                                "id": 3822,
+                                "id": 3908,
                                 "name": "IndexAccess",
-                                "src": "389:12:8"
+                                "src": "666:12:8"
                               },
                               {
                                 "attributes": {
@@ -1791,18 +2031,18 @@
                                   "overloadedDeclarations": [
                                     null
                                   ],
-                                  "referencedDeclaration": 3814,
-                                  "type": "uint8",
+                                  "referencedDeclaration": 3898,
+                                  "type": "enum ContractRoles",
                                   "value": "role"
                                 },
-                                "id": 3821,
+                                "id": 3907,
                                 "name": "Identifier",
-                                "src": "402:4:8"
+                                "src": "679:4:8"
                               }
                             ],
-                            "id": 3823,
+                            "id": 3909,
                             "name": "IndexAccess",
-                            "src": "389:18:8"
+                            "src": "666:18:8"
                           },
                           {
                             "attributes": {
@@ -1817,29 +2057,29 @@
                               "type": "bool",
                               "value": "false"
                             },
-                            "id": 3824,
+                            "id": 3910,
                             "name": "Literal",
-                            "src": "410:5:8"
+                            "src": "687:5:8"
                           }
                         ],
-                        "id": 3825,
+                        "id": 3911,
                         "name": "Assignment",
-                        "src": "389:26:8"
+                        "src": "666:26:8"
                       }
                     ],
-                    "id": 3826,
+                    "id": 3912,
                     "name": "ExpressionStatement",
-                    "src": "389:26:8"
+                    "src": "666:26:8"
                   }
                 ],
-                "id": 3827,
+                "id": 3913,
                 "name": "Block",
-                "src": "379:43:8"
+                "src": "656:43:8"
               }
             ],
-            "id": 3828,
+            "id": 3914,
             "name": "FunctionDefinition",
-            "src": "313:109:8"
+            "src": "582:117:8"
           },
           {
             "attributes": {
@@ -1850,7 +2090,7 @@
               "kind": "function",
               "name": "setMainCharacter",
               "overrides": null,
-              "scope": 3861,
+              "scope": 3947,
               "stateMutability": "nonpayable",
               "virtual": false,
               "visibility": "external"
@@ -1864,27 +2104,29 @@
                       "mutability": "mutable",
                       "name": "role",
                       "overrides": null,
-                      "scope": 3844,
+                      "scope": 3930,
                       "stateVariable": false,
                       "storageLocation": "default",
-                      "type": "uint8",
+                      "type": "enum Characters",
                       "value": null,
                       "visibility": "internal"
                     },
                     "children": [
                       {
                         "attributes": {
-                          "name": "uint8",
-                          "type": "uint8"
+                          "contractScope": null,
+                          "name": "Characters",
+                          "referencedDeclaration": 3866,
+                          "type": "enum Characters"
                         },
-                        "id": 3829,
-                        "name": "ElementaryTypeName",
-                        "src": "454:5:8"
+                        "id": 3915,
+                        "name": "UserDefinedTypeName",
+                        "src": "731:10:8"
                       }
                     ],
-                    "id": 3830,
+                    "id": 3916,
                     "name": "VariableDeclaration",
-                    "src": "454:10:8"
+                    "src": "731:15:8"
                   },
                   {
                     "attributes": {
@@ -1892,7 +2134,7 @@
                       "mutability": "mutable",
                       "name": "actor",
                       "overrides": null,
-                      "scope": 3844,
+                      "scope": 3930,
                       "stateVariable": false,
                       "storageLocation": "default",
                       "type": "address",
@@ -1906,19 +2148,19 @@
                           "stateMutability": "nonpayable",
                           "type": "address"
                         },
-                        "id": 3831,
+                        "id": 3917,
                         "name": "ElementaryTypeName",
-                        "src": "466:7:8"
+                        "src": "748:7:8"
                       }
                     ],
-                    "id": 3832,
+                    "id": 3918,
                     "name": "VariableDeclaration",
-                    "src": "466:13:8"
+                    "src": "748:13:8"
                   }
                 ],
-                "id": 3833,
+                "id": 3919,
                 "name": "ParameterList",
-                "src": "453:27:8"
+                "src": "730:32:8"
               },
               {
                 "attributes": {
@@ -1927,9 +2169,9 @@
                   ]
                 },
                 "children": [],
-                "id": 3836,
+                "id": 3922,
                 "name": "ParameterList",
-                "src": "500:0:8"
+                "src": "782:0:8"
               },
               {
                 "attributes": {
@@ -1942,18 +2184,18 @@
                       "overloadedDeclarations": [
                         null
                       ],
-                      "referencedDeclaration": 4434,
+                      "referencedDeclaration": 4821,
                       "type": "modifier ()",
                       "value": "onlyOwner"
                     },
-                    "id": 3834,
+                    "id": 3920,
                     "name": "Identifier",
-                    "src": "490:9:8"
+                    "src": "772:9:8"
                   }
                 ],
-                "id": 3835,
+                "id": 3921,
                 "name": "ModifierInvocation",
-                "src": "490:9:8"
+                "src": "772:9:8"
               },
               {
                 "children": [
@@ -1986,13 +2228,13 @@
                                   "overloadedDeclarations": [
                                     null
                                   ],
-                                  "referencedDeclaration": 3792,
-                                  "type": "mapping(uint8 => address)",
+                                  "referencedDeclaration": 3878,
+                                  "type": "mapping(enum Characters => address)",
                                   "value": "mainCharacters"
                                 },
-                                "id": 3837,
+                                "id": 3923,
                                 "name": "Identifier",
-                                "src": "510:14:8"
+                                "src": "792:14:8"
                               },
                               {
                                 "attributes": {
@@ -2000,18 +2242,18 @@
                                   "overloadedDeclarations": [
                                     null
                                   ],
-                                  "referencedDeclaration": 3830,
-                                  "type": "uint8",
+                                  "referencedDeclaration": 3916,
+                                  "type": "enum Characters",
                                   "value": "role"
                                 },
-                                "id": 3838,
+                                "id": 3924,
                                 "name": "Identifier",
-                                "src": "525:4:8"
+                                "src": "807:4:8"
                               }
                             ],
-                            "id": 3839,
+                            "id": 3925,
                             "name": "IndexAccess",
-                            "src": "510:20:8"
+                            "src": "792:20:8"
                           },
                           {
                             "attributes": {
@@ -2019,33 +2261,33 @@
                               "overloadedDeclarations": [
                                 null
                               ],
-                              "referencedDeclaration": 3832,
+                              "referencedDeclaration": 3918,
                               "type": "address",
                               "value": "actor"
                             },
-                            "id": 3840,
+                            "id": 3926,
                             "name": "Identifier",
-                            "src": "533:5:8"
+                            "src": "815:5:8"
                           }
                         ],
-                        "id": 3841,
+                        "id": 3927,
                         "name": "Assignment",
-                        "src": "510:28:8"
+                        "src": "792:28:8"
                       }
                     ],
-                    "id": 3842,
+                    "id": 3928,
                     "name": "ExpressionStatement",
-                    "src": "510:28:8"
+                    "src": "792:28:8"
                   }
                 ],
-                "id": 3843,
+                "id": 3929,
                 "name": "Block",
-                "src": "500:45:8"
+                "src": "782:45:8"
               }
             ],
-            "id": 3844,
+            "id": 3930,
             "name": "FunctionDefinition",
-            "src": "428:117:8"
+            "src": "705:122:8"
           },
           {
             "attributes": {
@@ -2059,7 +2301,7 @@
               ],
               "name": "getRole",
               "overrides": null,
-              "scope": 3861,
+              "scope": 3947,
               "stateMutability": "view",
               "virtual": false,
               "visibility": "external"
@@ -2073,7 +2315,7 @@
                       "mutability": "mutable",
                       "name": "contr",
                       "overrides": null,
-                      "scope": 3860,
+                      "scope": 3946,
                       "stateVariable": false,
                       "storageLocation": "default",
                       "type": "address",
@@ -2087,14 +2329,14 @@
                           "stateMutability": "nonpayable",
                           "type": "address"
                         },
-                        "id": 3845,
+                        "id": 3931,
                         "name": "ElementaryTypeName",
-                        "src": "568:7:8"
+                        "src": "850:7:8"
                       }
                     ],
-                    "id": 3846,
+                    "id": 3932,
                     "name": "VariableDeclaration",
-                    "src": "568:13:8"
+                    "src": "850:13:8"
                   },
                   {
                     "attributes": {
@@ -2102,32 +2344,34 @@
                       "mutability": "mutable",
                       "name": "role",
                       "overrides": null,
-                      "scope": 3860,
+                      "scope": 3946,
                       "stateVariable": false,
                       "storageLocation": "default",
-                      "type": "uint8",
+                      "type": "enum ContractRoles",
                       "value": null,
                       "visibility": "internal"
                     },
                     "children": [
                       {
                         "attributes": {
-                          "name": "uint8",
-                          "type": "uint8"
+                          "contractScope": null,
+                          "name": "ContractRoles",
+                          "referencedDeclaration": 3859,
+                          "type": "enum ContractRoles"
                         },
-                        "id": 3847,
-                        "name": "ElementaryTypeName",
-                        "src": "583:5:8"
+                        "id": 3933,
+                        "name": "UserDefinedTypeName",
+                        "src": "865:13:8"
                       }
                     ],
-                    "id": 3848,
+                    "id": 3934,
                     "name": "VariableDeclaration",
-                    "src": "583:10:8"
+                    "src": "865:18:8"
                   }
                 ],
-                "id": 3849,
+                "id": 3935,
                 "name": "ParameterList",
-                "src": "567:27:8"
+                "src": "849:35:8"
               },
               {
                 "children": [
@@ -2137,7 +2381,7 @@
                       "mutability": "mutable",
                       "name": "",
                       "overrides": null,
-                      "scope": 3860,
+                      "scope": 3946,
                       "stateVariable": false,
                       "storageLocation": "default",
                       "type": "bool",
@@ -2150,25 +2394,25 @@
                           "name": "bool",
                           "type": "bool"
                         },
-                        "id": 3850,
+                        "id": 3936,
                         "name": "ElementaryTypeName",
-                        "src": "618:4:8"
+                        "src": "908:4:8"
                       }
                     ],
-                    "id": 3851,
+                    "id": 3937,
                     "name": "VariableDeclaration",
-                    "src": "618:4:8"
+                    "src": "908:4:8"
                   }
                 ],
-                "id": 3852,
+                "id": 3938,
                 "name": "ParameterList",
-                "src": "617:6:8"
+                "src": "907:6:8"
               },
               {
                 "children": [
                   {
                     "attributes": {
-                      "functionReturnParameters": 3852
+                      "functionReturnParameters": 3938
                     },
                     "children": [
                       {
@@ -2188,7 +2432,7 @@
                               "isLValue": true,
                               "isPure": false,
                               "lValueRequested": false,
-                              "type": "mapping(uint8 => bool)"
+                              "type": "mapping(enum ContractRoles => bool)"
                             },
                             "children": [
                               {
@@ -2197,13 +2441,13 @@
                                   "overloadedDeclarations": [
                                     null
                                   ],
-                                  "referencedDeclaration": 3788,
-                                  "type": "mapping(address => mapping(uint8 => bool))",
+                                  "referencedDeclaration": 3874,
+                                  "type": "mapping(address => mapping(enum ContractRoles => bool))",
                                   "value": "roles"
                                 },
-                                "id": 3853,
+                                "id": 3939,
                                 "name": "Identifier",
-                                "src": "641:5:8"
+                                "src": "931:5:8"
                               },
                               {
                                 "attributes": {
@@ -2211,18 +2455,18 @@
                                   "overloadedDeclarations": [
                                     null
                                   ],
-                                  "referencedDeclaration": 3846,
+                                  "referencedDeclaration": 3932,
                                   "type": "address",
                                   "value": "contr"
                                 },
-                                "id": 3854,
+                                "id": 3940,
                                 "name": "Identifier",
-                                "src": "647:5:8"
+                                "src": "937:5:8"
                               }
                             ],
-                            "id": 3855,
+                            "id": 3941,
                             "name": "IndexAccess",
-                            "src": "641:12:8"
+                            "src": "931:12:8"
                           },
                           {
                             "attributes": {
@@ -2230,43 +2474,43 @@
                               "overloadedDeclarations": [
                                 null
                               ],
-                              "referencedDeclaration": 3848,
-                              "type": "uint8",
+                              "referencedDeclaration": 3934,
+                              "type": "enum ContractRoles",
                               "value": "role"
                             },
-                            "id": 3856,
+                            "id": 3942,
                             "name": "Identifier",
-                            "src": "654:4:8"
+                            "src": "944:4:8"
                           }
                         ],
-                        "id": 3857,
+                        "id": 3943,
                         "name": "IndexAccess",
-                        "src": "641:18:8"
+                        "src": "931:18:8"
                       }
                     ],
-                    "id": 3858,
+                    "id": 3944,
                     "name": "Return",
-                    "src": "634:25:8"
+                    "src": "924:25:8"
                   }
                 ],
-                "id": 3859,
+                "id": 3945,
                 "name": "Block",
-                "src": "624:42:8"
+                "src": "914:42:8"
               }
             ],
-            "id": 3860,
+            "id": 3946,
             "name": "FunctionDefinition",
-            "src": "551:115:8"
+            "src": "833:123:8"
           }
         ],
-        "id": 3861,
+        "id": 3947,
         "name": "ContractDefinition",
-        "src": "54:614:8"
+        "src": "302:656:8"
       }
     ],
-    "id": 3862,
+    "id": 3948,
     "name": "SourceUnit",
-    "src": "0:763:8"
+    "src": "0:959:8"
   },
   "compiler": {
     "name": "solc",
@@ -2274,7 +2518,7 @@
   },
   "networks": {},
   "schemaVersion": "3.3.3",
-  "updatedAt": "2021-02-13T21:18:49.303Z",
+  "updatedAt": "2021-02-18T02:04:22.107Z",
   "devdoc": {
     "kind": "dev",
     "methods": {
