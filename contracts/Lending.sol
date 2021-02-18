@@ -13,7 +13,7 @@ struct HourlyBondAccount {
     uint256 moduloHour;
 }
 
-contract Lending is RoleAware {
+contract Lending is RoleAware, Ownable {
     uint256 constant FP32 = 2**32;
     uint256 constant ACCUMULATOR_INIT = 10**18;
     uint256 constant WITHDRAWAL_WINDOW = 6 minutes;
@@ -38,7 +38,7 @@ contract Lending is RoleAware {
     uint256 public bondTotalDailyTarget;
     mapping(uint256 => uint256) public dailyMaturing;
 
-    constructor(address _roles) RoleAware(_roles) {}
+    constructor(address _roles) RoleAware(_roles) Ownable() {}
 
     function getUpdatedRate(address token, uint256 runtime) external {
         uint256 supply;

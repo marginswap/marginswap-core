@@ -2,12 +2,12 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "../interfaces/IWETH.sol";
 import "./RoleAware.sol";
 
-contract Fund is RoleAware {
+contract Fund is RoleAware, Ownable {
     address public WETH;
     address[] public approvedTokens;
     mapping(address => bool) public activeTokens;
 
-    constructor(address _WETH, address _roles) RoleAware(_roles) {
+    constructor(address _WETH, address _roles) Ownable() RoleAware(_roles) {
         WETH = _WETH;
     }
 
