@@ -1,4 +1,3 @@
-
 /*
    ____            __   __        __   _
   / __/__ __ ___  / /_ / /  ___  / /_ (_)__ __
@@ -34,19 +33,16 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 */
 
-import '@openzeppelin/contracts/math/Math.sol';
-import '@openzeppelin/contracts/math/SafeMath.sol';
-import '@openzeppelin/contracts/token/ERC20/IERC20.sol';
-import '@openzeppelin/contracts/utils/Address.sol';
-import '@openzeppelin/contracts/token/ERC20/SafeERC20.sol';
+import "@openzeppelin/contracts/math/Math.sol";
+import "@openzeppelin/contracts/math/SafeMath.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts/utils/Address.sol";
+import "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
 
-import '../interfaces/IRewardDistributionRecipient.sol';
-import './LPTokenWrapper.sol';
+import "../interfaces/IRewardDistributionRecipient.sol";
+import "./LPTokenWrapper.sol";
 
-contract IncentiveStaking is
-    LPTokenWrapper,
-    IRewardDistributionRecipient
-{
+contract IncentiveStaking is LPTokenWrapper, IRewardDistributionRecipient {
     using SafeMath for uint256;
     using SafeERC20 for IERC20;
 
@@ -81,7 +77,7 @@ contract IncentiveStaking is
         require(
             block.timestamp >= starttime,
             // TODO rename ?
-            'IncentiveSTaking: not start'
+            "IncentiveSTaking: not start"
         );
         _;
     }
@@ -129,7 +125,7 @@ contract IncentiveStaking is
         updateReward(msg.sender)
         checkStart
     {
-        require(amount > 0, 'IncentiveStaking: Cannot stake 0');
+        require(amount > 0, "IncentiveStaking: Cannot stake 0");
         super.stake(amount);
         emit Staked(msg.sender, amount);
     }
@@ -140,7 +136,7 @@ contract IncentiveStaking is
         updateReward(msg.sender)
         checkStart
     {
-        require(amount > 0, 'IncentiveStaking: Cannot withdraw 0');
+        require(amount > 0, "IncentiveStaking: Cannot withdraw 0");
         super.withdraw(amount);
         emit Withdrawn(msg.sender, amount);
     }

@@ -1,4 +1,4 @@
-import '@openzeppelin/contracts/access/Ownable.sol';
+import "@openzeppelin/contracts/access/Ownable.sol";
 
 abstract contract IRewardDistributionRecipient is Ownable {
     address public rewardDistribution;
@@ -8,7 +8,7 @@ abstract contract IRewardDistributionRecipient is Ownable {
     modifier onlyRewardDistribution() {
         require(
             _msgSender() == rewardDistribution,
-            'Caller is not reward distribution'
+            "Caller is not reward distribution"
         );
         _;
     }
