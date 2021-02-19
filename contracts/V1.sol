@@ -18,6 +18,8 @@ contract V1 is Ownable {
     MarginRouter public marginRouter;
     Price public price;
 
+    event Deployed(address _contract, string _msg);
+
     constructor(
         address targetOwner,
         address WETH,
@@ -28,8 +30,10 @@ contract V1 is Ownable {
         address peg
     ) Ownable() {
         roles = new Roles();
+        emit Deployed(address(roles), "Roles");
 
         fund = new Fund(WETH, address(roles));
+        emit Deployed(address(fund), "Roles");
         fund.transferOwnership(targetOwner);
         roles.setMainCharacter(Characters.FUND, address(fund));
 

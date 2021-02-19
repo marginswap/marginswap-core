@@ -24,6 +24,21 @@
 // const fs = require('fs');
 // const mnemonic = fs.readFileSync(".secret").toString().trim();
 
+function walletProvider(networkName) {
+    const homedir = require('os').homedir();
+    const HDWalletProvider = require('@truffle/hdwallet-provider');
+    const infuraKey = "ae52aea5aa2b41e287d72e10b1175491";
+
+    const fs = require('fs');
+    const privateKey = fs.readFileSync(`${homedir}/.secret`).toString().trim();
+
+    return () => {
+        new HDWalletProvider(
+            privateKey,
+            `https://${networkName}.infura.io/v3/ae52aea5aa2b41e287d72e10b1175491`);
+    }
+}
+
 module.exports = {
   /**
    * Networks define how you connect to your ethereum client and let you set the
@@ -41,7 +56,38 @@ module.exports = {
     // You should run a client (like ganache-cli, geth or parity) in a separate terminal
     // tab if you use this network and you must also set the `host`, `port` and `network_id`
     // options below to some value.
-    //
+      //
+      
+      live: {
+          provider: walletProvider('mainnet'),
+          gas: 1500000, //  192147 5000000,
+          gasPrice: 192100000000,
+          network_id: 1
+      },
+      development: {
+          host: "127.0.0.1",     // Localhost (default: none)
+          gas: 150000000,
+          port: 8545,
+          //port: 8545,            // Standard Ethereum port (default: none)
+          network_id: "*",       // Any network (default: none)
+          skipDryRun: false,
+      },
+      kovan: {
+          provider: walletProvider('kovan'),
+          gas: 5000000,
+          confirmations: 2,    // # of confs to wait between deployments. (default: 0)
+          gasPrice: 25000000000,
+          network_id: 42
+      },
+      ropsten: {
+          provider: walletProvider('ropsten'),
+          network_id: 3,       // Ropsten's id
+          gas: 5500000,        // Ropsten has a lower block limit than mainnet
+          confirmations: 2,    // # of confs to wait between deployments. (default: 0)
+          timeoutBlocks: 200,  // # of blocks before a deployment times out  (minimum/default: 50)
+          //skipDryRun: true     // Skip dry run before migrations? (default: false for public nets )
+      },
+
     // development: {
     //  host: "127.0.0.1",     // Localhost (default: none)
     //  port: 8545,            // Standard Ethereum port (default: none)
