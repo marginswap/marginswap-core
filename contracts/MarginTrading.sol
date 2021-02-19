@@ -53,6 +53,27 @@ contract MarginTrading is RoleAware, Ownable {
         (holdingTokens, holdingAmounts);
     }
 
+    function getBorrowAmounts(address trader)
+        external
+        view
+        returns (address[] memory borrowTokens, uint256[] memory borrowAmounts)
+    {
+        MarginAccount storage account = marginAccounts[trader];
+        borrowTokens = account.borrowTokens;
+
+        borrowAmounts = new uint256[](account.borrowTokens.length);
+        for (uint256 idx = 0; borrowTokens.length > idx; idx++) {
+            address tokenAddress = borrowTokens[idx];
+            borrowAmounts[idx] = Lending(lending()).viewBorrowInterest(
+                account.borrowed[tokenAddress],
+                tokenAddress,
+                account.borrowedYieldQuotientsFP[tokenAddress]
+            );
+        }
+
+        (borrowTokens, borrowAmounts);
+    }
+
     function setLeverage(uint256 _leverage) external onlyOwner {
         leverage = _leverage;
     }
