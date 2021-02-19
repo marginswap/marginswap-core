@@ -82,7 +82,7 @@ contract Lending is RoleAware, Ownable {
         uint256 balance,
         uint256 accumulatorFP,
         uint256 yieldQuotientFP
-    ) internal returns (uint256) {
+    ) internal pure returns (uint256) {
         // 1 * FP / FP = 1
         return (balance * accumulatorFP) / yieldQuotientFP;
     }
@@ -99,6 +99,20 @@ contract Lending is RoleAware, Ownable {
                 block.timestamp
             );
         return applyInterest(balance, yA.accumulatorFP, yieldQuotientFP);
+    }
+
+    function viewBorrowInterest(
+        uint256 balance,
+        address token,
+        uint256 yieldQuotientFP
+    ) external  view returns (uint256) {
+        uint256 accumulatorFP =
+            viewCumulativeYield(
+                token,
+                borrowYieldAccumulators,
+                block.timestamp
+            );
+        return applyInterest(balance, accumulatorFP, yieldQuotientFP);
     }
 
     function withdrawHourlyBonds(address token, uint256 amount) external {
