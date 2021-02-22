@@ -105,7 +105,7 @@ contract Lending is RoleAware, Ownable {
         uint256 balance,
         address token,
         uint256 yieldQuotientFP
-    ) external  view returns (uint256) {
+    ) external view returns (uint256) {
         uint256 accumulatorFP =
             viewCumulativeYield(
                 token,

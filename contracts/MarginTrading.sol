@@ -380,11 +380,10 @@ contract MarginTrading is RoleAware, Ownable {
     address[] buyTokens;
     address[] tradersToLiquidate;
 
-    // TODO bake records after margin calling
     struct MCRecord {
         uint256 blockNum;
         uint256 amount;
-        uint256 stakeAttacker;
+        address stakeAttacker;
     }
     mapping(address => MCRecord) stakeAttackRecords;
 
@@ -417,7 +416,7 @@ contract MarginTrading is RoleAware, Ownable {
                     address token = account.holdingTokens[sellIdx];
                     Liquidation storage liquidation = liquidationAmounts[token];
                     if (liquidation.blockNum != block.number) {
-                        // TODO delete liquidationAmounts at end of call
+                        // TODO delete liquidationAmounts at end of call?
                         liquidation.sell = account.holdings[token];
                         liquidation.buy = 0;
                         liquidation.blockNum = block.number;
@@ -457,8 +456,15 @@ contract MarginTrading is RoleAware, Ownable {
                     min(1 + block.number - mcRecord.blockNum, mcAttackWindow);
                 uint256 attackerCut =
                     (blockDif * mcRecord.amount) / mcAttackWindow;
-                // TODO send attackerCut to mcRecord.stakeAttacker
+                Fund(fund()).withdraw(
+                    Price(price()).peg(),
+                    mcRecord.stakeAttacker,
+                    attackerCut
+                );
                 attackReturns += mcRecord.amount - attackerCut;
+                mcRecord.amount = 0;
+                mcRecord.stakeAttacker = address(0);
+                mcRecord.blockNum = 0;
             }
         }
     }
@@ -469,7 +475,13 @@ contract MarginTrading is RoleAware, Ownable {
         returns (uint256[] memory pegAmounts)
     {
         pegAmounts = new uint256[](buyTokens.length);
-        // TODO calc how much it would cost for every buy
+        for (uint256 tokenIdx = 0; buyTokens.length > tokenIdx; tokenIdx++) {
+            address buyToken = buyTokens[tokenIdx];
+            pegAmounts[tokenIdx] = Price(price()).getCostInPeg(
+                buyToken,
+                pegAmounts[tokenIdx]
+            );
+        }
     }
 
     function liquidateToPeg() internal returns (uint256 pegAmount) {
@@ -478,22 +490,34 @@ contract MarginTrading is RoleAware, Ownable {
             sellTokens.length > tokenIndex;
             tokenIndex++
         ) {
-            uint256 sellAmount =
-                liquidationAmounts[sellTokens[tokenIndex]].sell;
+            address token = sellTokens[tokenIndex];
+            uint256 sellAmount = liquidationAmounts[token].sell;
             // sell TODO
-            pegAmount += 0;
+            //pegAmount += getUpdatedPriceInPeg(token, sellAmount);
         }
     }
 
     function deleteAccount(MarginAccount storage account) internal {
-        // TODO
-    }
-
-    function holdings2Peg(MarginAccount storage account)
-        internal
-        returns (uint256 pegAmount)
-    {
-        // TODO work with price module
+        for (
+            uint256 borrowIdx = 0;
+            account.borrowTokens.length > borrowIdx;
+            borrowIdx++
+        ) {
+            address borrowToken = account.borrowTokens[borrowIdx];
+            account.borrowed[borrowToken] = 0;
+            account.borrowedYieldQuotientsFP[borrowToken] = 0;
+        }
+        for (
+            uint256 holdingIdx = 0;
+            account.holdingTokens.length > holdingIdx;
+            holdingIdx++
+        ) {
+            address holdingToken = account.holdingTokens[holdingIdx];
+            account.holdings[holdingToken] = 0;
+            account.holdsToken[holdingToken] = false;
+        }
+        delete account.borrowTokens;
+        delete account.holdingTokens;
     }
 
     function callMargin(
@@ -510,9 +534,9 @@ contract MarginTrading is RoleAware, Ownable {
         //(address[] memory sellTokens,
         //address[] memory buyTokens,
         // address[] memory tradersToLiquidate) =
-        // TODO distribute attackReturns
-        uint256 attackReturns =
+        uint256 attackReturns2Authorized =
             calcLiquidationAmounts(liquidationCandidates, isAuthorized);
+        marginCallerCut += attackReturns2Authorized;
 
         uint256 sale2pegAmount = liquidateToPeg();
         uint256[] memory peg2targetCosts = calcLiquidationTargetCosts();
@@ -525,7 +549,7 @@ contract MarginTrading is RoleAware, Ownable {
             address traderAddress = tradersToLiquidate[traderIdx];
             MarginAccount storage account = marginAccounts[traderAddress];
 
-            uint256 holdingsValue = holdings2Peg(account);
+            uint256 holdingsValue = holdingsInPeg(account);
             uint256 borrowValue = loanInPeg(account);
             // half of the liquidation threshold
             uint256 mcCut4account =
@@ -533,7 +557,18 @@ contract MarginTrading is RoleAware, Ownable {
                     100 /
                     leverage /
                     2;
-            marginCallerCut += mcCut4account;
+            if (isAuthorized) {
+                marginCallerCut += mcCut4account;
+            } else {
+                // This could theoretically lead to a previous attackers
+                // record being overwritten, but only if the trader restarts
+                // their account and goes back into the red within the short time window
+                // which would be a costly attack requiring collusion without upside
+                MCRecord storage mcRecord = stakeAttackRecords[traderAddress];
+                mcRecord.amount = mcCut4account;
+                mcRecord.stakeAttacker = currentCaller;
+                mcRecord.blockNum = block.number;
+            }
 
             if (holdingsValue >= mcCut4account + borrowValue) {
                 // send remaining funds back to trader

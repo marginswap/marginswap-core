@@ -275,6 +275,15 @@ contract MarginRouter is RoleAware {
         address factory = factories[amm];
         return UniswapV2Library.getAmountsOut(factory, inAmount, path);
     }
+
+    function getAmountsIn(
+        AMM amm,
+        uint256 outAmount,
+        address[] calldata path
+    ) external view returns (uint256[] memory) {
+        address factory = factories[amm];
+        return UniswapV2Library.getAmountsIn(factory, outAmount, path);
+    }
 }
 
 // TODO use cached prices or borrow and write prices before registering trade
