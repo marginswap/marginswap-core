@@ -7,6 +7,7 @@ struct TokenPrice {
     uint256[] tokenPer1kHistory;
     uint256 currentPriceIndex;
     address[] liquidationPath;
+    address[] inverseLiquidationPath;
 }
 
 contract Price is RoleAware {
@@ -62,6 +63,32 @@ contract Price is RoleAware {
         }
     }
 
+    // TODO rename to amounts in / out
+    function getCostInPeg(address token, uint256 outAmount)
+        external
+        view
+        returns (uint256)
+    {
+        if (token == peg) {
+            return outAmount;
+        } else {
+            TokenPrice storage tokenPrice = tokenPrices[token];
+            require(
+                tokenPrice.inverseLiquidationPath.length > 1,
+                "Token does not have a liquidation path"
+            );
+
+            uint256[] memory pathAmounts =
+                MarginRouter(router()).getAmountsIn(
+                    AMM.uni,
+                    outAmount,
+                    tokenPrice.inverseLiquidationPath
+                );
+            uint256 inAmount = pathAmounts[0];
+            return inAmount;
+        }
+    }
+
     function forceUpdatedPriceInPeg(address token, uint256 amount)
         external
         returns (uint256 pegPrice)
@@ -92,6 +119,7 @@ contract Price is RoleAware {
     function addLiquidationPath(address[] memory path) external {
         // TODO
         // make sure paths aren't excessively long
+        // add the inverse as well
     }
 
     function liquidateToPeg(address token, uint256 amount) external {
