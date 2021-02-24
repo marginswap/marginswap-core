@@ -20,6 +20,7 @@
   },
   "homepage": "https://github.com/marginswap/marginswap-core#readme",
   "dependencies": {
+    "@nomiclabs/hardhat-ethers": "^2.0.1",
     "@openzeppelin/contracts": "3.3.0",
     "@truffle/hdwallet-provider": "1.2.1",
     "@uniswap/v2-core": "^1.0.1"
@@ -27,5 +28,10 @@
   "devDependencies": {
     "prettier": "^2.2.1",
     "prettier-plugin-solidity": "^1.0.0-beta.5"
+    "@nomiclabs/hardhat-waffle": "^2.0.1",
+    "chai": "^4.3.0",
+    "ethereum-waffle": "^3.2.2",
+    "ethers": "^5.0.31",
+    "hardhat": "^2.0.11"
   }
 }
