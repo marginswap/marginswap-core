@@ -1,6 +1,6 @@
-const { expect } = require("chai");
+const { expect, assert } = require("chai");
 
-describe("MarginTrading", function () {
+describe("MarginTrading.getHoldingAmount", function () {
     it("Should return empty for non-existent account", async function () {
         const Roles = await ethers.getContractFactory("Roles");
         const roles = await Roles.deploy();
@@ -10,6 +10,11 @@ describe("MarginTrading", function () {
         const marginTrading = await MarginTrading.deploy(roles.address);
         await marginTrading.deployed();
 
-        expect(await marginTrading.getHoldingAmounts("nonexistentaddress")).to.equal("Hello, world!");
+        const holdingAmounts = await marginTrading.getHoldingAmounts(roles.address);
+
+        expect(holdingAmounts).to.be.a('array');
+        expect(holdingAmounts).to.have.lengthOf(2);
+        expect(holdingAmounts).to.have.property('holdingAmounts').with.lengthOf(0);
+        expect(holdingAmounts).to.have.property('holdingTokens').with.lengthOf(0);
     });
 });
