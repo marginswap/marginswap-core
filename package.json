@@ -27,7 +27,7 @@
   },
   "devDependencies": {
     "prettier": "^2.2.1",
-    "prettier-plugin-solidity": "^1.0.0-beta.5"
+    "prettier-plugin-solidity": "^1.0.0-beta.5",
     "@nomiclabs/hardhat-waffle": "^2.0.1",
     "chai": "^4.3.0",
     "ethereum-waffle": "^3.2.2",
