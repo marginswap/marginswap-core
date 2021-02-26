@@ -24,7 +24,7 @@ contract MarginRouter is RoleAware {
         WETH = _WETH;
     }
 
-    function deposit(address depositToken, uint256 depositAmount)
+    function crossDeposit(address depositToken, uint256 depositAmount)
         external
         noIntermediary
     {
@@ -48,7 +48,7 @@ contract MarginRouter is RoleAware {
         }
     }
 
-    function depositETH() external payable noIntermediary {
+    function crossDepositETH() external payable noIntermediary {
         Fund(fund()).depositToWETH{value: msg.value}();
         uint256 extinguishAmount =
             CrossMarginTrading(marginTrading()).registerDeposit(
@@ -66,7 +66,7 @@ contract MarginRouter is RoleAware {
         }
     }
 
-    function withdraw(address withdrawToken, uint256 withdrawAmount)
+    function crossWithdraw(address withdrawToken, uint256 withdrawAmount)
         external
         noIntermediary
     {
@@ -81,7 +81,7 @@ contract MarginRouter is RoleAware {
         );
     }
 
-    function withdrawETH(uint256 withdrawAmount) external noIntermediary {
+    function crossWithdrawETH(uint256 withdrawAmount) external noIntermediary {
         CrossMarginTrading(marginTrading()).registerWithdrawal(
             msg.sender,
             WETH,
@@ -90,7 +90,7 @@ contract MarginRouter is RoleAware {
         Fund(fund()).withdrawETH(msg.sender, withdrawAmount);
     }
 
-    function borrow(address borrowToken, uint256 borrowAmount)
+    function crossBorrow(address borrowToken, uint256 borrowAmount)
         external
         noIntermediary
     {
@@ -102,7 +102,7 @@ contract MarginRouter is RoleAware {
         );
     }
 
-    function extinguishDebt(address debtToken, uint256 extinguishAmount)
+    function crossExtinguishDebt(address debtToken, uint256 extinguishAmount)
         external
         noIntermediary
     {
@@ -196,7 +196,7 @@ contract MarginRouter is RoleAware {
     // make trade
     // register trade w/ margintrading (register within transaction)
 
-    function swapExactTokensForTokens(
+    function crossSwapExactTokensForTokens(
         AMM amm,
         uint256 amountIn,
         uint256 amountOutMin,
@@ -230,7 +230,7 @@ contract MarginRouter is RoleAware {
         Lending(lending()).registerBorrow(outToken, borrowAmount);
     }
 
-    function swapTokensForExactTokens(
+    function crossSwapTokensForExactTokens(
         AMM amm,
         uint256 amountOut,
         uint256 amountInMax,
