@@ -3,17 +3,16 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "./Roles.sol";
 import "./Fund.sol";
 import "./Admin.sol";
-import "./MarginTrading.sol";
+import "./CrossMarginTrading.sol";
 import "./Lending.sol";
 import "./MarginRouter.sol";
-import "./MarginTrading.sol";
 import "./Price.sol";
 
 contract V1 is Ownable {
     Roles public roles;
     Fund public fund;
     Admin public admin;
-    MarginTrading public marginTrading;
+    CrossMarginTrading public crossMarginTrading;
     Lending public lending;
     MarginRouter public marginRouter;
     Price public price;
@@ -37,11 +36,11 @@ contract V1 is Ownable {
         admin.transferOwnership(targetOwner);
         roles.setMainCharacter(Characters.FEE_CONTROLLER, address(admin));
 
-        marginTrading = new MarginTrading(address(roles));
-        marginTrading.transferOwnership(targetOwner);
+        crossMarginTrading = new CrossMarginTrading(address(roles));
+        crossMarginTrading.transferOwnership(targetOwner);
         roles.setMainCharacter(
             Characters.MARGIN_TRADING,
-            address(marginTrading)
+            address(crossMarginTrading)
         );
 
         lending = new Lending(address(roles));
@@ -62,7 +61,7 @@ contract V1 is Ownable {
         roles.giveRole(ContractRoles.WITHDRAWER, address(admin));
         roles.giveRole(ContractRoles.WITHDRAWER, address(marginRouter));
         roles.giveRole(ContractRoles.WITHDRAWER, address(lending));
-        roles.giveRole(ContractRoles.WITHDRAWER, address(marginTrading));
+        roles.giveRole(ContractRoles.WITHDRAWER, address(crossMarginTrading));
 
         roles.giveRole(ContractRoles.MARGIN_CALLER, address(admin));
         roles.giveRole(ContractRoles.BORROWER, address(marginRouter));
@@ -70,7 +69,7 @@ contract V1 is Ownable {
         roles.giveRole(ContractRoles.FEE_SOURCE, address(marginRouter));
         roles.giveRole(
             ContractRoles.INSURANCE_CLAIMANT,
-            address(marginTrading)
+            address(crossMarginTrading)
         );
 
         roles.transferOwnership(targetOwner);

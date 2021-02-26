@@ -3,7 +3,7 @@ import "@openzeppelin/contracts/math/SafeMath.sol";
 
 import "./RoleAware.sol";
 import "./Fund.sol";
-import "./MarginTrading.sol";
+import "./CrossMarginTrading.sol";
 
 struct MarginCallingStake {
     uint256 stake;
@@ -130,7 +130,7 @@ contract Admin is RoleAware, Ownable {
                 mcDelegatedTo[currentStaker][msg.sender];
 
         uint256 mcFees =
-            MarginTrading(marginTrading()).callMargin(
+            CrossMarginTrading(marginTrading()).callMargin(
                 traders,
                 getUpdatedCurrentStaker(),
                 msg.sender,

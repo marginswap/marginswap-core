@@ -3,7 +3,7 @@ import "../libraries/UniswapV2Library.sol";
 
 import "./RoleAware.sol";
 import "./Fund.sol";
-import "./MarginTrading.sol";
+import "./CrossMarginTrading.sol";
 import "./Lending.sol";
 import "./Admin.sol";
 
@@ -33,13 +33,13 @@ contract MarginRouter is RoleAware {
             "Cannot transfer deposit to margin account"
         );
         uint256 extinguishAmount =
-            MarginTrading(marginTrading()).registerDeposit(
+            CrossMarginTrading(marginTrading()).registerDeposit(
                 msg.sender,
                 depositToken,
                 depositAmount
             );
         if (extinguishAmount > 0) {
-            MarginTrading(marginTrading()).registerPayOff(
+            CrossMarginTrading(marginTrading()).registerPayOff(
                 msg.sender,
                 depositToken,
                 extinguishAmount
@@ -51,13 +51,13 @@ contract MarginRouter is RoleAware {
     function depositETH() external payable noIntermediary {
         Fund(fund()).depositToWETH{value: msg.value}();
         uint256 extinguishAmount =
-            MarginTrading(marginTrading()).registerDeposit(
+            CrossMarginTrading(marginTrading()).registerDeposit(
                 msg.sender,
                 WETH,
                 msg.value
             );
         if (extinguishAmount > 0) {
-            MarginTrading(marginTrading()).registerPayOff(
+            CrossMarginTrading(marginTrading()).registerPayOff(
                 msg.sender,
                 WETH,
                 extinguishAmount
@@ -70,7 +70,7 @@ contract MarginRouter is RoleAware {
         external
         noIntermediary
     {
-        MarginTrading(marginTrading()).registerWithdrawal(
+        CrossMarginTrading(marginTrading()).registerWithdrawal(
             msg.sender,
             withdrawToken,
             withdrawAmount
@@ -82,7 +82,7 @@ contract MarginRouter is RoleAware {
     }
 
     function withdrawETH(uint256 withdrawAmount) external noIntermediary {
-        MarginTrading(marginTrading()).registerWithdrawal(
+        CrossMarginTrading(marginTrading()).registerWithdrawal(
             msg.sender,
             WETH,
             withdrawAmount
@@ -95,7 +95,7 @@ contract MarginRouter is RoleAware {
         noIntermediary
     {
         Lending(lending()).registerBorrow(borrowToken, borrowAmount);
-        MarginTrading(marginTrading()).registerBorrow(
+        CrossMarginTrading(marginTrading()).registerBorrow(
             msg.sender,
             borrowToken,
             borrowAmount
@@ -106,7 +106,7 @@ contract MarginRouter is RoleAware {
         external
         noIntermediary
     {
-        MarginTrading(marginTrading()).registerPayOff(
+        CrossMarginTrading(marginTrading()).registerPayOff(
             msg.sender,
             debtToken,
             extinguishAmount
@@ -220,7 +220,7 @@ contract MarginRouter is RoleAware {
         address outToken = path[path.length - 1];
         // register the trade
         uint256 borrowAmount =
-            MarginTrading(marginTrading()).registerTradeAndBorrow(
+            CrossMarginTrading(marginTrading()).registerTradeAndBorrow(
                 msg.sender,
                 path[0],
                 outToken,
@@ -257,7 +257,7 @@ contract MarginRouter is RoleAware {
         address outToken = path[path.length - 1];
         // register the trade
         uint256 borrowAmount =
-            MarginTrading(marginTrading()).registerTradeAndBorrow(
+            CrossMarginTrading(marginTrading()).registerTradeAndBorrow(
                 msg.sender,
                 path[0],
                 outToken,

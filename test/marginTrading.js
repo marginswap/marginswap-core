@@ -1,13 +1,13 @@
 const { expect, assert } = require("chai");
 
-describe("MarginTrading.getHoldingAmount", function () {
+describe("CrossMarginTrading.getHoldingAmount", function () {
     it("Should return empty for non-existent account", async function () {
         const Roles = await ethers.getContractFactory("Roles");
         const roles = await Roles.deploy();
         await roles.deployed();
 
-        const MarginTrading = await ethers.getContractFactory("MarginTrading");
-        const marginTrading = await MarginTrading.deploy(roles.address);
+        const CrossMarginTrading = await ethers.getContractFactory("CrossMarginTrading");
+        const marginTrading = await CrossMarginTrading.deploy(roles.address);
         await marginTrading.deployed();
 
         const holdingAmounts = await marginTrading.getHoldingAmounts(roles.address);
