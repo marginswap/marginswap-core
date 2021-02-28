@@ -163,18 +163,23 @@ contract MarginRouter is RoleAware {
     }
 
     function authorizedSwapExactT4T(
-                                    AMM amm,
-                                    uint256 amountIn,
+        AMM amm,
+        uint256 amountIn,
         uint256 amountOutMin,
         address[] calldata path
     ) external returns (uint256[] memory) {
-        require(isAuthorizedFundTrader(msg.sender),
-                "Calling contract is not authorized to trade with protocl funds");
-        return _swapExactT4T(factories[amm],
-                             amountIn,
-                             amountOutMin,
-                             path,
-                             block.timestamp + 1);
+        require(
+            isAuthorizedFundTrader(msg.sender),
+            "Calling contract is not authorized to trade with protocl funds"
+        );
+        return
+            _swapExactT4T(
+                factories[amm],
+                amountIn,
+                amountOutMin,
+                path,
+                block.timestamp + 1
+            );
     }
 
     function _swapT4ExactT(
@@ -207,14 +212,20 @@ contract MarginRouter is RoleAware {
         uint256 amountInMax,
         address[] calldata path
     ) external returns (uint256[] memory) {
-        require(isAuthorizedFundTrader(msg.sender),
-                "Calling contract is not authorized to trade with protocl funds");
-        return _swapT4ExactT(factories[amm],
-                             amountOut,
-                             amountInMax,
-                             path,
-                             block.timestamp + 1);
+        require(
+            isAuthorizedFundTrader(msg.sender),
+            "Calling contract is not authorized to trade with protocl funds"
+        );
+        return
+            _swapT4ExactT(
+                factories[amm],
+                amountOut,
+                amountInMax,
+                path,
+                block.timestamp + 1
+            );
     }
+
     // deposit
     // borrow
     // auto-borrow for margin trades

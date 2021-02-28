@@ -470,18 +470,15 @@ contract CrossMarginTrading is RoleAware, Ownable {
         }
     }
 
-    function liquidateFromPeg()
-        internal
-        returns (uint256 pegAmount)
-    {
+    function liquidateFromPeg() internal returns (uint256 pegAmount) {
         for (uint256 tokenIdx = 0; buyTokens.length > tokenIdx; tokenIdx++) {
             address buyToken = buyTokens[tokenIdx];
             Liquidation storage liq = liquidationAmounts[buyToken];
             if (liq.buy > liq.sell) {
                 pegAmount += Price(price()).liquidateToPeg(
-                                                           buyToken,
-                                                           liq.buy - liq.sell
-                                                           );
+                    buyToken,
+                    liq.buy - liq.sell
+                );
             }
         }
     }

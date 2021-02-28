@@ -96,7 +96,10 @@ contract Price is RoleAware, Ownable {
         // add the inverse as well
     }
 
-    function liquidateToPeg(address token, uint256 amount) external returns (uint256) {
+    function liquidateToPeg(address token, uint256 amount)
+        external
+        returns (uint256)
+    {
         require(
             isLiquidator(msg.sender),
             "Calling contract is not authorized to liquidate"
@@ -105,15 +108,21 @@ contract Price is RoleAware, Ownable {
             return amount;
         } else {
             TokenPrice memory tP = tokenPrices[token];
-            uint256[] memory amounts = MarginRouter(router()).authorizedSwapExactT4T(AMM.uni,
-                                                                            amount,
-                                                                            0,
-                                                                            tP.liquidationPath);
-            return amounts[amounts.length -1];
+            uint256[] memory amounts =
+                MarginRouter(router()).authorizedSwapExactT4T(
+                    AMM.uni,
+                    amount,
+                    0,
+                    tP.liquidationPath
+                );
+            return amounts[amounts.length - 1];
         }
     }
 
-    function liquidateFromPeg(address token, uint256 targetAmount) external returns (uint256) {
+    function liquidateFromPeg(address token, uint256 targetAmount)
+        external
+        returns (uint256)
+    {
         require(
             isLiquidator(msg.sender),
             "Calling contract is not authorized to liquidate"
@@ -122,11 +131,14 @@ contract Price is RoleAware, Ownable {
             return targetAmount;
         } else {
             TokenPrice memory tP = tokenPrices[token];
-            uint256[] memory amounts = MarginRouter(router()).authorizedSwapT4ExactT(AMM.uni,
-                                                                           targetAmount,
-                                                                            // TODO set an actual max peg input value
-                                                                            0,
-                                                                            tP.inverseLiquidationPath);
+            uint256[] memory amounts =
+                MarginRouter(router()).authorizedSwapT4ExactT(
+                    AMM.uni,
+                    targetAmount,
+                    // TODO set an actual max peg input value
+                    0,
+                    tP.inverseLiquidationPath
+                );
             return amounts[0];
         }
     }

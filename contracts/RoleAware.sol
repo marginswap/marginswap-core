@@ -63,7 +63,11 @@ contract RoleAware {
         return roles.getRole(contr, ContractRoles.LIQUIDATOR);
     }
 
-    function isAuthorizedFundTrader(address contr) internal view returns (bool) {
+    function isAuthorizedFundTrader(address contr)
+        internal
+        view
+        returns (bool)
+    {
         return roles.getRole(contr, ContractRoles.AUTHORIZED_FUND_TRADER);
     }
 }
