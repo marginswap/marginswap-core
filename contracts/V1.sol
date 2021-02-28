@@ -67,10 +67,6 @@ contract V1 is Ownable {
         roles.giveRole(ContractRoles.BORROWER, address(marginRouter));
         roles.giveRole(ContractRoles.MARGIN_TRADER, address(marginRouter));
         roles.giveRole(ContractRoles.FEE_SOURCE, address(marginRouter));
-        roles.giveRole(
-            ContractRoles.INSURANCE_CLAIMANT,
-            address(crossMarginTrading)
-        );
 
         roles.transferOwnership(targetOwner);
     }

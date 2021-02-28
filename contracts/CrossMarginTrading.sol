@@ -24,6 +24,7 @@ struct CrossMarginAccount {
 
 contract CrossMarginTrading is RoleAware, Ownable {
     using SafeMath for uint256;
+    event LiquidationShortfall(uint256 amount);
 
     uint256 public leverage;
     uint256 public liquidationThresholdPercent;
@@ -469,18 +470,19 @@ contract CrossMarginTrading is RoleAware, Ownable {
         }
     }
 
-    function calcLiquidationTargetCosts()
+    function liquidateFromPeg()
         internal
-        view
-        returns (uint256[] memory pegAmounts)
+        returns (uint256 pegAmount)
     {
-        pegAmounts = new uint256[](buyTokens.length);
         for (uint256 tokenIdx = 0; buyTokens.length > tokenIdx; tokenIdx++) {
             address buyToken = buyTokens[tokenIdx];
-            pegAmounts[tokenIdx] = Price(price()).getCostInPeg(
-                buyToken,
-                pegAmounts[tokenIdx]
-            );
+            Liquidation storage liq = liquidationAmounts[buyToken];
+            if (liq.buy > liq.sell) {
+                pegAmount += Price(price()).liquidateToPeg(
+                                                           buyToken,
+                                                           liq.buy - liq.sell
+                                                           );
+            }
         }
     }
 
@@ -491,9 +493,11 @@ contract CrossMarginTrading is RoleAware, Ownable {
             tokenIndex++
         ) {
             address token = sellTokens[tokenIndex];
-            uint256 sellAmount = liquidationAmounts[token].sell;
-            // sell TODO
-            //pegAmount += getUpdatedPriceInPeg(token, sellAmount);
+            Liquidation storage liq = liquidationAmounts[token];
+            if (liq.sell > liq.buy) {
+                uint256 sellAmount = liq.sell - liq.buy;
+                pegAmount += Price(price()).liquidateToPeg(token, sellAmount);
+            }
         }
     }
 
@@ -539,7 +543,11 @@ contract CrossMarginTrading is RoleAware, Ownable {
         marginCallerCut += attackReturns2Authorized;
 
         uint256 sale2pegAmount = liquidateToPeg();
-        uint256[] memory peg2targetCosts = calcLiquidationTargetCosts();
+        uint256 peg2targetCost = liquidateFromPeg();
+        // TODO add the mcCut to this
+        if (peg2targetCost > sale2pegAmount) {
+            emit LiquidationShortfall(peg2targetCost - sale2pegAmount);
+        }
 
         for (
             uint256 traderIdx = 0;
