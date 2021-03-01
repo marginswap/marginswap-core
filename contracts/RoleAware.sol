@@ -70,4 +70,8 @@ contract RoleAware {
     {
         return roles.getRole(contr, ContractRoles.AUTHORIZED_FUND_TRADER);
     }
+
+    function isIncentiveReporter(address contr) internal view returns (bool) {
+        return roles.getRole(contr, ContractRoles.INCENTIVE_REPORTER);
+    }
 }
