@@ -62,14 +62,4 @@ contract Fund is RoleAware, Ownable {
         IWETH(WETH).withdraw(withdrawalAmount);
         payable(recipient).transfer(withdrawalAmount);
     }
-
-    // withdrawers role
-    function sendTokenTo(
-        address token,
-        address recipient,
-        uint256 amount
-    ) external returns (bool) {
-        require(isWithdrawer(msg.sender), "Not authorized to withdraw");
-        return IERC20(token).transfer(recipient, amount);
-    }
 }

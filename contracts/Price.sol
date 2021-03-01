@@ -10,12 +10,12 @@ struct TokenPrice {
     address[] inverseLiquidationPath;
 }
 
-contract Price is RoleAware {
+contract Price is RoleAware, Ownable {
     address public peg;
     mapping(address => TokenPrice) tokenPrices;
     uint256 constant PRICE_HIST_LENGTH = 30;
 
-    constructor(address _peg, address _roles) RoleAware(_roles) {
+    constructor(address _peg, address _roles) RoleAware(_roles) Ownable() {
         peg = _peg;
     }
 
@@ -89,43 +89,57 @@ contract Price is RoleAware {
         }
     }
 
-    function forceUpdatedPriceInPeg(address token, uint256 amount)
-        external
-        returns (uint256 pegPrice)
-    {
-        // TODO don't check if it is already cached for this block
-        pegPrice = 0;
-    }
-
-    function getMaxDrop(address token) external returns (uint256 dropInPeg) {
-        // TODO biggest drop in price to current price
-        dropInPeg = 0;
-    }
-
-    function getMaxRise(address token) external returns (uint256 riseInPeg) {
-        // TODO
-        riseInPeg = 0;
-    }
-
-    function claimInsurance(address token, uint256 claim) external {
-        require(
-            isInsuranceClaimant(msg.sender),
-            "Caller not authorized to claim insurance"
-        );
-        // TODO
-    }
-
     // add path from token to current liquidation peg (i.e. USDC)
-    function addLiquidationPath(address[] memory path) external {
+    function setLiquidationPath(address[] memory path) external onlyOwner {
         // TODO
         // make sure paths aren't excessively long
         // add the inverse as well
     }
 
-    function liquidateToPeg(address token, uint256 amount) external {
-        // TODO require caller has liquidator role
-        // for each path:
-        // find minimum liquidity along the route
-        // set that as weight of path
+    function liquidateToPeg(address token, uint256 amount)
+        external
+        returns (uint256)
+    {
+        require(
+            isLiquidator(msg.sender),
+            "Calling contract is not authorized to liquidate"
+        );
+        if (token == peg) {
+            return amount;
+        } else {
+            TokenPrice memory tP = tokenPrices[token];
+            uint256[] memory amounts =
+                MarginRouter(router()).authorizedSwapExactT4T(
+                    AMM.uni,
+                    amount,
+                    0,
+                    tP.liquidationPath
+                );
+            return amounts[amounts.length - 1];
+        }
+    }
+
+    function liquidateFromPeg(address token, uint256 targetAmount)
+        external
+        returns (uint256)
+    {
+        require(
+            isLiquidator(msg.sender),
+            "Calling contract is not authorized to liquidate"
+        );
+        if (token == peg) {
+            return targetAmount;
+        } else {
+            TokenPrice memory tP = tokenPrices[token];
+            uint256[] memory amounts =
+                MarginRouter(router()).authorizedSwapT4ExactT(
+                    AMM.uni,
+                    targetAmount,
+                    // TODO set an actual max peg input value
+                    0,
+                    tP.inverseLiquidationPath
+                );
+            return amounts[0];
+        }
     }
 }

@@ -59,8 +59,16 @@ contract RoleAware {
         return roles.getRole(contr, ContractRoles.MARGIN_CALLER);
     }
 
-    function isInsuranceClaimant(address contr) internal view returns (bool) {
-        return roles.getRole(contr, ContractRoles.INSURANCE_CLAIMANT);
+    function isLiquidator(address contr) internal view returns (bool) {
+        return roles.getRole(contr, ContractRoles.LIQUIDATOR);
+    }
+
+    function isAuthorizedFundTrader(address contr)
+        internal
+        view
+        returns (bool)
+    {
+        return roles.getRole(contr, ContractRoles.AUTHORIZED_FUND_TRADER);
     }
 
     function isIncentiveReporter(address contr) internal view returns (bool) {
