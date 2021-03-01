@@ -152,7 +152,7 @@ contract MarginRouter is RoleAware {
             "MarginRouter: INSUFFICIENT_OUTPUT_AMOUNT"
         );
         require(
-            Fund(fund()).sendTokenTo(
+            Fund(fund()).withdraw(
                 path[0],
                 UniswapV2Library.pairFor(factory, path[0], path[1]),
                 amounts[0]
@@ -196,7 +196,7 @@ contract MarginRouter is RoleAware {
             "UniswapV2Router: EXCESSIVE_INPUT_AMOUNT"
         );
         require(
-            Fund(fund()).sendTokenTo(
+            Fund(fund()).withdraw(
                 path[0],
                 UniswapV2Library.pairFor(factory, path[0], path[1]),
                 amounts[0]
