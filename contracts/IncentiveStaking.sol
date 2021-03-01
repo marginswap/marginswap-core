@@ -48,7 +48,7 @@ contract IncentiveStaking is LPTokenWrapper, IRewardDistributionRecipient {
 
     IERC20 public rewardTokenERC20;
     // TODO set
-    uint256 public DURATION = 30 days;
+    uint256 public duration = 30 days;
 
     uint256 public starttime;
     uint256 public periodFinish = 0;
@@ -163,19 +163,19 @@ contract IncentiveStaking is LPTokenWrapper, IRewardDistributionRecipient {
     {
         if (block.timestamp > starttime) {
             if (block.timestamp >= periodFinish) {
-                rewardRate = reward.div(DURATION);
+                rewardRate = reward.div(duration);
             } else {
                 uint256 remaining = periodFinish.sub(block.timestamp);
                 uint256 leftover = remaining.mul(rewardRate);
-                rewardRate = reward.add(leftover).div(DURATION);
+                rewardRate = reward.add(leftover).div(duration);
             }
             lastUpdateTime = block.timestamp;
-            periodFinish = block.timestamp.add(DURATION);
+            periodFinish = block.timestamp.add(duration);
             emit RewardAdded(reward);
         } else {
-            rewardRate = reward.div(DURATION);
+            rewardRate = reward.div(duration);
             lastUpdateTime = starttime;
-            periodFinish = starttime.add(DURATION);
+            periodFinish = starttime.add(duration);
             emit RewardAdded(reward);
         }
     }
