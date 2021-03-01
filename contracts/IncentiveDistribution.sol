@@ -3,12 +3,13 @@ import "./RoleAware.sol";
 import "./Fund.sol";
 
 struct Claim {
-    uint256 startingRewardRate;
+    uint256 startingRewardRateFP;
     address recipient;
     uint256 amount;
 }
 
 abstract contract IncentiveDistribution is RoleAware, Ownable {
+    uint256 constant FP32 = 2**32;
     uint256 contractionPerMil = 999;
     address MFI;
 
@@ -36,7 +37,7 @@ abstract contract IncentiveDistribution is RoleAware, Ownable {
     // If e.g. a lender keeps their money in for several days, then their reward is going to be
     // amount * (reward_rate_hour1 + reward_rate_hour2 + reward_rate_hour3...)
     // where reward_rate is the amount of incentive per trade volume / lending volume
-    mapping(uint8 => uint256) public aggregateHourlyRewardRate;
+    mapping(uint8 => uint256) public aggregateHourlyRewardRateFP;
     mapping(uint256 => Claim) public claims;
     uint256 public nextClaimId;
 
@@ -52,7 +53,8 @@ abstract contract IncentiveDistribution is RoleAware, Ownable {
 
         updateHourTotals(tranche);
         currentHourTotals[tranche] += spotAmount;
-        uint256 rewardAmount = spotAmount * currentHourlyRewardRate(tranche);
+        uint256 rewardAmount =
+            (spotAmount * currentHourlyRewardRateFP(tranche)) / FP32;
         Fund(fund()).withdraw(MFI, recipient, rewardAmount);
     }
 
@@ -64,7 +66,7 @@ abstract contract IncentiveDistribution is RoleAware, Ownable {
             // This will skip hours if there has been no calls to this function in that tranche
             // In which case our rates are going to be somewhat out of whack anyway,
             // so we won't mind too much
-            aggregateHourlyRewardRate[tranche] += currentHourlyRewardRate(
+            aggregateHourlyRewardRateFP[tranche] += currentHourlyRewardRateFP(
                 tranche
             );
             currentDayTotals[tranche] -= hourlyTotals[tranche][lastUpdatedHour];
@@ -79,10 +81,14 @@ abstract contract IncentiveDistribution is RoleAware, Ownable {
         }
     }
 
-    function currentHourlyRewardRate(uint8 tranche) internal returns (uint256) {
-        uint256 trancheDailyDistribution =
-            (currentDailyDistribution * tranchePercentShare[tranche]) / 100;
-        return trancheDailyDistribution / currentDayTotals[tranche] / 24;
+    function currentHourlyRewardRateFP(uint8 tranche)
+        internal
+        returns (uint256)
+    {
+        uint256 trancheDailyDistributionFP =
+            (FP32 * (currentDailyDistribution * tranchePercentShare[tranche])) /
+                100;
+        return trancheDailyDistributionFP / currentDayTotals[tranche] / 24;
     }
 
     function startClaim(
@@ -98,7 +104,7 @@ abstract contract IncentiveDistribution is RoleAware, Ownable {
         ongoingTotals[tranche] += claimAmount;
         currentHourTotals[tranche] += claimAmount;
         claims[nextClaimId] = Claim({
-            startingRewardRate: aggregateHourlyRewardRate[tranche],
+            startingRewardRateFP: aggregateHourlyRewardRateFP[tranche],
             recipient: recipient,
             amount: claimAmount
         });
@@ -119,8 +125,8 @@ abstract contract IncentiveDistribution is RoleAware, Ownable {
 
         Claim storage claim = claims[claimId];
         // add all rewards accrued up to now
-        claim.startingRewardRate -=
-            claim.amount /
+        claim.startingRewardRateFP -=
+            (claim.amount * FP32) /
             calcRewardAmount(tranche, claim);
         claim.amount += additionalAmount;
     }
@@ -138,8 +144,8 @@ abstract contract IncentiveDistribution is RoleAware, Ownable {
 
         Claim storage claim = claims[claimId];
         // add all rewards accrued up to now
-        claim.startingRewardRate -=
-            claim.amount /
+        claim.startingRewardRateFP -=
+            (claim.amount * FP32) /
             calcRewardAmount(tranche, claim);
         claim.amount -= subtractAmount;
     }
@@ -155,7 +161,7 @@ abstract contract IncentiveDistribution is RoleAware, Ownable {
         uint256 rewardAmount = calcRewardAmount(tranche, claim);
         Fund(fund()).withdraw(MFI, claim.recipient, rewardAmount);
         delete claim.recipient;
-        delete claim.startingRewardRate;
+        delete claim.startingRewardRateFP;
         delete claim.amount;
     }
 
@@ -165,7 +171,8 @@ abstract contract IncentiveDistribution is RoleAware, Ownable {
         returns (uint256)
     {
         return
-            claim.amount *
-            (aggregateHourlyRewardRate[tranche] - claim.startingRewardRate);
+            (claim.amount *
+                (aggregateHourlyRewardRateFP[tranche] -
+                    claim.startingRewardRateFP)) / FP32;
     }
 }
