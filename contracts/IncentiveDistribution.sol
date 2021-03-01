@@ -8,7 +8,7 @@ struct Claim {
     uint256 amount;
 }
 
-contract IncentiveDistribution is RoleAware, Ownable {
+abstract contract IncentiveDistribution is RoleAware, Ownable {
     uint256 contractionPerMil = 999;
     address MFI;
 
@@ -100,17 +100,40 @@ contract IncentiveDistribution is RoleAware, Ownable {
         return nextClaimId - 1;
     }
 
+    function addToClaimAmount(uint8 tranche, uint256 claimId, uint256 additionalAmount) external {
+        require(isIncentiveReporter(msg.sender), "Contract not authorized to report incentives");
+        updateHourTotals(tranche);
+
+        Claim storage claim = claims[claimId];
+        // add all rewards accrued up to now
+        claim.startingRewardRate -= claim.amount / calcRewardAmount(tranche, claim);
+        claim.amount += additionalAmount;
+    }
+
+    function subtractFromClaimAmount(uint8 tranche, uint256 claimId, uint256 subtractAmount) external {
+        require(isIncentiveReporter(msg.sender), "Contract not authorized to report incentives");
+        updateHourTotals(tranche);
+
+        Claim storage claim = claims[claimId];
+        // add all rewards accrued up to now
+        claim.startingRewardRate -= claim.amount / calcRewardAmount(tranche, claim);
+        claim.amount -= subtractAmount;
+    }
+
     function endClaim(uint8 tranche, uint256 claimId) external {
         require(isIncentiveReporter(msg.sender), "Contract not authorized to report incentives");
         updateHourTotals(tranche);
         Claim storage claim = claims[claimId];
         // TODO what if empty?
-        uint256 rewardAmount =
-            claim.amount *
-                (aggregateHourlyRewardRate[tranche] - claim.startingRewardRate);
+        uint256 rewardAmount = calcRewardAmount(tranche, claim);
         Fund(fund()).withdraw(MFI, claim.recipient, rewardAmount);
         delete claim.recipient;
         delete claim.startingRewardRate;
         delete claim.amount;
+    }
+
+    function calcRewardAmount(uint8 tranche, Claim storage claim) internal view returns(uint256) {
+        return claim.amount *
+            (aggregateHourlyRewardRate[tranche] - claim.startingRewardRate);
     }
 }
