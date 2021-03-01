@@ -45,7 +45,8 @@ contract IncentiveDistribution is RoleAware, Ownable {
         address recipient,
         uint256 spotAmount
     ) external {
-        // TODO auth role
+        require(isIncentiveReporter(msg.sender), "Contract not authorized to report incentives");
+
         updateHourTotals(tranche);
         currentHourTotals[tranche] += spotAmount;
         uint256 rewardAmount = spotAmount * currentHourlyRewardRate(tranche);
@@ -86,7 +87,7 @@ contract IncentiveDistribution is RoleAware, Ownable {
         address recipient,
         uint256 claimAmount
     ) external returns (uint256) {
-        // TODO test authorization
+        require(isIncentiveReporter(msg.sender), "Contract not authorized to report incentives");
         updateHourTotals(tranche);
         ongoingTotals[tranche] += claimAmount;
         currentHourTotals[tranche] += claimAmount;
@@ -100,6 +101,7 @@ contract IncentiveDistribution is RoleAware, Ownable {
     }
 
     function endClaim(uint8 tranche, uint256 claimId) external {
+        require(isIncentiveReporter(msg.sender), "Contract not authorized to report incentives");
         updateHourTotals(tranche);
         Claim storage claim = claims[claimId];
         // TODO what if empty?

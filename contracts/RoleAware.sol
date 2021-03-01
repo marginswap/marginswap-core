@@ -62,4 +62,8 @@ contract RoleAware {
     function isInsuranceClaimant(address contr) internal view returns (bool) {
         return roles.getRole(contr, ContractRoles.INSURANCE_CLAIMANT);
     }
+
+    function isIncentiveReporter(address contr) internal view returns (bool) {
+        return roles.getRole(contr, ContractRoles.INCENTIVE_REPORTER);
+    }
 }
