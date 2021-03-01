@@ -11,31 +11,44 @@ contract LiquidityMiningReward {
     IncentiveDistribution incentiveDistributor;
     uint256 public incentiveStart;
     uint256 public lockEnd;
-    constructor(address _incentiveDistributor,
-                address _stakeToken,
-                uint256 startTimestamp,
-                uint256 lockEndTimestamp) {
+
+    constructor(
+        address _incentiveDistributor,
+        address _stakeToken,
+        uint256 startTimestamp,
+        uint256 lockEndTimestamp
+    ) {
         incentiveDistributor = IncentiveDistribution(_incentiveDistributor);
         stakeToken = IERC20(_stakeToken);
         incentiveStart = startTimestamp;
         lockEnd = lockEndTimestamp;
     }
 
-    function depositStake(uint256 amount) external
-    {
-        require(block.timestamp > incentiveStart, "Incentive hasn't started yet");
+    function depositStake(uint256 amount) external {
+        require(
+            block.timestamp > incentiveStart,
+            "Incentive hasn't started yet"
+        );
         stakeToken.safeTransferFrom(msg.sender, address(this), amount);
         if (claimIds[msg.sender] > 0) {
-            incentiveDistributor.addToClaimAmount(0, claimIds[msg.sender], amount);
+            incentiveDistributor.addToClaimAmount(
+                0,
+                claimIds[msg.sender],
+                amount
+            );
         } else {
-            uint256 claimId = incentiveDistributor.startClaim(0, msg.sender, amount);
+            uint256 claimId =
+                incentiveDistributor.startClaim(0, msg.sender, amount);
             claimIds[msg.sender] = claimId;
         }
         stakeAmounts[msg.sender] += amount;
     }
 
     function withdrawStake() external {
-        require(block.timestamp > lockEnd, "Stake rewards are currently still locked");
+        require(
+            block.timestamp > lockEnd,
+            "Stake rewards are currently still locked"
+        );
         if (stakeAmounts[msg.sender] > 0) {
             stakeToken.safeTransfer(msg.sender, stakeAmounts[msg.sender]);
             stakeAmounts[msg.sender] = 0;
