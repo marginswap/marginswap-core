@@ -1,4 +1,6 @@
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "./RoleAware.sol";
+import "./Fund.sol";
 
 struct Claim {
     uint256 startingRewardRate;
@@ -8,12 +10,22 @@ struct Claim {
 
 contract IncentiveDistribution is RoleAware, Ownable {
     uint256 contractionPerMil = 999;
+    address MFI;
 
-    constructor(address _roles) RoleAware(_roles) Ownable() {}
+    constructor(
+        address _MFI,
+        uint256 startingDailyDistribution,
+        address _roles
+    ) RoleAware(_roles) Ownable() {
+        MFI = _MFI;
+        currentDailyDistribution = startingDailyDistribution;
+        // TODO init all the values for the first day / first hour
+    }
 
     uint256 public currentDailyDistribution;
     uint256[] public tranchePercentShare;
-    // TODO init to something non-zero
+
+    // TODO initialize non-zero
     mapping(uint8 => uint256) public currentDayTotals;
     mapping(uint8 => uint256[24]) public hourlyTotals;
     mapping(uint8 => uint256) public currentHourTotals;
@@ -31,12 +43,13 @@ contract IncentiveDistribution is RoleAware, Ownable {
     function getSpotReward(
         uint8 tranche,
         address recipient,
-        uint256 amount
+        uint256 spotAmount
     ) external {
         // TODO auth role
         updateHourTotals(tranche);
-        currentHourTotals[tranche] += amount;
-        // TODO disburse
+        currentHourTotals[tranche] += spotAmount;
+        uint256 rewardAmount = spotAmount * currentHourlyRewardRate(tranche);
+        Fund(fund()).withdraw(MFI, recipient, rewardAmount);
     }
 
     function updateHourTotals(uint8 tranche) internal {
@@ -74,6 +87,7 @@ contract IncentiveDistribution is RoleAware, Ownable {
         uint256 claimAmount
     ) external returns (uint256) {
         // TODO test authorization
+        updateHourTotals(tranche);
         ongoingTotals[tranche] += claimAmount;
         currentHourTotals[tranche] += claimAmount;
         claims[nextClaimId] = Claim({
@@ -86,12 +100,15 @@ contract IncentiveDistribution is RoleAware, Ownable {
     }
 
     function endClaim(uint8 tranche, uint256 claimId) external {
+        updateHourTotals(tranche);
         Claim storage claim = claims[claimId];
         // TODO what if empty?
         uint256 rewardAmount =
             claim.amount *
                 (aggregateHourlyRewardRate[tranche] - claim.startingRewardRate);
-        // TODO send
+        Fund(fund()).withdraw(MFI, claim.recipient, rewardAmount);
         delete claim.recipient;
+        delete claim.startingRewardRate;
+        delete claim.amount;
     }
 }
