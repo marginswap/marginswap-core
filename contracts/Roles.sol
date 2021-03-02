@@ -7,7 +7,8 @@ enum ContractRoles {
     MARGIN_TRADER,
     FEE_SOURCE,
     LIQUIDATOR,
-    AUTHORIZED_FUND_TRADER
+    AUTHORIZED_FUND_TRADER,
+    INCENTIVE_REPORTER
 }
 
 enum Characters {
