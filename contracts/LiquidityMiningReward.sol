@@ -1,4 +1,4 @@
-import "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "./IncentiveDistribution.sol";
 
@@ -10,18 +10,15 @@ contract LiquidityMiningReward {
     mapping(address => uint256) public stakeAmounts;
     IncentiveDistribution incentiveDistributor;
     uint256 public incentiveStart;
-    uint256 public lockEnd;
 
     constructor(
         address _incentiveDistributor,
         address _stakeToken,
-        uint256 startTimestamp,
-        uint256 lockEndTimestamp
+        uint256 startTimestamp
     ) {
         incentiveDistributor = IncentiveDistribution(_incentiveDistributor);
         stakeToken = IERC20(_stakeToken);
         incentiveStart = startTimestamp;
-        lockEnd = lockEndTimestamp;
     }
 
     function depositStake(uint256 amount) external {
@@ -45,10 +42,6 @@ contract LiquidityMiningReward {
     }
 
     function withdrawStake() external {
-        require(
-            block.timestamp > lockEnd,
-            "Stake rewards are currently still locked"
-        );
         if (stakeAmounts[msg.sender] > 0) {
             stakeToken.safeTransfer(msg.sender, stakeAmounts[msg.sender]);
             stakeAmounts[msg.sender] = 0;
