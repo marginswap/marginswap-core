@@ -1,8 +1,7 @@
-pragma solidity ^0.7.0;
+pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
-import "@openzeppelin/contracts/math/SafeMath.sol";
 
 import "./Fund.sol";
 import "./Lending.sol";
@@ -23,7 +22,6 @@ struct CrossMarginAccount {
 }
 
 contract CrossMarginTrading is RoleAware, Ownable {
-    using SafeMath for uint256;
     event LiquidationShortfall(uint256 amount);
 
     uint256 public leverage;
@@ -162,10 +160,8 @@ contract CrossMarginTrading is RoleAware, Ownable {
         );
         CrossMarginAccount storage account = marginAccounts[trader];
 
-        // SafeMath throws on underflow
-        account.holdings[withdrawToken] = account.holdings[withdrawToken].sub(
-            withdrawAmount
-        );
+        // throws on underflow
+        account.holdings[withdrawToken] = account.holdings[withdrawToken] - withdrawAmount;
         require(
             positiveBalance(account),
             "Account balance is too low to withdraw"
@@ -201,18 +197,14 @@ contract CrossMarginTrading is RoleAware, Ownable {
         address debtToken,
         uint256 extinguishAmount
     ) internal {
-        // SafeMath will throw if insufficient funds
+        // will throw if insufficient funds
         account.borrowed[debtToken] = Lending(lending()).applyBorrowInterest(
             account.borrowed[debtToken],
             debtToken,
             account.borrowedYieldQuotientsFP[debtToken]
         );
-        account.borrowed[debtToken] = account.borrowed[debtToken].sub(
-            extinguishAmount
-        );
-        account.holdings[debtToken] = account.holdings[debtToken].sub(
-            extinguishAmount
-        );
+        account.borrowed[debtToken] = account.borrowed[debtToken] - extinguishAmount;
+        account.holdings[debtToken] = account.holdings[debtToken] - extinguishAmount;
     }
 
     function hasHoldingToken(CrossMarginAccount storage account, address token)
@@ -357,9 +349,7 @@ contract CrossMarginTrading is RoleAware, Ownable {
         uint256 soldAmount,
         uint256 boughtAmount
     ) internal {
-        account.holdings[fromToken] = account.holdings[fromToken].sub(
-            soldAmount
-        );
+        account.holdings[fromToken] = account.holdings[fromToken] - soldAmount;
         addHolding(account, toToken, boughtAmount);
     }
 

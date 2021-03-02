@@ -1,0 +1,4 @@
+{
+    "solidity.enableLocalNodeCompiler": true,
+    "solidity.compilerOptimization": 20000
+}
