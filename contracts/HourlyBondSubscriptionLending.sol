@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: GPL-2.0-only
+pragma solidity ^0.8.0;
+
 import "./BaseLending.sol";
 import "./Fund.sol";
 

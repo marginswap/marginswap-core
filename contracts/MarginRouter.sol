@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: GPL-2.0-only
+pragma solidity ^0.8.0;
+
 import "@uniswap/v2-core/contracts/interfaces/IUniswapV2Factory.sol";
 import "../libraries/UniswapV2Library.sol";
 
@@ -12,6 +15,11 @@ enum AMM {uni, sushi, compare, split}
 contract MarginRouter is RoleAware {
     mapping(AMM => address) factories;
     address WETH;
+
+    modifier ensure(uint deadline) {
+        require(deadline >= block.timestamp, 'UniswapV2Router: EXPIRED');
+        _;
+    }
 
     constructor(
         address uniswapFactory,
@@ -143,8 +151,7 @@ contract MarginRouter is RoleAware {
         address factory,
         uint256 amountIn,
         uint256 amountOutMin,
-        address[] calldata path,
-        uint256 deadline
+        address[] calldata path
     ) internal returns (uint256[] memory amounts) {
         amounts = UniswapV2Library.getAmountsOut(factory, amountIn, path);
         require(
@@ -177,8 +184,7 @@ contract MarginRouter is RoleAware {
                 factories[amm],
                 amountIn,
                 amountOutMin,
-                path,
-                block.timestamp + 1
+                path
             );
     }
 
@@ -186,8 +192,7 @@ contract MarginRouter is RoleAware {
         address factory,
         uint256 amountOut,
         uint256 amountInMax,
-        address[] calldata path,
-        uint256 deadline
+        address[] calldata path
     ) internal returns (uint256[] memory amounts) {
         // TODO minimum trade?
         amounts = UniswapV2Library.getAmountsIn(factory, amountOut, path);
@@ -221,8 +226,7 @@ contract MarginRouter is RoleAware {
                 factories[amm],
                 amountOut,
                 amountInMax,
-                path,
-                block.timestamp + 1
+                path
             );
     }
 
@@ -242,19 +246,17 @@ contract MarginRouter is RoleAware {
         uint256 amountOutMin,
         address[] calldata path,
         uint256 deadline
-    ) external noIntermediary returns (uint256[] memory amounts) {
+    ) external noIntermediary ensure(deadline) returns (uint256[] memory amounts) {
         // calc fees
         uint256 fees =
             Admin(feeController()).subtractTradingFees(path[0], amountIn);
 
         // swap
-        address factory = factories[amm];
         amounts = _swapExactT4T(
-            factory,
+            factories[amm],
             amountIn - fees,
             amountOutMin,
-            path,
-            deadline
+            path
         );
 
         address outToken = path[path.length - 1];
@@ -276,7 +278,7 @@ contract MarginRouter is RoleAware {
         uint256 amountInMax,
         address[] calldata path,
         uint256 deadline
-    ) external noIntermediary returns (uint256[] memory amounts) {
+    ) external noIntermediary ensure(deadline) returns (uint256[] memory amounts) {
         // calc fees
         uint256 fees =
             Admin(feeController()).addTradingFees(
@@ -285,13 +287,11 @@ contract MarginRouter is RoleAware {
             );
 
         // swap
-        address factory = factories[amm];
         amounts = _swapT4ExactT(
-            factory,
+            factories[amm],
             amountOut + fees,
             amountInMax,
-            path,
-            deadline
+            path
         );
 
         address outToken = path[path.length - 1];

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-2.0-only
 pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
@@ -268,7 +269,7 @@ contract CrossMarginTrading is RoleAware, Ownable {
         address trader,
         address token,
         uint256 amount
-    ) external returns (uint256 borrowAmount) {
+    ) external view returns (uint256 borrowAmount) {
         require(
             isMarginTrader(msg.sender),
             "Calling contract is not an authorized margin trader"
@@ -353,7 +354,7 @@ contract CrossMarginTrading is RoleAware, Ownable {
         addHolding(account, toToken, boughtAmount);
     }
 
-    function min(uint256 a, uint256 b) internal returns (uint256) {
+    function min(uint256 a, uint256 b) internal pure returns (uint256) {
         if (a > b) {
             return b;
         } else {
@@ -513,7 +514,6 @@ contract CrossMarginTrading is RoleAware, Ownable {
 
     function callMargin(
         address[] memory liquidationCandidates,
-        address responsibleStaker,
         address currentCaller,
         bool isAuthorized
     ) external returns (uint256 marginCallerCut) {
@@ -575,6 +575,7 @@ contract CrossMarginTrading is RoleAware, Ownable {
             } else {
                 uint256 shortfall =
                     (borrowValue + mcCut4account) - holdingsValue;
+                emit LiquidationShortfall(shortfall);
             }
 
             deleteAccount(account);

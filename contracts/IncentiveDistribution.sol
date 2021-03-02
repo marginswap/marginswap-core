@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: GPL-2.0-only
+pragma solidity ^0.8.0;
+
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "./RoleAware.sol";
 import "./Fund.sol";
@@ -83,6 +86,7 @@ abstract contract IncentiveDistribution is RoleAware, Ownable {
 
     function currentHourlyRewardRateFP(uint8 tranche)
         internal
+        view
         returns (uint256)
     {
         uint256 trancheDailyDistributionFP =
