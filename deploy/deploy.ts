@@ -1,5 +1,5 @@
 import { HardhatRuntimeEnvironment } from "hardhat/types";
-import * as deployedAddresses from './deployed-contract-addresses.json';
+import deployedAddresses from './deployed-contract-addresses.json';
 import * as fs from 'fs';
 import { tasks } from "hardhat";
 import { Contract } from "ethers";
@@ -36,10 +36,14 @@ const deployTasks: {
 
 export async function runDeploy(taskName: string, hre: HardhatRuntimeEnvironment) {
     const currentNetwork = hre.hardhatArguments.network;
+    console.log(`Network: ${currentNetwork}`);
     const deployRecord: DeployRecord = deployedAddresses[currentNetwork] || {};
     deployedAddresses[currentNetwork] = await runTask(taskName, deployRecord, hre);
     if (!ephemeralNetworks.has(currentNetwork)) {
         storeAddresses(deployedAddresses);
+    } else {
+        console.log("Deployed addresses:");
+        console.log(deployedAddresses);
     }
 }
 
@@ -68,8 +72,10 @@ async function runTask(taskName: string,
 }
 
 function storeAddresses(addresses: object) {
-    fs.writeFile('deployed-contract-addresses.json',
-        JSON.stringify(addresses, null, 4), () => { });
+    fs.writeFileSync('deploy/deployed-contract-addresses.json',
+        JSON.stringify(addresses, null, 4));
+    console.log(`Wrote addresses to file:`);
+    console.log(addresses);
 }
 
 // outside addresses
