@@ -123,17 +123,20 @@ contract Admin is RoleAware, Ownable {
         mcDelegatedTo[forStaker][delegate] = false;
     }
 
-    function callMargin(address[] memory traders) external noIntermediary returns (uint256 mcFees) {
+    function callMargin(address[] memory traders)
+        external
+        noIntermediary
+        returns (uint256 mcFees)
+    {
         address currentStaker = getUpdatedCurrentStaker();
         bool isAuthorized =
             currentStaker == msg.sender ||
                 mcDelegatedTo[currentStaker][msg.sender];
 
-        mcFees =
-            CrossMarginTrading(marginTrading()).callMargin(
-                traders,
-                msg.sender,
-                isAuthorized
-            );
+        mcFees = CrossMarginTrading(marginTrading()).callMargin(
+            traders,
+            msg.sender,
+            isAuthorized
+        );
     }
 }

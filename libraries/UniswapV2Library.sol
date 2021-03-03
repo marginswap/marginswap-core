@@ -3,7 +3,6 @@ pragma solidity >=0.5.0;
 import "@uniswap/v2-core/contracts/interfaces/IUniswapV2Pair.sol";
 
 library UniswapV2Library {
-
     // returns sorted token addresses, used to handle return values from pairs sorted in this order
     function sortTokens(address tokenA, address tokenB)
         internal
@@ -63,7 +62,7 @@ library UniswapV2Library {
             reserveA > 0 && reserveB > 0,
             "UniswapV2Library: INSUFFICIENT_LIQUIDITY"
         );
-        amountB = amountA * reserveB / reserveA;
+        amountB = (amountA * reserveB) / reserveA;
     }
 
     // given an input amount of an asset and pair reserves, returns the maximum output amount of the other asset

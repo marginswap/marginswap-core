@@ -58,5 +58,9 @@ abstract contract BaseLending is RoleAware, Ownable {
         }
     }
 
-    function _makeFallbackBond(address token, address holder, uint256 amount) internal virtual; 
+    function _makeFallbackBond(
+        address token,
+        address holder,
+        uint256 amount
+    ) internal virtual;
 }

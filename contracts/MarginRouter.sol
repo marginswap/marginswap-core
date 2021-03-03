@@ -16,8 +16,8 @@ contract MarginRouter is RoleAware {
     mapping(AMM => address) factories;
     address WETH;
 
-    modifier ensure(uint deadline) {
-        require(deadline >= block.timestamp, 'UniswapV2Router: EXPIRED');
+    modifier ensure(uint256 deadline) {
+        require(deadline >= block.timestamp, "UniswapV2Router: EXPIRED");
         _;
     }
 
@@ -179,13 +179,7 @@ contract MarginRouter is RoleAware {
             isAuthorizedFundTrader(msg.sender),
             "Calling contract is not authorized to trade with protocl funds"
         );
-        return
-            _swapExactT4T(
-                factories[amm],
-                amountIn,
-                amountOutMin,
-                path
-            );
+        return _swapExactT4T(factories[amm], amountIn, amountOutMin, path);
     }
 
     function _swapT4ExactT(
@@ -221,13 +215,7 @@ contract MarginRouter is RoleAware {
             isAuthorizedFundTrader(msg.sender),
             "Calling contract is not authorized to trade with protocl funds"
         );
-        return
-            _swapT4ExactT(
-                factories[amm],
-                amountOut,
-                amountInMax,
-                path
-            );
+        return _swapT4ExactT(factories[amm], amountOut, amountInMax, path);
     }
 
     // deposit
@@ -246,7 +234,12 @@ contract MarginRouter is RoleAware {
         uint256 amountOutMin,
         address[] calldata path,
         uint256 deadline
-    ) external noIntermediary ensure(deadline) returns (uint256[] memory amounts) {
+    )
+        external
+        noIntermediary
+        ensure(deadline)
+        returns (uint256[] memory amounts)
+    {
         // calc fees
         uint256 fees =
             Admin(feeController()).subtractTradingFees(path[0], amountIn);
@@ -278,7 +271,12 @@ contract MarginRouter is RoleAware {
         uint256 amountInMax,
         address[] calldata path,
         uint256 deadline
-    ) external noIntermediary ensure(deadline) returns (uint256[] memory amounts) {
+    )
+        external
+        noIntermediary
+        ensure(deadline)
+        returns (uint256[] memory amounts)
+    {
         // calc fees
         uint256 fees =
             Admin(feeController()).addTradingFees(

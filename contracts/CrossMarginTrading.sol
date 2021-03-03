@@ -162,7 +162,9 @@ contract CrossMarginTrading is RoleAware, Ownable {
         CrossMarginAccount storage account = marginAccounts[trader];
 
         // throws on underflow
-        account.holdings[withdrawToken] = account.holdings[withdrawToken] - withdrawAmount;
+        account.holdings[withdrawToken] =
+            account.holdings[withdrawToken] -
+            withdrawAmount;
         require(
             positiveBalance(account),
             "Account balance is too low to withdraw"
@@ -204,8 +206,12 @@ contract CrossMarginTrading is RoleAware, Ownable {
             debtToken,
             account.borrowedYieldQuotientsFP[debtToken]
         );
-        account.borrowed[debtToken] = account.borrowed[debtToken] - extinguishAmount;
-        account.holdings[debtToken] = account.holdings[debtToken] - extinguishAmount;
+        account.borrowed[debtToken] =
+            account.borrowed[debtToken] -
+            extinguishAmount;
+        account.holdings[debtToken] =
+            account.holdings[debtToken] -
+            extinguishAmount;
     }
 
     function hasHoldingToken(CrossMarginAccount storage account, address token)

@@ -30,22 +30,22 @@ contract V1 is Ownable {
 
         fund = new Fund(WETH, address(roles));
         fund.transferOwnership(targetOwner);
-        roles.setMainCharacter(Characters.FUND, address(fund));
+        //roles.setMainCharacter(Characters.FUND, address(fund));
 
         admin = new Admin(feesPer10k, MFI, address(roles));
         admin.transferOwnership(targetOwner);
-        roles.setMainCharacter(Characters.FEE_CONTROLLER, address(admin));
+        //roles.setMainCharacter(Characters.FEE_CONTROLLER, address(admin));
 
         crossMarginTrading = new CrossMarginTrading(address(roles));
         crossMarginTrading.transferOwnership(targetOwner);
-        roles.setMainCharacter(
-            Characters.MARGIN_TRADING,
-            address(crossMarginTrading)
-        );
+        //roles.setMainCharacter(
+        //    Characters.MARGIN_TRADING,
+        //    address(crossMarginTrading)
+        //);
 
         lending = new Lending(address(roles));
         lending.transferOwnership(targetOwner);
-        roles.setMainCharacter(Characters.LENDING, address(lending));
+        //roles.setMainCharacter(Characters.LENDING, address(lending));
 
         marginRouter = new MarginRouter(
             uniswapFactory,
@@ -53,20 +53,20 @@ contract V1 is Ownable {
             WETH,
             address(roles)
         );
-        roles.setMainCharacter(Characters.ROUTER, address(marginRouter));
+        //roles.setMainCharacter(Characters.ROUTER, address(marginRouter));
 
         price = new Price(peg, address(roles));
-        roles.setMainCharacter(Characters.PRICE_CONTROLLER, address(price));
+        //roles.setMainCharacter(Characters.PRICE_CONTROLLER, address(price));
 
-        roles.giveRole(ContractRoles.WITHDRAWER, address(admin));
-        roles.giveRole(ContractRoles.WITHDRAWER, address(marginRouter));
-        roles.giveRole(ContractRoles.WITHDRAWER, address(lending));
-        roles.giveRole(ContractRoles.WITHDRAWER, address(crossMarginTrading));
+        //roles.giveRole(ContractRoles.WITHDRAWER, address(admin));
+        //roles.giveRole(ContractRoles.WITHDRAWER, address(marginRouter));
+        //roles.giveRole(ContractRoles.WITHDRAWER, address(lending));
+        //roles.giveRole(ContractRoles.WITHDRAWER, address(crossMarginTrading));
 
-        roles.giveRole(ContractRoles.MARGIN_CALLER, address(admin));
-        roles.giveRole(ContractRoles.BORROWER, address(marginRouter));
-        roles.giveRole(ContractRoles.MARGIN_TRADER, address(marginRouter));
-        roles.giveRole(ContractRoles.FEE_SOURCE, address(marginRouter));
+        //roles.giveRole(ContractRoles.MARGIN_CALLER, address(admin));
+        //roles.giveRole(ContractRoles.BORROWER, address(marginRouter));
+        //roles.giveRole(ContractRoles.MARGIN_TRADER, address(marginRouter));
+        //roles.giveRole(ContractRoles.FEE_SOURCE, address(marginRouter));
 
         roles.transferOwnership(targetOwner);
     }

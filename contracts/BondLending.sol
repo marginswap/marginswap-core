@@ -33,7 +33,6 @@ abstract contract BondLending is BaseLending {
 
     mapping(uint256 => Bond) public bonds;
 
-
     mapping(address => uint256[]) public totalLendingPerRuntime;
     mapping(address => uint256[]) runtimeYieldsFP;
     uint256 public nextBondIndex;
@@ -82,8 +81,8 @@ abstract contract BondLending is BaseLending {
                         originalPrice: amount,
                         returnAmount: bondReturn,
                         maturityTimestamp: block.timestamp + runtime,
-                                runtime: runtime,
-                                yieldFP: yieldFP
+                        runtime: runtime,
+                        yieldFP: yieldFP
                     });
                     updateSpeed(
                         buyingSpeed[token],
@@ -99,11 +98,15 @@ abstract contract BondLending is BaseLending {
     function withdrawBond(uint256 bondId) external {
         Bond storage bond = bonds[bondId];
         require(msg.sender == bond.holder, "Not holder of bond");
-        require(block.timestamp > bond.maturityTimestamp, "bond is still immature");
+        require(
+            block.timestamp > bond.maturityTimestamp,
+            "bond is still immature"
+        );
 
         address token = bond.token;
         uint256 bucketIndex = getBucketIndex(token, bond.runtime);
-        uint256 interpolatedAmount = (bond.originalPrice + bond.returnAmount) / 2;
+        uint256 interpolatedAmount =
+            (bond.originalPrice + bond.returnAmount) / 2;
         totalLending[token] -= interpolatedAmount;
         totalLendingPerRuntime[token][bucketIndex] -= interpolatedAmount;
 
@@ -164,7 +167,6 @@ abstract contract BondLending is BaseLending {
             bucketMaxYield
         );
     }
-
 
     function viewBondReturn(
         address token,
