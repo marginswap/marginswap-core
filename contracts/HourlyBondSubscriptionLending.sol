@@ -19,7 +19,8 @@ struct HourlyBond {
 // TODO totalHourlyYieldFP
 abstract contract HourlyBondSubscriptionLending is BaseLending {
     uint256 constant WITHDRAWAL_WINDOW = 10 minutes;
-    mapping(address => mapping(address => HourlyBond)) public hourlyBondAccounts;
+    mapping(address => mapping(address => HourlyBond))
+        public hourlyBondAccounts;
     mapping(address => YieldAccumulator) public hourlyBondYieldAccumulators;
     mapping(address => uint256) public totalHourlyBond;
     mapping(address => uint256) public hourlyBondBuyingSpeed;
@@ -76,7 +77,6 @@ abstract contract HourlyBondSubscriptionLending is BaseLending {
         }
     }
 
-    
     function withdrawHourlyBond(address token, uint256 amount) external {
         HourlyBond storage bond = hourlyBondAccounts[token][msg.sender];
         // apply all interest
@@ -85,7 +85,7 @@ abstract contract HourlyBondSubscriptionLending is BaseLending {
     }
 
     function _withdrawHourlyBond(
-                                 address token,
+        address token,
         HourlyBond storage bond,
         address recipient,
         uint256 amount
@@ -118,7 +118,6 @@ abstract contract HourlyBondSubscriptionLending is BaseLending {
         bond.moduloHour = 0;
     }
 
-    
     function calcCumulativeYield(
         YieldAccumulator storage yieldAccumulator,
         uint256 timeDelta

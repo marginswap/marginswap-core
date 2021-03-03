@@ -1,6 +1,7 @@
 import { task } from "hardhat/config";
 import "@nomiclabs/hardhat-waffle";
 import * as fs from 'fs';
+import { runDeploy } from './deploy/deploy';
 
 
 
@@ -13,6 +14,12 @@ task("accounts", "Prints the list of accounts", async (args, hre) => {
         console.log(account.address);
     }
 });
+
+task("deploy", "Runs deployment scripts")
+    .addPositionalParam("taskName", "Name of contract or other deployment task to execute")
+    .setAction(async (args, hre) => {
+        await runDeploy(args.taskName, hre);
+    });
 
 const homedir = require('os').homedir();
 const privateKey = fs.readFileSync(`${homedir}/.marginswap-secret`).toString().trim();

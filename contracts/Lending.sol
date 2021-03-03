@@ -1,11 +1,9 @@
 // SPDX-License-Identifier: GPL-2.0-only
 pragma solidity ^0.8.0;
 
-
 import "./Fund.sol";
 import "./HourlyBondSubscriptionLending.sol";
 import "./BondLending.sol";
-
 
 contract Lending is BaseLending, HourlyBondSubscriptionLending, BondLending {
     mapping(address => YieldAccumulator) public borrowYieldAccumulators;
@@ -64,7 +62,11 @@ contract Lending is BaseLending, HourlyBondSubscriptionLending, BondLending {
             );
     }
 
-    function _makeFallbackBond(address token, address holder, uint256 amount) internal override {
+    function _makeFallbackBond(
+        address token,
+        address holder,
+        uint256 amount
+    ) internal override {
         _makeHourlyBond(token, holder, amount);
     }
 }
