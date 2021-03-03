@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: GPL-2.0-only
+pragma solidity ^0.8.0;
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 import "./RoleAware.sol";
@@ -121,30 +123,17 @@ contract Admin is RoleAware, Ownable {
         mcDelegatedTo[forStaker][delegate] = false;
     }
 
-    function callMargin(address[] memory traders) external noIntermediary {
+    function callMargin(address[] memory traders) external noIntermediary returns (uint256 mcFees) {
         address currentStaker = getUpdatedCurrentStaker();
         bool isAuthorized =
             currentStaker == msg.sender ||
                 mcDelegatedTo[currentStaker][msg.sender];
 
-        uint256 mcFees =
+        mcFees =
             CrossMarginTrading(marginTrading()).callMargin(
                 traders,
-                getUpdatedCurrentStaker(),
                 msg.sender,
                 isAuthorized
             );
-        // attacker mode
-        // store both the returns and who was originally responsible
-        // if the responsible address doesn't update within a certain time window, they lose their staked token
-        // and they lose a portion of their earnings with every step..
-        // if the current caller isn't the responsible party they may still be reclaiming what was called before
-        // probably 5 seconds is the window? I.e. 50 blocks?
-
-        // store first past the post attacker
-        //
     }
 }
-
-// what if it keeps climbing beyond insurance? do we close position? -- I think we have to.
-// we just shouldn't make new loans to that

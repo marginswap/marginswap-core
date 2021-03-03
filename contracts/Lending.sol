@@ -1,3 +1,7 @@
+// SPDX-License-Identifier: GPL-2.0-only
+pragma solidity ^0.8.0;
+
+
 import "./Fund.sol";
 import "./HourlyBondSubscriptionLending.sol";
 import "./BondLending.sol";
