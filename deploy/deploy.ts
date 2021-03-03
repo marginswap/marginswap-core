@@ -1,5 +1,5 @@
 import { HardhatRuntimeEnvironment } from "hardhat/types";
-import * as deployedAddresses from './deployed-contract-addresses.json';
+import deployedAddresses from './deployed-contract-addresses.json';
 import * as fs from 'fs';
 import { tasks } from "hardhat";
 import { Contract } from "ethers";
@@ -23,15 +23,27 @@ const deployTasks: {
     fund: {
         fun: deployFund,
         dependsOn: ['roles']
+    },
+    incentiveDistribution: {
+        fun: deployIncentiveDistribution,
+        dependsOn: ['roles', 'fund']
+    },
+    liquidityMiningReward: {
+        fun: deployLiquidityMiningReward,
+        dependsOn: ['incentiveDistribution']
     }
 }
 
 export async function runDeploy(taskName: string, hre: HardhatRuntimeEnvironment) {
     const currentNetwork = hre.hardhatArguments.network;
+    console.log(`Network: ${currentNetwork}`);
     const deployRecord: DeployRecord = deployedAddresses[currentNetwork] || {};
     deployedAddresses[currentNetwork] = await runTask(taskName, deployRecord, hre);
     if (!ephemeralNetworks.has(currentNetwork)) {
         storeAddresses(deployedAddresses);
+    } else {
+        console.log("Deployed addresses:");
+        console.log(deployedAddresses);
     }
 }
 
@@ -47,6 +59,7 @@ async function runTask(taskName: string,
                 ...await runTask(dependencyName, deployRecord, hre)
             };
         }
+        console.log(`Deploying: ${taskName}`);
         deployRecord = {
             ...deployRecord,
             ...await task.fun(deployRecord, hre)
@@ -59,8 +72,10 @@ async function runTask(taskName: string,
 }
 
 function storeAddresses(addresses: object) {
-    fs.writeFile('deployed-contract-addresses.json',
-        JSON.stringify(addresses, null, 4), () => { });
+    fs.writeFileSync('deploy/deployed-contract-addresses.json',
+        JSON.stringify(addresses, null, 4));
+    console.log(`Wrote addresses to file:`);
+    console.log(addresses);
 }
 
 // outside addresses
@@ -108,8 +123,34 @@ async function deployFund(deplRec: DeployRecord, hre: HardhatRuntimeEnvironment)
     await fund.deployed();
 
     const RoleAware = await hre.ethers.getContractFactory("RoleAware");
-    roles.functions.setMainCharacter(FUND);
+    await roles.functions.setMainCharacter(FUND, fund.address);
 
     return { fund: fund.address };
 }
 
+async function deployIncentiveDistribution(deplRec: DeployRecord, hre: HardhatRuntimeEnvironment) {
+    const Roles = await hre.ethers.getContractFactory("Roles");
+    const roles = await Roles.attach(deplRec.roles);
+
+    const IncentiveDistribution = await hre.ethers.getContractFactory("IncentiveDistribution");
+    const incentiveDistribution = await IncentiveDistribution
+        .deploy(MFI_ADDRESS, 4000, roles.address);
+    await incentiveDistribution.deployed();
+
+    await roles.functions.giveRole(WITHDRAWER, incentiveDistribution.address);
+
+    return { incentiveDistribution: incentiveDistribution.address };
+}
+
+async function deployLiquidityMiningReward(deplRec: DeployRecord, hre: HardhatRuntimeEnvironment) {
+    const IncentiveDistribution = await hre.ethers.getContractFactory("IncentiveDistribution");
+    const incentiveDistribution = await IncentiveDistribution.attach(deplRec.incentiveDistribution);
+
+    const nowSeconds = Math.floor(new Date().getTime() / 1000);
+    const LiquidityMiningReward = await hre.ethers.getContractFactory("LiquidityMiningReward");
+    const liquidityMiningReward = await LiquidityMiningReward
+        .deploy(incentiveDistribution.address, LIQUIDITY_TOKEN, nowSeconds);
+    await liquidityMiningReward.deployed();
+
+    return { liquidityMiningReward: liquidityMiningReward.address };
+}

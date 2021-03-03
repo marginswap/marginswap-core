@@ -11,18 +11,20 @@ struct Claim {
     uint256 amount;
 }
 
-abstract contract IncentiveDistribution is RoleAware, Ownable {
+contract IncentiveDistribution is RoleAware, Ownable {
     uint256 constant FP32 = 2**32;
     uint256 contractionPerMil = 999;
     address MFI;
 
     constructor(
         address _MFI,
-        uint256 startingDailyDistribution,
+        uint256 startingDailyDistributionWithoutDecimals,
         address _roles
     ) RoleAware(_roles) Ownable() {
         MFI = _MFI;
-        currentDailyDistribution = startingDailyDistribution;
+        currentDailyDistribution =
+            startingDailyDistributionWithoutDecimals *
+            (1 ether);
         // TODO init all the values for the first day / first hour
     }
 
