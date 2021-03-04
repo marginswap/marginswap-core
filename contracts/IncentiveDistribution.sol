@@ -12,8 +12,12 @@ struct Claim {
 }
 
 contract IncentiveDistribution is RoleAware, Ownable {
+    // fixed point number factor
     uint256 constant FP32 = 2**32;
+    // the amount of contraction per thousand, per day
+    // of the overal daily incentive distribution
     uint256 constant contractionPerMil = 999;
+    // the period for which claims are batch updated
     uint256 constant period = 4 hours;
     uint256 constant periodsPerDay = 24 hours / period;
     address MFI;
@@ -30,20 +34,24 @@ contract IncentiveDistribution is RoleAware, Ownable {
         lastDailyDistributionUpdate = block.timestamp / (1 days);
     }
 
+    // how much is going to be distributed, contracts every day
     uint256 public currentDailyDistribution;
+    // last day on which we updated currentDailyDistribution
     uint256 lastDailyDistributionUpdate;
+    // portion of daily distribution per each tranche
     mapping(uint8 => uint256) public trancheShare;
     uint256 public trancheShareTotal;
 
-    // TODO initialize non-zero
-    mapping(uint8 => uint256) public currentDayTotals;
-    mapping(uint8 => uint256[periodsPerDay]) public periodTotals;
+    // tranche => claim totals for the period we're currently aggregating
     mapping(uint8 => uint256) public currentPeriodTotals;
+    // tranche => timestamp / period of last update
     mapping(uint8 => uint256) public lastUpdatedPeriods;
-    // carry-over totals
-    mapping(uint8 => uint256) public ongoingTotals;
 
+    // how each claim unit would get if they had staked from the dawn of time
+    // expressed as fixed point number
+    // claim amounts are expressed relative to this ongoing aggregate
     mapping(uint8 => uint256) public aggregatePeriodicRewardRateFP;
+    // claim records
     mapping(uint256 => Claim) public claims;
     uint256 public nextClaimId = 1;
 
@@ -66,89 +74,31 @@ contract IncentiveDistribution is RoleAware, Ownable {
 
     function initTranche(
         uint8 tranche,
-        uint256 share,
-        uint256 assumedInitialDailyTotalWithoutDecimals
+        uint256 share
     ) external onlyOwner {
         _setTrancheShare(tranche, share);
 
-        currentDayTotals[tranche] =
-            assumedInitialDailyTotalWithoutDecimals *
-            1 ether;
-        uint256 assumedPeriodTotal = currentDayTotals[tranche] / periodsPerDay;
-        for (
-            uint256 periodOfDay = 0;
-            periodOfDay < periodsPerDay;
-            periodOfDay++
-        ) {
-            periodTotals[tranche][periodOfDay] = assumedPeriodTotal;
-        }
-
         lastUpdatedPeriods[tranche] = block.timestamp / period;
+        // simply initialize to 1.0
         aggregatePeriodicRewardRateFP[tranche] = FP32;
-    }
-
-    function getSpotReward(
-        uint8 tranche,
-        address recipient,
-        uint256 spotAmount
-    ) external {
-        require(
-            isIncentiveReporter(msg.sender),
-            "Contract not authorized to report incentives"
-        );
-
-        updatePeriodTotals(tranche);
-        currentPeriodTotals[tranche] += spotAmount;
-        uint256 rewardAmount =
-            (spotAmount * currentPeriodicRewardRateFP(tranche)) / FP32;
-        // we don't requre that this transfer goes through
-        // because it's presumably just a small spot reward
-        Fund(fund()).withdraw(MFI, recipient, rewardAmount);
     }
 
     function updatePeriodTotals(uint8 tranche) internal {
         uint256 currentPeriod = block.timestamp / period;
 
+        // update the amount that gets distributed per day, if there has been
+        // a day transition
         updateCurrentDailyDistribution();
         // Do a bunch of updating of periodic variables when the period changes
         uint256 lU = lastUpdatedPeriods[tranche];
         uint256 periodDiff = currentPeriod - lU;
 
-        if (periodDiff > periodsPerDay) {
-            // This is an optimized route for handling updates over several days
-            uint256 ongoingTotal = ongoingTotals[tranche];
-            currentDayTotals[tranche] = ongoingTotal * periodsPerDay;
-
-            // reset all the period memories
-            for (uint256 i = 0; i < periodsPerDay; i++) {
-                periodTotals[tranche][i] = ongoingTotal;
-            }
-            currentPeriodTotals[tranche] = ongoingTotal;
-            // this will be a bit shy of target if this hasn't been updated in a while, but that's life
+        if (periodDiff > 0) {
             aggregatePeriodicRewardRateFP[tranche] +=
                 currentPeriodicRewardRateFP(tranche) *
                 periodDiff;
-        } else {
-            for (
-                uint256 lastUpdatedPeriod = lU;
-                lastUpdatedPeriod < currentPeriod;
-                lastUpdatedPeriod++
-            ) {
-                uint256 periodOfDay = lastUpdatedPeriod % periodsPerDay;
-                aggregatePeriodicRewardRateFP[
-                    tranche
-                ] += currentPeriodicRewardRateFP(tranche);
-                // rotate out the daily totals
-                currentDayTotals[tranche] -= periodTotals[tranche][periodOfDay];
-                periodTotals[tranche][periodOfDay] = currentPeriodTotals[
-                    tranche
-                ];
-                currentDayTotals[tranche] += periodTotals[tranche][periodOfDay];
-
-                // carry over any ongoing claims
-                currentPeriodTotals[tranche] = ongoingTotals[tranche];
-            }
         }
+
         lastUpdatedPeriods[tranche] = currentPeriod;
     }
 
@@ -159,11 +109,14 @@ contract IncentiveDistribution is RoleAware, Ownable {
     function updateCurrentDailyDistribution() internal {
         uint256 nowDay = block.timestamp / (1 days);
         uint256 dayDiff = nowDay - lastDailyDistributionUpdate;
+
+        // shrink the daily distribution for every day that has passed
         for (uint256 i = 0; i < dayDiff; i++) {
             currentDailyDistribution =
                 (currentDailyDistribution * contractionPerMil) /
                 1000;
         }
+        // now update this memo
         lastDailyDistributionUpdate = nowDay;
     }
 
@@ -172,17 +125,14 @@ contract IncentiveDistribution is RoleAware, Ownable {
         view
         returns (uint256)
     {
-        // scale daily distribution down to tranche
-        uint256 trancheDailyDistributionFP =
-            (FP32 * (currentDailyDistribution * trancheShare[tranche])) /
-                trancheShareTotal;
+        // scale daily distribution down to tranche share
+        uint256 tranchePeriodDistributionFP =
+            FP32 * currentDailyDistribution * trancheShare[tranche] / trancheShareTotal / periodsPerDay;
 
-        // rate = total_reward / total
-        // .. and then scaled to one period
+        // rate = (total_reward / total_claims) per period
         return
-            trancheDailyDistributionFP /
-            currentDayTotals[tranche] /
-            periodsPerDay;
+            tranchePeriodDistributionFP /
+            currentPeriodTotals[tranche];
     }
 
     function startClaim(
@@ -196,7 +146,7 @@ contract IncentiveDistribution is RoleAware, Ownable {
         );
         if (currentDailyDistribution > 0) {
             updatePeriodTotals(tranche);
-            ongoingTotals[tranche] += claimAmount;
+
             currentPeriodTotals[tranche] += claimAmount;
 
             claims[nextClaimId] = Claim({
@@ -222,7 +172,7 @@ contract IncentiveDistribution is RoleAware, Ownable {
         );
         if (currentDailyDistribution > 0) {
             updatePeriodTotals(tranche);
-            ongoingTotals[tranche] += additionalAmount;
+
             currentPeriodTotals[tranche] += additionalAmount;
 
             Claim storage claim = claims[claimId];
@@ -245,7 +195,7 @@ contract IncentiveDistribution is RoleAware, Ownable {
             "Contract not authorized to report incentives"
         );
         updatePeriodTotals(tranche);
-        ongoingTotals[tranche] -= subtractAmount;
+
         currentPeriodTotals[tranche] -= subtractAmount;
 
         Claim storage claim = claims[claimId];

@@ -1,11 +1,12 @@
 // SPDX-License-Identifier: GPL-2.0-only
 pragma solidity ^0.8.0;
 
+import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "./IncentiveDistribution.sol";
 
-contract LiquidityMiningReward {
+contract LiquidityMiningReward is Ownable {
     using SafeERC20 for IERC20;
 
     IERC20 public stakeToken;
@@ -22,6 +23,10 @@ contract LiquidityMiningReward {
         incentiveDistributor = IncentiveDistribution(_incentiveDistributor);
         stakeToken = IERC20(_stakeToken);
         incentiveStart = startTimestamp;
+    }
+
+    function migrateIncentiveDistributor(address newDistributor) external onlyOwner {
+        incentiveDistributor = IncentiveDistribution(newDistributor);
     }
 
     function depositStake(uint256 amount) external {

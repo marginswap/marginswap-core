@@ -166,8 +166,7 @@ async function deployLiquidityMiningReward(deplRec: DeployRecord, hre: HardhatRu
 
     await incentiveDistribution.functions.initTranche(
         0, // tranche id
-        200, // share of pie in permil
-        10000 // assumed initial daily volume without decimals
+        200 // share of pie in permil
     );
 
     return { liquidityMiningReward: liquidityMiningReward.address };
