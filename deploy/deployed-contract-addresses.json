@@ -1,3 +1,6 @@
 {
-    
+    "default": {},
+    "kovan": {
+        "roles": "0x541769D9578645b5477ace873b484FabcAD6D428"
+    }
 }

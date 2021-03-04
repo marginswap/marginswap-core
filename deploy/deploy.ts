@@ -97,6 +97,7 @@ const FEE_SOURCE = 5;
 const LIQUIDATOR = 6;
 const AUTHORIZED_FUND_TRADER = 7;
 const INCENTIVE_REPORTER = 8;
+const TOKEN_ACTIVATOR = 9;
 
 const FUND = 101;
 const LENDING = 102;
@@ -151,6 +152,11 @@ async function deployLiquidityMiningReward(deplRec: DeployRecord, hre: HardhatRu
     const liquidityMiningReward = await LiquidityMiningReward
         .deploy(incentiveDistribution.address, LIQUIDITY_TOKEN, nowSeconds);
     await liquidityMiningReward.deployed();
+
+    const Roles = await hre.ethers.getContractFactory("Roles");
+    const roles = await Roles.attach(deplRec.roles);
+
+    await roles.functions.giveRole(INCENTIVE_REPORTER, liquidityMiningReward.address);
 
     return { liquidityMiningReward: liquidityMiningReward.address };
 }
