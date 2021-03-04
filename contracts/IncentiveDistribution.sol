@@ -30,6 +30,7 @@ contract IncentiveDistribution is RoleAware, Ownable {
     }
 
     uint256 public currentDailyDistribution;
+    uint256 lastDailyDistributionUpdate;
     mapping(uint8 => uint256) public trancheShare;
     uint256 public trancheShareTotal;
 
@@ -103,37 +104,61 @@ contract IncentiveDistribution is RoleAware, Ownable {
     function updatePeriodTotals(uint8 tranche) internal {
         uint256 currentPeriod = block.timestamp / period;
 
+        updateCurrentDailyDistribution();
         // Do a bunch of updating of periodic variables when the period changes
+        uint256 lU = lastUpdatedPeriods[tranche];
+        uint256 periodDiff = currentPeriod - lU;
 
-        for (
-            uint256 lastUpdatedPeriod = lastUpdatedPeriods[tranche];
-            lastUpdatedPeriod < currentPeriod;
-            lastUpdatedPeriod++
-        ) {
-            uint256 periodOfDay = lastUpdatedPeriod % periodsPerDay;
-            aggregatePeriodicRewardRateFP[
-                tranche
-            ] += currentPeriodicRewardRateFP(tranche);
-            // rotate out the daily totals
-            currentDayTotals[tranche] -= periodTotals[tranche][periodOfDay];
-            periodTotals[tranche][periodOfDay] = currentPeriodTotals[tranche];
-            currentDayTotals[tranche] += periodTotals[tranche][periodOfDay];
+        if (periodDiff > periodsPerDay) {
+            // This is an optimized route for handling updates over several days
+            uint256 ongoingTotal = ongoingTotals[tranche];
+            currentDayTotals[tranche] = ongoingTotal * periodsPerDay;
 
-            // carry over any ongoing claims
-            currentPeriodTotals[tranche] = ongoingTotals[tranche];
-
-            // switch the distribution amount at day changes
-            if (periodOfDay + 1 == periodsPerDay) {
-                currentDailyDistribution =
-                    (currentDailyDistribution * contractionPerMil) /
-                    1000;
+            // reset all the period memories
+            for (uint256 i = 0; i < periodsPerDay; i++) {
+                periodTotals[tranche][i] = ongoingTotal;
             }
-            lastUpdatedPeriods[tranche] = currentPeriod;
+            currentPeriodTotals[tranche] = ongoingTotal;
+            // this will be a bit shy of target if this hasn't been updated in a while, but that's life
+            aggregatePeriodicRewardRateFP[tranche] +=
+                currentPeriodicRewardRateFP(tranche) *
+                periodDiff;
+        } else {
+            for (
+                uint256 lastUpdatedPeriod = lU;
+                lastUpdatedPeriod < currentPeriod;
+                lastUpdatedPeriod++
+            ) {
+                uint256 periodOfDay = lastUpdatedPeriod % periodsPerDay;
+                aggregatePeriodicRewardRateFP[
+                    tranche
+                ] += currentPeriodicRewardRateFP(tranche);
+                // rotate out the daily totals
+                currentDayTotals[tranche] -= periodTotals[tranche][periodOfDay];
+                periodTotals[tranche][periodOfDay] = currentPeriodTotals[
+                    tranche
+                ];
+                currentDayTotals[tranche] += periodTotals[tranche][periodOfDay];
+
+                // carry over any ongoing claims
+                currentPeriodTotals[tranche] = ongoingTotals[tranche];
+            }
         }
+        lastUpdatedPeriods[tranche] = currentPeriod;
     }
 
     function forcePeriodTotalUpdate(uint8 tranche) external {
         updatePeriodTotals(tranche);
+    }
+
+    function updateCurrentDailyDistribution() internal {
+        uint256 nowDay = block.timestamp / (1 days);
+        uint256 dayDiff = nowDay - lastDailyDistributionUpdate;
+        for (uint256 i = 0; i < dayDiff; i++) {
+            currentDailyDistribution =
+                (currentDailyDistribution * contractionPerMil) /
+                1000;
+        }
     }
 
     function currentPeriodicRewardRateFP(uint8 tranche)
@@ -141,9 +166,13 @@ contract IncentiveDistribution is RoleAware, Ownable {
         view
         returns (uint256)
     {
+        // scale daily distribution down to tranche
         uint256 trancheDailyDistributionFP =
             (FP32 * (currentDailyDistribution * trancheShare[tranche])) /
                 trancheShareTotal;
+
+        // rate = total_reward / total
+        // .. and then scaled to one period
         return
             trancheDailyDistributionFP /
             currentDayTotals[tranche] /
