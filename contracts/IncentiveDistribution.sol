@@ -159,6 +159,7 @@ contract IncentiveDistribution is RoleAware, Ownable {
                 (currentDailyDistribution * contractionPerMil) /
                 1000;
         }
+        lastDailyDistributionUpdate = nowDay;
     }
 
     function currentPeriodicRewardRateFP(uint8 tranche)
