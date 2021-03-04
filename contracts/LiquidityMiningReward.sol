@@ -29,7 +29,9 @@ contract LiquidityMiningReward {
             block.timestamp > incentiveStart,
             "Incentive hasn't started yet"
         );
+
         stakeToken.safeTransferFrom(msg.sender, address(this), amount);
+
         if (claimIds[msg.sender] > 0) {
             incentiveDistributor.addToClaimAmount(
                 0,
@@ -41,18 +43,38 @@ contract LiquidityMiningReward {
                 incentiveDistributor.startClaim(0, msg.sender, amount);
             claimIds[msg.sender] = claimId;
         }
+
         stakeAmounts[msg.sender] += amount;
     }
 
-    function withdrawStake() external {
-        if (stakeAmounts[msg.sender] > 0) {
-            stakeToken.safeTransfer(msg.sender, stakeAmounts[msg.sender]);
-            stakeAmounts[msg.sender] = 0;
+    function withdrawStake(uint256 amount) external {
+        uint256 stakeAmount = stakeAmounts[msg.sender];
+        require(stakeAmount >= amount, "Not enough stake to withdraw");
+
+        stakeToken.safeTransfer(msg.sender, amount);
+        stakeAmounts[msg.sender] = stakeAmount - amount;
+
+        if (stakeAmount == amount) {
             incentiveDistributor.endClaim(0, claimIds[msg.sender]);
             claimIds[msg.sender] = 0;
+        } else {
+            incentiveDistributor.subtractFromClaimAmount(
+                0,
+                claimIds[msg.sender],
+                amount
+            );
         }
+    }
+
+    function withdrawReward() external returns (uint256) {
+        uint256 claimId = claimIds[msg.sender];
+        require(claimId > 0, "No registered claim");
+        return incentiveDistributor.withdrawReward(0, claimId);
     }
 }
 
 // USDC - MFI pair token
 // 0x9d640080af7c81911d87632a7d09cc4ab6b133ac
+
+// on ropsten:
+// 0xc4c79A0e1C7A9c79f1e943E3a5bEc65396a5434a

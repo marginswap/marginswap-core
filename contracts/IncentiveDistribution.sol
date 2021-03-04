@@ -255,16 +255,17 @@ contract IncentiveDistribution is RoleAware, Ownable {
         );
         updatePeriodTotals(tranche);
         Claim storage claim = claims[claimId];
-        // TODO what if empty?
-        uint256 rewardAmount = calcRewardAmount(tranche, claim);
+        if (claim.startingRewardRateFP > 0) {
+            uint256 rewardAmount = calcRewardAmount(tranche, claim);
 
-        require(
-            Fund(fund()).withdraw(MFI, claim.recipient, rewardAmount),
-            "There seems to be a lack of MFI in the incentive fund!"
-        );
-        delete claim.recipient;
-        delete claim.startingRewardRateFP;
-        delete claim.amount;
+            require(
+                Fund(fund()).withdraw(MFI, claim.recipient, rewardAmount),
+                "There seems to be a lack of MFI in the incentive fund!"
+            );
+            delete claim.recipient;
+            delete claim.startingRewardRateFP;
+            delete claim.amount;
+        }
     }
 
     function calcRewardAmount(uint8 tranche, Claim storage claim)
@@ -276,5 +277,33 @@ contract IncentiveDistribution is RoleAware, Ownable {
             (claim.amount *
                 (aggregatePeriodicRewardRateFP[tranche] -
                     claim.startingRewardRateFP)) / FP32;
+    }
+
+    function viewRewardAmount(uint8 tranche, uint256 claimId)
+        external
+        view
+        returns (uint256)
+    {
+        return calcRewardAmount(tranche, claims[claimId]);
+    }
+
+    function withdrawReward(uint8 tranche, uint256 claimId)
+        external
+        returns (uint256 rewardAmount)
+    {
+        require(
+            isIncentiveReporter(msg.sender),
+            "Contract not authorized to report incentives"
+        );
+        updatePeriodTotals(tranche);
+        Claim storage claim = claims[claimId];
+        rewardAmount = calcRewardAmount(tranche, claim);
+
+        require(
+            Fund(fund()).withdraw(MFI, claim.recipient, rewardAmount),
+            "There seems to be a lack of MFI in the incentive fund!"
+        );
+
+        claim.startingRewardRateFP = aggregatePeriodicRewardRateFP[tranche];
     }
 }
