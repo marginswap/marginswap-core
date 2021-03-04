@@ -5,6 +5,14 @@
     },
     "ropsten": {
         "roles": "0x71328517862C481fA7E5Ed39Ffc53fc64c9778e5",
-        "fund": "0x690c6ff4C5DdBAeA4282b109dC145cbA19d13206"
+        "fund": "0x690c6ff4C5DdBAeA4282b109dC145cbA19d13206",
+        "incentiveDistribution": "0xEf13Ff3E1749606c11623C8b8064761ba70248e3",
+        "liquidityMiningReward": "0x2C71Dc2795224184bC80466b4E4A8bC29008eD7f"
+    },
+    "mainnet": {
+        "roles": "0xB867ABeF538349bC5156F524cC7743fE07942D3F",
+        "fund": "0x2AF84B57B9c56D630DB60d4F564254975736C47e",
+        "incentiveDistribution": "0x20A4Fc1421D7dBe65036C26682A41434f471AeC5",
+        "liquidityMiningReward": "0x88D7C739c43EC0da72B9317BB4193e98BC530bBd"
     }
 }
