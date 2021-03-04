@@ -7,11 +7,26 @@ import "./RoleAware.sol";
 
 contract Fund is RoleAware, Ownable {
     address public WETH;
-    address[] public approvedTokens;
     mapping(address => bool) public activeTokens;
 
     constructor(address _WETH, address _roles) Ownable() RoleAware(_roles) {
         WETH = _WETH;
+    }
+
+    function activateToken(address token) external {
+        require(
+            isTokenActivator(msg.sender),
+            "Address not authorized to activate tokens"
+        );
+        activeTokens[token] = true;
+    }
+
+    function deactivateToken(address token) external {
+        require(
+            isTokenActivator(msg.sender),
+            "Address not authorized to activate tokens"
+        );
+        activeTokens[token] = false;
     }
 
     function deposit(address depositToken, uint256 depositAmount)

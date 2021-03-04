@@ -19,7 +19,7 @@ contract Roles is Ownable {
         mainCharacters[role] = actor;
     }
 
-    function getRole(address contr, uint16 role) external view returns (bool) {
+    function getRole(uint16 role, address contr) external view returns (bool) {
         return roles[contr][role];
     }
 }

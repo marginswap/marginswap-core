@@ -25,17 +25,18 @@ contract IncentiveDistribution is RoleAware, Ownable {
         currentDailyDistribution =
             startingDailyDistributionWithoutDecimals *
             (1 ether);
-        // TODO init all the values for the first day / first hour
     }
 
     uint256 public currentDailyDistribution;
-    uint256[] public tranchePercentShare;
+    mapping(uint8 => uint256) public trancheShare;
+    uint256 public trancheShareTotal;
 
     // TODO initialize non-zero
     mapping(uint8 => uint256) public currentDayTotals;
     mapping(uint8 => uint256[24]) public hourlyTotals;
     mapping(uint8 => uint256) public currentHourTotals;
     mapping(uint8 => uint256) public lastUpdatedHours;
+    // carry-over totals
     mapping(uint8 => uint256) public ongoingTotals;
 
     // Here's the crux: rewards are aggregated hourly for ongoing incentive distribution
@@ -45,6 +46,40 @@ contract IncentiveDistribution is RoleAware, Ownable {
     mapping(uint8 => uint256) public aggregateHourlyRewardRateFP;
     mapping(uint256 => Claim) public claims;
     uint256 public nextClaimId;
+
+    function setTrancheShare(uint8 tranche, uint256 share) external onlyOwner {
+        require(
+            lastUpdatedHours[tranche] > 0,
+            "Tranche is not initialized, please initialize first"
+        );
+        _setTrancheShare(tranche, share);
+    }
+
+    function _setTrancheShare(uint8 tranche, uint256 share) internal {
+        if (share > trancheShare[tranche]) {
+            trancheShareTotal += share - trancheShare[tranche];
+        } else {
+            trancheShareTotal -= trancheShare[tranche] - share;
+        }
+        trancheShare[tranche] = share;
+    }
+
+    function initTranche(
+        uint8 tranche,
+        uint256 share,
+        uint256 assumedInitialDailyTotal
+    ) external onlyOwner {
+        _setTrancheShare(tranche, share);
+
+        currentDayTotals[tranche] = assumedInitialDailyTotal;
+        uint256 assumedHourlyTotal = assumedInitialDailyTotal / 24;
+        for (uint256 hour = 0; hour < 24; hour++) {
+            hourlyTotals[tranche][hour] = assumedHourlyTotal;
+        }
+
+        lastUpdatedHours[tranche] = block.timestamp / (1 hours);
+        aggregateHourlyRewardRateFP[tranche] = FP32;
+    }
 
     function getSpotReward(
         uint8 tranche,
@@ -64,26 +99,39 @@ contract IncentiveDistribution is RoleAware, Ownable {
     }
 
     function updateHourTotals(uint8 tranche) internal {
-        uint256 currentHour = (block.timestamp % (1 days)) / (1 hours);
-        uint256 lastUpdatedHour = lastUpdatedHours[tranche];
-        if (lastUpdatedHour != currentHour) {
-            lastUpdatedHours[tranche] = currentHour;
-            // This will skip hours if there has been no calls to this function in that tranche
-            // In which case our rates are going to be somewhat out of whack anyway,
-            // so we won't mind too much
+        uint256 currentHour = block.timestamp / (1 hours);
+
+        // Do a bunch of updating of hourly variables when the hour changes
+
+        for (
+            uint256 lastUpdatedHour = lastUpdatedHours[tranche];
+            lastUpdatedHour < currentHour;
+            lastUpdatedHour++
+        ) {
+            uint256 hourOfDay = lastUpdatedHour % 24;
             aggregateHourlyRewardRateFP[tranche] += currentHourlyRewardRateFP(
                 tranche
             );
-            currentDayTotals[tranche] -= hourlyTotals[tranche][lastUpdatedHour];
-            hourlyTotals[tranche][lastUpdatedHour] = currentHourTotals[tranche];
-            currentDayTotals[tranche] += hourlyTotals[tranche][lastUpdatedHour];
+            // rotate out the daily totals
+            currentDayTotals[tranche] -= hourlyTotals[tranche][hourOfDay];
+            hourlyTotals[tranche][hourOfDay] = currentHourTotals[tranche];
+            currentDayTotals[tranche] += hourlyTotals[tranche][hourOfDay];
+
+            // carry over any ongoing claims
             currentHourTotals[tranche] = ongoingTotals[tranche];
-            if (currentHour == 0) {
+
+            // switch the distribution amount at day changes
+            if (hourOfDay + 1 == 24) {
                 currentDailyDistribution =
                     (currentDailyDistribution * contractionPerMil) /
                     1000;
             }
+            lastUpdatedHours[tranche] = currentHour;
         }
+    }
+
+    function forceHourTotalUpdate(uint8 tranche) external {
+        updateHourTotals(tranche);
     }
 
     function currentHourlyRewardRateFP(uint8 tranche)
@@ -92,8 +140,8 @@ contract IncentiveDistribution is RoleAware, Ownable {
         returns (uint256)
     {
         uint256 trancheDailyDistributionFP =
-            (FP32 * (currentDailyDistribution * tranchePercentShare[tranche])) /
-                100;
+            (FP32 * (currentDailyDistribution * trancheShare[tranche])) /
+                trancheShareTotal;
         return trancheDailyDistributionFP / currentDayTotals[tranche] / 24;
     }
 

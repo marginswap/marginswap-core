@@ -12,6 +12,7 @@ contract RoleAware {
     uint16 public constant LIQUIDATOR = 6;
     uint16 public constant AUTHORIZED_FUND_TRADER = 7;
     uint16 public constant INCENTIVE_REPORTER = 8;
+    uint16 public constant TOKEN_ACTIVATOR = 9;
 
     uint16 public constant FUND = 101;
     uint16 public constant LENDING = 102;
@@ -59,27 +60,27 @@ contract RoleAware {
     }
 
     function isBorrower(address contr) internal view returns (bool) {
-        return roles.getRole(contr, BORROWER);
+        return roles.getRole(BORROWER, contr);
     }
 
     function isWithdrawer(address contr) internal view returns (bool) {
-        return roles.getRole(contr, WITHDRAWER);
+        return roles.getRole(WITHDRAWER, contr);
     }
 
     function isMarginTrader(address contr) internal view returns (bool) {
-        return roles.getRole(contr, MARGIN_TRADER);
+        return roles.getRole(MARGIN_TRADER, contr);
     }
 
     function isFeeSource(address contr) internal view returns (bool) {
-        return roles.getRole(contr, FEE_SOURCE);
+        return roles.getRole(FEE_SOURCE, contr);
     }
 
     function isMarginCaller(address contr) internal view returns (bool) {
-        return roles.getRole(contr, MARGIN_CALLER);
+        return roles.getRole(MARGIN_CALLER, contr);
     }
 
     function isLiquidator(address contr) internal view returns (bool) {
-        return roles.getRole(contr, LIQUIDATOR);
+        return roles.getRole(LIQUIDATOR, contr);
     }
 
     function isAuthorizedFundTrader(address contr)
@@ -87,10 +88,14 @@ contract RoleAware {
         view
         returns (bool)
     {
-        return roles.getRole(contr, AUTHORIZED_FUND_TRADER);
+        return roles.getRole(AUTHORIZED_FUND_TRADER, contr);
     }
 
     function isIncentiveReporter(address contr) internal view returns (bool) {
-        return roles.getRole(contr, INCENTIVE_REPORTER);
+        return roles.getRole(INCENTIVE_REPORTER, contr);
+    }
+
+    function isTokenActivator(address contr) internal view returns (bool) {
+        return roles.getRole(TOKEN_ACTIVATOR, contr);
     }
 }
