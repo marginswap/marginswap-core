@@ -42,14 +42,14 @@ contract LiquidityMiningRewardTest {
 
         incentiveDistro = new IncentiveDistribution(
             address(rewardToken),
-            100_000,
+            4_000,
             address(roles)
         );
         roles.giveRole(WITHDRAWER, address(incentiveDistro));
-        incentiveDistro.initTranche(0, 200, 10_000);
+        incentiveDistro.initTranche(0, 200);
 
         stakeToken = new ERC20PresetMinterPauser("Stake Token", "STK");
-        stakeToken.mint(address(this), 10_000 ether);
+        stakeToken.mint(address(this), 20_000 ether);
 
         liqui = new LiquidityMiningReward(
             address(incentiveDistro),
