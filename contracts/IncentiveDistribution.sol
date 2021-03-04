@@ -27,6 +27,7 @@ contract IncentiveDistribution is RoleAware, Ownable {
         currentDailyDistribution =
             startingDailyDistributionWithoutDecimals *
             (1 ether);
+        lastDailyDistributionUpdate = block.timestamp / (1 days);
     }
 
     uint256 public currentDailyDistribution;
@@ -44,7 +45,7 @@ contract IncentiveDistribution is RoleAware, Ownable {
 
     mapping(uint8 => uint256) public aggregatePeriodicRewardRateFP;
     mapping(uint256 => Claim) public claims;
-    uint256 public nextClaimId;
+    uint256 public nextClaimId = 1;
 
     function setTrancheShare(uint8 tranche, uint256 share) external onlyOwner {
         require(
@@ -98,6 +99,8 @@ contract IncentiveDistribution is RoleAware, Ownable {
         currentPeriodTotals[tranche] += spotAmount;
         uint256 rewardAmount =
             (spotAmount * currentPeriodicRewardRateFP(tranche)) / FP32;
+        // we don't requre that this transfer goes through
+        // because it's presumably just a small spot reward
         Fund(fund()).withdraw(MFI, recipient, rewardAmount);
     }
 
@@ -189,16 +192,20 @@ contract IncentiveDistribution is RoleAware, Ownable {
             isIncentiveReporter(msg.sender),
             "Contract not authorized to report incentives"
         );
-        updatePeriodTotals(tranche);
-        ongoingTotals[tranche] += claimAmount;
-        currentPeriodTotals[tranche] += claimAmount;
-        claims[nextClaimId] = Claim({
-            startingRewardRateFP: aggregatePeriodicRewardRateFP[tranche],
-            recipient: recipient,
-            amount: claimAmount
-        });
-        nextClaimId += 1;
-        return nextClaimId - 1;
+        if (currentDailyDistribution > 0) {
+            updatePeriodTotals(tranche);
+            ongoingTotals[tranche] += claimAmount;
+            currentPeriodTotals[tranche] += claimAmount;
+            claims[nextClaimId] = Claim({
+                startingRewardRateFP: aggregatePeriodicRewardRateFP[tranche],
+                recipient: recipient,
+                amount: claimAmount
+            });
+            nextClaimId += 1;
+            return nextClaimId - 1;
+        } else {
+            return 0;
+        }
     }
 
     function addToClaimAmount(
@@ -210,14 +217,16 @@ contract IncentiveDistribution is RoleAware, Ownable {
             isIncentiveReporter(msg.sender),
             "Contract not authorized to report incentives"
         );
-        updatePeriodTotals(tranche);
+        if (currentDailyDistribution > 0) {
+            updatePeriodTotals(tranche);
 
-        Claim storage claim = claims[claimId];
-        // add all rewards accrued up to now
-        claim.startingRewardRateFP -=
-            (claim.amount * FP32) /
-            calcRewardAmount(tranche, claim);
-        claim.amount += additionalAmount;
+            Claim storage claim = claims[claimId];
+            // add all rewards accrued up to now
+            claim.startingRewardRateFP -=
+                (claim.amount * FP32) /
+                calcRewardAmount(tranche, claim);
+            claim.amount += additionalAmount;
+        }
     }
 
     function subtractFromClaimAmount(
@@ -246,12 +255,17 @@ contract IncentiveDistribution is RoleAware, Ownable {
         );
         updatePeriodTotals(tranche);
         Claim storage claim = claims[claimId];
-        // TODO what if empty?
-        uint256 rewardAmount = calcRewardAmount(tranche, claim);
-        Fund(fund()).withdraw(MFI, claim.recipient, rewardAmount);
-        delete claim.recipient;
-        delete claim.startingRewardRateFP;
-        delete claim.amount;
+        if (claim.startingRewardRateFP > 0) {
+            uint256 rewardAmount = calcRewardAmount(tranche, claim);
+
+            require(
+                Fund(fund()).withdraw(MFI, claim.recipient, rewardAmount),
+                "There seems to be a lack of MFI in the incentive fund!"
+            );
+            delete claim.recipient;
+            delete claim.startingRewardRateFP;
+            delete claim.amount;
+        }
     }
 
     function calcRewardAmount(uint8 tranche, Claim storage claim)
@@ -263,5 +277,33 @@ contract IncentiveDistribution is RoleAware, Ownable {
             (claim.amount *
                 (aggregatePeriodicRewardRateFP[tranche] -
                     claim.startingRewardRateFP)) / FP32;
+    }
+
+    function viewRewardAmount(uint8 tranche, uint256 claimId)
+        external
+        view
+        returns (uint256)
+    {
+        return calcRewardAmount(tranche, claims[claimId]);
+    }
+
+    function withdrawReward(uint8 tranche, uint256 claimId)
+        external
+        returns (uint256 rewardAmount)
+    {
+        require(
+            isIncentiveReporter(msg.sender),
+            "Contract not authorized to report incentives"
+        );
+        updatePeriodTotals(tranche);
+        Claim storage claim = claims[claimId];
+        rewardAmount = calcRewardAmount(tranche, claim);
+
+        require(
+            Fund(fund()).withdraw(MFI, claim.recipient, rewardAmount),
+            "There seems to be a lack of MFI in the incentive fund!"
+        );
+
+        claim.startingRewardRateFP = aggregatePeriodicRewardRateFP[tranche];
     }
 }
