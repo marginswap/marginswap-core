@@ -67,12 +67,14 @@ contract IncentiveDistribution is RoleAware, Ownable {
     function initTranche(
         uint8 tranche,
         uint256 share,
-        uint256 assumedInitialDailyTotal
+        uint256 assumedInitialDailyTotalWithoutDecimals
     ) external onlyOwner {
         _setTrancheShare(tranche, share);
 
-        currentDayTotals[tranche] = assumedInitialDailyTotal;
-        uint256 assumedPeriodTotal = assumedInitialDailyTotal / periodsPerDay;
+        currentDayTotals[tranche] =
+            assumedInitialDailyTotalWithoutDecimals *
+            1 ether;
+        uint256 assumedPeriodTotal = currentDayTotals[tranche] / periodsPerDay;
         for (
             uint256 periodOfDay = 0;
             periodOfDay < periodsPerDay;
@@ -196,6 +198,7 @@ contract IncentiveDistribution is RoleAware, Ownable {
             updatePeriodTotals(tranche);
             ongoingTotals[tranche] += claimAmount;
             currentPeriodTotals[tranche] += claimAmount;
+
             claims[nextClaimId] = Claim({
                 startingRewardRateFP: aggregatePeriodicRewardRateFP[tranche],
                 recipient: recipient,
@@ -219,12 +222,15 @@ contract IncentiveDistribution is RoleAware, Ownable {
         );
         if (currentDailyDistribution > 0) {
             updatePeriodTotals(tranche);
+            ongoingTotals[tranche] += additionalAmount;
+            currentPeriodTotals[tranche] += additionalAmount;
 
             Claim storage claim = claims[claimId];
-            // add all rewards accrued up to now
-            claim.startingRewardRateFP -=
-                (claim.amount * FP32) /
-                calcRewardAmount(tranche, claim);
+            require(
+                claim.startingRewardRateFP > 0,
+                "Trying to add to non-existant claim"
+            );
+            _withdrawReward(tranche, claim);
             claim.amount += additionalAmount;
         }
     }
@@ -239,12 +245,11 @@ contract IncentiveDistribution is RoleAware, Ownable {
             "Contract not authorized to report incentives"
         );
         updatePeriodTotals(tranche);
+        ongoingTotals[tranche] -= subtractAmount;
+        currentPeriodTotals[tranche] -= subtractAmount;
 
         Claim storage claim = claims[claimId];
-        // add all rewards accrued up to now
-        claim.startingRewardRateFP -=
-            (claim.amount * FP32) /
-            calcRewardAmount(tranche, claim);
+        _withdrawReward((tranche), claim);
         claim.amount -= subtractAmount;
     }
 
@@ -255,13 +260,9 @@ contract IncentiveDistribution is RoleAware, Ownable {
         );
         updatePeriodTotals(tranche);
         Claim storage claim = claims[claimId];
-        if (claim.startingRewardRateFP > 0) {
-            uint256 rewardAmount = calcRewardAmount(tranche, claim);
 
-            require(
-                Fund(fund()).withdraw(MFI, claim.recipient, rewardAmount),
-                "There seems to be a lack of MFI in the incentive fund!"
-            );
+        if (claim.startingRewardRateFP > 0) {
+            _withdrawReward(tranche, claim);
             delete claim.recipient;
             delete claim.startingRewardRateFP;
             delete claim.amount;
@@ -289,7 +290,7 @@ contract IncentiveDistribution is RoleAware, Ownable {
 
     function withdrawReward(uint8 tranche, uint256 claimId)
         external
-        returns (uint256 rewardAmount)
+        returns (uint256)
     {
         require(
             isIncentiveReporter(msg.sender),
@@ -297,6 +298,13 @@ contract IncentiveDistribution is RoleAware, Ownable {
         );
         updatePeriodTotals(tranche);
         Claim storage claim = claims[claimId];
+        return _withdrawReward(tranche, claim);
+    }
+
+    function _withdrawReward(uint8 tranche, Claim storage claim)
+        internal
+        returns (uint256 rewardAmount)
+    {
         rewardAmount = calcRewardAmount(tranche, claim);
 
         require(

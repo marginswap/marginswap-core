@@ -42,6 +42,7 @@ contract LiquidityMiningReward {
             uint256 claimId =
                 incentiveDistributor.startClaim(0, msg.sender, amount);
             claimIds[msg.sender] = claimId;
+            require(claimId > 0, "Distribution is over or paused");
         }
 
         stakeAmounts[msg.sender] += amount;
