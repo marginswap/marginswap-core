@@ -86,6 +86,7 @@ const UNISWAP_FACTORY = "0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f";
 const SUSHISWAP_FACTORY = "0xC0AEe478e3658e2610c5F7A4A2E1777cE9e4f2Ac";
 const USDC_ADDRESS = "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48";
 const LIQUIDITY_TOKEN = "0x9d640080af7c81911d87632a7d09cc4ab6b133ac";
+const ROPSTEN_LIQUI_TOKEN = "0xc4c79A0e1C7A9c79f1e943E3a5bEc65396a5434a";
 
 // roles
 
@@ -140,6 +141,10 @@ async function deployIncentiveDistribution(deplRec: DeployRecord, hre: HardhatRu
 
     await roles.functions.giveRole(WITHDRAWER, incentiveDistribution.address);
 
+    const Fund = await hre.ethers.getContractFactory("Fund");
+    const fund = await Fund.attach(deplRec.fund);
+    await fund.functions.activateToken(MFI_ADDRESS);
+
     return { incentiveDistribution: incentiveDistribution.address };
 }
 
@@ -148,15 +153,22 @@ async function deployLiquidityMiningReward(deplRec: DeployRecord, hre: HardhatRu
     const incentiveDistribution = await IncentiveDistribution.attach(deplRec.incentiveDistribution);
 
     const nowSeconds = Math.floor(new Date().getTime() / 1000);
+    const liquidityTokenAddress = hre.hardhatArguments.network === 'ropsten' ? MFI_ADDRESS : LIQUIDITY_TOKEN;
     const LiquidityMiningReward = await hre.ethers.getContractFactory("LiquidityMiningReward");
     const liquidityMiningReward = await LiquidityMiningReward
-        .deploy(incentiveDistribution.address, LIQUIDITY_TOKEN, nowSeconds);
+        .deploy(incentiveDistribution.address, liquidityTokenAddress, nowSeconds);
     await liquidityMiningReward.deployed();
 
     const Roles = await hre.ethers.getContractFactory("Roles");
     const roles = await Roles.attach(deplRec.roles);
 
     await roles.functions.giveRole(INCENTIVE_REPORTER, liquidityMiningReward.address);
+
+    await incentiveDistribution.functions.initTranche(
+        0, // tranche id
+        200, // share of pie in permil
+        10000 // assumed initial daily volume without decimals
+    );
 
     return { liquidityMiningReward: liquidityMiningReward.address };
 }
