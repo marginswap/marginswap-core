@@ -13,7 +13,9 @@ struct Claim {
 
 contract IncentiveDistribution is RoleAware, Ownable {
     uint256 constant FP32 = 2**32;
-    uint256 contractionPerMil = 999;
+    uint256 constant contractionPerMil = 999;
+    uint256 constant period = 4 hours;
+    uint256 constant periodsPerDay = 24 hours / period;
     address MFI;
 
     constructor(
@@ -28,28 +30,25 @@ contract IncentiveDistribution is RoleAware, Ownable {
     }
 
     uint256 public currentDailyDistribution;
+    uint256 lastDailyDistributionUpdate;
     mapping(uint8 => uint256) public trancheShare;
     uint256 public trancheShareTotal;
 
     // TODO initialize non-zero
     mapping(uint8 => uint256) public currentDayTotals;
-    mapping(uint8 => uint256[24]) public hourlyTotals;
-    mapping(uint8 => uint256) public currentHourTotals;
-    mapping(uint8 => uint256) public lastUpdatedHours;
+    mapping(uint8 => uint256[periodsPerDay]) public periodTotals;
+    mapping(uint8 => uint256) public currentPeriodTotals;
+    mapping(uint8 => uint256) public lastUpdatedPeriods;
     // carry-over totals
     mapping(uint8 => uint256) public ongoingTotals;
 
-    // Here's the crux: rewards are aggregated hourly for ongoing incentive distribution
-    // If e.g. a lender keeps their money in for several days, then their reward is going to be
-    // amount * (reward_rate_hour1 + reward_rate_hour2 + reward_rate_hour3...)
-    // where reward_rate is the amount of incentive per trade volume / lending volume
-    mapping(uint8 => uint256) public aggregateHourlyRewardRateFP;
+    mapping(uint8 => uint256) public aggregatePeriodicRewardRateFP;
     mapping(uint256 => Claim) public claims;
     uint256 public nextClaimId;
 
     function setTrancheShare(uint8 tranche, uint256 share) external onlyOwner {
         require(
-            lastUpdatedHours[tranche] > 0,
+            lastUpdatedPeriods[tranche] > 0,
             "Tranche is not initialized, please initialize first"
         );
         _setTrancheShare(tranche, share);
@@ -72,13 +71,17 @@ contract IncentiveDistribution is RoleAware, Ownable {
         _setTrancheShare(tranche, share);
 
         currentDayTotals[tranche] = assumedInitialDailyTotal;
-        uint256 assumedHourlyTotal = assumedInitialDailyTotal / 24;
-        for (uint256 hour = 0; hour < 24; hour++) {
-            hourlyTotals[tranche][hour] = assumedHourlyTotal;
+        uint256 assumedPeriodTotal = assumedInitialDailyTotal / periodsPerDay;
+        for (
+            uint256 periodOfDay = 0;
+            periodOfDay < periodsPerDay;
+            periodOfDay++
+        ) {
+            periodTotals[tranche][periodOfDay] = assumedPeriodTotal;
         }
 
-        lastUpdatedHours[tranche] = block.timestamp / (1 hours);
-        aggregateHourlyRewardRateFP[tranche] = FP32;
+        lastUpdatedPeriods[tranche] = block.timestamp / period;
+        aggregatePeriodicRewardRateFP[tranche] = FP32;
     }
 
     function getSpotReward(
@@ -91,58 +94,90 @@ contract IncentiveDistribution is RoleAware, Ownable {
             "Contract not authorized to report incentives"
         );
 
-        updateHourTotals(tranche);
-        currentHourTotals[tranche] += spotAmount;
+        updatePeriodTotals(tranche);
+        currentPeriodTotals[tranche] += spotAmount;
         uint256 rewardAmount =
-            (spotAmount * currentHourlyRewardRateFP(tranche)) / FP32;
+            (spotAmount * currentPeriodicRewardRateFP(tranche)) / FP32;
         Fund(fund()).withdraw(MFI, recipient, rewardAmount);
     }
 
-    function updateHourTotals(uint8 tranche) internal {
-        uint256 currentHour = block.timestamp / (1 hours);
+    function updatePeriodTotals(uint8 tranche) internal {
+        uint256 currentPeriod = block.timestamp / period;
 
-        // Do a bunch of updating of hourly variables when the hour changes
+        updateCurrentDailyDistribution();
+        // Do a bunch of updating of periodic variables when the period changes
+        uint256 lU = lastUpdatedPeriods[tranche];
+        uint256 periodDiff = currentPeriod - lU;
 
-        for (
-            uint256 lastUpdatedHour = lastUpdatedHours[tranche];
-            lastUpdatedHour < currentHour;
-            lastUpdatedHour++
-        ) {
-            uint256 hourOfDay = lastUpdatedHour % 24;
-            aggregateHourlyRewardRateFP[tranche] += currentHourlyRewardRateFP(
-                tranche
-            );
-            // rotate out the daily totals
-            currentDayTotals[tranche] -= hourlyTotals[tranche][hourOfDay];
-            hourlyTotals[tranche][hourOfDay] = currentHourTotals[tranche];
-            currentDayTotals[tranche] += hourlyTotals[tranche][hourOfDay];
+        if (periodDiff > periodsPerDay) {
+            // This is an optimized route for handling updates over several days
+            uint256 ongoingTotal = ongoingTotals[tranche];
+            currentDayTotals[tranche] = ongoingTotal * periodsPerDay;
 
-            // carry over any ongoing claims
-            currentHourTotals[tranche] = ongoingTotals[tranche];
-
-            // switch the distribution amount at day changes
-            if (hourOfDay + 1 == 24) {
-                currentDailyDistribution =
-                    (currentDailyDistribution * contractionPerMil) /
-                    1000;
+            // reset all the period memories
+            for (uint256 i = 0; i < periodsPerDay; i++) {
+                periodTotals[tranche][i] = ongoingTotal;
             }
-            lastUpdatedHours[tranche] = currentHour;
+            currentPeriodTotals[tranche] = ongoingTotal;
+            // this will be a bit shy of target if this hasn't been updated in a while, but that's life
+            aggregatePeriodicRewardRateFP[tranche] +=
+                currentPeriodicRewardRateFP(tranche) *
+                periodDiff;
+        } else {
+            for (
+                uint256 lastUpdatedPeriod = lU;
+                lastUpdatedPeriod < currentPeriod;
+                lastUpdatedPeriod++
+            ) {
+                uint256 periodOfDay = lastUpdatedPeriod % periodsPerDay;
+                aggregatePeriodicRewardRateFP[
+                    tranche
+                ] += currentPeriodicRewardRateFP(tranche);
+                // rotate out the daily totals
+                currentDayTotals[tranche] -= periodTotals[tranche][periodOfDay];
+                periodTotals[tranche][periodOfDay] = currentPeriodTotals[
+                    tranche
+                ];
+                currentDayTotals[tranche] += periodTotals[tranche][periodOfDay];
+
+                // carry over any ongoing claims
+                currentPeriodTotals[tranche] = ongoingTotals[tranche];
+            }
         }
+        lastUpdatedPeriods[tranche] = currentPeriod;
     }
 
-    function forceHourTotalUpdate(uint8 tranche) external {
-        updateHourTotals(tranche);
+    function forcePeriodTotalUpdate(uint8 tranche) external {
+        updatePeriodTotals(tranche);
     }
 
-    function currentHourlyRewardRateFP(uint8 tranche)
+    function updateCurrentDailyDistribution() internal {
+        uint256 nowDay = block.timestamp / (1 days);
+        uint256 dayDiff = nowDay - lastDailyDistributionUpdate;
+        for (uint256 i = 0; i < dayDiff; i++) {
+            currentDailyDistribution =
+                (currentDailyDistribution * contractionPerMil) /
+                1000;
+        }
+        lastDailyDistributionUpdate = nowDay;
+    }
+
+    function currentPeriodicRewardRateFP(uint8 tranche)
         internal
         view
         returns (uint256)
     {
+        // scale daily distribution down to tranche
         uint256 trancheDailyDistributionFP =
             (FP32 * (currentDailyDistribution * trancheShare[tranche])) /
                 trancheShareTotal;
-        return trancheDailyDistributionFP / currentDayTotals[tranche] / 24;
+
+        // rate = total_reward / total
+        // .. and then scaled to one period
+        return
+            trancheDailyDistributionFP /
+            currentDayTotals[tranche] /
+            periodsPerDay;
     }
 
     function startClaim(
@@ -154,11 +189,11 @@ contract IncentiveDistribution is RoleAware, Ownable {
             isIncentiveReporter(msg.sender),
             "Contract not authorized to report incentives"
         );
-        updateHourTotals(tranche);
+        updatePeriodTotals(tranche);
         ongoingTotals[tranche] += claimAmount;
-        currentHourTotals[tranche] += claimAmount;
+        currentPeriodTotals[tranche] += claimAmount;
         claims[nextClaimId] = Claim({
-            startingRewardRateFP: aggregateHourlyRewardRateFP[tranche],
+            startingRewardRateFP: aggregatePeriodicRewardRateFP[tranche],
             recipient: recipient,
             amount: claimAmount
         });
@@ -175,7 +210,7 @@ contract IncentiveDistribution is RoleAware, Ownable {
             isIncentiveReporter(msg.sender),
             "Contract not authorized to report incentives"
         );
-        updateHourTotals(tranche);
+        updatePeriodTotals(tranche);
 
         Claim storage claim = claims[claimId];
         // add all rewards accrued up to now
@@ -194,7 +229,7 @@ contract IncentiveDistribution is RoleAware, Ownable {
             isIncentiveReporter(msg.sender),
             "Contract not authorized to report incentives"
         );
-        updateHourTotals(tranche);
+        updatePeriodTotals(tranche);
 
         Claim storage claim = claims[claimId];
         // add all rewards accrued up to now
@@ -209,7 +244,7 @@ contract IncentiveDistribution is RoleAware, Ownable {
             isIncentiveReporter(msg.sender),
             "Contract not authorized to report incentives"
         );
-        updateHourTotals(tranche);
+        updatePeriodTotals(tranche);
         Claim storage claim = claims[claimId];
         // TODO what if empty?
         uint256 rewardAmount = calcRewardAmount(tranche, claim);
@@ -226,7 +261,7 @@ contract IncentiveDistribution is RoleAware, Ownable {
     {
         return
             (claim.amount *
-                (aggregateHourlyRewardRateFP[tranche] -
+                (aggregatePeriodicRewardRateFP[tranche] -
                     claim.startingRewardRateFP)) / FP32;
     }
 }
