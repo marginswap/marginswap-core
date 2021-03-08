@@ -60,11 +60,6 @@ contract MarginRouter is RoleAware {
                 msg.value
             );
         if (extinguishAmount > 0) {
-            CrossMarginTrading(marginTrading()).registerPayOff(
-                msg.sender,
-                WETH,
-                extinguishAmount
-            );
             Lending(lending()).payOff(WETH, extinguishAmount);
         }
     }
