@@ -20,6 +20,7 @@ contract RoleAware {
     uint16 public constant MARGIN_TRADING = 104;
     uint16 public constant FEE_CONTROLLER = 105;
     uint16 public constant PRICE_CONTROLLER = 106;
+    uint16 public constant ADMIN = 107;
 
     Roles public roles;
 
@@ -57,6 +58,10 @@ contract RoleAware {
 
     function price() internal view returns (address) {
         return roles.mainCharacters(PRICE_CONTROLLER);
+    }
+
+    function admin() internal view returns (address) {
+        return roles.mainCharacters(ADMIN);
     }
 
     function isBorrower(address contr) internal view returns (bool) {
