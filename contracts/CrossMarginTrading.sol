@@ -556,14 +556,9 @@ contract CrossMarginTrading is RoleAware, Ownable {
 
     function callMargin(
         address[] memory liquidationCandidates,
-        address currentCaller,
-        bool isAuthorized
+        address currentCaller
     ) external returns (uint256 marginCallerCut) {
-        require(
-            isMarginCaller(msg.sender),
-            "Calling address doesn't have margin caller role"
-        );
-
+        bool isAuthorized = Admin(admin()).isAuthorizedStaker(msg.sender);
         //(address[] memory sellTokens,
         //address[] memory buyTokens,
         // address[] memory tradersToLiquidate) =
