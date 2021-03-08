@@ -72,10 +72,7 @@ contract IncentiveDistribution is RoleAware, Ownable {
         trancheShare[tranche] = share;
     }
 
-    function initTranche(
-        uint8 tranche,
-        uint256 share
-    ) external onlyOwner {
+    function initTranche(uint8 tranche, uint256 share) external onlyOwner {
         _setTrancheShare(tranche, share);
 
         lastUpdatedPeriods[tranche] = block.timestamp / period;
@@ -127,12 +124,12 @@ contract IncentiveDistribution is RoleAware, Ownable {
     {
         // scale daily distribution down to tranche share
         uint256 tranchePeriodDistributionFP =
-            FP32 * currentDailyDistribution * trancheShare[tranche] / trancheShareTotal / periodsPerDay;
+            (FP32 * currentDailyDistribution * trancheShare[tranche]) /
+                trancheShareTotal /
+                periodsPerDay;
 
         // rate = (total_reward / total_claims) per period
-        return
-            tranchePeriodDistributionFP /
-            currentPeriodTotals[tranche];
+        return tranchePeriodDistributionFP / currentPeriodTotals[tranche];
     }
 
     function startClaim(

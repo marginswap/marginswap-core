@@ -25,7 +25,10 @@ contract LiquidityMiningReward is Ownable {
         incentiveStart = startTimestamp;
     }
 
-    function migrateIncentiveDistributor(address newDistributor) external onlyOwner {
+    function migrateIncentiveDistributor(address newDistributor)
+        external
+        onlyOwner
+    {
         incentiveDistributor = IncentiveDistribution(newDistributor);
     }
 

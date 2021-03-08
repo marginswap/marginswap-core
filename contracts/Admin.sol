@@ -17,7 +17,6 @@ contract Admin is RoleAware, Ownable {
     mapping(address => uint256) public stakes;
     uint256 public totalStakes;
     mapping(address => uint256) public claimIds;
-    IncentiveDistribution incentiveDistributor;
 
     uint256 feesPer10k;
     mapping(address => uint256) public collectedFees;
@@ -34,13 +33,11 @@ contract Admin is RoleAware, Ownable {
     constructor(
         uint256 _feesPer10k,
         address _MFI,
-        address _incentiveDistributor,
         address _roles
     ) RoleAware(_roles) Ownable() {
         MFI = _MFI;
         feesPer10k = _feesPer10k;
         maintenanceStakePerBlock = 1 ether;
-        incentiveDistributor = IncentiveDistribution(_incentiveDistributor);
     }
 
     function setMaintenanceStakePerBlock(uint256 amount) external onlyOwner {
@@ -55,16 +52,19 @@ contract Admin is RoleAware, Ownable {
         stakes[msg.sender] += amount;
         totalStakes += amount;
 
-
         if (claimIds[holder] > 0) {
-            incentiveDistributor.addToClaimAmount(
+            IncentiveDistribution(incentiveDistributor()).addToClaimAmount(
                 0,
                 claimIds[holder],
                 amount
             );
         } else {
             uint256 claimId =
-                incentiveDistributor.startClaim(0, holder, amount);
+                IncentiveDistribution(incentiveDistributor()).startClaim(
+                    0,
+                    holder,
+                    amount
+                );
             claimIds[msg.sender] = claimId;
             require(claimId > 0, "Distribution is over or paused");
         }
@@ -84,14 +84,14 @@ contract Admin is RoleAware, Ownable {
             "Insufficient funds -- something went really wrong."
         );
         if (stakeAmount == amount) {
-            incentiveDistributor.endClaim(0, claimIds[holder]);
+            IncentiveDistribution(incentiveDistributor()).endClaim(
+                0,
+                claimIds[holder]
+            );
             claimIds[holder] = 0;
         } else {
-            incentiveDistributor.subtractFromClaimAmount(
-                0,
-                claimIds[holder],
-                amount
-            );
+            IncentiveDistribution(incentiveDistributor())
+                .subtractFromClaimAmount(0, claimIds[holder], amount);
         }
     }
 
@@ -102,7 +102,6 @@ contract Admin is RoleAware, Ownable {
     function addTradingFees(address token, uint256 amount)
         external
         returns (uint256 fees)
-
     {
         require(isFeeSource(msg.sender), "Not authorized to source fees");
         fees = (feesPer10k * amount) / 10_000;
@@ -120,35 +119,42 @@ contract Admin is RoleAware, Ownable {
 
     function depositMaintenanceStake(uint256 amount) external {
         require(
-            amount + maintenanceStakes[msg.sender].stake >= maintenanceStakePerBlock,
+            amount + maintenanceStakes[msg.sender].stake >=
+                maintenanceStakePerBlock,
             "Insufficient stake to call even one block"
         );
         _stake(msg.sender, amount);
         if (maintenanceStakes[msg.sender].stake == 0) {
             // TODO make sure we delete from list when all is withdrawl again
             maintenanceStakes[msg.sender].stake = amount;
-            maintenanceStakes[msg.sender].nextStaker = getUpdatedCurrentStaker();
+            maintenanceStakes[msg.sender]
+                .nextStaker = getUpdatedCurrentStaker();
             maintenanceStakes[prevMaintenanceStaker].nextStaker = msg.sender;
         }
     }
 
     function getUpdatedCurrentStaker() internal returns (address) {
         while (
-            (block.number - currentMaintenanceStakerStartBlock) * maintenanceStakePerBlock >=
+            (block.number - currentMaintenanceStakerStartBlock) *
+                maintenanceStakePerBlock >=
             maintenanceStakes[currentMaintenanceStaker].stake
         ) {
             currentMaintenanceStakerStartBlock +=
                 maintenanceStakes[currentMaintenanceStaker].stake /
                 maintenanceStakePerBlock;
             prevMaintenanceStaker = currentMaintenanceStaker;
-            currentMaintenanceStaker = maintenanceStakes[currentMaintenanceStaker].nextStaker;
+            currentMaintenanceStaker = maintenanceStakes[
+                currentMaintenanceStaker
+            ]
+                .nextStaker;
         }
         return currentMaintenanceStaker;
     }
 
     function addDelegate(address forStaker, address delegate) external {
         require(
-            msg.sender == forStaker || maintenanceDelegateTo[forStaker][msg.sender],
+            msg.sender == forStaker ||
+                maintenanceDelegateTo[forStaker][msg.sender],
             "msg.sender not authorized to delegate for staker"
         );
         maintenanceDelegateTo[forStaker][delegate] = true;
@@ -156,16 +162,20 @@ contract Admin is RoleAware, Ownable {
 
     function removeDelegate(address forStaker, address delegate) external {
         require(
-            msg.sender == forStaker || maintenanceDelegateTo[forStaker][msg.sender],
+            msg.sender == forStaker ||
+                maintenanceDelegateTo[forStaker][msg.sender],
             "msg.sender not authorized to delegate for staker"
         );
         maintenanceDelegateTo[forStaker][delegate] = false;
     }
 
-    function isAuthorizedStaker(address caller) external returns (bool isAuthorized) {
+    function isAuthorizedStaker(address caller)
+        external
+        returns (bool isAuthorized)
+    {
         address currentStaker = getUpdatedCurrentStaker();
         isAuthorized =
             currentStaker == caller ||
-                maintenanceDelegateTo[currentStaker][caller];
+            maintenanceDelegateTo[currentStaker][caller];
     }
 }
