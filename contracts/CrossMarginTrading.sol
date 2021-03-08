@@ -28,9 +28,20 @@ contract CrossMarginTrading is RoleAware, Ownable {
     uint256 public leverage;
     uint256 public liquidationThresholdPercent;
     mapping(address => CrossMarginAccount) marginAccounts;
+    mapping(address => uint256) public tokenCaps;
+    mapping(address => uint256) public totalShort;
+    mapping(address => uint256) public totalLong;
 
     constructor(address _roles) RoleAware(_roles) Ownable() {
         liquidationThresholdPercent = 20;
+    }
+
+    function setTokenCap(address token, uint256 cap) external {
+        require(
+            isTokenActivator(msg.sender),
+            "Caller not authorized to set token cap"
+        );
+        tokenCaps[token] = cap;
     }
 
     function getHoldingAmounts(address trader)
@@ -94,10 +105,18 @@ contract CrossMarginTrading is RoleAware, Ownable {
             isMarginTrader(msg.sender),
             "Calling contract not authorized to deposit"
         );
+        totalLong[token] += depositAmount;
+        require(
+            tokenCaps[token] >= totalLong[token],
+            "Exceeding global exposure cap to token -- try again later"
+        );
+
         CrossMarginAccount storage account = marginAccounts[trader];
         addHolding(account, token, depositAmount);
         if (account.borrowed[token] > 0) {
             extinguishableDebt = min(depositAmount, account.borrowed[token]);
+            extinguishDebt(account, token, extinguishableDebt);
+            totalShort[token] -= extinguishableDebt;
         }
     }
 
@@ -122,6 +141,14 @@ contract CrossMarginTrading is RoleAware, Ownable {
             isMarginTrader(msg.sender),
             "Calling contract not authorized to deposit"
         );
+        totalShort[borrowToken] += borrowAmount;
+        totalLong[borrowToken] += borrowAmount;
+        require(
+            tokenCaps[borrowToken] >= totalShort[borrowToken] &&
+                tokenCaps[borrowToken] >= totalLong[borrowToken],
+            "Exceeding global exposure cap to token -- try again later"
+        );
+
         CrossMarginAccount storage account = marginAccounts[trader];
         borrow(account, borrowToken, borrowAmount);
     }
@@ -161,6 +188,7 @@ contract CrossMarginTrading is RoleAware, Ownable {
         );
         CrossMarginAccount storage account = marginAccounts[trader];
 
+        totalLong[withdrawToken] -= withdrawAmount;
         // throws on underflow
         account.holdings[withdrawToken] =
             account.holdings[withdrawToken] -
@@ -181,18 +209,6 @@ contract CrossMarginTrading is RoleAware, Ownable {
         // holdings / loan >= (leverage + 1) / leverage
         // =>
         return holdings * (leverage + 1) >= loan * leverage;
-    }
-
-    function registerPayOff(
-        address trader,
-        address debtToken,
-        uint256 extinguishAmount
-    ) external {
-        require(
-            isMarginTrader(msg.sender),
-            "Calling contract not authorized to deposit"
-        );
-        extinguishDebt(marginAccounts[trader], debtToken, extinguishAmount);
     }
 
     function extinguishDebt(
@@ -294,17 +310,37 @@ contract CrossMarginTrading is RoleAware, Ownable {
         address tokenTo,
         uint256 inAmount,
         uint256 outAmount
-    ) external returns (uint256 borrowAmount) {
+    ) external returns (uint256 extinguishableDebt, uint256 borrowAmount) {
         require(
             isMarginTrader(msg.sender),
             "Calling contract is not an authorized margin trader agent"
         );
 
         CrossMarginAccount storage account = marginAccounts[trader];
+
+        if (account.borrowed[tokenTo] > 0) {
+            extinguishableDebt = min(outAmount, account.borrowed[tokenTo]);
+            extinguishDebt(account, tokenTo, extinguishableDebt);
+            totalShort[tokenTo] -= extinguishableDebt;
+        }
+        totalLong[tokenFrom] -= inAmount;
+        totalLong[tokenTo] += outAmount - extinguishableDebt;
+        require(
+            tokenCaps[tokenTo] >= totalLong[tokenTo],
+            "Exceeding global exposure cap to token -- try again later"
+        );
+
         uint256 sellAmount = inAmount;
         if (inAmount > account.holdings[tokenFrom]) {
             sellAmount = account.holdings[tokenFrom];
             borrowAmount = inAmount - sellAmount;
+
+            totalShort[tokenFrom] += borrowAmount;
+            require(
+                tokenCaps[tokenFrom] >= totalShort[tokenFrom],
+                "Exceeding global exposure cap to token -- try again later"
+            );
+
             borrow(account, tokenFrom, borrowAmount);
         }
         adjustAmounts(account, tokenFrom, tokenTo, sellAmount, outAmount);

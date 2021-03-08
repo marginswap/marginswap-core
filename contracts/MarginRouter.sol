@@ -47,11 +47,6 @@ contract MarginRouter is RoleAware {
                 depositAmount
             );
         if (extinguishAmount > 0) {
-            CrossMarginTrading(marginTrading()).registerPayOff(
-                msg.sender,
-                depositToken,
-                extinguishAmount
-            );
             Lending(lending()).payOff(depositToken, extinguishAmount);
         }
     }
@@ -108,18 +103,6 @@ contract MarginRouter is RoleAware {
             borrowToken,
             borrowAmount
         );
-    }
-
-    function crossExtinguishDebt(address debtToken, uint256 extinguishAmount)
-        external
-        noIntermediary
-    {
-        CrossMarginTrading(marginTrading()).registerPayOff(
-            msg.sender,
-            debtToken,
-            extinguishAmount
-        );
-        Lending(lending()).payOff(debtToken, extinguishAmount);
     }
 
     // **** SWAP ****
@@ -252,17 +235,13 @@ contract MarginRouter is RoleAware {
             path
         );
 
-        address outToken = path[path.length - 1];
-        // register the trade
-        uint256 borrowAmount =
-            CrossMarginTrading(marginTrading()).registerTradeAndBorrow(
-                msg.sender,
-                path[0],
-                outToken,
-                amountIn,
-                amounts[amounts.length - 1]
-            );
-        Lending(lending()).registerBorrow(outToken, borrowAmount);
+        registerTrade(
+            msg.sender,
+            path[0],
+            path[path.length - 1],
+            amountIn,
+            amounts[amounts.length - 1]
+        );
     }
 
     function crossSwapTokensForExactTokens(
@@ -292,17 +271,36 @@ contract MarginRouter is RoleAware {
             path
         );
 
-        address outToken = path[path.length - 1];
-        // register the trade
-        uint256 borrowAmount =
+        registerTrade(
+            msg.sender,
+            path[0],
+            path[path.length - 1],
+            amounts[0],
+            amountOut
+        );
+    }
+
+    function registerTrade(
+        address trader,
+        address inToken,
+        address outToken,
+        uint256 inAmount,
+        uint256 outAmount
+    ) internal {
+        (uint256 extinguishAmount, uint256 borrowAmount) =
             CrossMarginTrading(marginTrading()).registerTradeAndBorrow(
-                msg.sender,
-                path[0],
+                trader,
+                inToken,
                 outToken,
-                amounts[0],
-                amountOut
+                inAmount,
+                outAmount
             );
-        Lending(lending()).registerBorrow(outToken, borrowAmount);
+        if (extinguishAmount > 0) {
+            Lending(lending()).payOff(outToken, extinguishAmount);
+        }
+        if (borrowAmount > 0) {
+            Lending(lending()).registerBorrow(outToken, borrowAmount);
+        }
     }
 
     function getAmountsOut(
