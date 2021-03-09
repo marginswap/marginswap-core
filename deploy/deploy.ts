@@ -31,6 +31,10 @@ const deployTasks: {
     liquidityMiningReward: {
         fun: deployLiquidityMiningReward,
         dependsOn: ['incentiveDistribution']
+    },
+    crossMarginTrading: {
+        fun: deployCrossMarginTrading,
+        dependsOn: ['roles', 'fund']
     }
 }
 
@@ -170,4 +174,16 @@ async function deployLiquidityMiningReward(deplRec: DeployRecord, hre: HardhatRu
     );
 
     return { liquidityMiningReward: liquidityMiningReward.address };
+}
+
+async function deployCrossMarginTrading(deplRec: DeployRecord, hre: HardhatRuntimeEnvironment) {
+    const CrossMarginTrading = await hre.ethers.getContractFactory("CrossMarginTrading");
+    const crossMarginTrading = await CrossMarginTrading.deploy(deplRec.roles);
+
+    await crossMarginTrading.deployed();
+    const Roles = await hre.ethers.getContractFactory("Roles");
+    const roles = await Roles.attach(deplRec.roles);
+    // TODO give roles where need be
+
+    return {crossMarginTrading: crossMarginTrading.address };
 }

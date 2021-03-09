@@ -65,7 +65,7 @@ contract RoleAware {
         return roles.mainCharacters(ADMIN);
     }
 
-    function incentiveDistribution() internal view returns (address) {
+    function incentiveDistributor() internal view returns (address) {
         return roles.mainCharacters(INCENTIVE_DISTRIBUTION);
     }
 
