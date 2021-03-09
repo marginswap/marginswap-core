@@ -9,12 +9,15 @@ import "./Fund.sol";
 import "./CrossMarginTrading.sol";
 import "./Lending.sol";
 import "./Admin.sol";
+import "./IncentiveDistribution.sol";
 
 enum AMM {uni, sushi, compare, split}
 
 contract MarginRouter is RoleAware {
     mapping(AMM => address) factories;
     address WETH;
+    // here we cache incentive tranches to save on a bit of gas
+    mapping(address => uint8) public borrowIncentiveTranches;
 
     modifier ensure(uint256 deadline) {
         require(deadline >= block.timestamp, "UniswapV2Router: EXPIRED");
@@ -314,6 +317,14 @@ contract MarginRouter is RoleAware {
     ) external view returns (uint256[] memory) {
         address factory = factories[amm];
         return UniswapV2Library.getAmountsIn(factory, outAmount, path);
+    }
+
+    function setBorrowIncentiveTranche(address token, uint8 tranche) external {
+        require(
+            isTokenActivator(msg.sender),
+            "Caller not authorized to set incentive tranche"
+        );
+        borrowIncentiveTranches[token] = tranche;
     }
 }
 

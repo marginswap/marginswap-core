@@ -7,6 +7,10 @@ import "./BondLending.sol";
 
 contract Lending is BaseLending, HourlyBondSubscriptionLending, BondLending {
     mapping(address => YieldAccumulator) public borrowYieldAccumulators;
+    mapping(address => uint256[]) public bondIds;
+
+    // here we cache incentive tranches to save on a bit of gas
+    mapping(address => uint8) public lendingIncentiveTranches;
 
     constructor(address _roles) RoleAware(_roles) Ownable() {}
 
@@ -68,5 +72,63 @@ contract Lending is BaseLending, HourlyBondSubscriptionLending, BondLending {
         uint256 amount
     ) internal override {
         _makeHourlyBond(token, holder, amount);
+    }
+
+    function withdrawHourlyBond(address token, uint256 amount) external {
+        HourlyBond storage bond = hourlyBondAccounts[token][msg.sender];
+        // apply all interest
+        updateHourlyBondAmount(token, bond);
+        super._withdrawHourlyBond(token, bond, msg.sender, amount);
+    }
+
+    function buyHourlyBondSubscription(address token, uint256 amount) external {
+        if (lendingTarget[token] >= totalLending[token] + amount) {
+            require(
+                Fund(fund()).deposit(token, amount),
+                "Could not transfer bond deposit token to fund"
+            );
+            super._makeHourlyBond(token, msg.sender, amount);
+        }
+    }
+
+    function buyBond(
+        address token,
+        uint256 runtime,
+        uint256 amount,
+        uint256 minReturn
+    ) external returns (uint256 bondIndex) {
+        if (
+            lendingTarget[token] >= totalLending[token] + amount &&
+            maxRuntime >= runtime &&
+            runtime >= minRuntime
+        ) {
+            bondIndex = super._makeBond(
+                msg.sender,
+                token,
+                runtime,
+                amount,
+                minReturn
+            );
+            bondIds[msg.sender].push(bondIndex);
+        }
+    }
+
+    function withdrawBond(uint256 bondId) external {
+        Bond storage bond = bonds[bondId];
+        require(msg.sender == bond.holder, "Not holder of bond");
+        require(
+            block.timestamp > bond.maturityTimestamp,
+            "bond is still immature"
+        );
+
+        super._withdrawBond(bond);
+    }
+
+    function setLendingIncentiveTranche(address token, uint8 tranche) external {
+        require(
+            isTokenActivator(msg.sender),
+            "Caller not authorized to set incentive tranche"
+        );
+        lendingIncentiveTranches[token] = tranche;
     }
 }
