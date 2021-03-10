@@ -18,5 +18,5 @@ const deploy: DeployFunction = async function ({
         deterministicDeployment: true,
     });
 };
-module.exports.tags = ['Roles'];
+module.exports.tags = ['Roles', 'local'];
 export default deploy
