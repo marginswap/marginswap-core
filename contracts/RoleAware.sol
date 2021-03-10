@@ -24,6 +24,8 @@ contract RoleAware {
     uint16 public constant INCENTIVE_DISTRIBUTION = 108;
 
     Roles public roles;
+    mapping(uint16 => address) public mainCharacterCache;
+    mapping(address => mapping(uint16 => bool)) public roleCache;
 
     constructor(address _roles) {
         roles = Roles(_roles);
@@ -37,60 +39,68 @@ contract RoleAware {
         _;
     }
 
+    function updateRoleCache(uint16 role, address contr) external {
+        roleCache[contr][role] = roles.getRole(role, contr);
+    }
+
+    function updateMainCharacterCache(uint16 role) external {
+        mainCharacterCache[role] = roles.mainCharacters(role);
+    }
+
     function fund() internal view returns (address) {
-        return roles.mainCharacters(FUND);
+        return mainCharacterCache[FUND];
     }
 
     function lending() internal view returns (address) {
-        return roles.mainCharacters(LENDING);
+        return mainCharacterCache[LENDING];
     }
 
     function router() internal view returns (address) {
-        return roles.mainCharacters(ROUTER);
+        return mainCharacterCache[ROUTER];
     }
 
     function marginTrading() internal view returns (address) {
-        return roles.mainCharacters(MARGIN_TRADING);
+        return mainCharacterCache[MARGIN_TRADING];
     }
 
     function feeController() internal view returns (address) {
-        return roles.mainCharacters(FEE_CONTROLLER);
+        return mainCharacterCache[FEE_CONTROLLER];
     }
 
     function price() internal view returns (address) {
-        return roles.mainCharacters(PRICE_CONTROLLER);
+        return mainCharacterCache[PRICE_CONTROLLER];
     }
 
     function admin() internal view returns (address) {
-        return roles.mainCharacters(ADMIN);
+        return mainCharacterCache[ADMIN];
     }
 
     function incentiveDistributor() internal view returns (address) {
-        return roles.mainCharacters(INCENTIVE_DISTRIBUTION);
+        return mainCharacterCache[INCENTIVE_DISTRIBUTION];
     }
 
     function isBorrower(address contr) internal view returns (bool) {
-        return roles.getRole(BORROWER, contr);
+        return roleCache[contr][BORROWER];
     }
 
     function isWithdrawer(address contr) internal view returns (bool) {
-        return roles.getRole(WITHDRAWER, contr);
+        return roleCache[contr][WITHDRAWER];
     }
 
     function isMarginTrader(address contr) internal view returns (bool) {
-        return roles.getRole(MARGIN_TRADER, contr);
+        return roleCache[contr][MARGIN_TRADER];
     }
 
     function isFeeSource(address contr) internal view returns (bool) {
-        return roles.getRole(FEE_SOURCE, contr);
+        return roleCache[contr][FEE_SOURCE];
     }
 
     function isMarginCaller(address contr) internal view returns (bool) {
-        return roles.getRole(MARGIN_CALLER, contr);
+        return roleCache[contr][MARGIN_CALLER];
     }
 
     function isLiquidator(address contr) internal view returns (bool) {
-        return roles.getRole(LIQUIDATOR, contr);
+        return roleCache[contr][LIQUIDATOR];
     }
 
     function isAuthorizedFundTrader(address contr)
@@ -98,14 +108,14 @@ contract RoleAware {
         view
         returns (bool)
     {
-        return roles.getRole(AUTHORIZED_FUND_TRADER, contr);
+        return roleCache[contr][AUTHORIZED_FUND_TRADER];
     }
 
     function isIncentiveReporter(address contr) internal view returns (bool) {
-        return roles.getRole(INCENTIVE_REPORTER, contr);
+        return roleCache[contr][INCENTIVE_REPORTER];
     }
 
     function isTokenActivator(address contr) internal view returns (bool) {
-        return roles.getRole(TOKEN_ACTIVATOR, contr);
+        return roleCache[contr][TOKEN_ACTIVATOR];
     }
 }
