@@ -21,6 +21,7 @@ contract MarginRouter is RoleAware, IncentivizedHolder {
     event CrossDeposit(address trader, address depositToken, uint256 depositAmount);
     event CrossTrade(address trader, address inToken, uint256 inTokenAmount, uint256 inTokenBorrow, address outToken, uint256 outTokenAmount, uint256 outTokenExtinguish);
     event CrossWithdraw(address trader, address withdrawToken, uint256 withdrawAmount);
+    event CrossBorrow(address trader, address borrowToken, uint256 borrowAmount);
 
     modifier ensure(uint256 deadline) {
         require(deadline >= block.timestamp, "UniswapV2Router: EXPIRED");
@@ -112,6 +113,7 @@ contract MarginRouter is RoleAware, IncentivizedHolder {
 
         stakeClaim(msg.sender, borrowToken, borrowAmount);
         // TODO integrate into deposit
+        emit CrossBorrow(msg.sender, borrowToken, borrowAmount);
     }
 
     // **** SWAP ****
