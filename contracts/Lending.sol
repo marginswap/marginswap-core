@@ -4,13 +4,16 @@ pragma solidity ^0.8.0;
 import "./Fund.sol";
 import "./HourlyBondSubscriptionLending.sol";
 import "./BondLending.sol";
+import "./IncentivizedHolder.sol";
 
-contract Lending is BaseLending, HourlyBondSubscriptionLending, BondLending {
+contract Lending is
+    BaseLending,
+    HourlyBondSubscriptionLending,
+    BondLending,
+    IncentivizedHolder
+{
     mapping(address => YieldAccumulator) public borrowYieldAccumulators;
     mapping(address => uint256[]) public bondIds;
-
-    // here we cache incentive tranches to save on a bit of gas
-    mapping(address => uint8) public lendingIncentiveTranches;
 
     constructor(address _roles) RoleAware(_roles) Ownable() {}
 
@@ -79,6 +82,8 @@ contract Lending is BaseLending, HourlyBondSubscriptionLending, BondLending {
         // apply all interest
         updateHourlyBondAmount(token, bond);
         super._withdrawHourlyBond(token, bond, msg.sender, amount);
+
+        withdrawClaim(msg.sender, token, amount);
     }
 
     function buyHourlyBondSubscription(address token, uint256 amount) external {
@@ -88,6 +93,8 @@ contract Lending is BaseLending, HourlyBondSubscriptionLending, BondLending {
                 "Could not transfer bond deposit token to fund"
             );
             super._makeHourlyBond(token, msg.sender, amount);
+
+            stakeClaim(msg.sender, token, amount);
         }
     }
 
@@ -110,6 +117,8 @@ contract Lending is BaseLending, HourlyBondSubscriptionLending, BondLending {
                 minReturn
             );
             bondIds[msg.sender].push(bondIndex);
+
+            stakeClaim(msg.sender, token, amount);
         }
     }
 
@@ -122,13 +131,9 @@ contract Lending is BaseLending, HourlyBondSubscriptionLending, BondLending {
         );
 
         super._withdrawBond(bond);
-    }
-
-    function setLendingIncentiveTranche(address token, uint8 tranche) external {
-        require(
-            isTokenActivator(msg.sender),
-            "Caller not authorized to set incentive tranche"
-        );
-        lendingIncentiveTranches[token] = tranche;
+        // in case of a shortfall, governance can step in to provide
+        // additonal compensation beyond the usual incentive which
+        // gets withdrawn here
+        withdrawClaim(msg.sender, bond.token, bond.originalPrice);
     }
 }
