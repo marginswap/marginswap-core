@@ -25,6 +25,7 @@ const deploy: DeployFunction = async function ({
         .then(Fund => ethers.getContractAt("Fund", Fund.address));
     await fund.activateToken(MFI_ADDRESS);
 };
-module.exports.tags = ['Roles', 'local'];
+
+module.exports.tags = ['IncentiveDistribution', 'local'];
 module.exports.dependencies = ['Roles', 'Fund'];
 export default deploy

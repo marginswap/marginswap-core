@@ -4,6 +4,9 @@ import * as fs from 'fs';
 import 'hardhat-deploy';
 import "hardhat-deploy-ethers";
 
+const MFI_ADDRESS = "0xAa4e3edb11AFa93c41db59842b29de64b72E355B";
+const LIQUIDITY_TOKEN = "0x9d640080af7c81911d87632a7d09cc4ab6b133ac";
+
 // This is a sample Hardhat task. To learn how to create your own go to
 // https://hardhat.org/guides/create-task.html
 task("accounts", "Prints the list of accounts", async (args, hre) => {
@@ -83,6 +86,10 @@ export default {
         liquidityMiningReward: {
             1: "0xEfa8122994c742566DB4478d25aD1eC3DF07f477",
             3: "0x2C71Dc2795224184bC80466b4E4A8bC29008eD7f"
+        },
+        liquidityToken: {
+            default: LIQUIDITY_TOKEN,
+            3: MFI_ADDRESS,
         }
     }
 };
