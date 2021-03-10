@@ -334,40 +334,6 @@
       "inputs": [
         {
           "internalType": "address",
-          "name": "token",
-          "type": "address"
-        },
-        {
-          "internalType": "uint256",
-          "name": "runtime",
-          "type": "uint256"
-        },
-        {
-          "internalType": "uint256",
-          "name": "amount",
-          "type": "uint256"
-        },
-        {
-          "internalType": "uint256",
-          "name": "minReturn",
-          "type": "uint256"
-        }
-      ],
-      "name": "buyBond",
-      "outputs": [
-        {
-          "internalType": "uint256",
-          "name": "bondIndex",
-          "type": "uint256"
-        }
-      ],
-      "stateMutability": "nonpayable",
-      "type": "function"
-    },
-    {
-      "inputs": [
-        {
-          "internalType": "address",
           "name": "",
           "type": "address"
         },
@@ -722,19 +688,6 @@
         }
       ],
       "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "inputs": [
-        {
-          "internalType": "uint256",
-          "name": "bondId",
-          "type": "uint256"
-        }
-      ],
-      "name": "withdrawBond",
-      "outputs": [],
-      "stateMutability": "nonpayable",
       "type": "function"
     },
     {
