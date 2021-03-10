@@ -4,8 +4,34 @@ import * as fs from 'fs';
 import 'hardhat-deploy';
 import "hardhat-deploy-ethers";
 
+// outside addresses
+const WETH = "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2";
 const MFI_ADDRESS = "0xAa4e3edb11AFa93c41db59842b29de64b72E355B";
+const REAL_TREASURY = "0x16F3Fc1E4BA9d70f47387b902fa5d21020b5C6B5";
+const UNISWAP_FACTORY = "0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f";
+const SUSHISWAP_FACTORY = "0xC0AEe478e3658e2610c5F7A4A2E1777cE9e4f2Ac";
+const USDC_ADDRESS = "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48";
 const LIQUIDITY_TOKEN = "0x9d640080af7c81911d87632a7d09cc4ab6b133ac";
+const ROPSTEN_LIQUI_TOKEN = "0xc4c79A0e1C7A9c79f1e943E3a5bEc65396a5434a";
+
+// roles
+
+const WITHDRAWER = 1;
+const MARGIN_CALLER = 2;
+const BORROWER = 3;
+const MARGIN_TRADER = 4;
+const FEE_SOURCE = 5;
+const LIQUIDATOR = 6;
+const AUTHORIZED_FUND_TRADER = 7;
+const INCENTIVE_REPORTER = 8;
+const TOKEN_ACTIVATOR = 9;
+
+const FUND = 101;
+const LENDING = 102;
+const ROUTER = 103;
+const MARGIN_TRADING = 104;
+const FEE_CONTROLLER = 105;
+const PRICE_CONTROLLER = 106;
 
 // This is a sample Hardhat task. To learn how to create your own go to
 // https://hardhat.org/guides/create-task.html
