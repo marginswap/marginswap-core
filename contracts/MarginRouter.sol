@@ -18,6 +18,10 @@ contract MarginRouter is RoleAware, IncentivizedHolder {
     mapping(AMM => address) factories;
     address WETH;
 
+    event CrossDeposit(address trader, address depositToken, uint256 depositAmount);
+    event CrossTrade(address trader, address inToken, uint256 inTokenAmount, uint256 inTokenBorrow, address outToken, uint256 outTokenAmount, uint256 outTokenExtinguish);
+    event CrossWithdraw(address trader, address withdrawToken, uint256 withdrawAmount);
+
     modifier ensure(uint256 deadline) {
         require(deadline >= block.timestamp, "UniswapV2Router: EXPIRED");
         _;
@@ -52,6 +56,7 @@ contract MarginRouter is RoleAware, IncentivizedHolder {
             Lending(lending()).payOff(depositToken, extinguishAmount);
             withdrawClaim(msg.sender, depositToken, extinguishAmount);
         }
+        emit CrossDeposit(msg.sender, depositToken, depositAmount);
     }
 
     function crossDepositETH() external payable noIntermediary {
@@ -66,6 +71,7 @@ contract MarginRouter is RoleAware, IncentivizedHolder {
             Lending(lending()).payOff(WETH, extinguishAmount);
             withdrawClaim(msg.sender, WETH, extinguishAmount);
         }
+        emit CrossDeposit(msg.sender, WETH, msg.value);
     }
 
     function crossWithdraw(address withdrawToken, uint256 withdrawAmount)
@@ -81,6 +87,7 @@ contract MarginRouter is RoleAware, IncentivizedHolder {
             Fund(fund()).withdraw(withdrawToken, msg.sender, withdrawAmount),
             "Could not withdraw from fund"
         );
+        emit CrossWithdraw(msg.sender, withdrawToken, withdrawAmount);
     }
 
     function crossWithdrawETH(uint256 withdrawAmount) external noIntermediary {
@@ -104,6 +111,7 @@ contract MarginRouter is RoleAware, IncentivizedHolder {
         );
 
         stakeClaim(msg.sender, borrowToken, borrowAmount);
+        // TODO integrate into deposit
     }
 
     // **** SWAP ****
@@ -304,6 +312,8 @@ contract MarginRouter is RoleAware, IncentivizedHolder {
             Lending(lending()).registerBorrow(outToken, borrowAmount);
             stakeClaim(trader, inToken, borrowAmount);
         }
+
+        emit CrossTrade(trader, inToken, inAmount, borrowAmount, outToken, outAmount, extinguishAmount);
     }
 
     function getAmountsOut(
