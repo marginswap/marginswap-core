@@ -15,13 +15,13 @@ const deploy: DeployFunction = async function ({
     const { deploy } = deployments;
     const { deployer } = await getNamedAccounts();
     const Roles = await deployments.get("Roles");
+    const roles = await ethers.getContractAt("Roles", Roles.address);
 
     const fund = await deploy('Fund', {
         from: deployer,
-        args: [WETH, Roles.address]
+        args: [WETH, roles.address]
     });
 
-    const roles = await ethers.getContract("Roles", Roles.address);
     await roles.setMainCharacter(FUND, fund.address);
 };
 module.exports.tags = ['Fund'];
