@@ -35,7 +35,7 @@ abstract contract BondLending is BaseLending {
 
     mapping(address => uint256[]) public totalLendingPerRuntime;
     mapping(address => uint256[]) runtimeYieldsFP;
-    uint256 public nextBondIndex;
+    uint256 public nextBondIndex = 1;
 
     event LiquidityWarning(
         address indexed token,

@@ -50,10 +50,7 @@ contract TokenAdmin is RoleAware, Ownable {
                 calcTrancheShare(incentiveWeight, totalLendingTargetPortion);
             iD.initTranche(nextTrancheIndex, lendingShare);
             tokenLendingTranches[token] = nextTrancheIndex;
-            Lending(lending()).setLendingIncentiveTranche(
-                token,
-                nextTrancheIndex
-            );
+            Lending(lending()).setIncentiveTranche(token, nextTrancheIndex);
             nextTrancheIndex++;
 
             // init borrowing
@@ -61,10 +58,7 @@ contract TokenAdmin is RoleAware, Ownable {
                 calcTrancheShare(incentiveWeight, totalBorrowingTargetPortion);
             iD.initTranche(nextTrancheIndex, borrowingShare);
             tokenBorrowingTranches[token] = nextTrancheIndex;
-            MarginRouter(router()).setBorrowIncentiveTranche(
-                token,
-                nextTrancheIndex
-            );
+            MarginRouter(router()).setIncentiveTranche(token, nextTrancheIndex);
             nextTrancheIndex++;
 
             updateIncentiveShares(iD);
