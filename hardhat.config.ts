@@ -1,9 +1,8 @@
 import { task } from "hardhat/config";
 import "@nomiclabs/hardhat-waffle";
 import * as fs from 'fs';
-import { runDeploy } from './deploy/deploy';
-
-
+import 'hardhat-deploy';
+import "hardhat-deploy-ethers";
 
 // This is a sample Hardhat task. To learn how to create your own go to
 // https://hardhat.org/guides/create-task.html
@@ -14,12 +13,6 @@ task("accounts", "Prints the list of accounts", async (args, hre) => {
         console.log(account.address);
     }
 });
-
-task("deploy", "Runs deployment scripts")
-    .addPositionalParam("taskName", "Name of contract or other deployment task to execute")
-    .setAction(async (args, hre) => {
-        await runDeploy(args.taskName, hre);
-    });
 
 const homedir = require('os').homedir();
 const privateKey = fs.readFileSync(`${homedir}/.marginswap-secret`).toString().trim();
@@ -61,4 +54,35 @@ export default {
             }
         }
     },
+
+    // ChainId: {
+    //     MAINNET = 1,
+    //     ROPSTEN = 3,
+    //     RINKEBY = 4,
+    //     GÖRLI = 5,
+    //     KOVAN = 42
+    // },
+
+    namedAccounts: {
+        deployer: {
+            default: 0
+        },
+        roles: {
+            1: "0xB867ABeF538349bC5156F524cC7743fE07942D3F",
+            3: "0x71328517862C481fA7E5Ed39Ffc53fc64c9778e5",
+            42: "0x541769D9578645b5477ace873b484FabcAD6D428"
+        },
+        fund: {
+            1: "0x2AF84B57B9c56D630DB60d4F564254975736C47e",
+            3: "0x690c6ff4C5DdBAeA4282b109dC145cbA19d13206"
+        },
+        incentiveDistribution: {
+            1: "0x20A4Fc1421D7dBe65036C26682A41434f471AeC5",
+            3: "0xEf13Ff3E1749606c11623C8b8064761ba70248e3"
+        },
+        liquidityMiningReward: {
+            1: "0xEfa8122994c742566DB4478d25aD1eC3DF07f477",
+            3: "0x2C71Dc2795224184bC80466b4E4A8bC29008eD7f"
+        }
+    }
 };
