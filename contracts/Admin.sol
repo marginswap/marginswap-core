@@ -132,7 +132,7 @@ contract Admin is RoleAware, Ownable {
         }
     }
 
-    function getUpdatedCurrentStaker() internal returns (address) {
+    function getUpdatedCurrentStaker() public returns (address) {
         while (
             (block.number - currentMaintenanceStakerStartBlock) *
                 maintenanceStakePerBlock >=

@@ -416,12 +416,14 @@ contract CrossMarginTrading is RoleAware, Ownable {
 
     struct MCRecord {
         uint256 blockNum;
+        address loser;
         uint256 amount;
         address stakeAttacker;
     }
     mapping(address => MCRecord) stakeAttackRecords;
+    uint256 avgLiquidationPerBlock = 10;
 
-    uint256 mcAttackWindow = 80;
+    uint256 mcAttackWindow = 5;
 
     function calcLiquidationAmounts(
         address[] memory liquidationCandidates,
@@ -483,8 +485,16 @@ contract CrossMarginTrading is RoleAware, Ownable {
                     }
                 }
             }
+            
             MCRecord storage mcRecord = stakeAttackRecords[traderAddress];
-            if (mcRecord.amount > 0 && isAuthorized) {
+            if (isAuthorized) {
+                attackReturns += _disburseMCAttack(mcRecord);
+            }
+        }
+    }
+
+    function _disburseMCAttack(MCRecord storage mcRecord) internal returns (uint256 returnAmount) {
+            if (mcRecord.amount > 0) {
                 // validate attack records, if any
                 uint256 blockDif =
                     min(1 + block.number - mcRecord.blockNum, mcAttackWindow);
@@ -494,11 +504,28 @@ contract CrossMarginTrading is RoleAware, Ownable {
                     Price(price()).peg(),
                     mcRecord.stakeAttacker,
                     attackerCut
-                );
-                attackReturns += mcRecord.amount - attackerCut;
+                                      );
+
+
+                Admin a = Admin(admin());
+                uint256 penalty = a.maintenanceStakePerBlock() * attackerCut / avgLiquidationPerBlock;
+                a.penalizeMaintenanceStake(mcRecord.loser, penalty, mcRecord.stakeAttacker);
+
                 mcRecord.amount = 0;
                 mcRecord.stakeAttacker = address(0);
                 mcRecord.blockNum = 0;
+                mcRecord.loser = address(0);
+
+                returnAmount = mcRecord.amount - attackerCut;
+
+            }
+    }        
+    
+    function disburseMCAttacks(address[] memory liquidatedAccounts) external {
+        for (uint256 i = 0; liquidatedAccounts.length > i; i++) {
+            MCRecord storage mcRecord = stakeAttackRecords[liquidatedAccounts[i]];
+            if (block.number > mcRecord.blockNum + mcAttackWindow) {
+                _disburseMCAttack(mcRecord);
             }
         }
     }
@@ -600,6 +627,7 @@ contract CrossMarginTrading is RoleAware, Ownable {
                 mcRecord.amount = mcCut4account;
                 mcRecord.stakeAttacker = currentCaller;
                 mcRecord.blockNum = block.number;
+                mcRecord.loser = Admin(admin()).getUpdatedCurrentStaker();
             }
 
             if (holdingsValue >= mcCut4account + borrowValue) {
@@ -617,5 +645,7 @@ contract CrossMarginTrading is RoleAware, Ownable {
 
             deleteAccount(account);
         }
+
+        avgLiquidationPerBlock = (avgLiquidationPerBlock * 99 + marginCallerCut) / 100;
     }
 }
