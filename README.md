@@ -5,6 +5,8 @@ Core contracts for marginswap functionality
 
 Install dependencies:
 ```(shell)
+git submodule init
+git submodule update
 yarn install
 ```
 
