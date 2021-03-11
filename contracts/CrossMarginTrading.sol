@@ -592,16 +592,14 @@ contract CrossMarginTrading is RoleAware, Ownable {
         address currentCaller
     ) external returns (uint256 maintainerCut) {
         bool isAuthorized = Admin(admin()).isAuthorizedStaker(msg.sender);
-        //(address[] memory sellTokens,
-        //address[] memory buyTokens,
-        // address[] memory tradersToLiquidate) =
+
         uint256 attackReturns2Authorized =
             calcLiquidationAmounts(liquidationCandidates, isAuthorized);
         maintainerCut += attackReturns2Authorized;
 
         uint256 sale2pegAmount = liquidateToPeg();
         uint256 peg2targetCost = liquidateFromPeg();
-        // TODO add the mcCut to this
+
         if (peg2targetCost > sale2pegAmount) {
             emit LiquidationShortfall(peg2targetCost - sale2pegAmount);
         }
@@ -616,36 +614,32 @@ contract CrossMarginTrading is RoleAware, Ownable {
 
             uint256 holdingsValue = holdingsInPeg(account);
             uint256 borrowValue = loanInPeg(account);
-            // half of the liquidation threshold
-            uint256 mcCut4account =
-                (borrowValue * liquidationThresholdPercent) /
-                    100 /
-                    leverage /
-                    2;
+            // 5% of value borrowed
+            uint256 mCut4Account = borrowValue * 1000 / 50;
             if (isAuthorized) {
-                maintainerCut += mcCut4account;
+                maintainerCut += mCut4Account;
             } else {
                 // This could theoretically lead to a previous attackers
                 // record being overwritten, but only if the trader restarts
                 // their account and goes back into the red within the short time window
                 // which would be a costly attack requiring collusion without upside
                 MCRecord storage mcRecord = stakeAttackRecords[traderAddress];
-                mcRecord.amount = mcCut4account;
+                mcRecord.amount = mCut4Account;
                 mcRecord.stakeAttacker = currentCaller;
                 mcRecord.blockNum = block.number;
                 mcRecord.loser = Admin(admin()).getUpdatedCurrentStaker();
             }
 
-            if (holdingsValue >= mcCut4account + borrowValue) {
+            if (holdingsValue >= mCut4Account + borrowValue) {
                 // send remaining funds back to trader
                 Fund(fund()).withdraw(
                     Price(price()).peg(),
                     traderAddress,
-                    holdingsValue - borrowValue - mcCut4account
+                    holdingsValue - borrowValue - mCut4Account
                 );
             } else {
                 uint256 shortfall =
-                    (borrowValue + mcCut4account) - holdingsValue;
+                    (borrowValue + mCut4Account) - holdingsValue;
                 emit LiquidationShortfall(shortfall);
             }
 
