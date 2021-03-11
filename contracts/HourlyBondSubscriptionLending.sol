@@ -27,16 +27,6 @@ abstract contract HourlyBondSubscriptionLending is BaseLending {
     mapping(address => uint256) public hourlyBondWithdrawingSpeed;
     uint256 public hourlyMaxYield;
 
-    function buyHourlyBondSubscription(address token, uint256 amount) external {
-        if (lendingTarget[token] >= totalLending[token] + amount) {
-            require(
-                Fund(fund()).deposit(token, amount),
-                "Could not transfer bond deposit token to fund"
-            );
-            _makeHourlyBond(token, msg.sender, amount);
-        }
-    }
-
     function _makeHourlyBond(
         address token,
         address holder,
@@ -75,13 +65,6 @@ abstract contract HourlyBondSubscriptionLending is BaseLending {
             totalLending[token] += deltaAmount;
             // TODO make a similar update for borrowing!
         }
-    }
-
-    function withdrawHourlyBond(address token, uint256 amount) external {
-        HourlyBond storage bond = hourlyBondAccounts[token][msg.sender];
-        // apply all interest
-        updateHourlyBondAmount(token, bond);
-        _withdrawHourlyBond(token, bond, msg.sender, amount);
     }
 
     function _withdrawHourlyBond(

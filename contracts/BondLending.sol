@@ -35,7 +35,7 @@ abstract contract BondLending is BaseLending {
 
     mapping(address => uint256[]) public totalLendingPerRuntime;
     mapping(address => uint256[]) runtimeYieldsFP;
-    uint256 public nextBondIndex;
+    uint256 public nextBondIndex = 1;
 
     event LiquidityWarning(
         address indexed token,
@@ -43,66 +43,54 @@ abstract contract BondLending is BaseLending {
         uint256 value
     );
 
-    function buyBond(
+    function _makeBond(
+        address holder,
         address token,
         uint256 runtime,
         uint256 amount,
         uint256 minReturn
-    ) external returns (uint256 bondIndex) {
-        if (
-            lendingTarget[token] >= totalLending[token] + amount &&
-            maxRuntime >= runtime &&
-            runtime >= minRuntime
-        ) {
-            uint256 bucketIndex = getBucketIndex(token, runtime);
-            uint256 yieldFP =
-                calcBondYieldFP(
-                    token,
-                    amount + totalLendingPerRuntime[token][bucketIndex],
+    ) internal returns (uint256 bondIndex) {
+        uint256 bucketIndex = getBucketIndex(token, runtime);
+        uint256 yieldFP =
+            calcBondYieldFP(
+                token,
+                amount + totalLendingPerRuntime[token][bucketIndex],
+                bucketIndex
+            );
+        uint256 bondReturn = (yieldFP * amount) / FP32;
+        if (bondReturn >= minReturn) {
+            if (Fund(fund()).depositFor(holder, token, amount)) {
+                uint256 interpolatedAmount = (amount + bondReturn) / 2;
+                totalLending[token] += interpolatedAmount;
+                totalLendingPerRuntime[token][
                     bucketIndex
+                ] += interpolatedAmount;
+                // TODO overflow??
+                totalHourlyYieldFP[token] +=
+                    (amount * yieldFP * (1 hours)) /
+                    runtime;
+                bondIndex = nextBondIndex;
+                nextBondIndex++;
+                bonds[bondIndex] = Bond({
+                    holder: holder,
+                    token: token,
+                    originalPrice: amount,
+                    returnAmount: bondReturn,
+                    maturityTimestamp: block.timestamp + runtime,
+                    runtime: runtime,
+                    yieldFP: yieldFP
+                });
+                updateSpeed(
+                    buyingSpeed[token],
+                    lastBought[token],
+                    bucketIndex,
+                    amount
                 );
-            uint256 bondReturn = (yieldFP * amount) / FP32;
-            if (bondReturn >= minReturn) {
-                if (Fund(fund()).depositFor(msg.sender, token, amount)) {
-                    uint256 interpolatedAmount = (amount + bondReturn) / 2;
-                    totalLending[token] += interpolatedAmount;
-                    totalLendingPerRuntime[token][
-                        bucketIndex
-                    ] += interpolatedAmount;
-                    // TODO overflow??
-                    totalHourlyYieldFP[token] +=
-                        (amount * yieldFP * (1 hours)) /
-                        runtime;
-                    bondIndex = nextBondIndex;
-                    nextBondIndex++;
-                    bonds[bondIndex] = Bond({
-                        holder: msg.sender,
-                        token: token,
-                        originalPrice: amount,
-                        returnAmount: bondReturn,
-                        maturityTimestamp: block.timestamp + runtime,
-                        runtime: runtime,
-                        yieldFP: yieldFP
-                    });
-                    updateSpeed(
-                        buyingSpeed[token],
-                        lastBought[token],
-                        bucketIndex,
-                        amount
-                    );
-                }
             }
         }
     }
 
-    function withdrawBond(uint256 bondId) external {
-        Bond storage bond = bonds[bondId];
-        require(msg.sender == bond.holder, "Not holder of bond");
-        require(
-            block.timestamp > bond.maturityTimestamp,
-            "bond is still immature"
-        );
-
+    function _withdrawBond(Bond storage bond) internal {
         address token = bond.token;
         uint256 bucketIndex = getBucketIndex(token, bond.runtime);
         uint256 interpolatedAmount =

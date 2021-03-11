@@ -9,12 +9,39 @@ import "./Fund.sol";
 import "./CrossMarginTrading.sol";
 import "./Lending.sol";
 import "./Admin.sol";
+import "./IncentivizedHolder.sol";
 
+// TODO get rid of enum
 enum AMM {uni, sushi, compare, split}
 
-contract MarginRouter is RoleAware {
+contract MarginRouter is RoleAware, IncentivizedHolder {
     mapping(AMM => address) factories;
     address WETH;
+
+    event CrossDeposit(
+        address trader,
+        address depositToken,
+        uint256 depositAmount
+    );
+    event CrossTrade(
+        address trader,
+        address inToken,
+        uint256 inTokenAmount,
+        uint256 inTokenBorrow,
+        address outToken,
+        uint256 outTokenAmount,
+        uint256 outTokenExtinguish
+    );
+    event CrossWithdraw(
+        address trader,
+        address withdrawToken,
+        uint256 withdrawAmount
+    );
+    event CrossBorrow(
+        address trader,
+        address borrowToken,
+        uint256 borrowAmount
+    );
 
     modifier ensure(uint256 deadline) {
         require(deadline >= block.timestamp, "UniswapV2Router: EXPIRED");
@@ -34,7 +61,6 @@ contract MarginRouter is RoleAware {
 
     function crossDeposit(address depositToken, uint256 depositAmount)
         external
-        noIntermediary
     {
         require(
             Fund(fund()).depositFor(msg.sender, depositToken, depositAmount),
@@ -48,10 +74,12 @@ contract MarginRouter is RoleAware {
             );
         if (extinguishAmount > 0) {
             Lending(lending()).payOff(depositToken, extinguishAmount);
+            withdrawClaim(msg.sender, depositToken, extinguishAmount);
         }
+        emit CrossDeposit(msg.sender, depositToken, depositAmount);
     }
 
-    function crossDepositETH() external payable noIntermediary {
+    function crossDepositETH() external payable {
         Fund(fund()).depositToWETH{value: msg.value}();
         uint256 extinguishAmount =
             CrossMarginTrading(marginTrading()).registerDeposit(
@@ -61,12 +89,13 @@ contract MarginRouter is RoleAware {
             );
         if (extinguishAmount > 0) {
             Lending(lending()).payOff(WETH, extinguishAmount);
+            withdrawClaim(msg.sender, WETH, extinguishAmount);
         }
+        emit CrossDeposit(msg.sender, WETH, msg.value);
     }
 
     function crossWithdraw(address withdrawToken, uint256 withdrawAmount)
         external
-        noIntermediary
     {
         CrossMarginTrading(marginTrading()).registerWithdrawal(
             msg.sender,
@@ -77,9 +106,10 @@ contract MarginRouter is RoleAware {
             Fund(fund()).withdraw(withdrawToken, msg.sender, withdrawAmount),
             "Could not withdraw from fund"
         );
+        emit CrossWithdraw(msg.sender, withdrawToken, withdrawAmount);
     }
 
-    function crossWithdrawETH(uint256 withdrawAmount) external noIntermediary {
+    function crossWithdrawETH(uint256 withdrawAmount) external {
         CrossMarginTrading(marginTrading()).registerWithdrawal(
             msg.sender,
             WETH,
@@ -88,16 +118,17 @@ contract MarginRouter is RoleAware {
         Fund(fund()).withdrawETH(msg.sender, withdrawAmount);
     }
 
-    function crossBorrow(address borrowToken, uint256 borrowAmount)
-        external
-        noIntermediary
-    {
+    function crossBorrow(address borrowToken, uint256 borrowAmount) external {
         Lending(lending()).registerBorrow(borrowToken, borrowAmount);
         CrossMarginTrading(marginTrading()).registerBorrow(
             msg.sender,
             borrowToken,
             borrowAmount
         );
+
+        stakeClaim(msg.sender, borrowToken, borrowAmount);
+        // TODO integrate into deposit
+        emit CrossBorrow(msg.sender, borrowToken, borrowAmount);
     }
 
     // **** SWAP ****
@@ -212,12 +243,7 @@ contract MarginRouter is RoleAware {
         uint256 amountOutMin,
         address[] calldata path,
         uint256 deadline
-    )
-        external
-        noIntermediary
-        ensure(deadline)
-        returns (uint256[] memory amounts)
-    {
+    ) external ensure(deadline) returns (uint256[] memory amounts) {
         // calc fees
         uint256 fees =
             Admin(feeController()).subtractTradingFees(path[0], amountIn);
@@ -245,12 +271,7 @@ contract MarginRouter is RoleAware {
         uint256 amountInMax,
         address[] calldata path,
         uint256 deadline
-    )
-        external
-        noIntermediary
-        ensure(deadline)
-        returns (uint256[] memory amounts)
-    {
+    ) external ensure(deadline) returns (uint256[] memory amounts) {
         // calc fees
         uint256 fees =
             Admin(feeController()).addTradingFees(
@@ -292,10 +313,22 @@ contract MarginRouter is RoleAware {
             );
         if (extinguishAmount > 0) {
             Lending(lending()).payOff(outToken, extinguishAmount);
+            withdrawClaim(trader, outToken, extinguishAmount);
         }
         if (borrowAmount > 0) {
             Lending(lending()).registerBorrow(outToken, borrowAmount);
+            stakeClaim(trader, inToken, borrowAmount);
         }
+
+        emit CrossTrade(
+            trader,
+            inToken,
+            inAmount,
+            borrowAmount,
+            outToken,
+            outAmount,
+            extinguishAmount
+        );
     }
 
     function getAmountsOut(
@@ -316,5 +349,3 @@ contract MarginRouter is RoleAware {
         return UniswapV2Library.getAmountsIn(factory, outAmount, path);
     }
 }
-
-// TODO use cached prices or borrow and write prices before registering trade

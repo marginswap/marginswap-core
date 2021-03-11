@@ -13,6 +13,7 @@ contract RoleAware {
     uint16 public constant AUTHORIZED_FUND_TRADER = 7;
     uint16 public constant INCENTIVE_REPORTER = 8;
     uint16 public constant TOKEN_ACTIVATOR = 9;
+    uint16 public constant STAKE_PENALIZER = 10;
 
     uint16 public constant FUND = 101;
     uint16 public constant LENDING = 102;
@@ -117,5 +118,9 @@ contract RoleAware {
 
     function isTokenActivator(address contr) internal view returns (bool) {
         return roleCache[contr][TOKEN_ACTIVATOR];
+    }
+
+    function isStakePenalizer(address contr) internal view returns (bool) {
+        return roles.getRole(STAKE_PENALIZER, contr);
     }
 }

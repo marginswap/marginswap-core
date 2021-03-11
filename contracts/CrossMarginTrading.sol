@@ -14,6 +14,7 @@ import "./Price.sol";
 // except for view functions of course
 
 struct CrossMarginAccount {
+    uint256 lastDepositBlock;
     address[] borrowTokens;
     mapping(address => uint256) borrowed;
     mapping(address => uint256) borrowedYieldQuotientsFP;
@@ -31,9 +32,11 @@ contract CrossMarginTrading is RoleAware, Ownable {
     mapping(address => uint256) public tokenCaps;
     mapping(address => uint256) public totalShort;
     mapping(address => uint256) public totalLong;
+    uint256 public coolingOffPeriod;
 
     constructor(address _roles) RoleAware(_roles) Ownable() {
         liquidationThresholdPercent = 20;
+        coolingOffPeriod = 20;
     }
 
     function setTokenCap(address token, uint256 cap) external {
@@ -42,6 +45,10 @@ contract CrossMarginTrading is RoleAware, Ownable {
             "Caller not authorized to set token cap"
         );
         tokenCaps[token] = cap;
+    }
+
+    function setCoolingOffPeriod(uint256 blocks) external onlyOwner {
+        coolingOffPeriod = blocks;
     }
 
     function getHoldingAmounts(address trader)
@@ -118,6 +125,7 @@ contract CrossMarginTrading is RoleAware, Ownable {
             extinguishDebt(account, token, extinguishableDebt);
             totalShort[token] -= extinguishableDebt;
         }
+        account.lastDepositBlock = block.number;
     }
 
     function addHolding(
@@ -187,6 +195,10 @@ contract CrossMarginTrading is RoleAware, Ownable {
             "Calling contract not authorized to deposit"
         );
         CrossMarginAccount storage account = marginAccounts[trader];
+        require(
+            block.number > account.lastDepositBlock + coolingOffPeriod,
+            "To prevent attacks you must wait until your cooling off period is over to withdraw"
+        );
 
         totalLong[withdrawToken] -= withdrawAmount;
         // throws on underflow
@@ -265,18 +277,17 @@ contract CrossMarginTrading is RoleAware, Ownable {
         return sumTokensInPeg(account.holdingTokens, account.holdings);
     }
 
-    function marginCallable(CrossMarginAccount storage account)
+    function belowMaintenanceThreshold(CrossMarginAccount storage account)
         internal
         returns (bool)
     {
         uint256 loan = loanInPeg(account);
         uint256 holdings = holdingsInPeg(account);
         // The following should hold:
-        // holdings / loan >= (leverage + liquidationThresholdPercent / 100) / leverage
-        // =>
+        // holdings / loan >= 1.1
+        // => holdings >= loan * 1.1
         return
-            holdings * leverage * 100 >=
-            (100 * leverage + liquidationThresholdPercent) * loan;
+            1000  * holdings >= 1100 * loan;
     }
 
     function canBorrow(
@@ -416,12 +427,14 @@ contract CrossMarginTrading is RoleAware, Ownable {
 
     struct MCRecord {
         uint256 blockNum;
+        address loser;
         uint256 amount;
         address stakeAttacker;
     }
     mapping(address => MCRecord) stakeAttackRecords;
+    uint256 avgLiquidationPerBlock = 10;
 
-    uint256 mcAttackWindow = 80;
+    uint256 mcAttackWindow = 5;
 
     function calcLiquidationAmounts(
         address[] memory liquidationCandidates,
@@ -438,7 +451,7 @@ contract CrossMarginTrading is RoleAware, Ownable {
         ) {
             address traderAddress = liquidationCandidates[traderIndex];
             CrossMarginAccount storage account = marginAccounts[traderAddress];
-            if (marginCallable(account)) {
+            if (belowMaintenanceThreshold(account)) {
                 // TODO optimize maybe put in the whole account?
                 // TODO unique?
                 tradersToLiquidate.push(traderAddress);
@@ -483,22 +496,54 @@ contract CrossMarginTrading is RoleAware, Ownable {
                     }
                 }
             }
+
             MCRecord storage mcRecord = stakeAttackRecords[traderAddress];
-            if (mcRecord.amount > 0 && isAuthorized) {
-                // validate attack records, if any
-                uint256 blockDif =
-                    min(1 + block.number - mcRecord.blockNum, mcAttackWindow);
-                uint256 attackerCut =
-                    (blockDif * mcRecord.amount) / mcAttackWindow;
-                Fund(fund()).withdraw(
-                    Price(price()).peg(),
-                    mcRecord.stakeAttacker,
-                    attackerCut
-                );
-                attackReturns += mcRecord.amount - attackerCut;
-                mcRecord.amount = 0;
-                mcRecord.stakeAttacker = address(0);
-                mcRecord.blockNum = 0;
+            if (isAuthorized) {
+                attackReturns += _disburseMCAttack(mcRecord);
+            }
+        }
+    }
+
+    function _disburseMCAttack(MCRecord storage mcRecord)
+        internal
+        returns (uint256 returnAmount)
+    {
+        if (mcRecord.amount > 0) {
+            // validate attack records, if any
+            uint256 blockDif =
+                min(1 + block.number - mcRecord.blockNum, mcAttackWindow);
+            uint256 attackerCut = (blockDif * mcRecord.amount) / mcAttackWindow;
+            Fund(fund()).withdraw(
+                Price(price()).peg(),
+                mcRecord.stakeAttacker,
+                attackerCut
+            );
+
+            Admin a = Admin(admin());
+            uint256 penalty =
+                (a.maintenanceStakePerBlock() * attackerCut) /
+                    avgLiquidationPerBlock;
+            a.penalizeMaintenanceStake(
+                mcRecord.loser,
+                penalty,
+                mcRecord.stakeAttacker
+            );
+
+            mcRecord.amount = 0;
+            mcRecord.stakeAttacker = address(0);
+            mcRecord.blockNum = 0;
+            mcRecord.loser = address(0);
+
+            returnAmount = mcRecord.amount - attackerCut;
+        }
+    }
+
+    function disburseMCAttacks(address[] memory liquidatedAccounts) external {
+        for (uint256 i = 0; liquidatedAccounts.length > i; i++) {
+            MCRecord storage mcRecord =
+                stakeAttackRecords[liquidatedAccounts[i]];
+            if (block.number > mcRecord.blockNum + mcAttackWindow) {
+                _disburseMCAttack(mcRecord);
             }
         }
     }
@@ -554,21 +599,19 @@ contract CrossMarginTrading is RoleAware, Ownable {
         delete account.holdingTokens;
     }
 
-    function callMargin(
+    function liquidate(
         address[] memory liquidationCandidates,
         address currentCaller
-    ) external returns (uint256 marginCallerCut) {
+    ) external returns (uint256 maintainerCut) {
         bool isAuthorized = Admin(admin()).isAuthorizedStaker(msg.sender);
-        //(address[] memory sellTokens,
-        //address[] memory buyTokens,
-        // address[] memory tradersToLiquidate) =
+
         uint256 attackReturns2Authorized =
             calcLiquidationAmounts(liquidationCandidates, isAuthorized);
-        marginCallerCut += attackReturns2Authorized;
+        maintainerCut += attackReturns2Authorized;
 
         uint256 sale2pegAmount = liquidateToPeg();
         uint256 peg2targetCost = liquidateFromPeg();
-        // TODO add the mcCut to this
+
         if (peg2targetCost > sale2pegAmount) {
             emit LiquidationShortfall(peg2targetCost - sale2pegAmount);
         }
@@ -583,39 +626,40 @@ contract CrossMarginTrading is RoleAware, Ownable {
 
             uint256 holdingsValue = holdingsInPeg(account);
             uint256 borrowValue = loanInPeg(account);
-            // half of the liquidation threshold
-            uint256 mcCut4account =
-                (borrowValue * liquidationThresholdPercent) /
-                    100 /
-                    leverage /
-                    2;
+            // 5% of value borrowed
+            uint256 mCut4Account = borrowValue * 1000 / 50;
             if (isAuthorized) {
-                marginCallerCut += mcCut4account;
+                maintainerCut += mCut4Account;
             } else {
                 // This could theoretically lead to a previous attackers
                 // record being overwritten, but only if the trader restarts
                 // their account and goes back into the red within the short time window
                 // which would be a costly attack requiring collusion without upside
                 MCRecord storage mcRecord = stakeAttackRecords[traderAddress];
-                mcRecord.amount = mcCut4account;
+                mcRecord.amount = mCut4Account;
                 mcRecord.stakeAttacker = currentCaller;
                 mcRecord.blockNum = block.number;
+                mcRecord.loser = Admin(admin()).getUpdatedCurrentStaker();
             }
 
-            if (holdingsValue >= mcCut4account + borrowValue) {
+            if (holdingsValue >= mCut4Account + borrowValue) {
                 // send remaining funds back to trader
                 Fund(fund()).withdraw(
                     Price(price()).peg(),
                     traderAddress,
-                    holdingsValue - borrowValue - mcCut4account
+                    holdingsValue - borrowValue - mCut4Account
                 );
             } else {
                 uint256 shortfall =
-                    (borrowValue + mcCut4account) - holdingsValue;
+                    (borrowValue + mCut4Account) - holdingsValue;
                 emit LiquidationShortfall(shortfall);
             }
 
             deleteAccount(account);
         }
+
+        avgLiquidationPerBlock =
+            (avgLiquidationPerBlock * 99 + maintainerCut) /
+            100;
     }
 }
