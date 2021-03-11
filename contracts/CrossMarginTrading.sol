@@ -265,18 +265,17 @@ contract CrossMarginTrading is RoleAware, Ownable {
         return sumTokensInPeg(account.holdingTokens, account.holdings);
     }
 
-    function marginCallable(CrossMarginAccount storage account)
+    function belowMaintenanceThreshold(CrossMarginAccount storage account)
         internal
         returns (bool)
     {
         uint256 loan = loanInPeg(account);
         uint256 holdings = holdingsInPeg(account);
         // The following should hold:
-        // holdings / loan >= (leverage + liquidationThresholdPercent / 100) / leverage
-        // =>
+        // holdings / loan >= 1.1
+        // => holdings >= loan * 1.1
         return
-            holdings * leverage * 100 >=
-            (100 * leverage + liquidationThresholdPercent) * loan;
+            1000  * holdings >= 1100 * loan;
     }
 
     function canBorrow(
@@ -438,7 +437,7 @@ contract CrossMarginTrading is RoleAware, Ownable {
         ) {
             address traderAddress = liquidationCandidates[traderIndex];
             CrossMarginAccount storage account = marginAccounts[traderAddress];
-            if (marginCallable(account)) {
+            if (belowMaintenanceThreshold(account)) {
                 // TODO optimize maybe put in the whole account?
                 // TODO unique?
                 tradersToLiquidate.push(traderAddress);
@@ -554,17 +553,17 @@ contract CrossMarginTrading is RoleAware, Ownable {
         delete account.holdingTokens;
     }
 
-    function callMargin(
+    function liquidate(
         address[] memory liquidationCandidates,
         address currentCaller
-    ) external returns (uint256 marginCallerCut) {
+    ) external returns (uint256 maintainerCut) {
         bool isAuthorized = Admin(admin()).isAuthorizedStaker(msg.sender);
         //(address[] memory sellTokens,
         //address[] memory buyTokens,
         // address[] memory tradersToLiquidate) =
         uint256 attackReturns2Authorized =
             calcLiquidationAmounts(liquidationCandidates, isAuthorized);
-        marginCallerCut += attackReturns2Authorized;
+        maintainerCut += attackReturns2Authorized;
 
         uint256 sale2pegAmount = liquidateToPeg();
         uint256 peg2targetCost = liquidateFromPeg();
@@ -590,7 +589,7 @@ contract CrossMarginTrading is RoleAware, Ownable {
                     leverage /
                     2;
             if (isAuthorized) {
-                marginCallerCut += mcCut4account;
+                maintainerCut += mcCut4account;
             } else {
                 // This could theoretically lead to a previous attackers
                 // record being overwritten, but only if the trader restarts
