@@ -7,11 +7,6 @@ import "./RoleAware.sol";
 import "./Fund.sol";
 import "./CrossMarginTrading.sol";
 
-struct MarginCallingStake {
-    uint256 stake;
-    address nextStaker;
-}
-
 contract Admin is RoleAware, Ownable {
     address MFI;
     mapping(address => uint256) public stakes;
@@ -22,7 +17,7 @@ contract Admin is RoleAware, Ownable {
     mapping(address => uint256) public collectedFees;
 
     uint256 public maintenanceStakePerBlock;
-    mapping(address => MarginCallingStake) public maintenanceStakes;
+    mapping(address => address) public nextMaintenanceStaker;
     mapping(address => mapping(address => bool)) public maintenanceDelegateTo;
     address currentMaintenanceStaker;
     address prevMaintenanceStaker;
@@ -74,13 +69,17 @@ contract Admin is RoleAware, Ownable {
         _stake(msg.sender, amount);
     }
 
-    function _withdrawStake(address holder, uint256 amount) internal {
+    function _withdrawStake(
+        address holder,
+        uint256 amount,
+        address recipient
+    ) internal {
         uint256 stakeAmount = stakes[holder];
         // overflow failure desirable
         stakes[holder] = amount;
         totalStakes -= amount;
         require(
-            Fund(fund()).withdraw(MFI, holder, amount),
+            Fund(fund()).withdraw(MFI, recipient, amount),
             "Insufficient funds -- something went really wrong."
         );
         if (stakeAmount == amount) {
@@ -96,7 +95,11 @@ contract Admin is RoleAware, Ownable {
     }
 
     function withdrawStake(uint256 amount) external {
-        _withdrawStake(msg.sender, amount);
+        require(
+            !isAuthorizedStaker(msg.sender),
+            "You can't withdraw while you're authorized staker"
+        );
+        _withdrawStake(msg.sender, amount, msg.sender);
     }
 
     function addTradingFees(address token, uint256 amount)
@@ -119,38 +122,44 @@ contract Admin is RoleAware, Ownable {
 
     function depositMaintenanceStake(uint256 amount) external {
         require(
-            amount + maintenanceStakes[msg.sender].stake >=
-                maintenanceStakePerBlock,
+            amount + stakes[msg.sender] >= maintenanceStakePerBlock,
             "Insufficient stake to call even one block"
         );
         _stake(msg.sender, amount);
-        if (maintenanceStakes[msg.sender].stake == 0) {
-            // TODO make sure we delete from list when all is withdrawl again
-            maintenanceStakes[msg.sender].stake = amount;
-            maintenanceStakes[msg.sender]
-                .nextStaker = getUpdatedCurrentStaker();
-            maintenanceStakes[prevMaintenanceStaker].nextStaker = msg.sender;
+        if (nextMaintenanceStaker[msg.sender] == address(0)) {
+            nextMaintenanceStaker[msg.sender] = getUpdatedCurrentStaker();
+            nextMaintenanceStaker[prevMaintenanceStaker] = msg.sender;
         }
     }
 
-    function getUpdatedCurrentStaker() internal returns (address) {
+    function getUpdatedCurrentStaker() public returns (address) {
         while (
             (block.number - currentMaintenanceStakerStartBlock) *
                 maintenanceStakePerBlock >=
-            maintenanceStakes[currentMaintenanceStaker].stake
+            stakes[currentMaintenanceStaker]
         ) {
-            currentMaintenanceStakerStartBlock +=
-                maintenanceStakes[currentMaintenanceStaker].stake /
-                maintenanceStakePerBlock;
-            prevMaintenanceStaker = currentMaintenanceStaker;
-            currentMaintenanceStaker = maintenanceStakes[
-                currentMaintenanceStaker
-            ]
-                .nextStaker;
+            if (maintenanceStakePerBlock > stakes[currentMaintenanceStaker]) {
+                // delete current from daisy chain
+                address nextOne =
+                    nextMaintenanceStaker[currentMaintenanceStaker];
+                nextMaintenanceStaker[prevMaintenanceStaker] = nextOne;
+                nextMaintenanceStaker[currentMaintenanceStaker] = address(0);
+
+                currentMaintenanceStaker = nextOne;
+            } else {
+                currentMaintenanceStakerStartBlock +=
+                    stakes[currentMaintenanceStaker] /
+                    maintenanceStakePerBlock;
+                prevMaintenanceStaker = currentMaintenanceStaker;
+                currentMaintenanceStaker = nextMaintenanceStaker[
+                    currentMaintenanceStaker
+                ];
+            }
         }
         return currentMaintenanceStaker;
     }
 
+    // TODO rethink authorization
     function addDelegate(address forStaker, address delegate) external {
         require(
             msg.sender == forStaker ||
@@ -170,12 +179,29 @@ contract Admin is RoleAware, Ownable {
     }
 
     function isAuthorizedStaker(address caller)
-        external
+        public
         returns (bool isAuthorized)
     {
         address currentStaker = getUpdatedCurrentStaker();
         isAuthorized =
             currentStaker == caller ||
             maintenanceDelegateTo[currentStaker][caller];
+    }
+
+    function penalizeMaintenanceStake(
+        address maintainer,
+        uint256 penalty,
+        address recipient
+    ) external returns (uint256 stakeTaken) {
+        require(
+            isStakePenalizer(msg.sender),
+            "msg.sender not authorized to penalize stakers"
+        );
+        if (penalty > stakes[maintainer]) {
+            stakeTaken = stakes[maintainer];
+        } else {
+            stakeTaken = penalty;
+        }
+        _withdrawStake(maintainer, stakeTaken, recipient);
     }
 }
