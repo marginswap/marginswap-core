@@ -61,7 +61,6 @@ contract MarginRouter is RoleAware, IncentivizedHolder {
 
     function crossDeposit(address depositToken, uint256 depositAmount)
         external
-        noIntermediary
     {
         require(
             Fund(fund()).depositFor(msg.sender, depositToken, depositAmount),
@@ -80,7 +79,7 @@ contract MarginRouter is RoleAware, IncentivizedHolder {
         emit CrossDeposit(msg.sender, depositToken, depositAmount);
     }
 
-    function crossDepositETH() external payable noIntermediary {
+    function crossDepositETH() external payable {
         Fund(fund()).depositToWETH{value: msg.value}();
         uint256 extinguishAmount =
             CrossMarginTrading(marginTrading()).registerDeposit(
@@ -97,7 +96,6 @@ contract MarginRouter is RoleAware, IncentivizedHolder {
 
     function crossWithdraw(address withdrawToken, uint256 withdrawAmount)
         external
-        noIntermediary
     {
         CrossMarginTrading(marginTrading()).registerWithdrawal(
             msg.sender,
@@ -111,7 +109,7 @@ contract MarginRouter is RoleAware, IncentivizedHolder {
         emit CrossWithdraw(msg.sender, withdrawToken, withdrawAmount);
     }
 
-    function crossWithdrawETH(uint256 withdrawAmount) external noIntermediary {
+    function crossWithdrawETH(uint256 withdrawAmount) external {
         CrossMarginTrading(marginTrading()).registerWithdrawal(
             msg.sender,
             WETH,
@@ -120,10 +118,7 @@ contract MarginRouter is RoleAware, IncentivizedHolder {
         Fund(fund()).withdrawETH(msg.sender, withdrawAmount);
     }
 
-    function crossBorrow(address borrowToken, uint256 borrowAmount)
-        external
-        noIntermediary
-    {
+    function crossBorrow(address borrowToken, uint256 borrowAmount) external {
         Lending(lending()).registerBorrow(borrowToken, borrowAmount);
         CrossMarginTrading(marginTrading()).registerBorrow(
             msg.sender,
@@ -248,12 +243,7 @@ contract MarginRouter is RoleAware, IncentivizedHolder {
         uint256 amountOutMin,
         address[] calldata path,
         uint256 deadline
-    )
-        external
-        noIntermediary
-        ensure(deadline)
-        returns (uint256[] memory amounts)
-    {
+    ) external ensure(deadline) returns (uint256[] memory amounts) {
         // calc fees
         uint256 fees =
             Admin(feeController()).subtractTradingFees(path[0], amountIn);
@@ -281,12 +271,7 @@ contract MarginRouter is RoleAware, IncentivizedHolder {
         uint256 amountInMax,
         address[] calldata path,
         uint256 deadline
-    )
-        external
-        noIntermediary
-        ensure(deadline)
-        returns (uint256[] memory amounts)
-    {
+    ) external ensure(deadline) returns (uint256[] memory amounts) {
         // calc fees
         uint256 fees =
             Admin(feeController()).addTradingFees(
