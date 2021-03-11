@@ -14,6 +14,7 @@ import "./Price.sol";
 // except for view functions of course
 
 struct CrossMarginAccount {
+    uint256 lastDepositBlock;
     address[] borrowTokens;
     mapping(address => uint256) borrowed;
     mapping(address => uint256) borrowedYieldQuotientsFP;
@@ -31,9 +32,11 @@ contract CrossMarginTrading is RoleAware, Ownable {
     mapping(address => uint256) public tokenCaps;
     mapping(address => uint256) public totalShort;
     mapping(address => uint256) public totalLong;
+    uint256 public coolingOffPeriod;
 
     constructor(address _roles) RoleAware(_roles) Ownable() {
         liquidationThresholdPercent = 20;
+        coolingOffPeriod = 20;
     }
 
     function setTokenCap(address token, uint256 cap) external {
@@ -42,6 +45,10 @@ contract CrossMarginTrading is RoleAware, Ownable {
             "Caller not authorized to set token cap"
         );
         tokenCaps[token] = cap;
+    }
+
+    function setCoolingOffPeriod(uint256 blocks) external onlyOwner {
+        coolingOffPeriod = blocks;
     }
 
     function getHoldingAmounts(address trader)
@@ -118,6 +125,7 @@ contract CrossMarginTrading is RoleAware, Ownable {
             extinguishDebt(account, token, extinguishableDebt);
             totalShort[token] -= extinguishableDebt;
         }
+        account.lastDepositBlock = block.number;
     }
 
     function addHolding(
@@ -187,6 +195,10 @@ contract CrossMarginTrading is RoleAware, Ownable {
             "Calling contract not authorized to deposit"
         );
         CrossMarginAccount storage account = marginAccounts[trader];
+        require(
+            block.number > account.lastDepositBlock + coolingOffPeriod,
+            "To prevent attacks you must wait until your cooling off period is over to withdraw"
+        );
 
         totalLong[withdrawToken] -= withdrawAmount;
         // throws on underflow
