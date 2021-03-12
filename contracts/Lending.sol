@@ -12,18 +12,21 @@ contract Lending is
     BondLending,
     IncentivizedHolder
 {
+    /// @dev accumulate interest per token (like compound indices)
     mapping(address => YieldAccumulator) public borrowYieldAccumulators;
+    /// @dev IDs for all bonds held by an address
     mapping(address => uint256[]) public bondIds;
 
     constructor(address _roles) RoleAware(_roles) Ownable() {}
 
+    /// @dev how much interest has accrued to a borrowed balance over time
     function applyBorrowInterest(
         uint256 balance,
         address token,
         uint256 yieldQuotientFP
     ) external returns (uint256) {
         YieldAccumulator storage yA =
-            getUpdatedCumulativeYield(
+            getUpdatedCumulativeYieldFP(
                 token,
                 borrowYieldAccumulators,
                 block.timestamp
@@ -31,13 +34,14 @@ contract Lending is
         return applyInterest(balance, yA.accumulatorFP, yieldQuotientFP);
     }
 
+    /// @dev view function to get current borrowing interest
     function viewBorrowInterest(
         uint256 balance,
         address token,
         uint256 yieldQuotientFP
     ) external view returns (uint256) {
         uint256 accumulatorFP =
-            viewCumulativeYield(
+            viewCumulativeYieldFP(
                 token,
                 borrowYieldAccumulators,
                 block.timestamp
@@ -45,6 +49,7 @@ contract Lending is
         return applyInterest(balance, accumulatorFP, yieldQuotientFP);
     }
 
+    /// @dev gets called by router to register if a trader borrows tokens
     function registerBorrow(address token, uint256 amount) external {
         require(isBorrower(msg.sender), "Not an approved borrower");
         require(Fund(fund()).activeTokens(token), "Not an approved token");
@@ -55,20 +60,27 @@ contract Lending is
         );
     }
 
+    /// @dev gets called by router if loan is extinguished
     function payOff(address token, uint256 amount) external {
         require(isBorrower(msg.sender), "Not an approved borrower");
         totalBorrowed[token] -= amount;
     }
 
-    function viewBorrowingYield(address token) external view returns (uint256) {
+    /// @dev get the borrow yield
+    function viewBorrowingYieldFP(address token)
+        external
+        view
+        returns (uint256)
+    {
         return
-            viewCumulativeYield(
+            viewCumulativeYieldFP(
                 token,
                 borrowYieldAccumulators,
                 block.timestamp
             );
     }
 
+    /// @dev In a liquidity crunch make a fallback bond until liquidity is good again
     function _makeFallbackBond(
         address token,
         address holder,
@@ -77,6 +89,7 @@ contract Lending is
         _makeHourlyBond(token, holder, amount);
     }
 
+    /// @dev withdraw an hour bond
     function withdrawHourlyBond(address token, uint256 amount) external {
         HourlyBond storage bond = hourlyBondAccounts[token][msg.sender];
         // apply all interest
@@ -86,10 +99,11 @@ contract Lending is
         withdrawClaim(msg.sender, token, amount);
     }
 
+    /// @dev buy hourly bond subscription
     function buyHourlyBondSubscription(address token, uint256 amount) external {
         if (lendingTarget[token] >= totalLending[token] + amount) {
             require(
-                Fund(fund()).deposit(token, amount),
+                Fund(fund()).depositFor(msg.sender, token, amount),
                 "Could not transfer bond deposit token to fund"
             );
             super._makeHourlyBond(token, msg.sender, amount);
@@ -98,6 +112,7 @@ contract Lending is
         }
     }
 
+    /// @dev buy fixed term bond that does not renew
     function buyBond(
         address token,
         uint256 runtime,
@@ -122,6 +137,7 @@ contract Lending is
         }
     }
 
+    /// @dev send back funds of bond after maturity
     function withdrawBond(uint256 bondId) external {
         Bond storage bond = bonds[bondId];
         require(msg.sender == bond.holder, "Not holder of bond");

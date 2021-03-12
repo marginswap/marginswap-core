@@ -19,6 +19,7 @@ struct HourlyBond {
 // TODO totalHourlyYieldFP
 abstract contract HourlyBondSubscriptionLending is BaseLending {
     uint256 constant WITHDRAWAL_WINDOW = 10 minutes;
+    // token => holder => bond record
     mapping(address => mapping(address => HourlyBond))
         public hourlyBondAccounts;
     mapping(address => YieldAccumulator) public hourlyBondYieldAccumulators;
@@ -47,7 +48,7 @@ abstract contract HourlyBondSubscriptionLending is BaseLending {
         uint256 yieldQuotientFP = bond.yieldQuotientFP;
         if (yieldQuotientFP > 0) {
             YieldAccumulator storage yA =
-                getUpdatedCumulativeYield(
+                getUpdatedCumulativeYieldFP(
                     token,
                     hourlyBondYieldAccumulators,
                     block.timestamp
@@ -101,7 +102,7 @@ abstract contract HourlyBondSubscriptionLending is BaseLending {
         bond.moduloHour = 0;
     }
 
-    function calcCumulativeYield(
+    function calcCumulativeYieldFP(
         YieldAccumulator storage yieldAccumulator,
         uint256 timeDelta
     ) internal view returns (uint256 accumulatorFP) {
@@ -128,7 +129,8 @@ abstract contract HourlyBondSubscriptionLending is BaseLending {
         }
     }
 
-    function getUpdatedCumulativeYield(
+    /// @dev updates yield accumulators for both borrowing and lending
+    function getUpdatedCumulativeYieldFP(
         address token,
         mapping(address => YieldAccumulator) storage yieldAccumulators,
         uint256 timestamp
@@ -145,15 +147,18 @@ abstract contract HourlyBondSubscriptionLending is BaseLending {
         );
 
         uint256 timeDelta = (timestamp - accumulator.lastUpdated);
-        accumulator.accumulatorFP = calcCumulativeYield(accumulator, timeDelta);
+        accumulator.accumulatorFP = calcCumulativeYieldFP(
+            accumulator,
+            timeDelta
+        );
     }
 
-    function viewCumulativeYield(
+    function viewCumulativeYieldFP(
         address token,
         mapping(address => YieldAccumulator) storage yieldAccumulators,
         uint256 timestamp
     ) internal view returns (uint256) {
         uint256 timeDelta = (timestamp - yieldAccumulators[token].lastUpdated);
-        return calcCumulativeYield(yieldAccumulators[token], timeDelta);
+        return calcCumulativeYieldFP(yieldAccumulators[token], timeDelta);
     }
 }

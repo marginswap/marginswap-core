@@ -15,14 +15,18 @@ import "./IncentivizedHolder.sol";
 enum AMM {uni, sushi, compare, split}
 
 contract MarginRouter is RoleAware, IncentivizedHolder {
-    mapping(AMM => address) factories;
-    address WETH;
+    /// different uniswap compatible factories to talk to
+    mapping(AMM => address) public factories;
+    /// wrapped ETH ERC20 contract
+    address public WETH;
 
+    /// emitted when a trader depoits on cross margin
     event CrossDeposit(
         address trader,
         address depositToken,
         uint256 depositAmount
     );
+    /// emitted whenever a trade happens
     event CrossTrade(
         address trader,
         address inToken,
@@ -32,17 +36,20 @@ contract MarginRouter is RoleAware, IncentivizedHolder {
         uint256 outTokenAmount,
         uint256 outTokenExtinguish
     );
+    /// emitted when a trader withdraws funds
     event CrossWithdraw(
         address trader,
         address withdrawToken,
         uint256 withdrawAmount
     );
+    /// emitted upon sucessfully borrowing
     event CrossBorrow(
         address trader,
         address borrowToken,
         uint256 borrowAmount
     );
 
+    /// TODO check if we use it
     modifier ensure(uint256 deadline) {
         require(deadline >= block.timestamp, "UniswapV2Router: EXPIRED");
         _;
@@ -59,6 +66,7 @@ contract MarginRouter is RoleAware, IncentivizedHolder {
         WETH = _WETH;
     }
 
+    /// @dev traders call this to deposit funds on cross margin
     function crossDeposit(address depositToken, uint256 depositAmount)
         external
     {
@@ -79,6 +87,7 @@ contract MarginRouter is RoleAware, IncentivizedHolder {
         emit CrossDeposit(msg.sender, depositToken, depositAmount);
     }
 
+    /// @dev deposit wrapped ehtereum into cross margin account
     function crossDepositETH() external payable {
         Fund(fund()).depositToWETH{value: msg.value}();
         uint256 extinguishAmount =
@@ -94,6 +103,7 @@ contract MarginRouter is RoleAware, IncentivizedHolder {
         emit CrossDeposit(msg.sender, WETH, msg.value);
     }
 
+    /// @dev withdraw deposits/earnings from cross margin account
     function crossWithdraw(address withdrawToken, uint256 withdrawAmount)
         external
     {
@@ -109,6 +119,7 @@ contract MarginRouter is RoleAware, IncentivizedHolder {
         emit CrossWithdraw(msg.sender, withdrawToken, withdrawAmount);
     }
 
+    /// @dev withdraw ethereum from cross margin account
     function crossWithdrawETH(uint256 withdrawAmount) external {
         CrossMarginTrading(marginTrading()).registerWithdrawal(
             msg.sender,
@@ -118,6 +129,7 @@ contract MarginRouter is RoleAware, IncentivizedHolder {
         Fund(fund()).withdrawETH(msg.sender, withdrawAmount);
     }
 
+    /// @dev borrow into cross margin trading account
     function crossBorrow(address borrowToken, uint256 borrowAmount) external {
         Lending(lending()).registerBorrow(borrowToken, borrowAmount);
         CrossMarginTrading(marginTrading()).registerBorrow(
@@ -131,6 +143,7 @@ contract MarginRouter is RoleAware, IncentivizedHolder {
         emit CrossBorrow(msg.sender, borrowToken, borrowAmount);
     }
 
+    // TODO check / compare to uniswap code
     // **** SWAP ****
     // requires the initial amount to have already been sent to the first pair
     function _swap(
@@ -156,6 +169,7 @@ contract MarginRouter is RoleAware, IncentivizedHolder {
         }
     }
 
+    /// @dev internal helper swapping exact token for token on AMM
     function _swapExactT4T(
         address factory,
         uint256 amountIn,
@@ -178,6 +192,7 @@ contract MarginRouter is RoleAware, IncentivizedHolder {
         _swap(factory, amounts, path, fund());
     }
 
+    /// @dev external function to make swaps on AMM using protocol funds, only for authorized contracts
     function authorizedSwapExactT4T(
         AMM amm,
         uint256 amountIn,
@@ -191,6 +206,7 @@ contract MarginRouter is RoleAware, IncentivizedHolder {
         return _swapExactT4T(factories[amm], amountIn, amountOutMin, path);
     }
 
+    // @dev internal helper swapping exact token for token on on AMM
     function _swapT4ExactT(
         address factory,
         uint256 amountOut,
@@ -214,6 +230,7 @@ contract MarginRouter is RoleAware, IncentivizedHolder {
         _swap(factory, amounts, path, fund());
     }
 
+    //// @dev external function for swapping protocol funds on AMM, only for authorized
     function authorizedSwapT4ExactT(
         AMM amm,
         uint256 amountOut,
@@ -227,16 +244,7 @@ contract MarginRouter is RoleAware, IncentivizedHolder {
         return _swapT4ExactT(factories[amm], amountOut, amountInMax, path);
     }
 
-    // deposit
-    // borrow
-    // auto-borrow for margin trades
-    // auto-extinguish? yeah, why not
-
-    // fees from fee controller / admin
-    // clear trade w/ margintrading
-    // make trade
-    // register trade w/ margintrading (register within transaction)
-
+    /// @dev entry point for swapping tokens held in cross margin account
     function crossSwapExactTokensForTokens(
         AMM amm,
         uint256 amountIn,
@@ -265,6 +273,7 @@ contract MarginRouter is RoleAware, IncentivizedHolder {
         );
     }
 
+    /// @dev entry point for swapping tokens held in cross margin account
     function crossSwapTokensForExactTokens(
         AMM amm,
         uint256 amountOut,
@@ -296,6 +305,8 @@ contract MarginRouter is RoleAware, IncentivizedHolder {
         );
     }
 
+    /// @dev helper function does all the work of telling other contracts
+    /// about a trade
     function registerTrade(
         address trader,
         address inToken,
@@ -316,7 +327,7 @@ contract MarginRouter is RoleAware, IncentivizedHolder {
             withdrawClaim(trader, outToken, extinguishAmount);
         }
         if (borrowAmount > 0) {
-            Lending(lending()).registerBorrow(outToken, borrowAmount);
+            Lending(lending()).registerBorrow(inToken, borrowAmount);
             stakeClaim(trader, inToken, borrowAmount);
         }
 

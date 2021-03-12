@@ -16,29 +16,42 @@ import "./Price.sol";
 struct CrossMarginAccount {
     uint256 lastDepositBlock;
     address[] borrowTokens;
+    // borrowed token address => amount
     mapping(address => uint256) borrowed;
+    // borrowed token => yield quotient
     mapping(address => uint256) borrowedYieldQuotientsFP;
     address[] holdingTokens;
+    // token held in portfolio => amount
     mapping(address => uint256) holdings;
+    // boolean value of whether an account holds a token
     mapping(address => bool) holdsToken;
 }
 
 contract CrossMarginTrading is RoleAware, Ownable {
     event LiquidationShortfall(uint256 amount);
 
+    /// @dev gets used in calculating how much accounts can borrow
     uint256 public leverage;
+
+    /// @dev percentage of assets held per assets borrowed at which to liquidate
     uint256 public liquidationThresholdPercent;
+
+    /// @dev record of all cross margin accounts
     mapping(address => CrossMarginAccount) marginAccounts;
+    /// @dev total token caps
     mapping(address => uint256) public tokenCaps;
+    /// @dev tracks total of short positions per token
     mapping(address => uint256) public totalShort;
+    /// @dev tracks total of long positions per token
     mapping(address => uint256) public totalLong;
     uint256 public coolingOffPeriod;
 
     constructor(address _roles) RoleAware(_roles) Ownable() {
-        liquidationThresholdPercent = 20;
+        liquidationThresholdPercent = 110;
         coolingOffPeriod = 20;
     }
 
+    /// @dev admin function to set the token cap
     function setTokenCap(address token, uint256 cap) external {
         require(
             isTokenActivator(msg.sender),
@@ -47,10 +60,12 @@ contract CrossMarginTrading is RoleAware, Ownable {
         tokenCaps[token] = cap;
     }
 
+    /// @dev setter for cooling off period for withdrawing funds after deposit
     function setCoolingOffPeriod(uint256 blocks) external onlyOwner {
         coolingOffPeriod = blocks;
     }
 
+    /// @dev view function to display account held assets state
     function getHoldingAmounts(address trader)
         external
         view
@@ -71,6 +86,7 @@ contract CrossMarginTrading is RoleAware, Ownable {
         (holdingTokens, holdingAmounts);
     }
 
+    /// @dev view function to display account borrowing state
     function getBorrowAmounts(address trader)
         external
         view
@@ -92,10 +108,12 @@ contract CrossMarginTrading is RoleAware, Ownable {
         (borrowTokens, borrowAmounts);
     }
 
+    /// @dev admin function to set leverage
     function setLeverage(uint256 _leverage) external onlyOwner {
         leverage = _leverage;
     }
 
+    /// @dev admin function to set liquidation threshold
     function setLiquidationThresholdPercent(uint256 threshold)
         external
         onlyOwner
@@ -103,6 +121,7 @@ contract CrossMarginTrading is RoleAware, Ownable {
         liquidationThresholdPercent = threshold;
     }
 
+    /// @dev gets called by router to affirm a deposit to an account
     function registerDeposit(
         address trader,
         address token,
@@ -112,22 +131,27 @@ contract CrossMarginTrading is RoleAware, Ownable {
             isMarginTrader(msg.sender),
             "Calling contract not authorized to deposit"
         );
-        totalLong[token] += depositAmount;
-        require(
-            tokenCaps[token] >= totalLong[token],
-            "Exceeding global exposure cap to token -- try again later"
-        );
 
         CrossMarginAccount storage account = marginAccounts[trader];
-        addHolding(account, token, depositAmount);
         if (account.borrowed[token] > 0) {
             extinguishableDebt = min(depositAmount, account.borrowed[token]);
             extinguishDebt(account, token, extinguishableDebt);
             totalShort[token] -= extinguishableDebt;
         }
+        // no overflow because depositAmount >= extinguishableDebt
+        uint256 addedHolding = depositAmount - extinguishableDebt;
+        addHolding(account, token, addedHolding);
+
+        totalLong[token] += addedHolding;
+        require(
+            tokenCaps[token] >= totalLong[token],
+            "Exceeding global exposure cap to token -- try again later"
+        );
+
         account.lastDepositBlock = block.number;
     }
 
+    /// @dev add an asset to be held by account
     function addHolding(
         CrossMarginAccount storage account,
         address token,
@@ -140,6 +164,7 @@ contract CrossMarginTrading is RoleAware, Ownable {
         account.holdings[token] += depositAmount;
     }
 
+    /// @dev gets called by router to affirm isolated borrowing event
     function registerBorrow(
         address trader,
         address borrowToken,
@@ -161,6 +186,7 @@ contract CrossMarginTrading is RoleAware, Ownable {
         borrow(account, borrowToken, borrowAmount);
     }
 
+    /// @dev adjust account to reflect borrowing of token amount
     function borrow(
         CrossMarginAccount storage account,
         address borrowToken,
@@ -168,9 +194,6 @@ contract CrossMarginTrading is RoleAware, Ownable {
     ) internal {
         if (!hasBorrowedToken(account, borrowToken)) {
             account.borrowTokens.push(borrowToken);
-
-            account.borrowedYieldQuotientsFP[borrowToken] = Lending(lending())
-                .viewBorrowingYield(borrowToken);
         } else {
             account.borrowed[borrowToken] = Lending(lending())
                 .applyBorrowInterest(
@@ -179,12 +202,16 @@ contract CrossMarginTrading is RoleAware, Ownable {
                 account.borrowedYieldQuotientsFP[borrowToken]
             );
         }
+        account.borrowedYieldQuotientsFP[borrowToken] = Lending(lending())
+            .viewBorrowingYieldFP(borrowToken);
+
         account.borrowed[borrowToken] += borrowAmount;
         addHolding(account, borrowToken, borrowAmount);
 
         require(positiveBalance(account), "Can't borrow: insufficient balance");
     }
 
+    /// @dev gets called by router to affirm withdrawal of tokens from account
     function registerWithdrawal(
         address trader,
         address withdrawToken,
@@ -211,6 +238,7 @@ contract CrossMarginTrading is RoleAware, Ownable {
         );
     }
 
+    /// @dev checks whether account is in the black, deposit + earnings relative to borrowed
     function positiveBalance(CrossMarginAccount storage account)
         internal
         returns (bool)
@@ -220,9 +248,10 @@ contract CrossMarginTrading is RoleAware, Ownable {
         // The following condition should hold:
         // holdings / loan >= (leverage + 1) / leverage
         // =>
-        return holdings * (leverage + 1) >= loan * leverage;
+        return holdings * leverage >= loan * (leverage + 1);
     }
 
+    /// @dev internal function adjusting holding and borrow balances when debt extinguished
     function extinguishDebt(
         CrossMarginAccount storage account,
         address debtToken,
@@ -234,14 +263,21 @@ contract CrossMarginTrading is RoleAware, Ownable {
             debtToken,
             account.borrowedYieldQuotientsFP[debtToken]
         );
+
         account.borrowed[debtToken] =
             account.borrowed[debtToken] -
             extinguishAmount;
         account.holdings[debtToken] =
             account.holdings[debtToken] -
             extinguishAmount;
+
+        if (account.borrowed[debtToken] > 0) {
+            account.borrowedYieldQuotientsFP[debtToken] = Lending(lending())
+                .viewBorrowingYieldFP(debtToken);
+        }
     }
 
+    /// @dev checks whether an account holds a token
     function hasHoldingToken(CrossMarginAccount storage account, address token)
         internal
         view
@@ -250,6 +286,7 @@ contract CrossMarginTrading is RoleAware, Ownable {
         return account.holdsToken[token];
     }
 
+    /// @dev checks whether an account has borrowed a token
     function hasBorrowedToken(CrossMarginAccount storage account, address token)
         internal
         view
@@ -258,6 +295,7 @@ contract CrossMarginTrading is RoleAware, Ownable {
         return account.borrowedYieldQuotientsFP[token] > 0;
     }
 
+    /// @dev calculate total loan in reference currency, including compound interest
     function loanInPeg(CrossMarginAccount storage account)
         internal
         returns (uint256)
@@ -270,6 +308,7 @@ contract CrossMarginTrading is RoleAware, Ownable {
             );
     }
 
+    /// @dev total of assets of account, expressed in reference currency
     function holdingsInPeg(CrossMarginAccount storage account)
         internal
         returns (uint256)
@@ -277,6 +316,7 @@ contract CrossMarginTrading is RoleAware, Ownable {
         return sumTokensInPeg(account.holdingTokens, account.holdings);
     }
 
+    /// @dev check whether an account can/should be liquidated
     function belowMaintenanceThreshold(CrossMarginAccount storage account)
         internal
         returns (bool)
@@ -286,35 +326,10 @@ contract CrossMarginTrading is RoleAware, Ownable {
         // The following should hold:
         // holdings / loan >= 1.1
         // => holdings >= loan * 1.1
-        return
-            1000  * holdings >= 1100 * loan;
+        return 100 * holdings >= liquidationThresholdPercent * loan;
     }
 
-    function canBorrow(
-        CrossMarginAccount storage account,
-        address token,
-        uint256 amount
-    ) internal view returns (bool) {
-        return account.holdings[token] >= amount;
-    }
-
-    function getTradeBorrowAmount(
-        address trader,
-        address token,
-        uint256 amount
-    ) external view returns (uint256 borrowAmount) {
-        require(
-            isMarginTrader(msg.sender),
-            "Calling contract is not an authorized margin trader"
-        );
-        CrossMarginAccount storage account = marginAccounts[trader];
-        borrowAmount = amount - account.holdings[token];
-        require(
-            canBorrow(account, token, borrowAmount),
-            "Can't borrow full amount"
-        );
-    }
-
+    /// @dev gets callled by router to register a trade and borrow and extinguis as necessary
     function registerTradeAndBorrow(
         address trader,
         address tokenFrom,
@@ -344,6 +359,7 @@ contract CrossMarginTrading is RoleAware, Ownable {
         uint256 sellAmount = inAmount;
         if (inAmount > account.holdings[tokenFrom]) {
             sellAmount = account.holdings[tokenFrom];
+            /// won't overflow
             borrowAmount = inAmount - sellAmount;
 
             totalShort[tokenFrom] += borrowAmount;
@@ -357,6 +373,7 @@ contract CrossMarginTrading is RoleAware, Ownable {
         adjustAmounts(account, tokenFrom, tokenTo, sellAmount, outAmount);
     }
 
+    /// @dev go through list of tokens and their amounts, summing up
     function sumTokensInPeg(
         address[] storage tokens,
         mapping(address => uint256) storage amounts
@@ -370,6 +387,7 @@ contract CrossMarginTrading is RoleAware, Ownable {
         }
     }
 
+    /// @dev go through list of tokens and ammounts, summing up with interest
     function sumTokensInPegWithYield(
         address[] storage tokens,
         mapping(address => uint256) storage amounts,
@@ -385,17 +403,19 @@ contract CrossMarginTrading is RoleAware, Ownable {
         }
     }
 
+    /// @dev calculate yield for token amount and convert to reference currency
     function yieldTokenInPeg(
         address token,
         uint256 amount,
         mapping(address => uint256) storage yieldQuotientsFP
     ) internal returns (uint256) {
-        uint256 yield = Lending(lending()).viewBorrowingYield(token);
+        uint256 yieldFP = Lending(lending()).viewBorrowingYieldFP(token);
         // 1 * FP / FP = 1
-        uint256 amountInToken = (amount * yield) / yieldQuotientsFP[token];
+        uint256 amountInToken = (amount * yieldFP) / yieldQuotientsFP[token];
         return Price(price()).getUpdatedPriceInPeg(token, amountInToken);
     }
 
+    /// @dev move tokens from one holding to another
     function adjustAmounts(
         CrossMarginAccount storage account,
         address fromToken,
@@ -407,6 +427,7 @@ contract CrossMarginTrading is RoleAware, Ownable {
         addHolding(account, toToken, boughtAmount);
     }
 
+    /// @dev minimum
     function min(uint256 a, uint256 b) internal pure returns (uint256) {
         if (a > b) {
             return b;
@@ -481,7 +502,7 @@ contract CrossMarginTrading is RoleAware, Ownable {
                     Liquidation storage liquidation = liquidationAmounts[token];
 
                     uint256 yield =
-                        Lending(lending()).viewBorrowingYield(token);
+                        Lending(lending()).viewBorrowingYieldFP(token);
                     uint256 loanAmount =
                         (account.borrowed[token] * yield) /
                             account.borrowedYieldQuotientsFP[token];
@@ -627,7 +648,7 @@ contract CrossMarginTrading is RoleAware, Ownable {
             uint256 holdingsValue = holdingsInPeg(account);
             uint256 borrowValue = loanInPeg(account);
             // 5% of value borrowed
-            uint256 mCut4Account = borrowValue * 1000 / 50;
+            uint256 mCut4Account = (borrowValue * 1000) / 50;
             if (isAuthorized) {
                 maintainerCut += mCut4Account;
             } else {

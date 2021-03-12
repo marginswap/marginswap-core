@@ -13,6 +13,7 @@ abstract contract BaseLending is RoleAware, Ownable {
     mapping(address => uint256) public totalHourlyYieldFP;
     uint256 public yieldChangePerSecondFP;
 
+    /// @dev simple formula for calculating interest relative to accumulator
     function applyInterest(
         uint256 balance,
         uint256 accumulatorFP,
