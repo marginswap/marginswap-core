@@ -149,12 +149,13 @@ contract Admin is RoleAware, Ownable {
     }
 
     function getMaintenanceStakerStake() public view returns (uint256) {
-        if(currentMaintenanceStaker == lockedMFI) {
+        if (currentMaintenanceStaker == lockedMFI) {
             return IERC20(MFI).balanceOf(lockedMFI);
         } else {
             return stakes[currentMaintenanceStaker];
         }
     }
+
     function getUpdatedCurrentStaker() public returns (address) {
         while (
             (block.number - currentMaintenanceStakerStartBlock) *
