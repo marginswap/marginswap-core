@@ -6,7 +6,7 @@ import "../libraries/UniswapV2Library.sol";
 
 import "./RoleAware.sol";
 import "./Fund.sol";
-import "./CrossMarginTrading.sol";
+import "../interfaces/IMarginTrading.sol";
 import "./Lending.sol";
 import "./Admin.sol";
 import "./IncentivizedHolder.sol";
@@ -75,7 +75,7 @@ contract MarginRouter is RoleAware, IncentivizedHolder {
             "Cannot transfer deposit to margin account"
         );
         uint256 extinguishAmount =
-            CrossMarginTrading(marginTrading()).registerDeposit(
+            IMarginTrading(marginTrading()).registerDeposit(
                 msg.sender,
                 depositToken,
                 depositAmount
@@ -91,7 +91,7 @@ contract MarginRouter is RoleAware, IncentivizedHolder {
     function crossDepositETH() external payable {
         Fund(fund()).depositToWETH{value: msg.value}();
         uint256 extinguishAmount =
-            CrossMarginTrading(marginTrading()).registerDeposit(
+            IMarginTrading(marginTrading()).registerDeposit(
                 msg.sender,
                 WETH,
                 msg.value
@@ -107,7 +107,7 @@ contract MarginRouter is RoleAware, IncentivizedHolder {
     function crossWithdraw(address withdrawToken, uint256 withdrawAmount)
         external
     {
-        CrossMarginTrading(marginTrading()).registerWithdrawal(
+        IMarginTrading(marginTrading()).registerWithdrawal(
             msg.sender,
             withdrawToken,
             withdrawAmount
@@ -121,7 +121,7 @@ contract MarginRouter is RoleAware, IncentivizedHolder {
 
     /// @dev withdraw ethereum from cross margin account
     function crossWithdrawETH(uint256 withdrawAmount) external {
-        CrossMarginTrading(marginTrading()).registerWithdrawal(
+        IMarginTrading(marginTrading()).registerWithdrawal(
             msg.sender,
             WETH,
             withdrawAmount
@@ -132,7 +132,7 @@ contract MarginRouter is RoleAware, IncentivizedHolder {
     /// @dev borrow into cross margin trading account
     function crossBorrow(address borrowToken, uint256 borrowAmount) external {
         Lending(lending()).registerBorrow(borrowToken, borrowAmount);
-        CrossMarginTrading(marginTrading()).registerBorrow(
+        IMarginTrading(marginTrading()).registerBorrow(
             msg.sender,
             borrowToken,
             borrowAmount
@@ -315,7 +315,7 @@ contract MarginRouter is RoleAware, IncentivizedHolder {
         uint256 outAmount
     ) internal {
         (uint256 extinguishAmount, uint256 borrowAmount) =
-            CrossMarginTrading(marginTrading()).registerTradeAndBorrow(
+            IMarginTrading(marginTrading()).registerTradeAndBorrow(
                 trader,
                 inToken,
                 outToken,

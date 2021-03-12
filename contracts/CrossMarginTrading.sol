@@ -27,7 +27,7 @@ struct CrossMarginAccount {
     mapping(address => bool) holdsToken;
 }
 
-contract CrossMarginTrading is RoleAware, Ownable {
+    contract CrossMarginTrading is RoleAware, Ownable, IMarginTrading {
     event LiquidationShortfall(uint256 amount);
 
     /// @dev gets used in calculating how much accounts can borrow
@@ -126,7 +126,7 @@ contract CrossMarginTrading is RoleAware, Ownable {
         address trader,
         address token,
         uint256 depositAmount
-    ) external returns (uint256 extinguishableDebt) {
+    ) external override returns (uint256 extinguishableDebt) {
         require(
             isMarginTrader(msg.sender),
             "Calling contract not authorized to deposit"
@@ -169,7 +169,7 @@ contract CrossMarginTrading is RoleAware, Ownable {
         address trader,
         address borrowToken,
         uint256 borrowAmount
-    ) external {
+    ) external override {
         require(
             isMarginTrader(msg.sender),
             "Calling contract not authorized to deposit"
@@ -216,7 +216,7 @@ contract CrossMarginTrading is RoleAware, Ownable {
         address trader,
         address withdrawToken,
         uint256 withdrawAmount
-    ) external {
+    ) external override {
         require(
             isMarginTrader(msg.sender),
             "Calling contract not authorized to deposit"
@@ -336,7 +336,7 @@ contract CrossMarginTrading is RoleAware, Ownable {
         address tokenTo,
         uint256 inAmount,
         uint256 outAmount
-    ) external returns (uint256 extinguishableDebt, uint256 borrowAmount) {
+    ) external override returns (uint256 extinguishableDebt, uint256 borrowAmount) {
         require(
             isMarginTrader(msg.sender),
             "Calling contract is not an authorized margin trader agent"
