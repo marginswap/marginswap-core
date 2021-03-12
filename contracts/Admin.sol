@@ -44,7 +44,7 @@ contract Admin is RoleAware, Ownable {
             Fund(fund()).depositFor(holder, MFI, amount),
             "Could not deposit stake funds (perhaps make allowance to fund contract?"
         );
-        stakes[msg.sender] += amount;
+        stakes[holder] += amount;
         totalStakes += amount;
 
         if (claimIds[holder] > 0) {
@@ -60,7 +60,7 @@ contract Admin is RoleAware, Ownable {
                     holder,
                     amount
                 );
-            claimIds[msg.sender] = claimId;
+            claimIds[holder] = claimId;
             require(claimId > 0, "Distribution is over or paused");
         }
     }
