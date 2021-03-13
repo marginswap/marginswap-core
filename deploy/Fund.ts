@@ -25,6 +25,7 @@ const deploy: DeployFunction = async function ({
     const fund = await ethers.getContractAt("Fund", Fund.address);
 
     await roles.setMainCharacter(FUND, fund.address);
+    // TODO ultimately this role goes to tokenadmin
     await roles.giveRole(TOKEN_ACTIVATOR, deployer);
     await fund.updateRoleCache(TOKEN_ACTIVATOR, deployer);
 };
