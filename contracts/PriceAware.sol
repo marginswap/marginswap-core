@@ -39,7 +39,10 @@ abstract contract PriceAware is Ownable, RoleAware {
         CONFIDENT_UPDATE_RATE_PERMIL = rate;
     }
 
-    function forcePriceUpdate(address token, uint256 inAmount) public returns (uint256) {
+    function forcePriceUpdate(address token, uint256 inAmount)
+        public
+        returns (uint256)
+    {
         return getUpdatedPriceInPeg(token, inAmount);
     }
 
@@ -83,7 +86,10 @@ abstract contract PriceAware is Ownable, RoleAware {
                 );
             uint256 outAmount = pathAmounts[pathAmounts.length - 1];
 
-            if (outAmount > UPDATE_MIN_PEG_AMOUNT && outAmount < UPDATE_MAX_PEG_AMOUNT) {
+            if (
+                outAmount > UPDATE_MIN_PEG_AMOUNT &&
+                outAmount < UPDATE_MAX_PEG_AMOUNT
+            ) {
                 confidentUpdatePriceInPeg(tokenPrice, inAmount, outAmount);
             }
 
