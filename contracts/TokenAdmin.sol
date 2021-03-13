@@ -31,13 +31,15 @@ contract TokenAdmin is RoleAware, Ownable {
     function activateToken(
         address token,
         uint256 exposureCap,
+        uint256 lendingBuffer,
         uint256 incentiveWeight
     ) external onlyOwner {
         require(!Fund(fund()).activeTokens(token), "Token already is active");
 
         Fund(fund()).activateToken(token);
         CrossMarginTrading(marginTrading()).setTokenCap(token, exposureCap);
-        // TODO lending cap as well
+        Lending(lending()).setLendingCap(token, exposureCap);
+        Lending(lending()).setLendingBuffer(token, lendingBuffer);
 
         if (incentiveWeight > 0) {
             totalTokenWeights += incentiveWeight;

@@ -139,7 +139,7 @@ abstract contract BondLending is BaseLending {
         yieldFP = runtimeYieldsFP[token][bucketIndex];
         uint256 lastUpdated = yieldLastUpdated[token][bucketIndex];
         uint256 bucketTarget =
-            (lendingTarget[token] * runtimeWeights[token][bucketIndex]) /
+            (lendingTarget(token) * runtimeWeights[token][bucketIndex]) /
                 weightTotal;
         uint256 buying = buyingSpeed[token][bucketIndex];
         uint256 withdrawing = withdrawingSpeed[token][bucketIndex];
@@ -212,7 +212,10 @@ abstract contract BondLending is BaseLending {
         uint256 runtimeScale = runtime / (10 minutes);
         // scale adjustment relative to runtime
         speedRegister[bucketIndex] =
-            (speedRegister[bucketIndex] * runtimeScale + currentSpeed * timeDiff) /
+            (speedRegister[bucketIndex] *
+                runtimeScale +
+                currentSpeed *
+                timeDiff) /
             (runtimeScale + timeDiff);
         lastAction[bucketIndex] = block.timestamp;
     }

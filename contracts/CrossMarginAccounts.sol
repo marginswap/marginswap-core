@@ -276,6 +276,7 @@ abstract contract CrossMarginAccounts is RoleAware, PriceAware {
             borrowIdx++
         ) {
             address borrowToken = account.borrowTokens[borrowIdx];
+            totalShort[borrowToken] -= account.borrowed[borrowToken];
             account.borrowed[borrowToken] = 0;
             account.borrowedYieldQuotientsFP[borrowToken] = 0;
         }
@@ -285,6 +286,7 @@ abstract contract CrossMarginAccounts is RoleAware, PriceAware {
             holdingIdx++
         ) {
             address holdingToken = account.holdingTokens[holdingIdx];
+            totalLong[holdingToken] -= account.holdings[holdingToken];
             account.holdings[holdingToken] = 0;
             account.holdsToken[holdingToken] = false;
         }

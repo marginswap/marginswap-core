@@ -8,8 +8,9 @@ abstract contract BaseLending is RoleAware, Ownable {
 
     mapping(address => uint256) public totalLending;
     mapping(address => uint256) public totalBorrowed;
-    // TODO init lending target with some amount out the gate
-    mapping(address => uint256) public lendingTarget;
+    // TODO init lending buffer and cap
+    mapping(address => uint256) public lendingBuffer;
+    mapping(address => uint256) public lendingCap;
     mapping(address => uint256) public totalHourlyYieldFP;
     uint256 public yieldChangePerSecondFP;
 
@@ -69,4 +70,25 @@ abstract contract BaseLending is RoleAware, Ownable {
         address holder,
         uint256 amount
     ) internal virtual;
+
+    function lendingTarget(address token) public view returns (uint256) {
+        return
+            min(lendingCap[token], totalBorrowed[token] + lendingBuffer[token]);
+    }
+
+    function setLendingCap(address token, uint256 cap) external {
+        require(
+            isTokenActivator(msg.sender),
+            "not authorized to set lending cap"
+        );
+        lendingCap[token] = cap;
+    }
+
+    function setLendingBuffer(address token, uint256 buffer) external {
+        require(
+            isTokenActivator(msg.sender),
+            "not autorized to set lending buffer"
+        );
+        lendingBuffer[token] = buffer;
+    }
 }

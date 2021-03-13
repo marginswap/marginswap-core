@@ -140,7 +140,7 @@ abstract contract HourlyBondSubscriptionLending is BaseLending {
             accumulator.hourlyYieldFP,
             accumulator.lastUpdated,
             totalLending[token],
-            lendingTarget[token],
+            lendingTarget(token),
             hourlyBondBuyingSpeed[token],
             hourlyBondWithdrawingSpeed[token],
             hourlyMaxYield

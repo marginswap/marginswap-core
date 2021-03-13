@@ -101,7 +101,7 @@ contract Lending is
 
     /// @dev buy hourly bond subscription
     function buyHourlyBondSubscription(address token, uint256 amount) external {
-        if (lendingTarget[token] >= totalLending[token] + amount) {
+        if (lendingTarget(token) >= totalLending[token] + amount) {
             require(
                 Fund(fund()).depositFor(msg.sender, token, amount),
                 "Could not transfer bond deposit token to fund"
@@ -120,7 +120,7 @@ contract Lending is
         uint256 minReturn
     ) external returns (uint256 bondIndex) {
         if (
-            lendingTarget[token] >= totalLending[token] + amount &&
+            lendingTarget(token) >= totalLending[token] + amount &&
             maxRuntime >= runtime &&
             runtime >= minRuntime
         ) {
