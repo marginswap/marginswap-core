@@ -14,6 +14,7 @@ struct TokenPrice {
 }
 
 contract Price is RoleAware, Ownable {
+    address public constant UNI = 0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f;
     address public peg;
     mapping(address => TokenPrice) tokenPrices;
     uint256 constant PRICE_HIST_LENGTH = 30;
@@ -51,7 +52,7 @@ contract Price is RoleAware, Ownable {
             );
             uint256[] memory pathAmounts =
                 MarginRouter(router()).getAmountsOut(
-                    AMM.uni,
+                    UNI,
                     inAmount,
                     tokenPrice.liquidationPath
                 );
@@ -83,7 +84,7 @@ contract Price is RoleAware, Ownable {
 
             uint256[] memory pathAmounts =
                 MarginRouter(router()).getAmountsIn(
-                    AMM.uni,
+                    UNI,
                     outAmount,
                     tokenPrice.inverseLiquidationPath
                 );
@@ -113,7 +114,7 @@ contract Price is RoleAware, Ownable {
             TokenPrice memory tP = tokenPrices[token];
             uint256[] memory amounts =
                 MarginRouter(router()).authorizedSwapExactT4T(
-                    AMM.uni,
+                    UNI,
                     amount,
                     0,
                     tP.liquidationPath
@@ -136,7 +137,7 @@ contract Price is RoleAware, Ownable {
             TokenPrice memory tP = tokenPrices[token];
             uint256[] memory amounts =
                 MarginRouter(router()).authorizedSwapT4ExactT(
-                    AMM.uni,
+                    UNI,
                     targetAmount,
                     // TODO set an actual max peg input value
                     0,

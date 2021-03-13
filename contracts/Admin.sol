@@ -19,20 +19,38 @@ contract Admin is RoleAware, Ownable {
     uint256 public maintenanceStakePerBlock;
     mapping(address => address) public nextMaintenanceStaker;
     mapping(address => mapping(address => bool)) public maintenanceDelegateTo;
-    address currentMaintenanceStaker;
-    address prevMaintenanceStaker;
-    uint256 currentMaintenanceStakerStartBlock;
+    address public currentMaintenanceStaker;
+    address public prevMaintenanceStaker;
+    uint256 public currentMaintenanceStakerStartBlock;
+    address public lockedMFI;
 
     // TODO initialize the above
 
     constructor(
         uint256 _feesPer10k,
         address _MFI,
+        address _lockedMFI,
+        address lockedMFIDelegate,
         address _roles
     ) RoleAware(_roles) Ownable() {
         MFI = _MFI;
         feesPer10k = _feesPer10k;
         maintenanceStakePerBlock = 1 ether;
+        lockedMFI = _lockedMFI;
+
+        // for initialization purposes and to ensure availability of service
+        // the team's locked MFI participate in maintenance staking only
+        // (not in the incentive staking part)
+        // this implies some trust of the team to execute, which we deem reasonable
+        // since the locked stake is temporary and diminishing as well as the fact
+        // that the team is heavily invested in the protocol and incentivized
+        // by fees like any other maintainer
+        // furthermore others could step in to liquidate via the attacker route
+        // and take away the team fees if they were delinquent
+        nextMaintenanceStaker[lockedMFI] = lockedMFI;
+        currentMaintenanceStaker = lockedMFI;
+        prevMaintenanceStaker = lockedMFI;
+        maintenanceDelegateTo[lockedMFI][lockedMFIDelegate];
     }
 
     function setMaintenanceStakePerBlock(uint256 amount) external onlyOwner {
@@ -44,7 +62,7 @@ contract Admin is RoleAware, Ownable {
             Fund(fund()).depositFor(holder, MFI, amount),
             "Could not deposit stake funds (perhaps make allowance to fund contract?"
         );
-        stakes[msg.sender] += amount;
+        stakes[holder] += amount;
         totalStakes += amount;
 
         if (claimIds[holder] > 0) {
@@ -60,7 +78,7 @@ contract Admin is RoleAware, Ownable {
                     holder,
                     amount
                 );
-            claimIds[msg.sender] = claimId;
+            claimIds[holder] = claimId;
             require(claimId > 0, "Distribution is over or paused");
         }
     }
@@ -132,13 +150,21 @@ contract Admin is RoleAware, Ownable {
         }
     }
 
+    function getMaintenanceStakerStake() public view returns (uint256) {
+        if (currentMaintenanceStaker == lockedMFI) {
+            return IERC20(MFI).balanceOf(lockedMFI);
+        } else {
+            return stakes[currentMaintenanceStaker];
+        }
+    }
+
     function getUpdatedCurrentStaker() public returns (address) {
         while (
             (block.number - currentMaintenanceStakerStartBlock) *
                 maintenanceStakePerBlock >=
-            stakes[currentMaintenanceStaker]
+            getMaintenanceStakerStake()
         ) {
-            if (maintenanceStakePerBlock > stakes[currentMaintenanceStaker]) {
+            if (maintenanceStakePerBlock > getMaintenanceStakerStake()) {
                 // delete current from daisy chain
                 address nextOne =
                     nextMaintenanceStaker[currentMaintenanceStaker];

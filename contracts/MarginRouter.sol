@@ -6,23 +6,25 @@ import "../libraries/UniswapV2Library.sol";
 
 import "./RoleAware.sol";
 import "./Fund.sol";
-import "./CrossMarginTrading.sol";
+import "../interfaces/IMarginTrading.sol";
 import "./Lending.sol";
 import "./Admin.sol";
 import "./IncentivizedHolder.sol";
 
-// TODO get rid of enum
-enum AMM {uni, sushi, compare, split}
-
-contract MarginRouter is RoleAware, IncentivizedHolder {
-    mapping(AMM => address) factories;
-    address WETH;
-
+contract MarginRouter is RoleAware, IncentivizedHolder, Ownable {
+    /// different uniswap compatible factories to talk to
+    mapping(address => bool) public factories;
+    /// wrapped ETH ERC20 contract
+    address public WETH;
+    address public constant UNI = 0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f;
+    address public constant SUSHI = 0xC0AEe478e3658e2610c5F7A4A2E1777cE9e4f2Ac;
+    /// emitted when a trader depoits on cross margin
     event CrossDeposit(
         address trader,
         address depositToken,
         uint256 depositAmount
     );
+    /// emitted whenever a trade happens
     event CrossTrade(
         address trader,
         address inToken,
@@ -32,33 +34,37 @@ contract MarginRouter is RoleAware, IncentivizedHolder {
         uint256 outTokenAmount,
         uint256 outTokenExtinguish
     );
+    /// emitted when a trader withdraws funds
     event CrossWithdraw(
         address trader,
         address withdrawToken,
         uint256 withdrawAmount
     );
+    /// emitted upon sucessfully borrowing
     event CrossBorrow(
         address trader,
         address borrowToken,
         uint256 borrowAmount
     );
 
+    /// TODO check if we use it
     modifier ensure(uint256 deadline) {
         require(deadline >= block.timestamp, "UniswapV2Router: EXPIRED");
         _;
     }
 
-    constructor(
-        address uniswapFactory,
-        address sushiswapFactory,
-        address _WETH,
-        address _roles
-    ) RoleAware(_roles) {
-        factories[AMM.uni] = uniswapFactory;
-        factories[AMM.sushi] = sushiswapFactory;
+    constructor(address _WETH, address _roles) RoleAware(_roles) {
+        factories[UNI] = true;
+        factories[SUSHI] = true;
+
         WETH = _WETH;
     }
 
+    function authorizeAMM(address ammFactory) external onlyOwner {
+        factories[ammFactory] = true;
+    }
+
+    /// @dev traders call this to deposit funds on cross margin
     function crossDeposit(address depositToken, uint256 depositAmount)
         external
     {
@@ -67,7 +73,7 @@ contract MarginRouter is RoleAware, IncentivizedHolder {
             "Cannot transfer deposit to margin account"
         );
         uint256 extinguishAmount =
-            CrossMarginTrading(marginTrading()).registerDeposit(
+            IMarginTrading(marginTrading()).registerDeposit(
                 msg.sender,
                 depositToken,
                 depositAmount
@@ -79,10 +85,11 @@ contract MarginRouter is RoleAware, IncentivizedHolder {
         emit CrossDeposit(msg.sender, depositToken, depositAmount);
     }
 
+    /// @dev deposit wrapped ehtereum into cross margin account
     function crossDepositETH() external payable {
         Fund(fund()).depositToWETH{value: msg.value}();
         uint256 extinguishAmount =
-            CrossMarginTrading(marginTrading()).registerDeposit(
+            IMarginTrading(marginTrading()).registerDeposit(
                 msg.sender,
                 WETH,
                 msg.value
@@ -94,10 +101,11 @@ contract MarginRouter is RoleAware, IncentivizedHolder {
         emit CrossDeposit(msg.sender, WETH, msg.value);
     }
 
+    /// @dev withdraw deposits/earnings from cross margin account
     function crossWithdraw(address withdrawToken, uint256 withdrawAmount)
         external
     {
-        CrossMarginTrading(marginTrading()).registerWithdrawal(
+        IMarginTrading(marginTrading()).registerWithdrawal(
             msg.sender,
             withdrawToken,
             withdrawAmount
@@ -109,8 +117,9 @@ contract MarginRouter is RoleAware, IncentivizedHolder {
         emit CrossWithdraw(msg.sender, withdrawToken, withdrawAmount);
     }
 
+    /// @dev withdraw ethereum from cross margin account
     function crossWithdrawETH(uint256 withdrawAmount) external {
-        CrossMarginTrading(marginTrading()).registerWithdrawal(
+        IMarginTrading(marginTrading()).registerWithdrawal(
             msg.sender,
             WETH,
             withdrawAmount
@@ -118,9 +127,10 @@ contract MarginRouter is RoleAware, IncentivizedHolder {
         Fund(fund()).withdrawETH(msg.sender, withdrawAmount);
     }
 
+    /// @dev borrow into cross margin trading account
     function crossBorrow(address borrowToken, uint256 borrowAmount) external {
         Lending(lending()).registerBorrow(borrowToken, borrowAmount);
-        CrossMarginTrading(marginTrading()).registerBorrow(
+        IMarginTrading(marginTrading()).registerBorrow(
             msg.sender,
             borrowToken,
             borrowAmount
@@ -131,6 +141,7 @@ contract MarginRouter is RoleAware, IncentivizedHolder {
         emit CrossBorrow(msg.sender, borrowToken, borrowAmount);
     }
 
+    // TODO check / compare to uniswap code
     // **** SWAP ****
     // requires the initial amount to have already been sent to the first pair
     function _swap(
@@ -156,6 +167,7 @@ contract MarginRouter is RoleAware, IncentivizedHolder {
         }
     }
 
+    /// @dev internal helper swapping exact token for token on AMM
     function _swapExactT4T(
         address factory,
         uint256 amountIn,
@@ -178,8 +190,9 @@ contract MarginRouter is RoleAware, IncentivizedHolder {
         _swap(factory, amounts, path, fund());
     }
 
+    /// @dev external function to make swaps on AMM using protocol funds, only for authorized contracts
     function authorizedSwapExactT4T(
-        AMM amm,
+        address factory,
         uint256 amountIn,
         uint256 amountOutMin,
         address[] calldata path
@@ -188,9 +201,10 @@ contract MarginRouter is RoleAware, IncentivizedHolder {
             isAuthorizedFundTrader(msg.sender),
             "Calling contract is not authorized to trade with protocl funds"
         );
-        return _swapExactT4T(factories[amm], amountIn, amountOutMin, path);
+        return _swapExactT4T(factory, amountIn, amountOutMin, path);
     }
 
+    // @dev internal helper swapping exact token for token on on AMM
     function _swapT4ExactT(
         address factory,
         uint256 amountOut,
@@ -214,8 +228,9 @@ contract MarginRouter is RoleAware, IncentivizedHolder {
         _swap(factory, amounts, path, fund());
     }
 
+    //// @dev external function for swapping protocol funds on AMM, only for authorized
     function authorizedSwapT4ExactT(
-        AMM amm,
+        address factory,
         uint256 amountOut,
         uint256 amountInMax,
         address[] calldata path
@@ -224,21 +239,12 @@ contract MarginRouter is RoleAware, IncentivizedHolder {
             isAuthorizedFundTrader(msg.sender),
             "Calling contract is not authorized to trade with protocl funds"
         );
-        return _swapT4ExactT(factories[amm], amountOut, amountInMax, path);
+        return _swapT4ExactT(factory, amountOut, amountInMax, path);
     }
 
-    // deposit
-    // borrow
-    // auto-borrow for margin trades
-    // auto-extinguish? yeah, why not
-
-    // fees from fee controller / admin
-    // clear trade w/ margintrading
-    // make trade
-    // register trade w/ margintrading (register within transaction)
-
+    /// @dev entry point for swapping tokens held in cross margin account
     function crossSwapExactTokensForTokens(
-        AMM amm,
+        address ammFactory,
         uint256 amountIn,
         uint256 amountOutMin,
         address[] calldata path,
@@ -248,9 +254,10 @@ contract MarginRouter is RoleAware, IncentivizedHolder {
         uint256 fees =
             Admin(feeController()).subtractTradingFees(path[0], amountIn);
 
+        requireAuthorizedAMM(ammFactory);
         // swap
         amounts = _swapExactT4T(
-            factories[amm],
+            ammFactory,
             amountIn - fees,
             amountOutMin,
             path
@@ -265,8 +272,9 @@ contract MarginRouter is RoleAware, IncentivizedHolder {
         );
     }
 
+    /// @dev entry point for swapping tokens held in cross margin account
     function crossSwapTokensForExactTokens(
-        AMM amm,
+        address ammFactory,
         uint256 amountOut,
         uint256 amountInMax,
         address[] calldata path,
@@ -279,9 +287,10 @@ contract MarginRouter is RoleAware, IncentivizedHolder {
                 amountOut
             );
 
+        requireAuthorizedAMM(ammFactory);
         // swap
         amounts = _swapT4ExactT(
-            factories[amm],
+            ammFactory,
             amountOut + fees,
             amountInMax,
             path
@@ -296,6 +305,8 @@ contract MarginRouter is RoleAware, IncentivizedHolder {
         );
     }
 
+    /// @dev helper function does all the work of telling other contracts
+    /// about a trade
     function registerTrade(
         address trader,
         address inToken,
@@ -304,7 +315,7 @@ contract MarginRouter is RoleAware, IncentivizedHolder {
         uint256 outAmount
     ) internal {
         (uint256 extinguishAmount, uint256 borrowAmount) =
-            CrossMarginTrading(marginTrading()).registerTradeAndBorrow(
+            IMarginTrading(marginTrading()).registerTradeAndBorrow(
                 trader,
                 inToken,
                 outToken,
@@ -316,7 +327,7 @@ contract MarginRouter is RoleAware, IncentivizedHolder {
             withdrawClaim(trader, outToken, extinguishAmount);
         }
         if (borrowAmount > 0) {
-            Lending(lending()).registerBorrow(outToken, borrowAmount);
+            Lending(lending()).registerBorrow(inToken, borrowAmount);
             stakeClaim(trader, inToken, borrowAmount);
         }
 
@@ -332,20 +343,25 @@ contract MarginRouter is RoleAware, IncentivizedHolder {
     }
 
     function getAmountsOut(
-        AMM amm,
+        address factory,
         uint256 inAmount,
         address[] calldata path
     ) external view returns (uint256[] memory) {
-        address factory = factories[amm];
         return UniswapV2Library.getAmountsOut(factory, inAmount, path);
     }
 
     function getAmountsIn(
-        AMM amm,
+        address factory,
         uint256 outAmount,
         address[] calldata path
     ) external view returns (uint256[] memory) {
-        address factory = factories[amm];
         return UniswapV2Library.getAmountsIn(factory, outAmount, path);
+    }
+
+    function requireAuthorizedAMM(address ammFactory) internal view {
+        require(
+            ammFactory == UNI || ammFactory == SUSHI || factories[ammFactory],
+            "Not using an authorized AMM"
+        );
     }
 }
