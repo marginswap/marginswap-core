@@ -222,8 +222,8 @@ abstract contract CrossMarginLiquidation is CrossMarginAccounts {
             address traderAddress = tradersToLiquidate[traderIdx];
             CrossMarginAccount storage account = marginAccounts[traderAddress];
 
-            uint256 holdingsValue = holdingsInPeg(account);
-            uint256 borrowValue = loanInPeg(account);
+            uint256 holdingsValue = holdingsInPeg(account, true);
+            uint256 borrowValue = loanInPeg(account, true);
             // 5% of value borrowed
             uint256 maintainerCut4Account = (borrowValue * 5) / 100;
             maintainerCut += maintainerCut4Account;
