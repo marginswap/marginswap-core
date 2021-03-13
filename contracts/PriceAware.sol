@@ -20,6 +20,8 @@ abstract contract PriceAware is Ownable, RoleAware {
     uint16 public priceUpdateWindow = 8;
     uint256 public TEPID_UPDATE_RATE_PERMIL = 20;
     uint256 public CONFIDENT_UPDATE_RATE_PERMIL = 650;
+    uint256 UPDATE_MAX_PEG_AMOUNT = 50_000;
+    uint256 UPDATE_MIN_PEG_AMOUNT = 1_000;
 
     constructor(address _peg) Ownable() {
         peg = _peg;
@@ -35,6 +37,18 @@ abstract contract PriceAware is Ownable, RoleAware {
 
     function setConfidentUpdateRate(uint256 rate) external onlyOwner {
         CONFIDENT_UPDATE_RATE_PERMIL = rate;
+    }
+
+    function forcePriceUpdate(address token, uint256 inAmount) public returns (uint256) {
+        return getUpdatedPriceInPeg(token, inAmount);
+    }
+
+    function setUpdateMaxPegAmount(uint256 amount) external onlyOwner {
+        UPDATE_MAX_PEG_AMOUNT = amount;
+    }
+
+    function setUpdateMinPegAmount(uint256 amount) external onlyOwner {
+        UPDATE_MIN_PEG_AMOUNT = amount;
     }
 
     function getCurrentPriceInPeg(
@@ -69,7 +83,9 @@ abstract contract PriceAware is Ownable, RoleAware {
                 );
             uint256 outAmount = pathAmounts[pathAmounts.length - 1];
 
-            confidentUpdatePriceInPeg(tokenPrice, inAmount, outAmount);
+            if (outAmount > UPDATE_MIN_PEG_AMOUNT && outAmount < UPDATE_MAX_PEG_AMOUNT) {
+                confidentUpdatePriceInPeg(tokenPrice, inAmount, outAmount);
+            }
 
             return outAmount;
         }
