@@ -23,6 +23,7 @@ const deploy: DeployFunction = async function ({
 
     const fund = await deployments.get("Fund")
         .then(Fund => ethers.getContractAt("Fund", Fund.address));
+
     await fund.activateToken(MFI_ADDRESS);
 };
 
