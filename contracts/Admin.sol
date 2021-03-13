@@ -42,9 +42,11 @@ contract Admin is RoleAware, Ownable {
         // the team's locked MFI participate in maintenance staking only
         // (not in the incentive staking part)
         // this implies some trust of the team to execute, which we deem reasonable
-        // since the team is heavily invested in the protocol and is incentivized
+        // since the locked stake is temporary and diminishing as well as the fact
+        // that the team is heavily invested in the protocol and incentivized
         // by fees like any other maintainer
         // furthermore others could step in to liquidate via the attacker route
+        // and take away the team fees if they were delinquent
         nextMaintenanceStaker[lockedMFI] = lockedMFI;
         currentMaintenanceStaker = lockedMFI;
         prevMaintenanceStaker = lockedMFI;
