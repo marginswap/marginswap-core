@@ -18,7 +18,6 @@ describe("Funds.activateToken", function () {
 
         const [owner] = await ethers.getSigners();
 
-        console.log(owner.address);
         await fund.connect(owner.address).activateToken(token.address);
     });
 });
