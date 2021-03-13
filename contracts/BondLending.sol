@@ -206,12 +206,14 @@ abstract contract BondLending is BaseLending {
         uint256 bucketSize = diffMaxMinRuntime / speedRegister.length;
         uint256 runtime = bucketSize * bucketIndex;
         uint256 timeDiff = block.timestamp - lastAction[bucketIndex];
-        uint256 currentSpeed = (amount * runtime) / timeDiff;
+        uint256 currentSpeed = (amount * runtime) / (timeDiff + 1);
 
         // TODO init speed with runtime
+        uint256 runtimeScale = runtime / (10 minutes);
+        // scale adjustment relative to runtime
         speedRegister[bucketIndex] =
-            (speedRegister[bucketIndex] * runtime + currentSpeed * timeDiff) /
-            (runtime + timeDiff);
+            (speedRegister[bucketIndex] * runtimeScale + currentSpeed * timeDiff) /
+            (runtimeScale + timeDiff);
         lastAction[bucketIndex] = block.timestamp;
     }
 }

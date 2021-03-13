@@ -23,13 +23,16 @@ abstract contract BaseLending is RoleAware, Ownable {
         return (balance * accumulatorFP) / yieldQuotientFP;
     }
 
+    /// update the yield for an asset based on recent supply and demand
     function updatedYieldFP(
+        // previous yield
         uint256 _yieldFP,
+        // timestamp
         uint256 lastUpdated,
         uint256 totalLendingInBucket,
         uint256 bucketTarget,
-        uint256 buying,
-        uint256 withdrawing,
+        uint256 buyingSpeed,
+        uint256 withdrawingSpeed,
         uint256 bucketMaxYield
     ) internal view returns (uint256 yieldFP) {
         yieldFP = _yieldFP;
@@ -38,24 +41,26 @@ abstract contract BaseLending is RoleAware, Ownable {
 
         if (
             totalLendingInBucket >= bucketTarget ||
-            // TODO is this too restrictive?
-            (buying >= withdrawing &&
-                buying - withdrawing >= bucketTarget - totalLendingInBucket)
+            buyingSpeed >= withdrawingSpeed
         ) {
-            // TODO underflow
-            yieldFP -= yieldDiff;
-            if (FP32 > yieldFP) {
-                yieldFP = FP32;
-            }
+            yieldFP -= min(yieldFP, yieldDiff);
         } else if (
             bucketTarget > totalLendingInBucket &&
-            (withdrawing > buying ||
-                bucketTarget - totalLendingInBucket > buying - withdrawing)
+            withdrawingSpeed > buyingSpeed
         ) {
             yieldFP += yieldDiff;
             if (yieldFP > bucketMaxYield) {
                 yieldFP = bucketMaxYield;
             }
+        }
+    }
+
+    /// @dev minimum
+    function min(uint256 a, uint256 b) internal pure returns (uint256) {
+        if (a > b) {
+            return b;
+        } else {
+            return a;
         }
     }
 

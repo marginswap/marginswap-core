@@ -13,18 +13,18 @@ struct TokenPrice {
     address[] inverseLiquidationPath;
 }
 
-contract Price is RoleAware, Ownable {
+abstract contract PriceAware is Ownable, RoleAware {
     address public constant UNI = 0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f;
     address public peg;
     mapping(address => TokenPrice) tokenPrices;
     uint256 constant PRICE_HIST_LENGTH = 30;
 
-    constructor(address _peg, address _roles) RoleAware(_roles) Ownable() {
+    constructor(address _peg) Ownable() {
         peg = _peg;
     }
 
     function getCurrentPriceInPeg(address token, uint256 inAmount)
-        external
+        internal
         view
         returns (uint256)
     {
@@ -39,7 +39,7 @@ contract Price is RoleAware, Ownable {
     }
 
     function getUpdatedPriceInPeg(address token, uint256 inAmount)
-        external
+        internal
         returns (uint256)
     {
         if (token == peg) {
@@ -69,7 +69,7 @@ contract Price is RoleAware, Ownable {
 
     // TODO rename to amounts in / out
     function getCostInPeg(address token, uint256 outAmount)
-        external
+        internal
         view
         returns (uint256)
     {
@@ -101,13 +101,9 @@ contract Price is RoleAware, Ownable {
     }
 
     function liquidateToPeg(address token, uint256 amount)
-        external
+        internal
         returns (uint256)
     {
-        require(
-            isLiquidator(msg.sender),
-            "Calling contract is not authorized to liquidate"
-        );
         if (token == peg) {
             return amount;
         } else {
@@ -124,13 +120,9 @@ contract Price is RoleAware, Ownable {
     }
 
     function liquidateFromPeg(address token, uint256 targetAmount)
-        external
+        internal
         returns (uint256)
     {
-        require(
-            isLiquidator(msg.sender),
-            "Calling contract is not authorized to liquidate"
-        );
         if (token == peg) {
             return targetAmount;
         } else {
