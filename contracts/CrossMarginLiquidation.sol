@@ -189,17 +189,16 @@ abstract contract CrossMarginLiquidation is CrossMarginAccounts {
     {
         bool isAuthorized = Admin(admin()).isAuthorizedStaker(msg.sender);
 
-        // calcLiquidationAmounts does a lot of the work here
+        // calcLiquidationAmounts does a lot of the work her
         // * aggregates both sell and buy side targets to be liquidated
         // * returns attacker cuts to them
         // * aggregates any returned fees from unauthorized (attacking) attempts
         uint256 attackReturns2Authorized =
             calcLiquidationAmounts(liquidationCandidates, isAuthorized);
+        maintainerCut = attackReturns2Authorized;
 
         uint256 sale2pegAmount = liquidateToPeg();
         uint256 peg2targetCost = liquidateFromPeg();
-        maintainerCut = (peg2targetCost * 5) / 100;
-        maintainerCut += attackReturns2Authorized;
 
         // TODO include the maintainer cut?
         if (peg2targetCost > sale2pegAmount) {
@@ -227,6 +226,7 @@ abstract contract CrossMarginLiquidation is CrossMarginAccounts {
             uint256 borrowValue = loanInPeg(account);
             // 5% of value borrowed
             uint256 maintainerCut4Account = (borrowValue * 5) / 100;
+            maintainerCut += maintainerCut4Account;
 
             if (!isAuthorized) {
                 // This could theoretically lead to a previous attackers
