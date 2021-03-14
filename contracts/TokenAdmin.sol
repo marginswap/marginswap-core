@@ -142,8 +142,6 @@ contract TokenAdmin is RoleAware, Ownable, IDelegateOwner {
         override
         onlyOwner
     {
-        Ownable(property).transferOwnership(
-            newOwner
-        );
+        Ownable(property).transferOwnership(newOwner);
     }
 }
