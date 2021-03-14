@@ -26,37 +26,49 @@ describe("CrossMarginTrading.getHoldingAmount", function () {
   });
 
   it("Should handle deposits", async () => {
-    const CrossMarginTrading = await deployments.get("CrossMarginTrading");
-    const crossMarginTrading = await ethers.getContractAt(
-      "CrossMarginTrading",
-      CrossMarginTrading.address
-    );
-
-    const { deployer } = await getNamedAccounts();
-
     const roles = await deployments
       .get("Roles")
       .then((Roles) => ethers.getContractAt("Roles", Roles.address));
+    const CrossMarginTradingTest = await ethers.getContractFactory("CrossMarginTradingTest");
+
+    const crossMarginTradingTest = await CrossMarginTradingTest.deploy(roles.address);
+    // const CrossMarginTrading = await deployments.get("CrossMarginTrading");
+    // const crossMarginTrading = await ethers.getContractAt(
+    //   "CrossMarginTrading",
+    //   CrossMarginTrading.address
+    // );
+
+    const { deployer } = await getNamedAccounts();
+
 
     await roles.giveRole(MARGIN_TRADER, deployer);
-    crossMarginTrading.updateRoleCache(MARGIN_TRADER, deployer);
+    crossMarginTradingTest.updateRoleCache(MARGIN_TRADER, deployer);
 
     // exceeding cap
-    expect(crossMarginTrading.registerDeposit(ADDRESS_ONE, ADDRESS_ONE, 1000))
+    expect(crossMarginTradingTest.registerDeposit(ADDRESS_ONE, ADDRESS_ONE, 1000))
       .to.be.reverted;
 
     roles.giveRole(TOKEN_ACTIVATOR, deployer);
-    crossMarginTrading.updateRoleCache(TOKEN_ACTIVATOR, deployer);
-    crossMarginTrading.setTokenCap(ADDRESS_ONE, 100000000);
+    crossMarginTradingTest.updateRoleCache(TOKEN_ACTIVATOR, deployer);
+    crossMarginTradingTest.setTokenCap(ADDRESS_ONE, 100000000);
 
-    await crossMarginTrading.registerDeposit(ADDRESS_ONE, ADDRESS_ONE, 1000);
+    await crossMarginTradingTest.registerDeposit(ADDRESS_ONE, ADDRESS_ONE, 1000);
 
-    let holdingAmounts = await crossMarginTrading.getHoldingAmounts(
+    let holdingAmounts = await crossMarginTradingTest.getHoldingAmounts(
       ADDRESS_ONE
     );
 
     expect(holdingAmounts.holdingAmounts[0]).to.equal(1000);
     expect(holdingAmounts.holdingTokens[0]).to.equal(ADDRESS_ONE);
+
+    await increaseBlocks();
+
+    await crossMarginTradingTest.registerWithdrawal(ADDRESS_ONE, ADDRESS_ONE, 1000);
+
+    holdingAmounts = await crossMarginTradingTest.getHoldingAmounts(ADDRESS_ONE);
+
+    expect(holdingAmounts.holdingAmounts[0]).to.equal(0);
+
   });
 });
 
@@ -67,9 +79,3 @@ async function increaseBlocks() {
     await network.provider.send("evm_mine", [timestamp]);
   }
 }
-
-// await crossMarginTrading.registerWithdrawal(ADDRESS_ONE, ADDRESS_ONE, 1000);
-
-// const holdingAmounts = await crossMarginTrading.getHoldingAmounts(ADDRESS_ONE);
-
-// expect(holdingAmounts.holdingAmounts[0]).to.equal(0);

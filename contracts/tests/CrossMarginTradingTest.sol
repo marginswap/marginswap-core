@@ -8,8 +8,15 @@ contract CrossMarginTradingTest is CrossMarginTrading {
         coolingOffPeriod = 0;
     }
 
-    function getUpdatedPriceInPeg(address token, uint256 inAmount) internal override returns (uint256) {
-        confidentUpdatePriceInPeg(tokenPrices[token], inAmount, inAmount);
+    function getUpdatedPriceInPeg(address token, uint256 inAmount)
+        internal
+        override
+        returns (uint256)
+    {
+        if (inAmount > 0) {
+            confidentUpdatePriceInPeg(tokenPrices[token], inAmount, inAmount);
+        }
+
         return inAmount;
     }
 }
