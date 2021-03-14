@@ -71,6 +71,7 @@ abstract contract PriceAware is Ownable, RoleAware {
     }
 
     function getUpdatedPriceInPeg(address token, uint256 inAmount)
+        virtual
         internal
         returns (uint256)
     {
