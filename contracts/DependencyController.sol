@@ -12,9 +12,16 @@ contract DependencyController is RoleAware, Ownable, IDelegateOwner {
     mapping(uint16 => bool) public knownCharacters;
     mapping(uint16 => bool) public knownRoles;
     mapping(address => address) public delegateOwner;
+    mapping(address => bool) public disabler;
 
     uint16[] public allCharacters;
     uint16[] public allRoles;
+
+     modifier onlyOwnerOrDisabler() {
+         require(owner() == _msgSender() || disabler[_msgSender()],
+                 "Caller is not the owner or authorized disabler");
+        _;
+    }
 
     function relinquishOwnership(address ownableContract, address newOwner)
         external
@@ -22,6 +29,10 @@ contract DependencyController is RoleAware, Ownable, IDelegateOwner {
         onlyOwner
     {
         Ownable(ownableContract).transferOwnership(newOwner);
+    }
+
+    function setDisabler(address disablerAddress, bool authorized) external onlyOwner {
+        disabler[disablerAddress] = authorized;
     }
 
     function executeAsOwner(address executor, address[] memory properties)
@@ -95,11 +106,33 @@ contract DependencyController is RoleAware, Ownable, IDelegateOwner {
         }
     }
 
+    function disableContract(address contr) external onlyOwnerOrDisabler {
+        _disableContract(contr);
+    }
+
+    function _disableContract(address contr) internal {
+        for (uint i = 0; allRoles.length > i; i++) {
+            if (roles.getRole(allRoles[i], contr)) {
+                _removeRole(allRoles[i], contr);
+            }
+        }
+
+        for (uint i = 0; allCharacters.length > i; i++) {
+            if (roles.mainCharacters(allCharacters[i]) == contr) {
+                _setMainCharacter(allCharacters[i], address(0));
+            }
+        }
+    }
+
     function giveRole(uint16 role, address actor) external onlyOwner {
         _giveRole(role, actor);
     }
 
-    function removeRole(uint16 role, address actor) external onlyOwner {
+    function removeRole(uint16 role, address actor) external onlyOwnerOrDisabler {
+        _removeRole(role, actor);
+    }
+
+    function _removeRole(uint16 role, address actor) internal {
         roles.removeRole(role, actor);
         updateRoleCache(role, actor);
     }
