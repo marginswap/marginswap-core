@@ -72,6 +72,7 @@ abstract contract PriceAware is Ownable, RoleAware {
 
     function getUpdatedPriceInPeg(address token, uint256 inAmount)
         internal
+        virtual
         returns (uint256)
     {
         if (token == peg) {
@@ -97,19 +98,19 @@ abstract contract PriceAware is Ownable, RoleAware {
         }
     }
 
-    /// Do a tepid update of price coming from a potentially unreliable source
-    function tepidUpdatePriceInPeg(
-        address token,
-        uint256 inAmount,
-        uint256 outAmount
-    ) internal {
-        _updatePriceInPeg(
-            tokenPrices[token],
-            inAmount,
-            outAmount,
-            TEPID_UPDATE_RATE_PERMIL
-        );
-    }
+    // /// Do a tepid update of price coming from a potentially unreliable source
+    // function tepidUpdatePriceInPeg(
+    //     address token,
+    //     uint256 inAmount,
+    //     uint256 outAmount
+    // ) internal {
+    //     _updatePriceInPeg(
+    //         tokenPrices[token],
+    //         inAmount,
+    //         outAmount,
+    //         TEPID_UPDATE_RATE_PERMIL
+    //     );
+    // }
 
     function confidentUpdatePriceInPeg(
         TokenPrice storage tokenPrice,
@@ -131,7 +132,7 @@ abstract contract PriceAware is Ownable, RoleAware {
         uint256 outAmount,
         uint256 weightPerMil
     ) internal {
-        uint256 updatePer1k = (1000 ether * inAmount) / outAmount;
+        uint256 updatePer1k = (1000 ether * inAmount) / (outAmount + 1); //(1000 ether * inAmount) / outAmount;
         tokenPrice.tokenPer1k =
             (tokenPrice.tokenPer1k *
                 (1000 - weightPerMil) +
@@ -156,6 +157,10 @@ abstract contract PriceAware is Ownable, RoleAware {
                 path.length - i - 1
             ];
         }
+        uint256[] memory pathAmounts =
+            MarginRouter(router()).getAmountsIn(UNI, 1000 ether, path);
+        uint256 inAmount = pathAmounts[0];
+        _updatePriceInPeg(tokenPrices[token], inAmount, 1000 ether, 1000);
     }
 
     function liquidateToPeg(address token, uint256 amount)
