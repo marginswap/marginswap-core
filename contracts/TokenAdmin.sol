@@ -6,8 +6,9 @@ import "./IncentiveDistribution.sol";
 import "./Fund.sol";
 import "./CrossMarginTrading.sol";
 import "./MarginRouter.sol";
+import "../interfaces/IDelegateOwner.sol";
 
-contract TokenAdmin is RoleAware, Ownable {
+contract TokenAdmin is RoleAware, Ownable, IDelegateOwner {
     uint256 public totalLendingTargetPortion;
     uint256 public totalBorrowingTargetPortion;
     address[] public incentiveTokens;
@@ -136,11 +137,12 @@ contract TokenAdmin is RoleAware, Ownable {
         totalBorrowingTargetPortion = portion;
     }
 
-    function relinquishOwnershipOfDistributor(address newOwner)
+    function relinquishOwnership(address property, address newOwner)
         external
+        override
         onlyOwner
     {
-        IncentiveDistribution(incentiveDistributor()).transferOwnership(
+        Ownable(property).transferOwnership(
             newOwner
         );
     }

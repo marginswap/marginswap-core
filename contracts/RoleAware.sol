@@ -40,11 +40,11 @@ contract RoleAware {
         _;
     }
 
-    function updateRoleCache(uint16 role, address contr) external {
+    function updateRoleCache(uint16 role, address contr) public virtual {
         roleCache[contr][role] = roles.getRole(role, contr);
     }
 
-    function updateMainCharacterCache(uint16 role) external {
+    function updateMainCharacterCache(uint16 role) public virtual {
         mainCharacterCache[role] = roles.mainCharacters(role);
     }
 
