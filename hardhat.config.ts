@@ -7,6 +7,7 @@ import "hardhat-deploy-ethers";
 // outside addresses
 const WETH = "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2";
 const MFI_ADDRESS = "0xAa4e3edb11AFa93c41db59842b29de64b72E355B";
+const LOCKED_MFI = "0x6c8fbBf8E079246A92E760D440793f2f864a26b3";
 const REAL_TREASURY = "0x16F3Fc1E4BA9d70f47387b902fa5d21020b5C6B5";
 const UNISWAP_FACTORY = "0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f";
 const SUSHISWAP_FACTORY = "0xC0AEe478e3658e2610c5F7A4A2E1777cE9e4f2Ac";
@@ -120,5 +121,14 @@ export default {
       default: LIQUIDITY_TOKEN,
       3: MFI_ADDRESS,
     },
+    mfiAddress: {
+      default: MFI_ADDRESS
+    },
+    lockedMfi: {
+      default: LOCKED_MFI
+    },
+    lockedMfiDelegate: {
+      default: 1
+    }
   },
 };
