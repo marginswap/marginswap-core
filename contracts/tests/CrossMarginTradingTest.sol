@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: GPL-2.0-only
+pragma solidity ^0.8.0;
+
 import "../CrossMarginTrading.sol";
 
 address constant TEST_PEG = 0x0000000000000000000000000000000000000010;
@@ -16,7 +19,6 @@ contract CrossMarginTradingTest is CrossMarginTrading {
         if (inAmount > 0) {
             confidentUpdatePriceInPeg(tokenPrices[token], inAmount, inAmount);
         }
-
         return inAmount;
     }
 }
