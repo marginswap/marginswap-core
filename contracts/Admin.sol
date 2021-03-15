@@ -16,7 +16,7 @@ contract Admin is RoleAware, Ownable {
     uint256 feesPer10k;
     mapping(address => uint256) public collectedFees;
 
-    uint256 public maintenanceStakePerBlock;
+    uint256 public maintenanceStakePerBlock = 10;
     mapping(address => address) public nextMaintenanceStaker;
     mapping(address => mapping(address => bool)) public maintenanceDelegateTo;
     address public currentMaintenanceStaker;
@@ -152,7 +152,7 @@ contract Admin is RoleAware, Ownable {
 
     function getMaintenanceStakerStake() public view returns (uint256) {
         if (currentMaintenanceStaker == lockedMFI) {
-            return IERC20(MFI).balanceOf(lockedMFI);
+            return IERC20(MFI).balanceOf(lockedMFI) / 2;
         } else {
             return stakes[currentMaintenanceStaker];
         }
