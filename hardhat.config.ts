@@ -4,9 +4,17 @@ import * as fs from "fs";
 import "hardhat-deploy";
 import "hardhat-deploy-ethers";
 
+// ChainIds
+const MAINNET = 1;
+const ROPSTEN = 3;
+const RINKEBY = 4;
+const GÖRLI = 5;
+const KOVAN = 42;
+
 // outside addresses
 const WETH = "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2";
 const MFI_ADDRESS = "0xAa4e3edb11AFa93c41db59842b29de64b72E355B";
+const LOCKED_MFI = "0x6c8fbBf8E079246A92E760D440793f2f864a26b3";
 const REAL_TREASURY = "0x16F3Fc1E4BA9d70f47387b902fa5d21020b5C6B5";
 const UNISWAP_FACTORY = "0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f";
 const SUSHISWAP_FACTORY = "0xC0AEe478e3658e2610c5F7A4A2E1777cE9e4f2Ac";
@@ -86,39 +94,42 @@ export default {
       },
     },
   },
-
-  // ChainId: {
-  //     MAINNET = 1,
-  //     ROPSTEN = 3,
-  //     RINKEBY = 4,
-  //     GÖRLI = 5,
-  //     KOVAN = 42
-  // },
-
   namedAccounts: {
     deployer: {
       default: 0,
     },
     roles: {
-      1: "0xB867ABeF538349bC5156F524cC7743fE07942D3F",
-      3: "0x71328517862C481fA7E5Ed39Ffc53fc64c9778e5",
-      42: "0x541769D9578645b5477ace873b484FabcAD6D428",
+      MAINNET: "0xB867ABeF538349bC5156F524cC7743fE07942D3F",
+      ROPSTEN: "0x71328517862C481fA7E5Ed39Ffc53fc64c9778e5",
+      KOVAN: "0x541769D9578645b5477ace873b484FabcAD6D428",
     },
     fund: {
-      1: "0x2AF84B57B9c56D630DB60d4F564254975736C47e",
-      3: "0x690c6ff4C5DdBAeA4282b109dC145cbA19d13206",
+      MAINNET: "0x2AF84B57B9c56D630DB60d4F564254975736C47e",
+      ROPSTEN: "0x690c6ff4C5DdBAeA4282b109dC145cbA19d13206",
     },
     incentiveDistribution: {
-      1: "0x20A4Fc1421D7dBe65036C26682A41434f471AeC5",
-      3: "0xEf13Ff3E1749606c11623C8b8064761ba70248e3",
+      MAINNET: "0x20A4Fc1421D7dBe65036C26682A41434f471AeC5",
+      ROPSTEN: "0xEf13Ff3E1749606c11623C8b8064761ba70248e3",
     },
     liquidityMiningReward: {
-      1: "0xEfa8122994c742566DB4478d25aD1eC3DF07f477",
-      3: "0x2C71Dc2795224184bC80466b4E4A8bC29008eD7f",
+      MAINNET: "0xEfa8122994c742566DB4478d25aD1eC3DF07f477",
+      ROPSTEN: "0x2C71Dc2795224184bC80466b4E4A8bC29008eD7f",
     },
     liquidityToken: {
       default: LIQUIDITY_TOKEN,
-      3: MFI_ADDRESS,
+      ROPSTEN: MFI_ADDRESS,
     },
+    mfiAddress: {
+      default: MFI_ADDRESS
+    },
+    lockedMfi: {
+      default: LOCKED_MFI
+    },
+    lockedMfiDelegate: {
+      default: 1
+    },
+    weth: {
+      default: WETH
+    }
   },
 };
