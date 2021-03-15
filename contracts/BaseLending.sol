@@ -11,7 +11,8 @@ abstract contract BaseLending is RoleAware, Ownable {
     // TODO init lending buffer and cap
     mapping(address => uint256) public lendingBuffer;
     mapping(address => uint256) public lendingCap;
-    mapping(address => uint256) public totalHourlyYieldFP;
+
+    uint256 public maxHourlyYieldFP;
     uint256 public yieldChangePerSecondFP;
 
     /// @dev simple formula for calculating interest relative to accumulator
@@ -90,5 +91,16 @@ abstract contract BaseLending is RoleAware, Ownable {
             "not autorized to set lending buffer"
         );
         lendingBuffer[token] = buffer;
+    }
+
+    function setMaxHourlyYieldFP(uint256 maxYieldFP) external onlyOwner {
+        maxHourlyYieldFP = maxYieldFP;
+    }
+
+    function setYieldChangePerSecondFP(uint256 changePerSecondFP)
+        external
+        onlyOwner
+    {
+        yieldChangePerSecondFP = changePerSecondFP;
     }
 }

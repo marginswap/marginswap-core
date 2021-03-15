@@ -62,7 +62,8 @@ abstract contract PriceAware is Ownable, RoleAware {
         TokenPrice storage tokenPrice = tokenPrices[token];
         if (
             block.number - tokenPrice.blockLastUpdated > priceUpdateWindow ||
-            (forceCurBlock && block.number != tokenPrice.blockLastUpdated)
+            (forceCurBlock && block.number != tokenPrice.blockLastUpdated) ||
+            tokenPrice.tokenPer1k == 0
         ) {
             return getUpdatedPriceInPeg(token, inAmount);
         } else {
@@ -132,7 +133,7 @@ abstract contract PriceAware is Ownable, RoleAware {
         uint256 outAmount,
         uint256 weightPerMil
     ) internal {
-        uint256 updatePer1k = (1000 ether * inAmount) / (outAmount + 1); //(1000 ether * inAmount) / outAmount;
+        uint256 updatePer1k = (1000 ether * inAmount) / (outAmount + 1);
         tokenPrice.tokenPer1k =
             (tokenPrice.tokenPer1k *
                 (1000 - weightPerMil) +

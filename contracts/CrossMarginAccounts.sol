@@ -87,6 +87,8 @@ abstract contract CrossMarginAccounts is RoleAware, PriceAware {
         (borrowTokens, borrowAmounts);
     }
 
+    /// @dev last time this account deposited
+    /// relevant for withdrawal window
     function getLastDepositBlock(address trader)
         external
         view

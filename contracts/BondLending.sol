@@ -20,10 +20,9 @@ abstract contract BondLending is BaseLending {
     uint256 public diffMaxMinRuntime;
     // this is the numerator under runtimeWeights.
     // any excess left over is the weight of hourly bonds
-    uint256 public weightTotal;
+    uint256 public constant WEIGHT_TOTAL_10k = 10_000;
     uint256 public borrowingMarkupFP;
 
-    mapping(address => uint256[]) public maxYield;
     mapping(address => uint256[]) public runtimeWeights;
     mapping(address => uint256[]) public buyingSpeed;
     mapping(address => uint256[]) public lastBought;
@@ -62,15 +61,14 @@ abstract contract BondLending is BaseLending {
             if (Fund(fund()).depositFor(holder, token, amount)) {
                 uint256 interpolatedAmount = (amount + bondReturn) / 2;
                 totalLending[token] += interpolatedAmount;
+
                 totalLendingPerRuntime[token][
                     bucketIndex
                 ] += interpolatedAmount;
-                // TODO overflow??
-                totalHourlyYieldFP[token] +=
-                    (amount * yieldFP * (1 hours)) /
-                    runtime;
+
                 bondIndex = nextBondIndex;
                 nextBondIndex++;
+
                 bonds[bondIndex] = Bond({
                     holder: holder,
                     token: token,
@@ -80,6 +78,7 @@ abstract contract BondLending is BaseLending {
                     runtime: runtime,
                     yieldFP: yieldFP
                 });
+
                 updateSpeed(
                     buyingSpeed[token],
                     lastBought[token],
@@ -138,12 +137,16 @@ abstract contract BondLending is BaseLending {
     ) internal view returns (uint256 yieldFP) {
         yieldFP = runtimeYieldsFP[token][bucketIndex];
         uint256 lastUpdated = yieldLastUpdated[token][bucketIndex];
+
         uint256 bucketTarget =
             (lendingTarget(token) * runtimeWeights[token][bucketIndex]) /
-                weightTotal;
+                WEIGHT_TOTAL_10k;
+
         uint256 buying = buyingSpeed[token][bucketIndex];
         uint256 withdrawing = withdrawingSpeed[token][bucketIndex];
-        uint256 bucketMaxYield = maxYield[token][bucketIndex];
+
+        uint256 runtime = minRuntime + bucketIndex * diffMaxMinRuntime;
+        uint256 bucketMaxYield = maxHourlyYieldFP * (runtime / (1 hours));
 
         yieldFP = updatedYieldFP(
             yieldFP,
@@ -171,22 +174,6 @@ abstract contract BondLending is BaseLending {
         return (yieldFP * amount) / FP32;
     }
 
-    function getAvgLendingYieldFP(address token)
-        internal
-        view
-        returns (uint256)
-    {
-        return totalHourlyYieldFP[token] / totalLending[token];
-    }
-
-    function getHourlyBorrowYieldFP(address token)
-        internal
-        view
-        returns (uint256)
-    {
-        return (getAvgLendingYieldFP(token) * borrowingMarkupFP) / FP32;
-    }
-
     function getBucketIndex(address token, uint256 runtime)
         internal
         view
@@ -194,7 +181,7 @@ abstract contract BondLending is BaseLending {
     {
         uint256[] storage yieldsFP = runtimeYieldsFP[token];
         uint256 bucketSize = diffMaxMinRuntime / yieldsFP.length;
-        bucketIndex = runtime / bucketSize;
+        bucketIndex = (runtime - minRuntime) / bucketSize;
     }
 
     function updateSpeed(
@@ -204,7 +191,7 @@ abstract contract BondLending is BaseLending {
         uint256 amount
     ) internal {
         uint256 bucketSize = diffMaxMinRuntime / speedRegister.length;
-        uint256 runtime = bucketSize * bucketIndex;
+        uint256 runtime = minRuntime + bucketSize * bucketIndex;
         uint256 timeDiff = block.timestamp - lastAction[bucketIndex];
         uint256 currentSpeed = (amount * runtime) / (timeDiff + 1);
 
@@ -218,5 +205,51 @@ abstract contract BondLending is BaseLending {
                 timeDiff) /
             (runtimeScale + timeDiff);
         lastAction[bucketIndex] = block.timestamp;
+    }
+
+    function setRuntimeYieldsFP(address token, uint256[] memory yieldsFP)
+        external
+        onlyOwner
+    {
+        runtimeYieldsFP[token] = yieldsFP;
+    }
+
+    function setRuntimeWeights(address token, uint256[] memory weights)
+        external
+    {
+        //require(
+        //    isTokenActivator(msg.sender),
+        //    "not autorized to set runtime weights"
+        //);
+        require(
+            runtimeWeights[token].length == 0 ||
+                runtimeWeights[token].length == weights.length,
+            "Cannot change size of weight array"
+        );
+        if (runtimeWeights[token].length == 0) {
+            // we are initializing
+
+            runtimeYieldsFP[token] = new uint256[](weights.length);
+            lastBought[token] = new uint256[](weights.length);
+            lastWithdrawn[token] = new uint256[](weights.length);
+            yieldLastUpdated[token] = new uint256[](weights.length);
+
+            uint256 hourlyYieldFP = (110 * FP32) / 100 / (24 * 365);
+            uint256 bucketSize = diffMaxMinRuntime / weights.length;
+
+            for (uint24 i = 0; weights.length > i; i++) {
+                uint256 runtime = minRuntime + bucketSize * i;
+                // Do a best guess of initializing
+                runtimeYieldsFP[token][i] =
+                    hourlyYieldFP *
+                    (runtime / (1 hours));
+
+                lastBought[token][i] = block.timestamp;
+                lastWithdrawn[token][i] = block.timestamp;
+                yieldLastUpdated[token][i] = block.timestamp;
+            }
+        }
+
+        runtimeWeights[token] = weights;
     }
 }

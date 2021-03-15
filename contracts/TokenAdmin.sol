@@ -18,6 +18,8 @@ contract TokenAdmin is RoleAware, Ownable, IDelegateOwner {
     mapping(address => uint8) public tokenBorrowingTranches;
     uint8 public nextTrancheIndex = 20;
 
+    uint256 public initHourlyYieldAPRPercent = 10;
+
     // TODO give this contract ownership of incentive distribution
     // after everything else is incentivized
     constructor(
@@ -42,6 +44,8 @@ contract TokenAdmin is RoleAware, Ownable, IDelegateOwner {
         CrossMarginTrading(marginTrading()).setTokenCap(token, exposureCap);
         Lending(lending()).setLendingCap(token, exposureCap);
         Lending(lending()).setLendingBuffer(token, lendingBuffer);
+        Lending(lending()).setHourlyYieldAPR(token, initHourlyYieldAPRPercent);
+        Lending(lending()).initBorrowYieldAccumulator(token);
 
         if (incentiveWeight > 0) {
             totalTokenWeights += incentiveWeight;
@@ -84,7 +88,7 @@ contract TokenAdmin is RoleAware, Ownable, IDelegateOwner {
         external
         onlyOwner
     {
-        // TODO add token cap to lending as well
+        Lending(lending()).setLendingCap(token, exposureCap);
         CrossMarginTrading(marginTrading()).setTokenCap(token, exposureCap);
     }
 
@@ -100,6 +104,17 @@ contract TokenAdmin is RoleAware, Ownable, IDelegateOwner {
 
         updateIncentiveShares(IncentiveDistribution(incentiveDistributor()));
     }
+
+    function changeLendingBuffer(address token, uint256 lendingBuffer)
+        external
+        onlyOwner
+    {
+        Lending(lending()).setLendingBuffer(token, lendingBuffer);
+    }
+
+    //function changeBondLendingWeights(address token, uint256[] memory weights) external onlyOwner {
+    //    Lending(lending()).setRuntimeWeights(token, weights);
+    //}
 
     function updateIncentiveShares(IncentiveDistribution iD) internal {
         for (uint8 i = 0; incentiveTokens.length > i; i++) {
@@ -135,6 +150,17 @@ contract TokenAdmin is RoleAware, Ownable, IDelegateOwner {
 
     function setBorrowingTargetPortion(uint256 portion) external onlyOwner {
         totalBorrowingTargetPortion = portion;
+    }
+
+    function changeHourlyYieldAPR(address token, uint256 aprPercent)
+        external
+        onlyOwner
+    {
+        Lending(lending()).setHourlyYieldAPR(token, aprPercent);
+    }
+
+    function setInitHourlyYieldAPR(uint256 value) external onlyOwner {
+        initHourlyYieldAPRPercent = value;
     }
 
     function relinquishOwnership(address property, address newOwner)

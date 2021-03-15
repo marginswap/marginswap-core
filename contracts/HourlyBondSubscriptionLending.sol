@@ -22,11 +22,30 @@ abstract contract HourlyBondSubscriptionLending is BaseLending {
     // token => holder => bond record
     mapping(address => mapping(address => HourlyBond))
         public hourlyBondAccounts;
+
     mapping(address => YieldAccumulator) public hourlyBondYieldAccumulators;
-    mapping(address => uint256) public totalHourlyBond;
+
     mapping(address => uint256) public hourlyBondBuyingSpeed;
     mapping(address => uint256) public hourlyBondWithdrawingSpeed;
-    uint256 public hourlyMaxYield;
+
+    function setHourlyYieldAPR(address token, uint256 aprPercent) external {
+        require(
+            isTokenActivator(msg.sender),
+            "not autorized to set hourly yield"
+        );
+        if (hourlyBondYieldAccumulators[token].accumulatorFP == 0) {
+            hourlyBondYieldAccumulators[token] = YieldAccumulator({
+                accumulatorFP: FP32,
+                lastUpdated: block.timestamp,
+                hourlyYieldFP: (FP32 * (100 + aprPercent)) / 100 / (24 * 365)
+            });
+        } else {
+            hourlyBondYieldAccumulators[token].hourlyYieldFP =
+                (FP32 * (100 + aprPercent)) /
+                100 /
+                (24 * 365);
+        }
+    }
 
     function _makeHourlyBond(
         address token,
@@ -38,7 +57,6 @@ abstract contract HourlyBondSubscriptionLending is BaseLending {
         bond.yieldQuotientFP = hourlyBondYieldAccumulators[token].accumulatorFP;
         bond.moduloHour = block.timestamp % (1 hours);
         bond.amount += amount;
-        totalHourlyBond[token] += amount;
         totalLending[token] += amount;
     }
 
@@ -62,7 +80,6 @@ abstract contract HourlyBondSubscriptionLending is BaseLending {
             );
 
             uint256 deltaAmount = bond.amount - oldAmount;
-            totalHourlyBond[token] += deltaAmount;
             totalLending[token] += deltaAmount;
             // TODO make a similar update for borrowing!
         }
@@ -88,7 +105,6 @@ abstract contract HourlyBondSubscriptionLending is BaseLending {
         );
 
         bond.amount -= amount;
-        totalHourlyBond[token] -= amount;
         totalLending[token] -= amount;
     }
 
@@ -143,7 +159,7 @@ abstract contract HourlyBondSubscriptionLending is BaseLending {
             lendingTarget(token),
             hourlyBondBuyingSpeed[token],
             hourlyBondWithdrawingSpeed[token],
-            hourlyMaxYield
+            maxHourlyYieldFP
         );
 
         uint256 timeDelta = (timestamp - accumulator.lastUpdated);

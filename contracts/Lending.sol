@@ -17,7 +17,13 @@ contract Lending is
     /// @dev IDs for all bonds held by an address
     mapping(address => uint256[]) public bondIds;
 
-    constructor(address _roles) RoleAware(_roles) Ownable() {}
+    constructor(address _roles) RoleAware(_roles) Ownable() {
+        uint256 APR = 899;
+        maxHourlyYieldFP = (FP32 * APR) / 100 / (24 * 365);
+
+        uint256 aprChangePerMil = 3;
+        yieldChangePerSecondFP = (FP32 * aprChangePerMil) / 1000;
+    }
 
     /// @dev how much interest has accrued to a borrowed balance over time
     function applyBorrowInterest(
@@ -147,9 +153,18 @@ contract Lending is
         );
 
         super._withdrawBond(bond);
+        delete bonds[bondId];
         // in case of a shortfall, governance can step in to provide
         // additonal compensation beyond the usual incentive which
         // gets withdrawn here
         withdrawClaim(msg.sender, bond.token, bond.originalPrice);
+    }
+
+    function initBorrowYieldAccumulator(address token) external {
+        require(
+            isTokenActivator(msg.sender),
+            "not autorized to init yield accumulator"
+        );
+        borrowYieldAccumulators[token] = FP32;
     }
 }
