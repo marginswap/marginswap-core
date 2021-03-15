@@ -21,7 +21,7 @@ contract TokenAdmin is RoleAware, Ownable, IDelegateOwner {
     uint256 public initHourlyYieldAPRPercent = 10;
 
     // TODO give this contract ownership of incentive distribution
-    // after everything else is incentivized
+    // during deploy after everything else is incentivized
     constructor(
         uint256 lendingTargetPortion,
         uint256 borrowingTargetPortion,
