@@ -13,32 +13,46 @@ contract DependencyController is RoleAware, Ownable, IDelegateOwner {
     mapping(uint16 => bool) public knownRoles;
     mapping(address => address) public delegateOwner;
     mapping(address => bool) public disabler;
+    address public currentExecutor = address(0);
 
     uint16[] public allCharacters;
     uint16[] public allRoles;
 
-     modifier onlyOwnerOrDisabler() {
-         require(owner() == _msgSender() || disabler[_msgSender()],
-                 "Caller is not the owner or authorized disabler");
+    modifier onlyOwnerOrExecOrDisabler() {
+        require(
+            owner() == _msgSender() ||
+                disabler[_msgSender()] ||
+                currentExecutor == _msgSender(),
+            "Caller is not the owner or authorized disabler or executor"
+        );
+        _;
+    }
+
+    modifier onlyOwnerOrExec() {
+        require(
+            owner() == _msgSender() || currentExecutor == _msgSender(),
+            "Caller is not the owner or executor"
+        );
         _;
     }
 
     function relinquishOwnership(address ownableContract, address newOwner)
         external
         override
-        onlyOwner
+        onlyOwnerOrExec
     {
         Ownable(ownableContract).transferOwnership(newOwner);
     }
 
-    function setDisabler(address disablerAddress, bool authorized) external onlyOwner {
+    function setDisabler(address disablerAddress, bool authorized)
+        external
+        onlyOwnerOrExec
+    {
         disabler[disablerAddress] = authorized;
     }
 
-    function executeAsOwner(address executor, address[] memory properties)
-        external
-        onlyOwner
-    {
+    function executeAsOwner(address executor) external onlyOwnerOrExec {
+        address[] memory properties = IExecutor(executor).requiredProperties();
         for (uint256 i = 0; properties.length > i; i++) {
             address property = properties[i];
             if (delegateOwner[property] != address(0)) {
@@ -51,17 +65,35 @@ contract DependencyController is RoleAware, Ownable, IDelegateOwner {
             }
         }
 
-        IExecutor(executor).execute(address(this));
+        uint16[] memory requiredRoles = IExecutor(executor).requiredRoles();
+
+        for (uint256 i = 0; requiredRoles.length > i; i++) {
+            _giveRole(requiredRoles[i], executor);
+        }
+
+        currentExecutor = executor;
+        IExecutor(executor).execute();
+        currentExecutor = address(0);
+
+        address rightfulOwner = IExecutor(executor).rightfulOwner();
+        require(
+            rightfulOwner == address(this) || rightfulOwner == owner(),
+            "Executor doesn't have the right rightful owner"
+        );
 
         for (uint256 i = 0; properties.length > i; i++) {
             address property = properties[i];
             require(
-                Ownable(property).owner() == address(this),
+                Ownable(property).owner() == rightfulOwner,
                 "Executor did not return ownership"
             );
             if (delegateOwner[property] != address(0)) {
                 Ownable(property).transferOwnership(delegateOwner[property]);
             }
+        }
+
+        for (uint256 i = 0; requiredRoles.length > i; i++) {
+            _removeRole(requiredRoles[i], executor);
         }
     }
 
@@ -70,7 +102,7 @@ contract DependencyController is RoleAware, Ownable, IDelegateOwner {
         uint16[] memory charactersPlayed,
         uint16[] memory rolesPlayed,
         address[] memory ownsAsDelegate
-    ) external onlyOwner {
+    ) external onlyOwnerOrExec {
         managedContracts.push(contr);
 
         // set up all characters this contract plays
@@ -106,29 +138,32 @@ contract DependencyController is RoleAware, Ownable, IDelegateOwner {
         }
     }
 
-    function disableContract(address contr) external onlyOwnerOrDisabler {
+    function disableContract(address contr) external onlyOwnerOrExecOrDisabler {
         _disableContract(contr);
     }
 
     function _disableContract(address contr) internal {
-        for (uint i = 0; allRoles.length > i; i++) {
+        for (uint256 i = 0; allRoles.length > i; i++) {
             if (roles.getRole(allRoles[i], contr)) {
                 _removeRole(allRoles[i], contr);
             }
         }
 
-        for (uint i = 0; allCharacters.length > i; i++) {
+        for (uint256 i = 0; allCharacters.length > i; i++) {
             if (roles.mainCharacters(allCharacters[i]) == contr) {
                 _setMainCharacter(allCharacters[i], address(0));
             }
         }
     }
 
-    function giveRole(uint16 role, address actor) external onlyOwner {
+    function giveRole(uint16 role, address actor) external onlyOwnerOrExec {
         _giveRole(role, actor);
     }
 
-    function removeRole(uint16 role, address actor) external onlyOwnerOrDisabler {
+    function removeRole(uint16 role, address actor)
+        external
+        onlyOwnerOrExecOrDisabler
+    {
         _removeRole(role, actor);
     }
 
@@ -137,7 +172,10 @@ contract DependencyController is RoleAware, Ownable, IDelegateOwner {
         updateRoleCache(role, actor);
     }
 
-    function setMainCharacter(uint16 role, address actor) external onlyOwner {
+    function setMainCharacter(uint16 role, address actor)
+        external
+        onlyOwnerOrExec
+    {
         _setMainCharacter(role, actor);
     }
 
