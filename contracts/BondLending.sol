@@ -14,9 +14,8 @@ struct Bond {
 }
 
 abstract contract BondLending is BaseLending {
-    // CAUTION: minRuntime must be at least 1 hour
-    uint256 public minRuntime;
-    uint256 public maxRuntime;
+    uint256 public minRuntime = 30 days;
+    uint256 public maxRuntime = 365 days;
     uint256 public diffMaxMinRuntime;
     // this is the numerator under runtimeWeights.
     // any excess left over is the weight of hourly bonds
@@ -129,7 +128,6 @@ abstract contract BondLending is BaseLending {
         yieldLastUpdated[token][bucketIndex] = block.timestamp;
     }
 
-    // TODO make sure yield changes can't get stuck under some circumstances
     function calcBondYieldFP(
         address token,
         uint256 totalLendingInBucket,
@@ -195,9 +193,8 @@ abstract contract BondLending is BaseLending {
         uint256 timeDiff = block.timestamp - lastAction[bucketIndex];
         uint256 currentSpeed = (amount * runtime) / (timeDiff + 1);
 
-        // TODO init speed with runtime
         uint256 runtimeScale = runtime / (10 minutes);
-        // scale adjustment relative to runtime
+        // scale adjustment relative togit  runtime
         speedRegister[bucketIndex] =
             (speedRegister[bucketIndex] *
                 runtimeScale +
@@ -233,6 +230,8 @@ abstract contract BondLending is BaseLending {
             lastBought[token] = new uint256[](weights.length);
             lastWithdrawn[token] = new uint256[](weights.length);
             yieldLastUpdated[token] = new uint256[](weights.length);
+            buyingSpeed[token] = new uint256[](weights.length);
+            withdrawingSpeed[token] = new uint256[](weights.length);
 
             uint256 hourlyYieldFP = (110 * FP32) / 100 / (24 * 365);
             uint256 bucketSize = diffMaxMinRuntime / weights.length;
@@ -251,5 +250,18 @@ abstract contract BondLending is BaseLending {
         }
 
         runtimeWeights[token] = weights;
+    }
+
+    function setMinRuntime(uint256 runtime) external onlyOwner {
+        require(runtime > 1 hours, "Min runtime needs to be at least 1 hour");
+        minRuntime = runtime;
+    }
+
+    function setMaxRuntime(uint256 runtime) external onlyOwner {
+        require(
+            runtime > minRuntime,
+            "Max runtime must be greater than min runtime"
+        );
+        maxRuntime = runtime;
     }
 }

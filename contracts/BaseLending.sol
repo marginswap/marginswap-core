@@ -8,7 +8,6 @@ abstract contract BaseLending is RoleAware, Ownable {
 
     mapping(address => uint256) public totalLending;
     mapping(address => uint256) public totalBorrowed;
-    // TODO init lending buffer and cap
     mapping(address => uint256) public lendingBuffer;
     mapping(address => uint256) public lendingCap;
 

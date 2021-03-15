@@ -24,8 +24,6 @@ contract Admin is RoleAware, Ownable {
     uint256 public currentMaintenanceStakerStartBlock;
     address public lockedMFI;
 
-    // TODO initialize the above
-
     constructor(
         uint256 _feesPer10k,
         address _MFI,
@@ -51,6 +49,7 @@ contract Admin is RoleAware, Ownable {
         currentMaintenanceStaker = lockedMFI;
         prevMaintenanceStaker = lockedMFI;
         maintenanceDelegateTo[lockedMFI][lockedMFIDelegate];
+        currentMaintenanceStakerStartBlock = block.number;
     }
 
     function setMaintenanceStakePerBlock(uint256 amount) external onlyOwner {
@@ -185,7 +184,6 @@ contract Admin is RoleAware, Ownable {
         return currentMaintenanceStaker;
     }
 
-    // TODO rethink authorization
     function addDelegate(address forStaker, address delegate) external {
         require(
             msg.sender == forStaker ||
