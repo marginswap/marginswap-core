@@ -17,7 +17,7 @@ struct HourlyBond {
 }
 
 abstract contract HourlyBondSubscriptionLending is BaseLending {
-    uint256 constant WITHDRAWAL_WINDOW = 10 minutes;
+    uint256 withdrawalWindow = 10 minutes;
     // token => holder => bond record
     mapping(address => mapping(address => HourlyBond))
         public hourlyBondAccounts;
@@ -48,6 +48,10 @@ abstract contract HourlyBondSubscriptionLending is BaseLending {
                 100 /
                 (24 * 365);
         }
+    }
+
+    function setWithdrawalWindow(uint256 window) external onlyOwner {
+        withdrawalWindow = window;
     }
 
     function _makeHourlyBond(
@@ -92,7 +96,7 @@ abstract contract HourlyBondSubscriptionLending is BaseLending {
         uint256 currentOffset = (block.timestamp - bond.moduloHour) % (1 hours);
 
         require(
-            WITHDRAWAL_WINDOW >= currentOffset,
+            withdrawalWindow >= currentOffset,
             "Tried withdrawing outside subscription cancellation time window"
         );
 
