@@ -36,6 +36,38 @@ contract DependencyController is RoleAware, Ownable, IDelegateOwner {
         _;
     }
 
+    function verifyOwnership() external view returns (bool ownsAll) {
+        ownsAll = ownsContractStrict(address(roles));
+        for (uint256 i = 0; managedContracts.length > i; i++) {
+            address contr = managedContracts[i];
+            ownsAll = ownsAll && ownsContract(contr);
+        }
+    }
+
+    function verifyOwnershipStrict() external view returns (bool ownsAll) {
+        ownsAll = ownsContractStrict(address(roles));
+        for (uint256 i = 0; managedContracts.length > i; i++) {
+            address contr = managedContracts[i];
+            ownsAll = ownsAll && ownsContractStrict(contr);
+        }
+    }
+
+    function ownsContract(address contr) public view returns (bool) {
+        address contrOwner = Ownable(contr).owner();
+        return
+            contrOwner == address(this) ||
+            contrOwner == owner() ||
+            contrOwner == delegateOwner[contr];
+    }
+
+    function ownsContractStrict(address contr) public view returns (bool) {
+        address contrOwner = Ownable(contr).owner();
+        return
+            contrOwner == address(this) ||
+            (contrOwner == delegateOwner[contr] &&
+                Ownable(delegateOwner[contr]).owner() == address(this));
+    }
+
     function relinquishOwnership(address ownableContract, address newOwner)
         external
         override
