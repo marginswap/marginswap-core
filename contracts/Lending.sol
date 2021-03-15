@@ -12,12 +12,8 @@ contract Lending is
     BondLending,
     IncentivizedHolder
 {
-    /// @dev accumulate interest per token (like compound indices)
-    mapping(address => YieldAccumulator) public borrowYieldAccumulators;
     /// @dev IDs for all bonds held by an address
     mapping(address => uint256[]) public bondIds;
-
-    uint256 public borrowingFactorPercent = 200;
 
     constructor(address _roles) RoleAware(_roles) Ownable() {
         uint256 APR = 899;
@@ -33,21 +29,15 @@ contract Lending is
         address token,
         uint256 yieldQuotientFP
     ) external returns (uint256 balanceWithInterest) {
-        YieldAccumulator storage yA =
-            getUpdatedCumulativeYieldFP(
-                token,
-                borrowYieldAccumulators,
-                block.timestamp
-            );
+        YieldAccumulator storage yA = borrowYieldAccumulators[token];
         balanceWithInterest = applyInterest(
             balance,
             yA.accumulatorFP,
             yieldQuotientFP
         );
-        borrowYieldAccumulators[token].hourlyYieldFP =
-            (borrowingFactorPercent *
-                hourlyBondYieldAccumulators[token].hourlyYieldFP) /
-            100;
+
+        uint256 deltaAmount = balanceWithInterest - balance;
+        totalBorrowed[token] += deltaAmount;
     }
 
     /// @dev view function to get current borrowing interest
@@ -176,5 +166,12 @@ contract Lending is
             "not autorized to init yield accumulator"
         );
         borrowYieldAccumulators[token].accumulatorFP = FP32;
+    }
+
+    function setBorrowingFactorPercent(uint256 borrowingFactor)
+        external
+        onlyOwner
+    {
+        borrowingFactorPercent = borrowingFactor;
     }
 }

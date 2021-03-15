@@ -16,7 +16,6 @@ struct HourlyBond {
     uint256 moduloHour;
 }
 
-// TODO totalHourlyYieldFP
 abstract contract HourlyBondSubscriptionLending is BaseLending {
     uint256 constant WITHDRAWAL_WINDOW = 10 minutes;
     // token => holder => bond record
@@ -24,6 +23,10 @@ abstract contract HourlyBondSubscriptionLending is BaseLending {
         public hourlyBondAccounts;
 
     mapping(address => YieldAccumulator) public hourlyBondYieldAccumulators;
+    /// @dev accumulate interest per token (like compound indices)
+    mapping(address => YieldAccumulator) public borrowYieldAccumulators;
+
+    uint256 public borrowingFactorPercent = 200;
 
     mapping(address => uint256) public hourlyBondBuyingSpeed;
     mapping(address => uint256) public hourlyBondWithdrawingSpeed;
@@ -65,12 +68,7 @@ abstract contract HourlyBondSubscriptionLending is BaseLending {
     {
         uint256 yieldQuotientFP = bond.yieldQuotientFP;
         if (yieldQuotientFP > 0) {
-            YieldAccumulator storage yA =
-                getUpdatedCumulativeYieldFP(
-                    token,
-                    hourlyBondYieldAccumulators,
-                    block.timestamp
-                );
+            YieldAccumulator storage yA = getUpdatedHourlyYield(token);
 
             uint256 oldAmount = bond.amount;
             bond.amount = applyInterest(
@@ -81,7 +79,6 @@ abstract contract HourlyBondSubscriptionLending is BaseLending {
 
             uint256 deltaAmount = bond.amount - oldAmount;
             totalLending[token] += deltaAmount;
-            // TODO make a similar update for borrowing!
         }
     }
 
@@ -146,12 +143,18 @@ abstract contract HourlyBondSubscriptionLending is BaseLending {
     }
 
     /// @dev updates yield accumulators for both borrowing and lending
-    function getUpdatedCumulativeYieldFP(
-        address token,
-        mapping(address => YieldAccumulator) storage yieldAccumulators,
-        uint256 timestamp
-    ) internal returns (YieldAccumulator storage accumulator) {
-        accumulator = yieldAccumulators[token];
+    function getUpdatedHourlyYield(address token)
+        internal
+        returns (YieldAccumulator storage accumulator)
+    {
+        accumulator = hourlyBondYieldAccumulators[token];
+        uint256 timeDelta = (block.timestamp - accumulator.lastUpdated);
+
+        accumulator.accumulatorFP = calcCumulativeYieldFP(
+            accumulator,
+            timeDelta
+        );
+
         accumulator.hourlyYieldFP = updatedYieldFP(
             accumulator.hourlyYieldFP,
             accumulator.lastUpdated,
@@ -162,11 +165,20 @@ abstract contract HourlyBondSubscriptionLending is BaseLending {
             maxHourlyYieldFP
         );
 
-        uint256 timeDelta = (timestamp - accumulator.lastUpdated);
-        accumulator.accumulatorFP = calcCumulativeYieldFP(
-            accumulator,
+        YieldAccumulator storage borrowAccumulator =
+            borrowYieldAccumulators[token];
+        timeDelta = block.timestamp - borrowAccumulator.lastUpdated;
+        borrowAccumulator.accumulatorFP = calcCumulativeYieldFP(
+            borrowAccumulator,
             timeDelta
         );
+
+        borrowYieldAccumulators[token].hourlyYieldFP =
+            (borrowingFactorPercent * accumulator.hourlyYieldFP) /
+            100;
+
+        accumulator.lastUpdated = block.timestamp;
+        borrowAccumulator.lastUpdated = block.timestamp;
     }
 
     function viewCumulativeYieldFP(
