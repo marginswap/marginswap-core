@@ -87,6 +87,14 @@ abstract contract CrossMarginAccounts is RoleAware, PriceAware {
         (borrowTokens, borrowAmounts);
     }
 
+    function getLastDepositBlock(address trader)
+        external
+        view
+        returns (uint256)
+    {
+        return marginAccounts[trader].lastDepositBlock;
+    }
+
     /// @dev add an asset to be held by account
     function addHolding(
         CrossMarginAccount storage account,
