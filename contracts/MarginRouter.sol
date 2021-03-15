@@ -47,9 +47,8 @@ contract MarginRouter is RoleAware, IncentivizedHolder, Ownable {
         uint256 borrowAmount
     );
 
-    /// TODO check if we use it
     modifier ensure(uint256 deadline) {
-        require(deadline >= block.timestamp, "UniswapV2Router: EXPIRED");
+        require(deadline >= block.timestamp, "Trade has expired");
         _;
     }
 
@@ -137,11 +136,9 @@ contract MarginRouter is RoleAware, IncentivizedHolder, Ownable {
         );
 
         stakeClaim(msg.sender, borrowToken, borrowAmount);
-        // TODO integrate into deposit
         emit CrossBorrow(msg.sender, borrowToken, borrowAmount);
     }
 
-    // TODO check / compare to uniswap code
     // **** SWAP ****
     // requires the initial amount to have already been sent to the first pair
     function _swap(
@@ -215,7 +212,7 @@ contract MarginRouter is RoleAware, IncentivizedHolder, Ownable {
         amounts = UniswapV2Library.getAmountsIn(factory, amountOut, path);
         require(
             amounts[0] <= amountInMax,
-            "UniswapV2Router: EXCESSIVE_INPUT_AMOUNT"
+            "MarginRouter: EXCESSIVE_INPUT_AMOUNT"
         );
         require(
             Fund(fund()).withdraw(

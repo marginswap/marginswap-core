@@ -25,11 +25,18 @@ abstract contract CrossMarginLiquidation is CrossMarginAccounts {
     address[] buyTokens;
     address[] tradersToLiquidate;
 
+    mapping(address => uint256) public maintenanceFailures;
     mapping(address => AccountLiqRecord) public stakeAttackRecords;
     uint256 public avgLiquidationPerBlock = 10;
 
     uint256 public liqStakeAttackWindow = 5;
     uint256 public MAINTAINER_CUT_PERCENT = 5;
+
+    uint256 public failureThreshold = 10;
+
+    function setFailureThreshold(uint256 threshFactor) external onlyOwner {
+        failureThreshold = threshFactor;
+    }
 
     function setLiqStakeAttackWindow(uint256 window) external onlyOwner {
         liqStakeAttackWindow = window;
@@ -46,7 +53,7 @@ abstract contract CrossMarginLiquidation is CrossMarginAccounts {
         sellTokens = new address[](0);
         buyTokens = new address[](0);
         tradersToLiquidate = new address[](0);
-        // TODO test
+
         for (
             uint256 traderIndex = 0;
             liquidationCandidates.length > traderIndex;
@@ -55,8 +62,6 @@ abstract contract CrossMarginLiquidation is CrossMarginAccounts {
             address traderAddress = liquidationCandidates[traderIndex];
             CrossMarginAccount storage account = marginAccounts[traderAddress];
             if (belowMaintenanceThreshold(account)) {
-                // TODO optimize maybe put in the whole account?
-                // TODO unique?
                 tradersToLiquidate.push(traderAddress);
                 for (
                     uint256 sellIdx = 0;
@@ -66,9 +71,7 @@ abstract contract CrossMarginLiquidation is CrossMarginAccounts {
                     address token = account.holdingTokens[sellIdx];
                     Liquidation storage liquidation = liquidationAmounts[token];
 
-                    // TODO factor out init liq record
                     if (liquidation.blockNum != block.number) {
-                        // TODO delete liquidationAmounts at end of call?
                         liquidation.sell = account.holdings[token];
                         liquidation.buy = 0;
                         liquidation.blockNum = block.number;
@@ -192,12 +195,21 @@ abstract contract CrossMarginLiquidation is CrossMarginAccounts {
         }
     }
 
+    function maintainerIsFailing() internal view returns (bool) {
+        (address currentMaintainer, ) =
+            Admin(admin()).viewCurrentMaintenanceStaker();
+        return
+            maintenanceFailures[currentMaintainer] >
+            failureThreshold * avgLiquidationPerBlock;
+    }
+
     /// called by maintenance stakers to liquidate accounts below liquidation threshold
     function liquidate(address[] memory liquidationCandidates)
         external
         returns (uint256 maintainerCut)
     {
         bool isAuthorized = Admin(admin()).isAuthorizedStaker(msg.sender);
+        bool canTakeNow = isAuthorized || maintainerIsFailing();
 
         // calcLiquidationAmounts does a lot of the work her
         // * aggregates both sell and buy side targets to be liquidated
@@ -221,7 +233,7 @@ abstract contract CrossMarginLiquidation is CrossMarginAccounts {
         }
 
         address loser = address(0);
-        if (!isAuthorized) {
+        if (!canTakeNow) {
             // whoever is the current responsible maintenance staker
             // and liable to lose their stake
             loser = Admin(admin()).getUpdatedCurrentStaker();
@@ -244,7 +256,7 @@ abstract contract CrossMarginLiquidation is CrossMarginAccounts {
                 (borrowValue * MAINTAINER_CUT_PERCENT) / 100;
             maintainerCut += maintainerCut4Account;
 
-            if (!isAuthorized) {
+            if (!canTakeNow) {
                 // This could theoretically lead to a previous attackers
                 // record being overwritten, but only if the trader restarts
                 // their account and goes back into the red within the short time window
@@ -274,7 +286,16 @@ abstract contract CrossMarginLiquidation is CrossMarginAccounts {
         avgLiquidationPerBlock =
             (avgLiquidationPerBlock * 99 + maintainerCut) /
             100;
+
+        address currentMaintainer = Admin(admin()).getUpdatedCurrentStaker();
+        if (isAuthorized) {
+            if (maintenanceFailures[currentMaintainer] > maintainerCut) {
+                maintenanceFailures[currentMaintainer] -= maintainerCut;
+            } else {
+                maintenanceFailures[currentMaintainer] = 0;
+            }
+        } else {
+            maintenanceFailures[currentMaintainer] += maintainerCut;
+        }
     }
 }
-
-// TODO penalize repeat offenders, i.e. delinquent liquidators

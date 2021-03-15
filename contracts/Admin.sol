@@ -16,15 +16,13 @@ contract Admin is RoleAware, Ownable {
     uint256 feesPer10k;
     mapping(address => uint256) public collectedFees;
 
-    uint256 public maintenanceStakePerBlock;
+    uint256 public maintenanceStakePerBlock = 10 ether;
     mapping(address => address) public nextMaintenanceStaker;
     mapping(address => mapping(address => bool)) public maintenanceDelegateTo;
     address public currentMaintenanceStaker;
     address public prevMaintenanceStaker;
     uint256 public currentMaintenanceStakerStartBlock;
     address public lockedMFI;
-
-    // TODO initialize the above
 
     constructor(
         uint256 _feesPer10k,
@@ -51,6 +49,7 @@ contract Admin is RoleAware, Ownable {
         currentMaintenanceStaker = lockedMFI;
         prevMaintenanceStaker = lockedMFI;
         maintenanceDelegateTo[lockedMFI][lockedMFIDelegate];
+        currentMaintenanceStakerStartBlock = block.number;
     }
 
     function setMaintenanceStakePerBlock(uint256 amount) external onlyOwner {
@@ -150,21 +149,27 @@ contract Admin is RoleAware, Ownable {
         }
     }
 
-    function getMaintenanceStakerStake() public view returns (uint256) {
-        if (currentMaintenanceStaker == lockedMFI) {
-            return IERC20(MFI).balanceOf(lockedMFI);
+    function getMaintenanceStakerStake(address staker)
+        public
+        view
+        returns (uint256)
+    {
+        if (staker == lockedMFI) {
+            return IERC20(MFI).balanceOf(lockedMFI) / 2;
         } else {
-            return stakes[currentMaintenanceStaker];
+            return stakes[staker];
         }
     }
 
     function getUpdatedCurrentStaker() public returns (address) {
+        uint256 currentStake =
+            getMaintenanceStakerStake(currentMaintenanceStaker);
         while (
             (block.number - currentMaintenanceStakerStartBlock) *
                 maintenanceStakePerBlock >=
-            getMaintenanceStakerStake()
+            currentStake
         ) {
-            if (maintenanceStakePerBlock > getMaintenanceStakerStake()) {
+            if (maintenanceStakePerBlock > currentStake) {
                 // delete current from daisy chain
                 address nextOne =
                     nextMaintenanceStaker[currentMaintenanceStaker];
@@ -176,16 +181,43 @@ contract Admin is RoleAware, Ownable {
                 currentMaintenanceStakerStartBlock +=
                     stakes[currentMaintenanceStaker] /
                     maintenanceStakePerBlock;
+
                 prevMaintenanceStaker = currentMaintenanceStaker;
                 currentMaintenanceStaker = nextMaintenanceStaker[
                     currentMaintenanceStaker
                 ];
             }
+            currentStake = getMaintenanceStakerStake(currentMaintenanceStaker);
         }
         return currentMaintenanceStaker;
     }
 
-    // TODO rethink authorization
+    function viewCurrentMaintenanceStaker()
+        public
+        view
+        returns (address staker, uint256 startBlock)
+    {
+        staker = currentMaintenanceStaker;
+        uint256 currentStake = getMaintenanceStakerStake(staker);
+        startBlock = currentMaintenanceStakerStartBlock;
+        while (
+            (block.number - startBlock) * maintenanceStakePerBlock >=
+            currentStake
+        ) {
+            if (maintenanceStakePerBlock > currentStake) {
+                // skip
+                staker = nextMaintenanceStaker[staker];
+                currentStake = getMaintenanceStakerStake(staker);
+            } else {
+                startBlock +=
+                    stakes[currentMaintenanceStaker] /
+                    maintenanceStakePerBlock;
+                staker = nextMaintenanceStaker[staker];
+                currentStake = getMaintenanceStakerStake(staker);
+            }
+        }
+    }
+
     function addDelegate(address forStaker, address delegate) external {
         require(
             msg.sender == forStaker ||

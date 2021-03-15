@@ -143,9 +143,9 @@ abstract contract CrossMarginAccounts is RoleAware, PriceAware {
         uint256 loan = loanInPeg(account, false);
         uint256 holdings = holdingsInPeg(account, false);
         // The following condition should hold:
-        // holdings / loan >= (leverage + 1) / leverage
+        // holdings / loan >= leverage / (leverage - 1)
         // =>
-        return holdings * leverage >= loan * (leverage + 1);
+        return holdings * (leverage - 1) >= loan * leverage;
     }
 
     /// @dev internal function adjusting holding and borrow balances when debt extinguished
@@ -296,7 +296,6 @@ abstract contract CrossMarginAccounts is RoleAware, PriceAware {
         addHolding(account, toToken, boughtAmount);
     }
 
-    // TODO effect on total caps!
     /// sets borrow and holding to zero
     function deleteAccount(CrossMarginAccount storage account) internal {
         for (
