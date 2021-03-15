@@ -5,6 +5,7 @@ import "./CrossMarginAccounts.sol";
 
 abstract contract CrossMarginLiquidation is CrossMarginAccounts {
     event LiquidationShortfall(uint256 amount);
+    event AccountLiquidated(address account);
 
     struct Liquidation {
         uint256 buy;
@@ -28,6 +29,15 @@ abstract contract CrossMarginLiquidation is CrossMarginAccounts {
     uint256 public avgLiquidationPerBlock = 10;
 
     uint256 public liqStakeAttackWindow = 5;
+    uint256 public MAINTAINER_CUT_PERCENT = 5;
+
+    function setLiqStakeAttackWindow(uint256 window) external onlyOwner {
+        liqStakeAttackWindow = window;
+    }
+
+    function setMaintainerCutPercent(uint256 cut) external onlyOwner {
+        MAINTAINER_CUT_PERCENT = cut;
+    }
 
     function calcLiquidationAmounts(
         address[] memory liquidationCandidates,
@@ -200,8 +210,10 @@ abstract contract CrossMarginLiquidation is CrossMarginAccounts {
         uint256 sale2pegAmount = liquidateToPeg();
         uint256 peg2targetCost = liquidateFromPeg();
 
-        // TODO include the maintainer cut?
-        if (peg2targetCost > sale2pegAmount) {
+        // this may be a bit imprecise, since individual shortfalls may be obscured
+        // by overall returns and the maintainer cut is taken out of the net total,
+        // but it gives us the general picture
+        if (peg2targetCost * (100 + MAINTAINER_CUT_PERCENT) / 100 > sale2pegAmount) {
             emit LiquidationShortfall(peg2targetCost - sale2pegAmount);
         }
 
@@ -225,7 +237,7 @@ abstract contract CrossMarginLiquidation is CrossMarginAccounts {
             uint256 holdingsValue = holdingsInPeg(account, true);
             uint256 borrowValue = loanInPeg(account, true);
             // 5% of value borrowed
-            uint256 maintainerCut4Account = (borrowValue * 5) / 100;
+            uint256 maintainerCut4Account = (borrowValue * MAINTAINER_CUT_PERCENT) / 100;
             maintainerCut += maintainerCut4Account;
 
             if (!isAuthorized) {
@@ -251,6 +263,7 @@ abstract contract CrossMarginLiquidation is CrossMarginAccounts {
                 );
             }
 
+            emit AccountLiquidated(traderAddress);
             deleteAccount(account);
         }
 
