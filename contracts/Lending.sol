@@ -17,6 +17,8 @@ contract Lending is
     /// @dev IDs for all bonds held by an address
     mapping(address => uint256[]) public bondIds;
 
+    uint256 public borrowingFactorPercent = 200;
+
     constructor(address _roles) RoleAware(_roles) Ownable() {
         uint256 APR = 899;
         maxHourlyYieldFP = (FP32 * APR) / 100 / (24 * 365);
@@ -30,14 +32,22 @@ contract Lending is
         uint256 balance,
         address token,
         uint256 yieldQuotientFP
-    ) external returns (uint256) {
+    ) external returns (uint256 balanceWithInterest) {
         YieldAccumulator storage yA =
             getUpdatedCumulativeYieldFP(
                 token,
                 borrowYieldAccumulators,
                 block.timestamp
             );
-        return applyInterest(balance, yA.accumulatorFP, yieldQuotientFP);
+        balanceWithInterest = applyInterest(
+            balance,
+            yA.accumulatorFP,
+            yieldQuotientFP
+        );
+        borrowYieldAccumulators[token].hourlyYieldFP =
+            (borrowingFactorPercent *
+                hourlyBondYieldAccumulators[token].hourlyYieldFP) /
+            100;
     }
 
     /// @dev view function to get current borrowing interest

@@ -296,7 +296,6 @@ abstract contract CrossMarginAccounts is RoleAware, PriceAware {
         addHolding(account, toToken, boughtAmount);
     }
 
-    // TODO effect on total caps!
     /// sets borrow and holding to zero
     function deleteAccount(CrossMarginAccount storage account) internal {
         for (
