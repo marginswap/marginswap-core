@@ -117,6 +117,11 @@ contract CrossMarginTrading is CrossMarginLiquidation, IMarginTrading {
             "To prevent attacks you must wait until your cooling off period is over to withdraw"
         );
 
+        require(
+            totalLong[withdrawToken] >= withdrawAmount,
+            "Not enough long to withdraw"
+        );
+
         totalLong[withdrawToken] -= withdrawAmount;
         // throws on underflow
         account.holdings[withdrawToken] =
