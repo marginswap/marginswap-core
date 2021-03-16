@@ -16,6 +16,8 @@ struct HourlyBond {
     uint256 moduloHour;
 }
 
+/// @dev Here we offer subscriptions to auto-renewing hourly bonds
+/// Funds are locked in for an 50 minutes per hour, while interest rates float
 abstract contract HourlyBondSubscriptionLending is BaseLending {
     uint256 withdrawalWindow = 10 minutes;
     // token => holder => bond record

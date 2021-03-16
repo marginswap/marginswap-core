@@ -7,6 +7,8 @@ import "./RoleAware.sol";
 import "./Fund.sol";
 import "./CrossMarginTrading.sol";
 
+/// @dev Here we support staking for MFI incentives as well as
+/// staking to perform the maintenance role.
 contract Admin is RoleAware, Ownable {
     address MFI;
     mapping(address => uint256) public stakes;

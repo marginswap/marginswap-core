@@ -3,6 +3,8 @@ pragma solidity ^0.8.0;
 
 import "./Roles.sol";
 
+/// Main characters are for service discovery
+/// Whereas roles are for access control
 contract RoleAware {
     uint16 public constant WITHDRAWER = 1;
     uint16 public constant MARGIN_CALLER = 2;

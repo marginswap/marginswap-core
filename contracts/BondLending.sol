@@ -13,6 +13,12 @@ struct Bond {
     uint256 yieldFP;
 }
 
+/// @dev Lending for fixed runtime, fixed interest
+/// Lenders can pick their own bond maturity date --
+/// In order to manage interest rates for the different
+/// maturities and create a yield curve we bucket
+/// bond runtimes into weighted baskets and adjust
+/// rates individually per bucket, based on supply and demand.
 abstract contract BondLending is BaseLending {
     uint256 public minRuntime = 30 days;
     uint256 public maxRuntime = 365 days;

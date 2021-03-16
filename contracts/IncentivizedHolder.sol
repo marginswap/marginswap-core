@@ -4,6 +4,8 @@ pragma solidity ^0.8.0;
 import "./IncentiveDistribution.sol";
 import "./RoleAware.sol";
 
+/// @dev helper class to facilitate staking and unstaking
+/// within the incentive system
 abstract contract IncentivizedHolder is RoleAware {
     // here we cache incentive tranches to save on a bit of gas
     mapping(address => uint8) public incentiveTranches;

@@ -8,6 +8,9 @@ import "./CrossMarginTrading.sol";
 import "./MarginRouter.sol";
 import "../interfaces/IDelegateOwner.sol";
 
+/// @dev A helper contract to manage the initialization of new tokens
+/// across different parts of the protocol, as well as changing some
+/// parameters throughout the lifetime of a token
 contract TokenAdmin is RoleAware, Ownable, IDelegateOwner {
     uint256 public totalLendingTargetPortion;
     uint256 public totalBorrowingTargetPortion;

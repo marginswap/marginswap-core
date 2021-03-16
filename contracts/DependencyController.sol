@@ -5,6 +5,9 @@ import "./RoleAware.sol";
 import "../interfaces/IExecutor.sol";
 import "../interfaces/IDelegateOwner.sol";
 
+/// @dev Provides a single point of reference to verify ownership integrity
+/// within our system as well as performing cache invalidation for
+/// roles and inter-contract relationships
 contract DependencyController is RoleAware, Ownable, IDelegateOwner {
     constructor(address _roles) RoleAware(_roles) Ownable() {}
 
