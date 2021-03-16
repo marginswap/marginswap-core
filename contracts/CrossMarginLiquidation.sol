@@ -3,6 +3,12 @@ pragma solidity ^0.8.0;
 
 import "./CrossMarginAccounts.sol";
 
+/// @dev Handles liquidation of accounts below maintenance threshold
+/// Liquidation can be called by the authorized staker, as determined
+/// in the Admin contract.
+/// If the authorized staker is delinquent, other participants can jump
+/// in and attack, taking their fees and potentially even their stake,
+/// depending how delinquent the responsible authorized staker is.
 abstract contract CrossMarginLiquidation is CrossMarginAccounts {
     event LiquidationShortfall(uint256 amount);
     event AccountLiquidated(address account);
@@ -13,6 +19,7 @@ abstract contract CrossMarginLiquidation is CrossMarginAccounts {
         uint256 blockNum;
     }
 
+    /// record kept around until a stake attacker can claim their reward
     struct AccountLiqRecord {
         uint256 blockNum;
         address loser;
@@ -46,6 +53,13 @@ abstract contract CrossMarginLiquidation is CrossMarginAccounts {
         MAINTAINER_CUT_PERCENT = cut;
     }
 
+    /// @dev calcLiquidationamounts does a number of tasks in this contract
+    /// and some of them are not straightforward.
+    /// First of all it aggregates liquidation amounts in storage (not in memory)
+    /// owing to the fact that arrays can't be pushed to and hash maps don't
+    /// exist in memory.
+    /// Then it also returns any stake attack funds if the stake was unsuccessful
+    /// (i.e. current caller is authorized). Also see context below.
     function calcLiquidationAmounts(
         address[] memory liquidationCandidates,
         bool isAuthorized
@@ -179,8 +193,10 @@ abstract contract CrossMarginLiquidation is CrossMarginAccounts {
                     buyToken,
                     liq.buy - liq.sell
                 );
+                delete liquidationAmounts[buyToken];
             }
         }
+        delete buyTokens;
     }
 
     function liquidateToPeg() internal returns (uint256 pegAmount) {
@@ -194,8 +210,10 @@ abstract contract CrossMarginLiquidation is CrossMarginAccounts {
             if (liq.sell > liq.buy) {
                 uint256 sellAmount = liq.sell - liq.buy;
                 pegAmount += PriceAware.liquidateToPeg(token, sellAmount);
+                delete liquidationAmounts[token];
             }
         }
+        delete sellTokens;
     }
 
     function maintainerIsFailing() internal view returns (bool) {
@@ -214,7 +232,7 @@ abstract contract CrossMarginLiquidation is CrossMarginAccounts {
         bool isAuthorized = Admin(admin()).isAuthorizedStaker(msg.sender);
         bool canTakeNow = isAuthorized || maintainerIsFailing();
 
-        // calcLiquidationAmounts does a lot of the work her
+        // calcLiquidationAmounts does a lot of the work here
         // * aggregates both sell and buy side targets to be liquidated
         // * returns attacker cuts to them
         // * aggregates any returned fees from unauthorized (attacking) attempts
