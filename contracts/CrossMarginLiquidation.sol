@@ -88,11 +88,14 @@ abstract contract CrossMarginLiquidation is CrossMarginAccounts {
                     address token = account.borrowTokens[buyIdx];
                     Liquidation storage liquidation = liquidationAmounts[token];
 
-                    uint256 yield =
-                        Lending(lending()).viewBorrowingYieldFP(token);
                     uint256 loanAmount =
-                        (account.borrowed[token] * yield) /
-                            account.borrowedYieldQuotientsFP[token];
+                        Lending(lending()).applyBorrowInterest(
+                            account.borrowed[token],
+                            token,
+                            account.borrowedYieldQuotientsFP[token]
+                        );
+
+                    Lending(lending()).payOff(token, loanAmount);
 
                     if (liquidation.blockNum != block.number) {
                         liquidation.sell = 0;

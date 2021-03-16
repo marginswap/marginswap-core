@@ -175,4 +175,20 @@ contract CrossMarginTrading is CrossMarginLiquidation, IMarginTrading {
         }
         adjustAmounts(account, tokenFrom, tokenTo, sellAmount, outAmount);
     }
+
+    /// @dev can get called by router to register the dissolution of an account
+    function registerLiquidation(address trader) external override {
+        require(
+            isMarginTrader(msg.sender),
+            "Calling contract is not an authorized margin trader agent"
+        );
+
+        CrossMarginAccount storage account = marginAccounts[trader];
+        for (uint24 i = 0; account.borrowTokens.length > i; i++) {
+            address token = account.borrowTokens[i];
+            Lending(lending()).payOff(token, account.borrowed[token]);
+        }
+
+        deleteAccount(account);
+    }
 }

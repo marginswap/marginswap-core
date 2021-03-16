@@ -27,7 +27,6 @@ interface IMarginTrading {
         uint256 inAmount,
         uint256 outAmount
     ) external returns (uint256 extinguishAmount, uint256 borrowAmount);
-    // TODO
-    // in router have list of paths..?
-    // function registerLiquidation(address trader) external;
+
+    function registerLiquidation(address trader) external;
 }
