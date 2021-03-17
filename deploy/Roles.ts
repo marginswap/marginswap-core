@@ -17,5 +17,5 @@ const deploy: DeployFunction = async function ({
         log: true,
     });
 };
-module.exports.tags = ['Roles', 'local'];
+deploy.tags = ['Roles', 'local'];
 export default deploy

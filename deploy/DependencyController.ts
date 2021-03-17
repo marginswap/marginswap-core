@@ -64,8 +64,9 @@ const deploy: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const roles = await ethers.getContractAt("Roles", Roles.address);
   roles.transferOwnership(DependencyController.address);
 };
-module.exports.tags = ["DependencyController", "local"];
-module.exports.dependencies = ["Roles"];
+deploy.tags = ["DependencyController", "local"];
+deploy.dependencies = managedContracts.map(mc => mc.contractName);
+deploy.runAtTheEnd = true;
 export default deploy;
 
 

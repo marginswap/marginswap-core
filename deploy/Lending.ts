@@ -17,6 +17,6 @@ const deploy: DeployFunction = async function ({
         args: [Roles.address],
     });
 };
-module.exports.tags = ["Lending", "local"];
-module.exports.dependencies = ["Roles"];
+deploy.tags = ["Lending", "local"];
+deploy.dependencies = ["Roles"];
 export default deploy;

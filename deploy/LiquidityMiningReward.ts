@@ -31,6 +31,6 @@ const deploy: DeployFunction = async function ({
     )
 };
 
-module.exports.tags = ['LiquidityMiningReward', 'local'];
-module.exports.dependencies = ['IncentiveDistribution'];
+deploy.tags = ['LiquidityMiningReward', 'local'];
+deploy.dependencies = ['IncentiveDistribution'];
 export default deploy
