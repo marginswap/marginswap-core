@@ -20,6 +20,6 @@ const deploy: DeployFunction = async function ({
         log: true,
     });
 };
-module.exports.tags = ['Admin', 'local'];
-module.exports.dependencies = ["Roles"];
+deploy.tags = ['Admin', 'local'];
+deploy.dependencies = ["Roles"];
 export default deploy

@@ -19,6 +19,6 @@ const deploy: DeployFunction = async function ({
     args: [USDT_ADDRESS, Roles.address],
   });
 };
-module.exports.tags = ["CrossMarginTrading", "local"];
-module.exports.dependencies = ["Roles"];
+deploy.tags = ["CrossMarginTrading", "local"];
+deploy.dependencies = ["Roles"];
 export default deploy;

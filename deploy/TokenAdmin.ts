@@ -19,6 +19,6 @@ const deploy: DeployFunction = async function ({
         args: [lendingTargetPortion, borrowingTargetPortion, Roles.address],
     });
 };
-module.exports.tags = ["TokenAdmin", "local"];
-module.exports.dependencies = ["Roles"];
+deploy.tags = ["TokenAdmin", "local"];
+deploy.dependencies = ["Roles"];
 export default deploy;

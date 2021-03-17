@@ -29,6 +29,6 @@ const deploy: DeployFunction = async function ({
   await roles.giveRole(TOKEN_ACTIVATOR, deployer);
   await fund.updateRoleCache(TOKEN_ACTIVATOR, deployer);
 };
-module.exports.tags = ["Fund"];
-module.exports.dependencies = ["Roles", "RoleAware"];
+deploy.tags = ["Fund"];
+deploy.dependencies = ["Roles", "RoleAware"];
 export default deploy;

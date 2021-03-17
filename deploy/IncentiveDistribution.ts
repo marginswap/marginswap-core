@@ -27,6 +27,6 @@ const deploy: DeployFunction = async function ({
     await fund.activateToken(MFI_ADDRESS);
 };
 
-module.exports.tags = ['IncentiveDistribution', 'local'];
-module.exports.dependencies = ['Roles', 'Fund'];
+deploy.tags = ['IncentiveDistribution', 'local'];
+deploy.dependencies = ['Roles', 'Fund'];
 export default deploy

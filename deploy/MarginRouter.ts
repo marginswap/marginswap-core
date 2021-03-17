@@ -17,6 +17,6 @@ const deploy: DeployFunction = async function ({
         args: [weth, Roles.address],
     });
 };
-module.exports.tags = ["MarginRouter", "local"];
-module.exports.dependencies = ["Roles"];
+deploy.tags = ["MarginRouter", "local"];
+deploy.dependencies = ["Roles"];
 export default deploy;
