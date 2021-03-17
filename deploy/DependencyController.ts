@@ -69,17 +69,17 @@ deploy.dependencies = managedContracts.map(mc => mc.contractName);
 deploy.runAtTheEnd = true;
 export default deploy;
 
-
 async function manage(hre: HardhatRuntimeEnvironment, dcAddress: string, mC: ManagedContract) {
   const contract = await hre.deployments.get(mC.contractName)
     .then(C => ethers.getContractAt(mC.contractName, C.address));
   const dC = await ethers.getContractAt("DependencyController", dcAddress);
 
-  const delegation = Promise
+  const delegation = await Promise
     .all((mC.ownAsDelegate || [])
       .map(async (property: string) => (await hre.deployments.get(property)).address));
 
-  await dC.manageContract(contract.address, mC.charactersPlayed, mC.rolesPlayed, delegation);
+  if (mC.contractName != "LiquidityMiningReward") {
+    await dC.manageContract(contract.address, mC.charactersPlayed, mC.rolesPlayed, delegation);
+  }
   await contract.transferOwnership(dC.address);
-
 }
