@@ -9,7 +9,36 @@ type ManagedContract = {
   ownAsDelegate?: string[];
 };
 
+const WITHDRAWER = 1;
+const MARGIN_CALLER = 2;
+const BORROWER = 3;
+const MARGIN_TRADER = 4;
+const FEE_SOURCE = 5;
+const LIQUIDATOR = 6;
+const AUTHORIZED_FUND_TRADER = 7;
+const INCENTIVE_REPORTER = 8;
+const TOKEN_ACTIVATOR = 9;
+const STAKE_PENALIZER = 10;
+
+const FUND = 101;
+const LENDING = 102;
+const ROUTER = 103;
+const MARGIN_TRADING = 104;
+const FEE_CONTROLLER = 105;
+const PRICE_CONTROLLER = 106;
+const ADMIN = 107;
+const INCENTIVE_DISTRIBUTION = 108;
+
 const managedContracts: ManagedContract[] = [
+  { contractName: "Roles", charactersPlayed: [], rolesPlayed: [] },
+  { contractName: "Admin", charactersPlayed: [], rolesPlayed: [] },
+  { contractName: "CrossMarginTrading", charactersPlayed: [], rolesPlayed: [] },
+  { contractName: "Fund", charactersPlayed: [], rolesPlayed: [TOKEN_ACTIVATOR] },
+  { contractName: "IncentiveDistribution", charactersPlayed: [], rolesPlayed: [] },
+  { contractName: "Lending", charactersPlayed: [], rolesPlayed: [] },
+  { contractName: "LiquidityMiningReward", charactersPlayed: [], rolesPlayed: [INCENTIVE_REPORTER] },
+  { contractName: "MarginRouter", charactersPlayed: [], rolesPlayed: [] },
+  { contractName: "TokenAdmin", charactersPlayed: [], rolesPlayed: [], ownAsDelegate: [] },
 ];
 
 const deploy: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
