@@ -30,15 +30,14 @@ const ADMIN = 107;
 const INCENTIVE_DISTRIBUTION = 108;
 
 const managedContracts: ManagedContract[] = [
-  { contractName: "Roles", charactersPlayed: [], rolesPlayed: [] },
   { contractName: "Admin", charactersPlayed: [], rolesPlayed: [] },
   { contractName: "CrossMarginTrading", charactersPlayed: [], rolesPlayed: [] },
-  { contractName: "Fund", charactersPlayed: [], rolesPlayed: [TOKEN_ACTIVATOR] },
+  { contractName: "Fund", charactersPlayed: [], rolesPlayed: [] },
   { contractName: "IncentiveDistribution", charactersPlayed: [], rolesPlayed: [] },
-  { contractName: "Lending", charactersPlayed: [], rolesPlayed: [] },
+  { contractName: "Lending", charactersPlayed: [], rolesPlayed: [LENDING] },
   { contractName: "LiquidityMiningReward", charactersPlayed: [], rolesPlayed: [INCENTIVE_REPORTER] },
   { contractName: "MarginRouter", charactersPlayed: [], rolesPlayed: [] },
-  { contractName: "TokenAdmin", charactersPlayed: [], rolesPlayed: [], ownAsDelegate: [] },
+  { contractName: "TokenAdmin", charactersPlayed: [], rolesPlayed: [TOKEN_ACTIVATOR], ownAsDelegate: ["IncentiveDistribution"] },
 ];
 
 const deploy: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
