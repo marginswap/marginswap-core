@@ -46,7 +46,11 @@ async function manage(hre: HardhatRuntimeEnvironment, dcAddress: string, mC: Man
     .then(C => ethers.getContractAt(mC.contractName, C.address));
   const dC = await ethers.getContractAt("DependencyController", dcAddress);
 
-  await dC.manageContract(contract.address, mC.charactersPlayed, mC.rolesPlayed, mC.ownAsDelegate || []);
+  const delegation = Promise
+    .all((mC.ownAsDelegate || [])
+      .map(async (property: string) => (await hre.deployments.get(property)).address));
+
+  await dC.manageContract(contract.address, mC.charactersPlayed, mC.rolesPlayed, delegation);
   await contract.transferOwnership(dC.address);
 
 }
