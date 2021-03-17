@@ -30,13 +30,13 @@ const ADMIN = 107;
 const INCENTIVE_DISTRIBUTION = 108;
 
 const managedContracts: ManagedContract[] = [
-  { contractName: "Admin", charactersPlayed: [], rolesPlayed: [] },
-  { contractName: "CrossMarginTrading", charactersPlayed: [], rolesPlayed: [] },
-  { contractName: "Fund", charactersPlayed: [], rolesPlayed: [] },
-  { contractName: "IncentiveDistribution", charactersPlayed: [], rolesPlayed: [] },
-  { contractName: "Lending", charactersPlayed: [], rolesPlayed: [LENDING] },
+  { contractName: "Admin", charactersPlayed: [ADMIN, FEE_CONTROLLER], rolesPlayed: [] },
+  { contractName: "CrossMarginTrading", charactersPlayed: [MARGIN_TRADING], rolesPlayed: [WITHDRAWER, AUTHORIZED_FUND_TRADER, STAKE_PENALIZER] },
+  { contractName: "Fund", charactersPlayed: [FUND], rolesPlayed: [] },
+  { contractName: "IncentiveDistribution", charactersPlayed: [INCENTIVE_DISTRIBUTION], rolesPlayed: [] },
+  { contractName: "Lending", charactersPlayed: [LENDING], rolesPlayed: [WITHDRAWER, INCENTIVE_REPORTER] },
   { contractName: "LiquidityMiningReward", charactersPlayed: [], rolesPlayed: [INCENTIVE_REPORTER] },
-  { contractName: "MarginRouter", charactersPlayed: [], rolesPlayed: [] },
+  { contractName: "MarginRouter", charactersPlayed: [ROUTER], rolesPlayed: [WITHDRAWER, MARGIN_TRADER, BORROWER, INCENTIVE_REPORTER] },
   { contractName: "TokenAdmin", charactersPlayed: [], rolesPlayed: [TOKEN_ACTIVATOR], ownAsDelegate: ["IncentiveDistribution"] },
 ];
 
