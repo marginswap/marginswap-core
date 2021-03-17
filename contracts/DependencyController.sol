@@ -159,7 +159,7 @@ contract DependencyController is RoleAware, Ownable, IDelegateOwner {
 
         // update this contract with all roles for all contracts we know about
         for (uint256 i = 0; allRoles.length > i; i++) {
-            for (uint256 j = 0; managedContracts.length > i; i++) {
+            for (uint256 j = 0; managedContracts.length > j; j++) {
                 RoleAware(contr).updateRoleCache(
                     allRoles[i],
                     managedContracts[j]

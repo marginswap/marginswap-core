@@ -78,8 +78,8 @@ async function manage(hre: HardhatRuntimeEnvironment, dcAddress: string, mC: Man
     .all((mC.ownAsDelegate || [])
       .map(async (property: string) => (await hre.deployments.get(property)).address));
 
+  await contract.transferOwnership(dC.address);
   if (mC.contractName != "LiquidityMiningReward") {
     await dC.manageContract(contract.address, mC.charactersPlayed, mC.rolesPlayed, delegation);
   }
-  await contract.transferOwnership(dC.address);
 }
