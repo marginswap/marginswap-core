@@ -21,6 +21,7 @@ const deploy: DeployFunction = async function ({
   const Fund = await deploy("Fund", {
     from: deployer,
     args: [WETH, roles.address],
+    log: true,
     skipIfAlreadyDeployed: true,
   });
 };

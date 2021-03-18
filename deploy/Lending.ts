@@ -15,6 +15,7 @@ const deploy: DeployFunction = async function ({
     await deploy("Lending", {
         from: deployer,
         args: [Roles.address],
+        log: true,
         skipIfAlreadyDeployed: true,
     });
 };

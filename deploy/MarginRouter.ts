@@ -15,6 +15,7 @@ const deploy: DeployFunction = async function ({
     await deploy("MarginRouter", {
         from: deployer,
         args: [weth, Roles.address],
+        log: true,
         skipIfAlreadyDeployed: true,
     });
 };

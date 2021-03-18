@@ -17,6 +17,7 @@ const deploy: DeployFunction = async function ({
     await deploy("TokenAdmin", {
         from: deployer,
         args: [lendingTargetPortion, borrowingTargetPortion, Roles.address],
+        log: true,
         skipIfAlreadyDeployed: true,
     });
 };

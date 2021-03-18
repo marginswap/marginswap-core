@@ -55,6 +55,7 @@ const deploy: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const DependencyController = await deploy("DependencyController", {
     from: deployer,
     args: [Roles.address],
+    log: true,
     skipIfAlreadyDeployed: true,
   });
 

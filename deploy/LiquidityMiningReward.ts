@@ -22,6 +22,7 @@ const deploy: DeployFunction = async function ({
     const liquidityMiningReward = await deploy('LiquidityMiningReward', {
         from: deployer,
         args: [incentiveDistribution.address, liquidityToken, nowSeconds],
+        log: true,
         skipIfAlreadyDeployed: true,
     });
 
