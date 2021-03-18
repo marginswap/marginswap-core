@@ -21,13 +21,8 @@ const deploy: DeployFunction = async function ({
   const Fund = await deploy("Fund", {
     from: deployer,
     args: [WETH, roles.address],
+    skipIfAlreadyDeployed: true,
   });
-  const fund = await ethers.getContractAt("Fund", Fund.address);
-
-  await roles.setMainCharacter(FUND, fund.address);
-  // TODO ultimately this role goes to tokenadmin
-  await roles.giveRole(TOKEN_ACTIVATOR, deployer);
-  await fund.updateRoleCache(TOKEN_ACTIVATOR, deployer);
 };
 deploy.tags = ["Fund"];
 deploy.dependencies = ["Roles", "RoleAware"];

@@ -18,6 +18,7 @@ const deploy: DeployFunction = async function ({
         from: deployer,
         args: [FEES_PER_10K, mfiAddress, lockedMfi, lockedMfiDelegate, Roles.address],
         log: true,
+        skipIfAlreadyDeployed: true,
     });
 };
 deploy.tags = ['Admin', 'local'];

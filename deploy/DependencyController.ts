@@ -1,6 +1,6 @@
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { DeployFunction } from "hardhat-deploy/types";
-import { ethers } from 'hardhat';
+import { ethers, network } from 'hardhat';
 
 type ManagedContract = {
   contractName: string,
@@ -55,19 +55,32 @@ const deploy: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const DependencyController = await deploy("DependencyController", {
     from: deployer,
     args: [Roles.address],
+    skipIfAlreadyDeployed: true,
   });
 
-  managedContracts.forEach((mC) => {
-    manage(hre, DependencyController.address, mC);
-  });
+  if (DependencyController.newlyDeployed) {
+    const roles = await ethers.getContractAt("Roles", Roles.address);
+    await roles.transferOwnership(DependencyController.address);
+    const IncentiveDistribution = await deployments.get("IncentiveDistribution");
+    const incentiveDistribution = await ethers
+      .getContractAt("IncentiveDistribution", IncentiveDistribution.address);
+    await incentiveDistribution.transferOwnership(DependencyController.address);
 
-  const roles = await ethers.getContractAt("Roles", Roles.address);
-  roles.transferOwnership(DependencyController.address);
+    for (const mC of managedContracts) {
+      await manage(hre, DependencyController.address, mC);
+    }
+
+    if (!network.live) {
+      const dC = await ethers.getContractAt("DependencyController", DependencyController.address);
+      await dC.relinquishOwnership(roles.address, deployer);
+    }
+  }
 };
 deploy.tags = ["DependencyController", "local"];
 deploy.dependencies = managedContracts.map(mc => mc.contractName);
 deploy.runAtTheEnd = true;
 export default deploy;
+
 
 async function manage(hre: HardhatRuntimeEnvironment, dcAddress: string, mC: ManagedContract) {
   const contract = await hre.deployments.get(mC.contractName)
@@ -78,7 +91,9 @@ async function manage(hre: HardhatRuntimeEnvironment, dcAddress: string, mC: Man
     .all((mC.ownAsDelegate || [])
       .map(async (property: string) => (await hre.deployments.get(property)).address));
 
-  await contract.transferOwnership(dC.address);
+  if (network.live) {
+    await contract.transferOwnership(dC.address);
+  }
   if (mC.contractName != "LiquidityMiningReward") {
     await dC.manageContract(contract.address, mC.charactersPlayed, mC.rolesPlayed, delegation);
   }

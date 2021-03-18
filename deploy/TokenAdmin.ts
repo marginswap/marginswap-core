@@ -17,6 +17,7 @@ const deploy: DeployFunction = async function ({
     await deploy("TokenAdmin", {
         from: deployer,
         args: [lendingTargetPortion, borrowingTargetPortion, Roles.address],
+        skipIfAlreadyDeployed: true,
     });
 };
 deploy.tags = ["TokenAdmin", "local"];

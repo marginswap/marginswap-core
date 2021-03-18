@@ -3,6 +3,7 @@ import { DeployFunction } from 'hardhat-deploy/types';
 const { ethers } = require('hardhat');
 
 const MFI_ADDRESS = "0xAa4e3edb11AFa93c41db59842b29de64b72E355B";
+const TOKEN_ACTIVATOR = 9;
 
 const deploy: DeployFunction = async function ({
     getNamedAccounts,
@@ -16,15 +17,20 @@ const deploy: DeployFunction = async function ({
     const roles = await deployments.get("Roles")
         .then(Roles => ethers.getContractAt("Roles", Roles.address));
 
-    await deploy('IncentiveDistribution', {
+    const deployRecord = await deploy('IncentiveDistribution', {
         from: deployer,
-        args: [MFI_ADDRESS, 4000, roles.address]
+        args: [MFI_ADDRESS, 4000, roles.address],
+        skipIfAlreadyDeployed: true,
     });
-
-    const fund = await deployments.get("Fund")
-        .then(Fund => ethers.getContractAt("Fund", Fund.address));
-
-    await fund.activateToken(MFI_ADDRESS);
+    
+    if (deployRecord.newlyDeployed) {
+        const fund = await deployments.get("Fund")
+            .then(Fund => ethers.getContractAt("Fund", Fund.address));
+        await roles.giveRole(TOKEN_ACTIVATOR, deployer);
+        await fund.updateRoleCache(TOKEN_ACTIVATOR, deployer);
+    
+        await fund.activateToken(MFI_ADDRESS);
+    }
 };
 
 deploy.tags = ['IncentiveDistribution', 'local'];
