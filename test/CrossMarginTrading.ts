@@ -24,22 +24,19 @@ describe("CrossMarginTrading.getHoldingAmount", function () {
     expect(holdingAmounts).to.have.property("holdingAmounts").with.lengthOf(0);
     expect(holdingAmounts).to.have.property("holdingTokens").with.lengthOf(0);
   });
+});
 
-  it("Should handle deposits", async () => {
+describe("CrossMarginTrading.registerDeposit", function () {
+  beforeEach(async () => {
+    await deployments.fixture();
+  });
+  it("Should revert if cap would be exceeded", async () => {
     const roles = await deployments
       .get("Roles")
       .then((Roles) => ethers.getContractAt("Roles", Roles.address));
     const CrossMarginTradingTest = await ethers.getContractFactory("CrossMarginTradingTest");
-
     const crossMarginTradingTest = await CrossMarginTradingTest.deploy(roles.address);
-    // const CrossMarginTrading = await deployments.get("CrossMarginTrading");
-    // const crossMarginTrading = await ethers.getContractAt(
-    //   "CrossMarginTrading",
-    //   CrossMarginTrading.address
-    // );
-
     const { deployer } = await getNamedAccounts();
-
 
     await roles.giveRole(MARGIN_TRADER, deployer);
     crossMarginTradingTest.updateRoleCache(MARGIN_TRADER, deployer);
@@ -47,25 +44,56 @@ describe("CrossMarginTrading.getHoldingAmount", function () {
     // exceeding cap
     expect(crossMarginTradingTest.registerDeposit(ADDRESS_ONE, ADDRESS_ONE, 1000))
       .to.be.reverted;
+  });
+
+  it("Should accept deposits under cap", async () => {
+    const roles = await deployments
+      .get("Roles")
+      .then((Roles) => ethers.getContractAt("Roles", Roles.address));
+    const CrossMarginTradingTest = await ethers.getContractFactory("CrossMarginTradingTest");
+    const crossMarginTradingTest = await CrossMarginTradingTest.deploy(roles.address);
+    const { deployer } = await getNamedAccounts();
 
     roles.giveRole(TOKEN_ACTIVATOR, deployer);
+    roles.giveRole(MARGIN_TRADER, deployer);
+    crossMarginTradingTest.updateRoleCache(MARGIN_TRADER, deployer);
     crossMarginTradingTest.updateRoleCache(TOKEN_ACTIVATOR, deployer);
     crossMarginTradingTest.setTokenCap(ADDRESS_ONE, 100000000);
 
-    await crossMarginTradingTest.registerDeposit(ADDRESS_ONE, ADDRESS_ONE, 1000);
 
-    let holdingAmounts = await crossMarginTradingTest.getHoldingAmounts(
+    let holdingAmountsBefore = await crossMarginTradingTest.getHoldingAmounts(
+      ADDRESS_ONE
+    );
+    await crossMarginTradingTest.registerDeposit(ADDRESS_ONE, ADDRESS_ONE, 1000);
+    let holdingAmountsAfter = await crossMarginTradingTest.getHoldingAmounts(
       ADDRESS_ONE
     );
 
-    expect(holdingAmounts.holdingAmounts[0]).to.equal(1000);
-    expect(holdingAmounts.holdingTokens[0]).to.equal(ADDRESS_ONE);
+    expect(holdingAmountsBefore).not.to.equal(holdingAmountsAfter);
+  });
+
+  it("Should accept withdrawals", async () => {
+    const roles = await deployments
+      .get("Roles")
+      .then((Roles) => ethers.getContractAt("Roles", Roles.address));
+    const { deployer } = await getNamedAccounts();
+    const CrossMarginTradingTest = await ethers.getContractFactory("CrossMarginTradingTest");
+    const crossMarginTradingTest = await CrossMarginTradingTest.deploy(roles.address);
+
+    roles.giveRole(TOKEN_ACTIVATOR, deployer);
+    roles.giveRole(MARGIN_TRADER, deployer);
+    crossMarginTradingTest.updateRoleCache(TOKEN_ACTIVATOR, deployer);
+    crossMarginTradingTest.updateRoleCache(MARGIN_TRADER, deployer);
+
+    crossMarginTradingTest.setTokenCap(ADDRESS_ONE, 100000000);
+    crossMarginTradingTest.setLeverage(3);
+    await crossMarginTradingTest.registerDeposit(ADDRESS_ONE, ADDRESS_ONE, 1000);
 
     await increaseBlocks();
 
     await crossMarginTradingTest.registerWithdrawal(ADDRESS_ONE, ADDRESS_ONE, 1000);
 
-    holdingAmounts = await crossMarginTradingTest.getHoldingAmounts(ADDRESS_ONE);
+    const holdingAmounts = await crossMarginTradingTest.getHoldingAmounts(ADDRESS_ONE);
 
     expect(holdingAmounts.holdingAmounts[0]).to.equal(0);
 
