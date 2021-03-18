@@ -21,7 +21,8 @@ const deploy: DeployFunction = async function ({
 
     const liquidityMiningReward = await deploy('LiquidityMiningReward', {
         from: deployer,
-        args: [incentiveDistribution.address, liquidityToken, nowSeconds]
+        args: [incentiveDistribution.address, liquidityToken, nowSeconds],
+        skipIfAlreadyDeployed: true,
     });
 
     roles.giveRole(INCENTIVE_REPORTER, liquidityMiningReward.address)
