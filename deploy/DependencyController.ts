@@ -55,25 +55,31 @@ const deploy: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const DependencyController = await deploy("DependencyController", {
     from: deployer,
     args: [Roles.address],
+    log: true,
     skipIfAlreadyDeployed: true,
   });
 
+  const roles = await ethers.getContractAt("Roles", Roles.address);
+
   if (DependencyController.newlyDeployed) {
-    const roles = await ethers.getContractAt("Roles", Roles.address);
-    await roles.transferOwnership(DependencyController.address);
+    let tx = await roles.transferOwnership(DependencyController.address);
+    console.log(`roles.transferOwnership tx: ${tx.hash}`);
+
     const IncentiveDistribution = await deployments.get("IncentiveDistribution");
     const incentiveDistribution = await ethers
       .getContractAt("IncentiveDistribution", IncentiveDistribution.address);
-    await incentiveDistribution.transferOwnership(DependencyController.address);
+    tx = await incentiveDistribution.transferOwnership(DependencyController.address);
+    console.log(`incentiveDistribution.transferOwnership tx: ${tx.hash}`);
+  }
 
-    for (const mC of managedContracts) {
-      await manage(hre, DependencyController.address, mC);
-    }
+  for (const mC of managedContracts) {
+    await manage(hre, DependencyController.address, mC);
+  }
 
-    if (!network.live) {
-      const dC = await ethers.getContractAt("DependencyController", DependencyController.address);
-      await dC.relinquishOwnership(roles.address, deployer);
-    }
+  if (!network.live) {
+    const dC = await ethers.getContractAt("DependencyController", DependencyController.address);
+    const tx = await dC.relinquishOwnership(roles.address, deployer);
+    console.log(`dependencyController.relinquishOwnership tx: ${tx.hash}`);
   }
 };
 deploy.tags = ["DependencyController", "local"];
@@ -85,16 +91,25 @@ export default deploy;
 async function manage(hre: HardhatRuntimeEnvironment, dcAddress: string, mC: ManagedContract) {
   const contract = await hre.deployments.get(mC.contractName)
     .then(C => ethers.getContractAt(mC.contractName, C.address));
+
   const dC = await ethers.getContractAt("DependencyController", dcAddress);
 
-  const delegation = await Promise
-    .all((mC.ownAsDelegate || [])
-      .map(async (property: string) => (await hre.deployments.get(property)).address));
+  const needsOwnershipUpdate = network.live && (await contract.owner()) != dC.address;
 
-  if (network.live) {
-    await contract.transferOwnership(dC.address);
+  if (needsOwnershipUpdate) {
+    const tx = await contract.transferOwnership(dC.address);
+    console.log(`${mC.contractName}.transferOwnership to dependencyController tx: ${tx.hash}`);
   }
-  if (mC.contractName != "LiquidityMiningReward") {
-    await dC.manageContract(contract.address, mC.charactersPlayed, mC.rolesPlayed, delegation);
+
+  const alreadyManaged = await dC.allManagedContracts();
+  if (!alreadyManaged.includes(contract.address)) {
+    const delegation = await Promise
+      .all((mC.ownAsDelegate || [])
+        .map(async (property: string) => (await hre.deployments.get(property)).address));
+
+    if (mC.contractName != "LiquidityMiningReward") {
+      const tx = await dC.manageContract(contract.address, mC.charactersPlayed, mC.rolesPlayed, delegation);
+      console.log(`dependencyController.manageContract(${mC.contractName}, ...) tx: ${tx.hash}`);
+    }
   }
 }

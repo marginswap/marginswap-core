@@ -17,6 +17,7 @@ const deploy: DeployFunction = async function ({
   await deploy("CrossMarginTrading", {
     from: deployer,
     args: [USDT_ADDRESS, Roles.address],
+    log: true,
     skipIfAlreadyDeployed: true,
   });
 };
