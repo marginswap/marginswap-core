@@ -3,6 +3,11 @@ import "@nomiclabs/hardhat-waffle";
 import * as fs from "fs";
 import "hardhat-deploy";
 import "hardhat-deploy-ethers";
+import { submitSources } from 'hardhat-deploy/dist/src/etherscan';
+import path from 'path';
+import { hrtime } from "node:process";
+import * as types from 'hardhat/internal/core/params/argumentTypes';
+
 
 // ChainIds
 const MAINNET = 1;
@@ -52,6 +57,50 @@ task("accounts", "Prints the list of accounts", async (args, hre) => {
     console.log(account.address);
   }
 });
+
+task('custom-etherscan', 'submit contract source code to etherscan')
+  .addOptionalParam('apikey', 'etherscan api key', undefined, types.string)
+  .addFlag(
+    'solcInput',
+    'fallback on solc-input (useful when etherscan fails on the minimum sources, see https://github.com/ethereum/solidity/issues/9573)'
+  )
+  .setAction(async (args, hre) => {
+    const etherscanApiKey = args.apiKey || process.env.ETHERSCAN_API_KEY;
+    if (!etherscanApiKey) {
+      throw new Error(
+        `No Etherscan API KEY provided. Set it through comand line option or by setting the "ETHERSCAN_API_KEY" env variable`
+      );
+    }
+
+    const solcInputsPath = path.join(
+      hre.config.paths.deployments,
+      hre.network.name,
+      'solcInputs'
+    );
+
+    // monkey-patch
+    const allAll = hre.deployments.all;
+    const foo = await allAll();
+    // filter out cross margin trading
+    hre.deployments.all = async () => (({ CrossMarginTrading, ...rest }) => rest)(await allAll());
+
+    await submitSources(hre, solcInputsPath, {
+      etherscanApiKey,
+      license: "GPL-2.0",
+      fallbackOnSolcInput: args.solcInput,
+      forceLicense: true,
+    });
+
+    hre.deployments.all = allAll;
+  });
+
+task('list-deployments', 'List all the deployed contracts for a network', async (args, hre) => {
+  console.log(`All deployments on ${hre.network.name}:`);
+  for (let [name, deployment] of Object.entries(await hre.deployments.all())) {
+    console.log(`${name}: ${deployment.address}`);
+  }
+});
+
 
 const homedir = require("os").homedir();
 const privateKey = fs
