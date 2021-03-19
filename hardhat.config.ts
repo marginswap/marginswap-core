@@ -94,6 +94,13 @@ task('custom-etherscan', 'submit contract source code to etherscan')
     hre.deployments.all = allAll;
   });
 
+task('list-deployments', 'List all the deployed contracts for a network', async (args, hre) => {
+  console.log(`All deployments on ${hre.network.name}:`);
+  for (let [name, deployment] of Object.entries(await hre.deployments.all())) {
+    console.log(`${name}: ${deployment.address}`);
+  }
+});
+
 
 const homedir = require("os").homedir();
 const privateKey = fs
