@@ -23,13 +23,13 @@ const deploy: DeployFunction = async function ({
         log: true,
         skipIfAlreadyDeployed: true,
     });
-    
+
     if (deployRecord.newlyDeployed) {
         const fund = await deployments.get("Fund")
             .then(Fund => ethers.getContractAt("Fund", Fund.address));
         await roles.giveRole(TOKEN_ACTIVATOR, deployer);
         await fund.updateRoleCache(TOKEN_ACTIVATOR, deployer);
-    
+
         await fund.activateToken(MFI_ADDRESS);
     }
 };

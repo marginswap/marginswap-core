@@ -36,7 +36,7 @@ abstract contract HourlyBondSubscriptionLending is BaseLending {
     function setHourlyYieldAPR(address token, uint256 aprPercent) external {
         require(
             isTokenActivator(msg.sender),
-            "not autorized to set hourly yield"
+            "not authorized to set hourly yield"
         );
         if (hourlyBondYieldAccumulators[token].accumulatorFP == 0) {
             hourlyBondYieldAccumulators[token] = YieldAccumulator({
@@ -86,6 +86,26 @@ abstract contract HourlyBondSubscriptionLending is BaseLending {
             uint256 deltaAmount = bond.amount - oldAmount;
             totalLending[token] += deltaAmount;
         }
+    }
+
+    // Retrieves bond balance for token and holder
+    function viewHourlyBondAmount(address token, address holder)
+        public
+        view
+        returns (uint256)
+    {
+        HourlyBond storage bond = hourlyBondAccounts[token][holder];
+        uint256 yieldQuotientFP = bond.yieldQuotientFP;
+        if (yieldQuotientFP > 0) {
+            return
+                bond.amount +
+                applyInterest(
+                    bond.amount,
+                    hourlyBondYieldAccumulators[token].accumulatorFP,
+                    yieldQuotientFP
+                );
+        }
+        return bond.amount + 0;
     }
 
     function _withdrawHourlyBond(
