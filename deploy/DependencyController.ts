@@ -1,7 +1,6 @@
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { DeployFunction } from "hardhat-deploy/types";
 import { ethers, network } from 'hardhat';
-import { Console } from "node:console";
 
 type ManagedContract = {
   contractName: string,
