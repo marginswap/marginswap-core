@@ -28,6 +28,7 @@ const FEE_CONTROLLER = 105;
 const PRICE_CONTROLLER = 106;
 const ADMIN = 107;
 const INCENTIVE_DISTRIBUTION = 108;
+const TOKEN_ADMIN = 109;
 
 const managedContracts: ManagedContract[] = [
   { contractName: "Admin", charactersPlayed: [ADMIN, FEE_CONTROLLER], rolesPlayed: [] },
@@ -37,7 +38,7 @@ const managedContracts: ManagedContract[] = [
   { contractName: "Lending", charactersPlayed: [LENDING], rolesPlayed: [WITHDRAWER, INCENTIVE_REPORTER] },
   { contractName: "LiquidityMiningReward", charactersPlayed: [], rolesPlayed: [INCENTIVE_REPORTER] },
   { contractName: "MarginRouter", charactersPlayed: [ROUTER], rolesPlayed: [WITHDRAWER, MARGIN_TRADER, BORROWER, INCENTIVE_REPORTER] },
-  { contractName: "TokenAdmin", charactersPlayed: [], rolesPlayed: [TOKEN_ACTIVATOR], ownAsDelegate: ["IncentiveDistribution"] },
+  { contractName: "TokenAdmin", charactersPlayed: [TOKEN_ADMIN], rolesPlayed: [TOKEN_ACTIVATOR], ownAsDelegate: ["IncentiveDistribution"] },
 ];
 
 const deploy: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
@@ -84,7 +85,6 @@ const deploy: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 };
 deploy.tags = ["DependencyController", "local"];
 deploy.dependencies = managedContracts.map(mc => mc.contractName);
-deploy.runAtTheEnd = true;
 export default deploy;
 
 
@@ -94,7 +94,7 @@ async function manage(hre: HardhatRuntimeEnvironment, dcAddress: string, mC: Man
 
   const dC = await ethers.getContractAt("DependencyController", dcAddress);
 
-  const needsOwnershipUpdate = network.live && (await contract.owner()) != dC.address;
+  const needsOwnershipUpdate = (await contract.owner()) != dC.address;
 
   if (needsOwnershipUpdate) {
     const tx = await contract.transferOwnership(dC.address);

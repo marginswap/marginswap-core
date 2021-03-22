@@ -6,7 +6,7 @@ interface IExecutor {
 
     function execute() external;
 
-    function requiredProperties() external returns (address[] memory);
+    function requiredProperties() external view returns (address[] memory);
 
     function requiredRoles() external returns (uint16[] memory);
 }

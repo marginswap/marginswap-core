@@ -101,6 +101,7 @@ task('list-deployments', 'List all the deployed contracts for a network', async 
   }
 });
 
+task('print-network', "Print network name", async (args, hre) => console.log(hre.network.name));
 
 const homedir = require("os").homedir();
 const privateKey = fs

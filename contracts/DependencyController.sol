@@ -244,7 +244,7 @@ contract DependencyController is RoleAware, Ownable, IDelegateOwner {
         }
     }
 
-    function allManagedContracts() external view  returns (address[] memory) {
+    function allManagedContracts() external view returns (address[] memory) {
         return managedContracts;
     }
 }

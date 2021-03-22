@@ -25,6 +25,7 @@ contract RoleAware {
     uint16 public constant PRICE_CONTROLLER = 106;
     uint16 public constant ADMIN = 107;
     uint16 public constant INCENTIVE_DISTRIBUTION = 108;
+    uint16 public constant TOKEN_ADMIN = 109;
 
     Roles public roles;
     mapping(uint16 => address) public mainCharacterCache;
