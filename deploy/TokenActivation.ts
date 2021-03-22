@@ -1,8 +1,11 @@
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { DeployFunction } from "hardhat-deploy/types";
-const { ethers } = require("hardhat");
+import { hrtime } from "node:process";
+import { ethers } from "hardhat";
 
 const USDT_ADDRESS = "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2";
+const MFI_ADDRESS = "0xAa4e3edb11AFa93c41db59842b29de64b72E355B";
+const TOKEN_ACTIVATOR = 9;
 
 const tokensPerNetwork = {
   kovan: {
@@ -103,10 +106,13 @@ const deploy: DeployFunction = async function ({
     skipIfAlreadyDeployed: true,
   });
 
-  const tx = await dc.executeAsOwner(TokenActivation.address);
-  console.log(`executing ${TokenActivation} as owner, by ${dc.address}, tx: ${tx.hash}`);
+  if (await ethers.getDefaultProvider().getCode(TokenActivation.address) != "0x") {
+    // execute if the contract hasn't self-destroyed yet
+    const tx = await dc.executeAsOwner(TokenActivation.address);
+    console.log(`executing ${TokenActivation} as owner, by ${dc.address}, tx: ${tx.hash}`);  
+  }
 };
 
-deploy.tags = ["InitialTokenActivation", "local"];
+deploy.tags = ["TokenActivation", "local"];
 deploy.dependencies = ["DependencyController"];
 export default deploy;
