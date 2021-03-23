@@ -2,11 +2,11 @@
 pragma solidity ^0.8.0;
 
 interface IExecutor {
-    function rightfulOwner() external returns (address);
+    function rightfulOwner() external view returns (address);
 
     function execute() external;
 
-    function requiredProperties() external returns (address[] memory);
+    function requiredProperties() external view returns (address[] memory);
 
-    function requiredRoles() external returns (uint16[] memory);
+    function requiredRoles() external view returns (uint16[] memory);
 }

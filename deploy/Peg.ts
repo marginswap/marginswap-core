@@ -1,8 +1,7 @@
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { DeployFunction } from "hardhat-deploy/types";
 import { deployments } from "hardhat";
-
-const USDT_ADDRESS = "0xdac17f958d2ee523a2206206994597c13d831ec7";
+import ERC20PresetMinterPauser from "@openzeppelin/contracts/build/contracts/ERC20PresetMinterPauser.json";
 
 const deploy: DeployFunction = async function ({
   getNamedAccounts,
@@ -13,16 +12,14 @@ const deploy: DeployFunction = async function ({
 }: HardhatRuntimeEnvironment) {
   const { deploy } = deployments;
   const { deployer } = await getNamedAccounts();
-  const Roles = await deployments.get("Roles");
-  const peg = await deployments.get("Peg");
 
-  await deploy("CrossMarginTrading", {
+  await deploy("Peg", {
+    contract: ERC20PresetMinterPauser,
     from: deployer,
-    args: [peg.address, Roles.address],
+    args: ["TestToken", "TT"],
     log: true,
     skipIfAlreadyDeployed: true,
   });
 };
-deploy.tags = ["CrossMarginTrading", "local"];
-deploy.dependencies = ["Roles", "Peg"];
+deploy.tags = ["Peg", "local"];
 export default deploy;
