@@ -1,3 +1,0 @@
-[submodule "artifacts"]
-	path = artifacts
-	url = git@github.com:marginswap/abi.git
