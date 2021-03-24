@@ -28,6 +28,7 @@ const FEE_CONTROLLER = 105;
 const PRICE_CONTROLLER = 106;
 const ADMIN = 107;
 const INCENTIVE_DISTRIBUTION = 108;
+const TOKEN_ADMIN = 109;
 
 const managedContracts: ManagedContract[] = [
   { contractName: "Admin", charactersPlayed: [ADMIN, FEE_CONTROLLER], rolesPlayed: [] },
@@ -37,7 +38,7 @@ const managedContracts: ManagedContract[] = [
   { contractName: "Lending", charactersPlayed: [LENDING], rolesPlayed: [WITHDRAWER, INCENTIVE_REPORTER] },
   { contractName: "LiquidityMiningReward", charactersPlayed: [], rolesPlayed: [INCENTIVE_REPORTER] },
   { contractName: "MarginRouter", charactersPlayed: [ROUTER], rolesPlayed: [WITHDRAWER, MARGIN_TRADER, BORROWER, INCENTIVE_REPORTER] },
-  { contractName: "TokenAdmin", charactersPlayed: [], rolesPlayed: [TOKEN_ACTIVATOR], ownAsDelegate: ["IncentiveDistribution"] },
+  { contractName: "TokenAdmin", charactersPlayed: [TOKEN_ADMIN], rolesPlayed: [TOKEN_ACTIVATOR], ownAsDelegate: ["IncentiveDistribution"] },
 ];
 
 const deploy: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
@@ -61,14 +62,18 @@ const deploy: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   const roles = await ethers.getContractAt("Roles", Roles.address);
 
-  if (DependencyController.newlyDeployed) {
-    let tx = await roles.transferOwnership(DependencyController.address);
+  if ((await roles.owner()) != DependencyController.address) {
+    const tx = await roles.transferOwnership(DependencyController.address);
     console.log(`roles.transferOwnership tx: ${tx.hash}`);
+  }
 
-    const IncentiveDistribution = await deployments.get("IncentiveDistribution");
-    const incentiveDistribution = await ethers
-      .getContractAt("IncentiveDistribution", IncentiveDistribution.address);
-    tx = await incentiveDistribution.transferOwnership(DependencyController.address);
+  const IncentiveDistribution = await deployments.get("IncentiveDistribution");
+  const incentiveDistribution = await ethers
+    .getContractAt("IncentiveDistribution", IncentiveDistribution.address);
+
+  const incentiveOwner = await incentiveDistribution.owner(); 
+  if (incentiveOwner !== DependencyController.address && incentiveOwner !== (await deployments.get("TokenAdmin")).address) {
+    const tx = await incentiveDistribution.transferOwnership(DependencyController.address);
     console.log(`incentiveDistribution.transferOwnership tx: ${tx.hash}`);
   }
 
@@ -76,15 +81,14 @@ const deploy: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     await manage(hre, DependencyController.address, mC);
   }
 
-  if (!network.live) {
-    const dC = await ethers.getContractAt("DependencyController", DependencyController.address);
-    const tx = await dC.relinquishOwnership(roles.address, deployer);
-    console.log(`dependencyController.relinquishOwnership tx: ${tx.hash}`);
-  }
+  // if (!network.live) {
+  //   const dC = await ethers.getContractAt("DependencyController", DependencyController.address);
+  //   const tx = await dC.relinquishOwnership(roles.address, deployer);
+  //   console.log(`dependencyController.relinquishOwnership tx: ${tx.hash}`);
+  // }
 };
 deploy.tags = ["DependencyController", "local"];
 deploy.dependencies = managedContracts.map(mc => mc.contractName);
-deploy.runAtTheEnd = true;
 export default deploy;
 
 
@@ -94,11 +98,16 @@ async function manage(hre: HardhatRuntimeEnvironment, dcAddress: string, mC: Man
 
   const dC = await ethers.getContractAt("DependencyController", dcAddress);
 
-  const needsOwnershipUpdate = network.live && (await contract.owner()) != dC.address;
+  const currentOwner = await contract.owner();
+  const { deployer }  = await hre.getNamedAccounts();
+  const needsOwnershipUpdate = currentOwner !== dC.address && currentOwner === deployer;
 
   if (needsOwnershipUpdate) {
     const tx = await contract.transferOwnership(dC.address);
     console.log(`${mC.contractName}.transferOwnership to dependencyController tx: ${tx.hash}`);
+  } else if(currentOwner !== dcAddress) {
+    console.warn(`${mC.contractName} is owned by ${currentOwner}, not dependency controller ${dcAddress}`);
+    console.log(`(current deployer address is ${deployer})`);
   }
 
   const alreadyManaged = await dC.allManagedContracts();
