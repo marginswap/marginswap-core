@@ -101,7 +101,11 @@ abstract contract HourlyBondSubscriptionLending is BaseLending {
                 bond.amount +
                 applyInterest(
                     bond.amount,
-                    hourlyBondYieldAccumulators[token].accumulatorFP,
+                    viewCumulativeYieldFP(
+                        token,
+                        hourlyBondYieldAccumulators,
+                        block.timestamp
+                    ),
                     yieldQuotientFP
                 );
         }
