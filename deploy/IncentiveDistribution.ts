@@ -21,7 +21,6 @@ const deploy: DeployFunction = async function ({
         log: true,
         skipIfAlreadyDeployed: true,
     });
-    
 };
 
 deploy.tags = ['IncentiveDistribution', 'local'];

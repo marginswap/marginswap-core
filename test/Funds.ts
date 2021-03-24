@@ -66,7 +66,6 @@ describe("Funds.activateToken", function () {
     expect(await token.balanceOf(fund.address)).to.equal(1000);
 
     const balanceBeforeWithdraw = await token.balanceOf(deployer);
-    console.log(balanceBeforeWithdraw);
 
     await fund.withdraw(token.address, deployer, 500);
 
