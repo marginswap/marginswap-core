@@ -7,6 +7,7 @@ import { submitSources } from 'hardhat-deploy/dist/src/etherscan';
 import path from 'path';
 import { hrtime } from "node:process";
 import * as types from 'hardhat/internal/core/params/argumentTypes';
+import { Deployment } from "hardhat-deploy/dist/types";
 
 
 // ChainIds
@@ -99,6 +100,19 @@ task('list-deployments', 'List all the deployed contracts for a network', async 
   for (let [name, deployment] of Object.entries(await hre.deployments.all())) {
     console.log(`${name}: ${deployment.address}`);
   }
+});
+
+task('export-addresses', "Export deployment addresses to JSON file", async (args, hre) => {
+  const addresses = require('./artifacts/addresses');
+  const networkAddresses = Object.entries(await hre.deployments.all())
+    .map(([name, deployRecord]:[string, Deployment]) => {
+      return [name, deployRecord.address];
+    });
+  addresses[hre.network.name] = Object.fromEntries(networkAddresses);
+  const stringRepresentation = JSON.stringify(addresses, null, 2);
+  console.log(addresses);
+
+  fs.writeFileSync("./artifacts/addresses.json", stringRepresentation);
 });
 
 task('print-network', "Print network name", async (args, hre) => console.log(hre.network.name));

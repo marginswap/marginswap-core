@@ -2,7 +2,10 @@
     "compilerOptions": {
       "module": "commonjs",
       "resolveJsonModule": true,
-      "esModuleInterop": true
+      "esModuleInterop": true,
+      "lib": [
+        "ES2019"
+      ]
     }
   }
   
