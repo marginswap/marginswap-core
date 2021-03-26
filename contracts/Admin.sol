@@ -10,12 +10,12 @@ import "./CrossMarginTrading.sol";
 /// @dev Here we support staking for MFI incentives as well as
 /// staking to perform the maintenance role.
 contract Admin is RoleAware, Ownable {
-    address MFI;
+    address public immutable MFI;
     mapping(address => uint256) public stakes;
     uint256 public totalStakes;
     mapping(address => uint256) public claimIds;
 
-    uint256 feesPer10k;
+    uint256 public immutable feesPer10k;
     mapping(address => uint256) public collectedFees;
 
     uint256 public maintenanceStakePerBlock = 10 ether;
@@ -24,7 +24,7 @@ contract Admin is RoleAware, Ownable {
     address public currentMaintenanceStaker;
     address public prevMaintenanceStaker;
     uint256 public currentMaintenanceStakerStartBlock;
-    address public lockedMFI;
+    address public immutable lockedMFI;
 
     constructor(
         uint256 _feesPer10k,
@@ -47,10 +47,10 @@ contract Admin is RoleAware, Ownable {
         // by fees like any other maintainer
         // furthermore others could step in to liquidate via the attacker route
         // and take away the team fees if they were delinquent
-        nextMaintenanceStaker[lockedMFI] = lockedMFI;
-        currentMaintenanceStaker = lockedMFI;
-        prevMaintenanceStaker = lockedMFI;
-        maintenanceDelegateTo[lockedMFI][lockedMFIDelegate];
+        nextMaintenanceStaker[_lockedMFI] = _lockedMFI;
+        currentMaintenanceStaker = _lockedMFI;
+        prevMaintenanceStaker = _lockedMFI;
+        maintenanceDelegateTo[_lockedMFI][lockedMFIDelegate];
         currentMaintenanceStakerStartBlock = block.number;
     }
 
