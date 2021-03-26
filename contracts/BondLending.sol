@@ -65,7 +65,7 @@ abstract contract BondLending is BaseLending {
         if (bondReturn >= minReturn) {
             if (Fund(fund()).depositFor(holder, token, amount)) {
                 uint256 interpolatedAmount = (amount + bondReturn) / 2;
-                totalLending[token] += interpolatedAmount;
+                lendingMeta[token].totalLending += interpolatedAmount;
 
                 totalLendingPerRuntime[token][
                     bucketIndex
@@ -99,7 +99,9 @@ abstract contract BondLending is BaseLending {
         uint256 bucketIndex = getBucketIndex(token, bond.runtime);
         uint256 interpolatedAmount =
             (bond.originalPrice + bond.returnAmount) / 2;
-        totalLending[token] -= interpolatedAmount;
+
+        LendingMetadata storage meta = lendingMeta[token];
+        meta.totalLending -= interpolatedAmount;
         totalLendingPerRuntime[token][bucketIndex] -= interpolatedAmount;
 
         updateSpeed(
@@ -110,7 +112,7 @@ abstract contract BondLending is BaseLending {
         );
 
         if (
-            totalBorrowed[token] > totalLending[token] ||
+            meta.totalBorrowed > meta.totalLending ||
             !Fund(fund()).withdraw(token, bond.holder, bond.returnAmount)
         ) {
             // apparently there is a liquidity issue
@@ -142,8 +144,9 @@ abstract contract BondLending is BaseLending {
         yieldFP = runtimeYieldsFP[token][bucketIndex];
         uint256 lastUpdated = yieldLastUpdated[token][bucketIndex];
 
+        LendingMetadata storage meta = lendingMeta[token];
         uint256 bucketTarget =
-            (lendingTarget(token) * runtimeWeights[token][bucketIndex]) /
+            (lendingTarget(meta) * runtimeWeights[token][bucketIndex]) /
                 WEIGHT_TOTAL_10k;
 
         uint256 buying = buyingSpeed[token][bucketIndex];

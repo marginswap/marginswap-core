@@ -37,7 +37,8 @@ contract Lending is
         );
 
         uint256 deltaAmount = balanceWithInterest - balance;
-        totalBorrowed[token] += deltaAmount;
+        LendingMetadata storage meta = lendingMeta[token];
+        meta.totalBorrowed += deltaAmount;
     }
 
     /// @dev view function to get current borrowing interest
@@ -59,9 +60,10 @@ contract Lending is
     function registerBorrow(address token, uint256 amount) external {
         require(isBorrower(msg.sender), "Not an approved borrower");
         require(Fund(fund()).activeTokens(token), "Not an approved token");
-        totalBorrowed[token] += amount;
+        LendingMetadata storage meta = lendingMeta[token];
+        meta.totalBorrowed += amount;
         require(
-            totalLending[token] >= totalBorrowed[token],
+            meta.totalLending >= meta.totalBorrowed,
             "Insufficient capital to lend, try again later!"
         );
     }
@@ -69,7 +71,7 @@ contract Lending is
     /// @dev gets called by router if loan is extinguished
     function payOff(address token, uint256 amount) external {
         require(isBorrower(msg.sender), "Not an approved borrower");
-        totalBorrowed[token] -= amount;
+        lendingMeta[token].totalBorrowed -= amount;
     }
 
     /// @dev get the borrow yield
@@ -107,7 +109,8 @@ contract Lending is
 
     /// @dev buy hourly bond subscription
     function buyHourlyBondSubscription(address token, uint256 amount) external {
-        if (lendingTarget(token) >= totalLending[token] + amount) {
+        LendingMetadata storage meta = lendingMeta[token];
+        if (lendingTarget(meta) >= meta.totalLending + amount) {
             require(
                 Fund(fund()).depositFor(msg.sender, token, amount),
                 "Could not transfer bond deposit token to fund"
@@ -125,8 +128,9 @@ contract Lending is
         uint256 amount,
         uint256 minReturn
     ) external returns (uint256 bondIndex) {
+        LendingMetadata storage meta = lendingMeta[token];
         if (
-            lendingTarget(token) >= totalLending[token] + amount &&
+            lendingTarget(meta) >= meta.totalLending + amount &&
             maxRuntime >= runtime &&
             runtime >= minRuntime
         ) {

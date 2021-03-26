@@ -66,7 +66,7 @@ abstract contract HourlyBondSubscriptionLending is BaseLending {
         bond.yieldQuotientFP = hourlyBondYieldAccumulators[token].accumulatorFP;
         bond.moduloHour = block.timestamp % (1 hours);
         bond.amount += amount;
-        totalLending[token] += amount;
+        lendingMeta[token].totalLending += amount;
     }
 
     function updateHourlyBondAmount(address token, HourlyBond storage bond)
@@ -84,7 +84,7 @@ abstract contract HourlyBondSubscriptionLending is BaseLending {
             );
 
             uint256 deltaAmount = bond.amount - oldAmount;
-            totalLending[token] += deltaAmount;
+            lendingMeta[token].totalLending += deltaAmount;
         }
     }
 
@@ -132,7 +132,7 @@ abstract contract HourlyBondSubscriptionLending is BaseLending {
         );
 
         bond.amount -= amount;
-        totalLending[token] -= amount;
+        lendingMeta[token].totalLending -= amount;
     }
 
     function closeHourlyBondAccount(address token) external {
@@ -185,11 +185,12 @@ abstract contract HourlyBondSubscriptionLending is BaseLending {
             timeDelta
         );
 
+        LendingMetadata storage meta = lendingMeta[token];
         accumulator.hourlyYieldFP = updatedYieldFP(
             accumulator.hourlyYieldFP,
             accumulator.lastUpdated,
-            totalLending[token],
-            lendingTarget(token),
+            meta.totalLending,
+            lendingTarget(meta),
             hourlyBondBuyingSpeed[token],
             hourlyBondWithdrawingSpeed[token],
             maxHourlyYieldFP
