@@ -95,7 +95,7 @@ contract Admin is RoleAware, Ownable {
     ) internal {
         uint256 stakeAmount = stakes[holder];
         // overflow failure desirable
-        stakes[holder] = amount;
+        stakes[holder] -= amount;
         totalStakes -= amount;
         require(
             Fund(fund()).withdraw(MFI, recipient, amount),
