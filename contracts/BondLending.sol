@@ -223,10 +223,10 @@ abstract contract BondLending is BaseLending {
     function setRuntimeWeights(address token, uint256[] memory weights)
         external
     {
-        //require(
-        //    isTokenActivator(msg.sender),
-        //    "not autorized to set runtime weights"
-        //);
+        require(
+            isTokenActivator(msg.sender),
+            "not autorized to set runtime weights"
+        );
         require(
             runtimeWeights[token].length == 0 ||
                 runtimeWeights[token].length == weights.length,
