@@ -263,6 +263,7 @@ abstract contract BondLending is BaseLending {
 
     function setMinRuntime(uint256 runtime) external onlyOwner {
         require(runtime > 1 hours, "Min runtime needs to be at least 1 hour");
+        require(maxRuntime > runtime, "Min runtime must be smaller than max runtime");
         minRuntime = runtime;
     }
 
