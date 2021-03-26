@@ -245,7 +245,7 @@ abstract contract BondLending is BaseLending {
             uint256 hourlyYieldFP = (110 * FP32) / 100 / (24 * 365);
             uint256 bucketSize = diffMaxMinRuntime / weights.length;
 
-            for (uint24 i = 0; weights.length > i; i++) {
+            for (uint256 i = 0; weights.length > i; i++) {
                 uint256 runtime = minRuntime + bucketSize * i;
                 // Do a best guess of initializing
                 runtimeYieldsFP[token][i] =
