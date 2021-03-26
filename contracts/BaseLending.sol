@@ -45,10 +45,7 @@ abstract contract BaseLending is RoleAware, Ownable {
             buyingSpeed >= withdrawingSpeed
         ) {
             yieldFP -= min(yieldFP, yieldDiff);
-        } else if (
-            bucketTarget > totalLendingInBucket &&
-            withdrawingSpeed > buyingSpeed
-        ) {
+        } else {
             yieldFP += yieldDiff;
             if (yieldFP > bucketMaxYield) {
                 yieldFP = bucketMaxYield;
