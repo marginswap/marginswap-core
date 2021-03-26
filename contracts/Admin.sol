@@ -181,7 +181,7 @@ contract Admin is RoleAware, Ownable {
                 currentMaintenanceStaker = nextOne;
             } else {
                 currentMaintenanceStakerStartBlock +=
-                    stakes[currentMaintenanceStaker] /
+                    currentStake /
                     maintenanceStakePerBlock;
 
                 prevMaintenanceStaker = currentMaintenanceStaker;
@@ -212,7 +212,7 @@ contract Admin is RoleAware, Ownable {
                 currentStake = getMaintenanceStakerStake(staker);
             } else {
                 startBlock +=
-                    stakes[currentMaintenanceStaker] /
+                    currentStake /
                     maintenanceStakePerBlock;
                 staker = nextMaintenanceStaker[staker];
                 currentStake = getMaintenanceStakerStake(staker);
