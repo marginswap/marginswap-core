@@ -249,7 +249,7 @@ contract MarginRouter is RoleAware, IncentivizedHolder, Ownable {
     ) external ensure(deadline) returns (uint256[] memory amounts) {
         // calc fees
         uint256 fees =
-            Admin(feeController()).subtractTradingFees(path[0], amountIn);
+            Admin(feeController()).takeFeesFromInput(path[0], amountIn);
 
         requireAuthorizedAMM(ammFactory);
         // swap
@@ -279,7 +279,7 @@ contract MarginRouter is RoleAware, IncentivizedHolder, Ownable {
     ) external ensure(deadline) returns (uint256[] memory amounts) {
         // calc fees
         uint256 fees =
-            Admin(feeController()).addTradingFees(
+            Admin(feeController()).takeFeesFromOutput(
                 path[path.length - 1],
                 amountOut
             );

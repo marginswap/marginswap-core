@@ -121,7 +121,7 @@ contract Admin is RoleAware, Ownable {
         _withdrawStake(msg.sender, amount, msg.sender);
     }
 
-    function addTradingFees(address token, uint256 amount)
+    function takeFeesFromOutput(address token, uint256 amount)
         external
         returns (uint256 fees)
     {
@@ -130,7 +130,7 @@ contract Admin is RoleAware, Ownable {
         collectedFees[token] += fees;
     }
 
-    function subtractTradingFees(address token, uint256 amount)
+    function takeFeesFromInput(address token, uint256 amount)
         external
         returns (uint256 fees)
     {
