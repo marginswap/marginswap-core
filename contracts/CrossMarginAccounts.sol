@@ -87,6 +87,29 @@ abstract contract CrossMarginAccounts is RoleAware, PriceAware {
         (borrowTokens, borrowAmounts);
     }
 
+    /// @dev view function to get loan amount in peg
+    function viewLoanInPeg(address trader)
+        external
+        view
+        returns (uint256 amount)
+    {
+        CrossMarginAccount storage account = marginAccounts[trader];
+        return
+            viewTokensInPegWithYield(
+                account.borrowTokens,
+                account.borrowed,
+                account.borrowedYieldQuotientsFP
+            );
+    }
+
+    /// @dev total of assets of account, expressed in reference currency
+    function viewHoldingsInPeg(address trader) internal view returns (uint256) {
+        CrossMarginAccount storage account = marginAccounts[trader];
+        return viewTokensInPeg(account.holdingTokens, account.holdings);
+    }
+
+    /// @dev view function to get total holding amount in peg
+
     /// @dev last time this account deposited
     /// relevant for withdrawal window
     function getLastDepositBlock(address trader)
@@ -248,6 +271,17 @@ abstract contract CrossMarginAccounts is RoleAware, PriceAware {
         }
     }
 
+    /// @dev go through list of tokens and their amounts, summing up
+    function viewTokensInPeg(
+        address[] storage tokens,
+        mapping(address => uint256) storage amounts
+    ) internal view returns (uint256 totalPeg) {
+        for (uint256 tokenId = 0; tokenId < tokens.length; tokenId++) {
+            address token = tokens[tokenId];
+            totalPeg += PriceAware.viewCurrentPriceInPeg(token, amounts[token]);
+        }
+    }
+
     /// @dev go through list of tokens and ammounts, summing up with interest
     function sumTokensInPegWithYield(
         address[] storage tokens,
@@ -262,6 +296,22 @@ abstract contract CrossMarginAccounts is RoleAware, PriceAware {
                 amounts[token],
                 yieldQuotientsFP,
                 forceCurBlock
+            );
+        }
+    }
+
+    /// @dev go through list of tokens and ammounts, summing up with interest
+    function viewTokensInPegWithYield(
+        address[] storage tokens,
+        mapping(address => uint256) storage amounts,
+        mapping(address => uint256) storage yieldQuotientsFP
+    ) internal view returns (uint256 totalPeg) {
+        for (uint256 tokenId = 0; tokenId < tokens.length; tokenId++) {
+            address token = tokens[tokenId];
+            totalPeg += viewYieldTokenInPeg(
+                token,
+                amounts[token],
+                yieldQuotientsFP
             );
         }
     }
@@ -282,6 +332,18 @@ abstract contract CrossMarginAccounts is RoleAware, PriceAware {
                 amountInToken,
                 forceCurBlock
             );
+    }
+
+    /// @dev calculate yield for token amount and convert to reference currency
+    function viewYieldTokenInPeg(
+        address token,
+        uint256 amount,
+        mapping(address => uint256) storage yieldQuotientsFP
+    ) internal view returns (uint256) {
+        uint256 yieldFP = Lending(lending()).viewBorrowingYieldFP(token);
+        // 1 * FP / FP = 1
+        uint256 amountInToken = (amount * yieldFP) / yieldQuotientsFP[token];
+        return PriceAware.viewCurrentPriceInPeg(token, amountInToken);
     }
 
     /// @dev move tokens from one holding to another

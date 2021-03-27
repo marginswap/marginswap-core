@@ -71,6 +71,26 @@ abstract contract PriceAware is Ownable, RoleAware {
         }
     }
 
+    function viewCurrentPriceInPeg(address token, uint256 inAmount)
+        internal
+        view
+        returns (uint256)
+    {
+        if (token == peg) {
+            return inAmount;
+        } else {
+            TokenPrice storage tokenPrice = tokenPrices[token];
+            uint256[] memory pathAmounts =
+                MarginRouter(router()).getAmountsOut(
+                    UNI,
+                    inAmount,
+                    tokenPrice.liquidationPath
+                );
+            uint256 outAmount = pathAmounts[pathAmounts.length - 1];
+            return outAmount;
+        }
+    }
+
     function getUpdatedPriceInPeg(address token, uint256 inAmount)
         internal
         virtual
