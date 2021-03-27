@@ -190,7 +190,7 @@ abstract contract CrossMarginLiquidation is CrossMarginAccounts {
             address buyToken = buyTokens[tokenIdx];
             Liquidation storage liq = liquidationAmounts[buyToken];
             if (liq.buy > liq.sell) {
-                pegAmount += PriceAware.liquidateToPeg(
+                pegAmount += PriceAware.liquidateFromPeg(
                     buyToken,
                     liq.buy - liq.sell
                 );
