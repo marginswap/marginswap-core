@@ -166,7 +166,8 @@ abstract contract CrossMarginLiquidation is CrossMarginAccounts {
             liqAttackRecord.blockNum = 0;
             liqAttackRecord.loser = address(0);
 
-            returnAmount -= attackerCut;
+            // return remainder, after cut was taken to authorized stakekr
+            returnAmount = liqAttackRecord.amount - attackerCut;
         }
     }
 
