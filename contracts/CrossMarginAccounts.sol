@@ -171,6 +171,19 @@ abstract contract CrossMarginAccounts is RoleAware, PriceAware {
         if (account.borrowed[debtToken] > 0) {
             account.borrowedYieldQuotientsFP[debtToken] = Lending(lending())
                 .viewBorrowingYieldFP(debtToken);
+        } else {
+            delete account.borrowedYieldQuotientsFP[debtToken];
+
+            bool decrement = false;
+            for (uint256 i = 0; account.borrowTokens.length > i; i++) {
+                address currToken = account.borrowTokens[i];
+                if (currToken == debtToken) {
+                    decrement = true;
+                } else if (decrement) {
+                    account.borrowTokens[i - 1] = currToken;
+                }
+            }
+            account.borrowTokens.pop();
         }
     }
 
