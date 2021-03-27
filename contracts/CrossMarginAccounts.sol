@@ -61,8 +61,6 @@ abstract contract CrossMarginAccounts is RoleAware, PriceAware {
             address tokenAddress = holdingTokens[idx];
             holdingAmounts[idx] = account.holdings[tokenAddress];
         }
-
-        (holdingTokens, holdingAmounts);
     }
 
     /// @dev view function to display account borrowing state
@@ -83,8 +81,6 @@ abstract contract CrossMarginAccounts is RoleAware, PriceAware {
                 account.borrowedYieldQuotientsFP[tokenAddress]
             );
         }
-
-        (borrowTokens, borrowAmounts);
     }
 
     /// @dev last time this account deposited
