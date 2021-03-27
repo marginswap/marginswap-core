@@ -35,7 +35,7 @@ abstract contract CrossMarginAccounts is RoleAware, PriceAware {
     uint256 public liquidationThresholdPercent;
 
     /// @dev record of all cross margin accounts
-    mapping(address => CrossMarginAccount) marginAccounts;
+    mapping(address => CrossMarginAccount) internal marginAccounts;
     /// @dev total token caps
     mapping(address => uint256) public tokenCaps;
     /// @dev tracks total of short positions per token
