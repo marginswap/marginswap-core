@@ -99,6 +99,9 @@ contract IncentiveDistribution is RoleAware, Ownable {
         lastUpdatedPeriods[tranche] = currentPeriod;
     }
 
+    // @dev can be called by anyone, if they want to ensure rewards
+    // are distributed to a high level of accuracy (if several days
+    // pass without update rewards will be slightly underestimated)
     function forcePeriodTotalUpdate(uint8 tranche) external {
         updatePeriodTotals(tranche);
     }
