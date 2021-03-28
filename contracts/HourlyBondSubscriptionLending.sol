@@ -45,7 +45,8 @@ abstract contract HourlyBondSubscriptionLending is BaseLending {
                 hourlyYieldFP: (FP32 * (100 + aprPercent)) / 100 / (24 * 365)
             });
         } else {
-            hourlyBondYieldAccumulators[token].hourlyYieldFP =
+            YieldAccumulator storage yA = getUpdatedHourlyYield(token);
+            yA.hourlyYieldFP =
                 (FP32 * (100 + aprPercent)) /
                 100 /
                 (24 * 365);
@@ -137,6 +138,7 @@ abstract contract HourlyBondSubscriptionLending is BaseLending {
         // apply all interest
         updateHourlyBondAmount(token, bond);
         _withdrawHourlyBond(token, bond, msg.sender, bond.amount);
+
         bond.amount = 0;
         bond.yieldQuotientFP = 0;
         bond.moduloHour = 0;
