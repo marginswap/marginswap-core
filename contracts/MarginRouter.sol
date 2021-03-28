@@ -15,7 +15,7 @@ contract MarginRouter is RoleAware, IncentivizedHolder, Ownable {
     /// different uniswap compatible factories to talk to
     mapping(address => bool) public factories;
     /// wrapped ETH ERC20 contract
-    address public WETH;
+    address public immutable WETH;
     address public constant UNI = 0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f;
     address public constant SUSHI = 0xC0AEe478e3658e2610c5F7A4A2E1777cE9e4f2Ac;
     /// emitted when a trader depoits on cross margin
