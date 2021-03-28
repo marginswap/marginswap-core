@@ -170,6 +170,9 @@ contract Lending is
             isTokenActivator(msg.sender),
             "not autorized to init yield accumulator"
         );
+        require(borrowYieldAccumulators[token].accumulatorFP == 0,
+                "trying to re-initialize yield accumulator");
+
         borrowYieldAccumulators[token].accumulatorFP = FP32;
     }
 
