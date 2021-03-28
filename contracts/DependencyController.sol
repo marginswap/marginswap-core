@@ -60,7 +60,8 @@ contract DependencyController is RoleAware, Ownable, IDelegateOwner {
         return
             contrOwner == address(this) ||
             contrOwner == owner() ||
-            contrOwner == delegateOwner[contr];
+            (delegateOwner[contr] != address(0) &&
+             contrOwner == delegateOwner[contr]);
     }
 
     function ownsContractStrict(address contr) public view returns (bool) {
