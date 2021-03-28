@@ -213,9 +213,7 @@ contract IncentiveDistribution is RoleAware, Ownable {
 
         if (claim.startingRewardRateFP > 0) {
             _withdrawReward(tranche, claim);
-            delete claim.recipient;
-            delete claim.startingRewardRateFP;
-            delete claim.amount;
+            delete claims[claimId];
         }
     }
 
