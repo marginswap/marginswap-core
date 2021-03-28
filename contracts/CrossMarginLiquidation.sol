@@ -237,9 +237,7 @@ abstract contract CrossMarginLiquidation is CrossMarginAccounts {
         // * aggregates both sell and buy side targets to be liquidated
         // * returns attacker cuts to them
         // * aggregates any returned fees from unauthorized (attacking) attempts
-        uint256 attackReturns2Authorized =
-            calcLiquidationAmounts(liquidationCandidates, isAuthorized);
-        maintainerCut = attackReturns2Authorized;
+        maintainerCut = calcLiquidationAmounts(liquidationCandidates, isAuthorized);
 
         uint256 sale2pegAmount = liquidateToPeg();
         uint256 peg2targetCost = liquidateFromPeg();
@@ -308,6 +306,10 @@ abstract contract CrossMarginLiquidation is CrossMarginAccounts {
         avgLiquidationPerBlock =
             (avgLiquidationPerBlock * 99 + maintainerCut) /
             100;
+
+        if (canTakeNow) {
+            Fund(fund()).withdraw(PriceAware.peg, msg.sender, maintainerCut);
+        }
 
         address currentMaintainer = Admin(admin()).getUpdatedCurrentStaker();
         if (isAuthorized) {
