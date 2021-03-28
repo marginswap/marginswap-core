@@ -153,13 +153,13 @@ contract Lending is
             block.timestamp > bond.maturityTimestamp,
             "bond is still immature"
         );
-
-        super._withdrawBond(bond);
-        delete bonds[bondId];
         // in case of a shortfall, governance can step in to provide
         // additonal compensation beyond the usual incentive which
         // gets withdrawn here
         withdrawClaim(msg.sender, bond.token, bond.originalPrice);
+
+        super._withdrawBond(bond);
+        delete bonds[bondId];
     }
 
     function initBorrowYieldAccumulator(address token) external {

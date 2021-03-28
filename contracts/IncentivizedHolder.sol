@@ -49,11 +49,21 @@ abstract contract IncentivizedHolder is RoleAware {
         uint256 claimId = claimIds[claimant][token];
         if (claimId > 0) {
             uint8 tranche = incentiveTranches[token];
+            // this does not end claims if they zero out, but we are willing
+            // to sacrifice the gas refund from zeroing out for simplicity
+            // sake and saving storage cost wwhen starting a claim
             IncentiveDistribution(incentiveDistributor()).subtractFromClaimAmount(
                 tranche,
                 claimId,
                 amount
             );
         }
+    }
+
+    function endClaim(address claimant, address token) internal {
+        uint256 claimId = claimIds[claimant][token];
+        uint8 tranche = incentiveTranches[token];
+        IncentiveDistribution(incentiveDistributor()).endClaim(tranche, claimId);
+        claimIds[claimant][token] = 0;
     }
 }
