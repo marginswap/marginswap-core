@@ -9,11 +9,11 @@ import "./IncentiveDistribution.sol";
 contract LiquidityMiningReward is Ownable {
     using SafeERC20 for IERC20;
 
-    IERC20 public stakeToken;
+    IERC20 public immutable stakeToken;
     mapping(address => uint256) public claimIds;
     mapping(address => uint256) public stakeAmounts;
-    IncentiveDistribution internal incentiveDistributor;
-    uint256 public incentiveStart;
+    IncentiveDistribution internal immutable incentiveDistributor;
+    uint256 public immutable incentiveStart;
 
     constructor(
         address _incentiveDistributor,
