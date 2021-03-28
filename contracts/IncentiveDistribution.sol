@@ -21,7 +21,7 @@ contract IncentiveDistribution is RoleAware, Ownable {
     // the period for which claims are batch updated
     uint256 constant period = 4 hours;
     uint256 constant periodsPerDay = 24 hours / period;
-    address MFI;
+    address immutable MFI;
 
     constructor(
         address _MFI,
