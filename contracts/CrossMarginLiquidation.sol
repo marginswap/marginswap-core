@@ -34,7 +34,7 @@ abstract contract CrossMarginLiquidation is CrossMarginAccounts {
 
     mapping(address => uint256) public maintenanceFailures;
     mapping(address => AccountLiqRecord) public stakeAttackRecords;
-    uint256 public avgLiquidationPerBlock = 10;
+    uint256 public avgLiquidationPerCall = 10;
 
     uint256 public liqStakeAttackWindow = 5;
     uint256 public MAINTAINER_CUT_PERCENT = 5;
@@ -154,7 +154,7 @@ abstract contract CrossMarginLiquidation is CrossMarginAccounts {
             Admin a = Admin(admin());
             uint256 penalty =
                 (a.maintenanceStakePerBlock() * attackerCut) /
-                    avgLiquidationPerBlock;
+                    avgLiquidationPerCall;
             a.penalizeMaintenanceStake(
                 liqAttackRecord.loser,
                 penalty,
@@ -222,7 +222,7 @@ abstract contract CrossMarginLiquidation is CrossMarginAccounts {
             Admin(admin()).viewCurrentMaintenanceStaker();
         return
             maintenanceFailures[currentMaintainer] >
-            failureThreshold * avgLiquidationPerBlock;
+            failureThreshold * avgLiquidationPerCall;
     }
 
     /// called by maintenance stakers to liquidate accounts below liquidation threshold
@@ -303,8 +303,8 @@ abstract contract CrossMarginLiquidation is CrossMarginAccounts {
             deleteAccount(account);
         }
 
-        avgLiquidationPerBlock =
-            (avgLiquidationPerBlock * 99 + maintainerCut) /
+        avgLiquidationPerCall =
+            (avgLiquidationPerCall * 99 + maintainerCut) /
             100;
 
         if (canTakeNow) {
