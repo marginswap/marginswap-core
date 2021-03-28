@@ -28,9 +28,9 @@ abstract contract CrossMarginLiquidation is CrossMarginAccounts {
     }
 
     mapping(address => Liquidation) liquidationAmounts;
-    address[] sellTokens;
-    address[] buyTokens;
-    address[] tradersToLiquidate;
+    address[] internal sellTokens;
+    address[] internal buyTokens;
+    address[] internal tradersToLiquidate;
 
     mapping(address => uint256) public maintenanceFailures;
     mapping(address => AccountLiqRecord) public stakeAttackRecords;
