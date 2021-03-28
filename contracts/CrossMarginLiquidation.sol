@@ -161,11 +161,6 @@ abstract contract CrossMarginLiquidation is CrossMarginAccounts {
                 liqAttackRecord.stakeAttacker
             );
 
-            liqAttackRecord.amount = 0;
-            liqAttackRecord.stakeAttacker = address(0);
-            liqAttackRecord.blockNum = 0;
-            liqAttackRecord.loser = address(0);
-
             // return remainder, after cut was taken to authorized stakekr
             returnAmount = liqAttackRecord.amount - attackerCut;
         }
@@ -175,12 +170,14 @@ abstract contract CrossMarginLiquidation is CrossMarginAccounts {
         external
     {
         for (uint256 i = 0; liquidatedAccounts.length > i; i++) {
+            address liqAccount = liquidatedAccounts[i];
             AccountLiqRecord storage liqAttackRecord =
-                stakeAttackRecords[liquidatedAccounts[i]];
+                stakeAttackRecords[liqAccount];
             if (
                 block.number > liqAttackRecord.blockNum + liqStakeAttackWindow
             ) {
                 _disburseLiqAttack(liqAttackRecord);
+                delete stakeAttackRecords[liqAccount];
             }
         }
     }
