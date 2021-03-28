@@ -29,6 +29,8 @@ contract Lending is
         address token,
         uint256 yieldQuotientFP
     ) external returns (uint256 balanceWithInterest) {
+        require(isBorrower(msg.sender), "Not an approved borrower");
+
         YieldAccumulator storage yA = borrowYieldAccumulators[token];
         balanceWithInterest = applyInterest(
             balance,
