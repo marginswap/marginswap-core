@@ -53,7 +53,6 @@ contract LiquidityMiningReward is Ownable {
         uint256 stakeAmount = stakeAmounts[msg.sender];
         require(stakeAmount >= amount, "Not enough stake to withdraw");
 
-        stakeToken.safeTransfer(msg.sender, amount);
         stakeAmounts[msg.sender] = stakeAmount - amount;
 
         if (stakeAmount == amount) {
@@ -66,6 +65,8 @@ contract LiquidityMiningReward is Ownable {
                 amount
             );
         }
+
+        stakeToken.safeTransfer(msg.sender, amount);
     }
 
     function withdrawReward() external returns (uint256) {
