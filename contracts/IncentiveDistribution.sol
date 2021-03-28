@@ -16,6 +16,7 @@ contract IncentiveDistribution is RoleAware, Ownable {
     uint256 constant FP32 = 2**32;
     // the amount of contraction per thousand, per day
     // of the overal daily incentive distribution
+    // https://en.wikipedia.org/wiki/Per_mil
     uint256 constant contractionPerMil = 999;
     // the period for which claims are batch updated
     uint256 constant period = 4 hours;
