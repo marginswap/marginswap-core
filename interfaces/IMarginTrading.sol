@@ -29,4 +29,17 @@ interface IMarginTrading {
     ) external returns (uint256 extinguishAmount, uint256 borrowAmount);
 
     function registerLiquidation(address trader) external;
+
+    function getHoldingAmounts(address trader)
+        external
+        view
+        returns (
+            address[] memory holdingTokens,
+            uint256[] memory holdingAmounts
+                 );
+
+     function getBorrowAmounts(address trader)
+        external
+        view
+         returns (address[] memory borrowTokens, uint256[] memory borrowAmounts);
 }

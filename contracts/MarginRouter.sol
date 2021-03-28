@@ -139,6 +139,19 @@ contract MarginRouter is RoleAware, IncentivizedHolder, Ownable {
         emit CrossBorrow(msg.sender, borrowToken, borrowAmount);
     }
 
+    /// @dev close an account that is no longer borrowing and return gains
+    function crossCloseAccount() external {
+        (address[] memory holdingTokens,
+         uint256[] memory holdingAmounts) = IMarginTrading(marginTrading()).getHoldingAmounts(msg.sender);
+
+        // requires all debts paid off
+        IMarginTrading(marginTrading()).registerLiquidation(msg.sender);
+
+        for (uint256 i = 0; holdingTokens.length > i; i++) {
+            Fund(fund()).withdraw(holdingTokens[i], msg.sender, holdingAmounts[i]);
+        }
+    }
+
     // **** SWAP ****
     // requires the initial amount to have already been sent to the first pair
     function _swap(

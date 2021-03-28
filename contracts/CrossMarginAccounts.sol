@@ -44,45 +44,6 @@ abstract contract CrossMarginAccounts is RoleAware, PriceAware {
     mapping(address => uint256) public totalLong;
     uint256 public coolingOffPeriod;
 
-    /// @dev view function to display account held assets state
-    function getHoldingAmounts(address trader)
-        external
-        view
-        returns (
-            address[] memory holdingTokens,
-            uint256[] memory holdingAmounts
-        )
-    {
-        CrossMarginAccount storage account = marginAccounts[trader];
-        holdingTokens = account.holdingTokens;
-
-        holdingAmounts = new uint256[](account.holdingTokens.length);
-        for (uint256 idx = 0; holdingTokens.length > idx; idx++) {
-            address tokenAddress = holdingTokens[idx];
-            holdingAmounts[idx] = account.holdings[tokenAddress];
-        }
-    }
-
-    /// @dev view function to display account borrowing state
-    function getBorrowAmounts(address trader)
-        external
-        view
-        returns (address[] memory borrowTokens, uint256[] memory borrowAmounts)
-    {
-        CrossMarginAccount storage account = marginAccounts[trader];
-        borrowTokens = account.borrowTokens;
-
-        borrowAmounts = new uint256[](account.borrowTokens.length);
-        for (uint256 idx = 0; borrowTokens.length > idx; idx++) {
-            address tokenAddress = borrowTokens[idx];
-            borrowAmounts[idx] = Lending(lending()).viewBorrowInterest(
-                account.borrowed[tokenAddress],
-                tokenAddress,
-                account.borrowedYieldQuotientsFP[tokenAddress]
-            );
-        }
-    }
-
     /// @dev last time this account deposited
     /// relevant for withdrawal window
     function getLastDepositBlock(address trader)
