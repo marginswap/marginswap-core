@@ -9,7 +9,7 @@ import "./RoleAware.sol";
 
 contract Fund is RoleAware, Ownable {
     using SafeERC20 for IERC20;
-    address public WETH;
+    address public immutable WETH;
     mapping(address => bool) public activeTokens;
 
     constructor(address _WETH, address _roles) Ownable() RoleAware(_roles) {
