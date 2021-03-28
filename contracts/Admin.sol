@@ -59,10 +59,8 @@ contract Admin is RoleAware, Ownable {
     }
 
     function _stake(address holder, uint256 amount) internal {
-        require(
-            Fund(fund()).depositFor(holder, MFI, amount),
-            "Could not deposit stake funds (perhaps make allowance to fund contract?"
-        );
+        Fund(fund()).depositFor(holder, MFI, amount);
+
         stakes[holder] += amount;
         totalStakes += amount;
 
@@ -97,10 +95,8 @@ contract Admin is RoleAware, Ownable {
         // overflow failure desirable
         stakes[holder] -= amount;
         totalStakes -= amount;
-        require(
-            Fund(fund()).withdraw(MFI, recipient, amount),
-            "Insufficient funds -- something went really wrong."
-        );
+        Fund(fund()).withdraw(MFI, recipient, amount);
+
         if (stakeAmount == amount) {
             IncentiveDistribution(incentiveDistributor()).endClaim(
                 0,

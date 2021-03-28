@@ -63,34 +63,33 @@ abstract contract BondLending is BaseLending {
             );
         uint256 bondReturn = (yieldFP * amount) / FP32;
         if (bondReturn >= minReturn) {
-            if (Fund(fund()).depositFor(holder, token, amount)) {
-                uint256 interpolatedAmount = (amount + bondReturn) / 2;
-                lendingMeta[token].totalLending += interpolatedAmount;
+            Fund(fund()).depositFor(holder, token, amount);
+            uint256 interpolatedAmount = (amount + bondReturn) / 2;
+            lendingMeta[token].totalLending += interpolatedAmount;
 
-                totalLendingPerRuntime[token][
+            totalLendingPerRuntime[token][
                     bucketIndex
-                ] += interpolatedAmount;
+            ] += interpolatedAmount;
 
-                bondIndex = nextBondIndex;
-                nextBondIndex++;
+            bondIndex = nextBondIndex;
+            nextBondIndex++;
 
-                bonds[bondIndex] = Bond({
-                    holder: holder,
-                    token: token,
-                    originalPrice: amount,
-                    returnAmount: bondReturn,
-                    maturityTimestamp: block.timestamp + runtime,
-                    runtime: runtime,
-                    yieldFP: yieldFP
-                });
+            bonds[bondIndex] = Bond({
+                holder: holder,
+                token: token,
+                originalPrice: amount,
+                returnAmount: bondReturn,
+                maturityTimestamp: block.timestamp + runtime,
+                runtime: runtime,
+                yieldFP: yieldFP
+            });
 
-                updateSpeed(
-                    buyingSpeed[token],
-                    lastBought[token],
-                    bucketIndex,
-                    amount
-                );
-            }
+            updateSpeed(
+                buyingSpeed[token],
+                lastBought[token],
+                bucketIndex,
+                amount
+            );
         }
     }
 
@@ -113,11 +112,13 @@ abstract contract BondLending is BaseLending {
 
         if (
             meta.totalBorrowed > meta.totalLending ||
-            !Fund(fund()).withdraw(token, bond.holder, bond.returnAmount)
+            IERC20(token).balanceOf(fund()) < bond.returnAmount
         ) {
             // apparently there is a liquidity issue
             emit LiquidityWarning(token, bond.holder, bond.returnAmount);
             _makeFallbackBond(token, bond.holder, bond.returnAmount);
+        } else {
+            Fund(fund()).withdraw(token, bond.holder, bond.returnAmount);
         }
     }
 

@@ -126,10 +126,7 @@ abstract contract HourlyBondSubscriptionLending is BaseLending {
             "Tried withdrawing outside subscription cancellation time window"
         );
 
-        require(
-            Fund(fund()).withdraw(token, recipient, amount),
-            "Insufficient liquidity"
-        );
+        Fund(fund()).withdraw(token, recipient, amount);
 
         bond.amount -= amount;
         lendingMeta[token].totalLending -= amount;

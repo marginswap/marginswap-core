@@ -111,10 +111,8 @@ contract Lending is
     function buyHourlyBondSubscription(address token, uint256 amount) external {
         LendingMetadata storage meta = lendingMeta[token];
         if (lendingTarget(meta) >= meta.totalLending + amount) {
-            require(
-                Fund(fund()).depositFor(msg.sender, token, amount),
-                "Could not transfer bond deposit token to fund"
-            );
+            Fund(fund()).depositFor(msg.sender, token, amount);
+
             super._makeHourlyBond(token, msg.sender, amount);
 
             stakeClaim(msg.sender, token, amount);

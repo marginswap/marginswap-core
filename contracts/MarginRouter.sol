@@ -67,10 +67,8 @@ contract MarginRouter is RoleAware, IncentivizedHolder, Ownable {
     function crossDeposit(address depositToken, uint256 depositAmount)
         external
     {
-        require(
-            Fund(fund()).depositFor(msg.sender, depositToken, depositAmount),
-            "Cannot transfer deposit to margin account"
-        );
+        Fund(fund()).depositFor(msg.sender, depositToken, depositAmount);
+
         uint256 extinguishAmount =
             IMarginTrading(marginTrading()).registerDeposit(
                 msg.sender,
@@ -109,10 +107,7 @@ contract MarginRouter is RoleAware, IncentivizedHolder, Ownable {
             withdrawToken,
             withdrawAmount
         );
-        require(
-            Fund(fund()).withdraw(withdrawToken, msg.sender, withdrawAmount),
-            "Could not withdraw from fund"
-        );
+        Fund(fund()).withdraw(withdrawToken, msg.sender, withdrawAmount);
         emit CrossWithdraw(msg.sender, withdrawToken, withdrawAmount);
     }
 
@@ -189,13 +184,10 @@ contract MarginRouter is RoleAware, IncentivizedHolder, Ownable {
             amounts[amounts.length - 1] >= amountOutMin,
             "MarginRouter: INSUFFICIENT_OUTPUT_AMOUNT"
         );
-        require(
-            Fund(fund()).withdraw(
+        Fund(fund()).withdraw(
                 path[0],
                 UniswapV2Library.pairFor(factory, path[0], path[1]),
                 amounts[0]
-            ),
-            "MarginRouter: Insufficient lending funds"
         );
         _swap(factory, amounts, path, fund());
     }
@@ -227,13 +219,10 @@ contract MarginRouter is RoleAware, IncentivizedHolder, Ownable {
             amounts[0] <= amountInMax,
             "MarginRouter: EXCESSIVE_INPUT_AMOUNT"
         );
-        require(
-            Fund(fund()).withdraw(
+        Fund(fund()).withdraw(
                 path[0],
                 UniswapV2Library.pairFor(factory, path[0], path[1]),
                 amounts[0]
-            ),
-            "MarginRouter: Insufficient lending funds"
         );
         _swap(factory, amounts, path, fund());
     }

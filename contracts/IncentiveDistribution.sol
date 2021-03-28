@@ -254,10 +254,9 @@ contract IncentiveDistribution is RoleAware, Ownable {
     {
         rewardAmount = calcRewardAmount(tranche, claim);
 
-        require(
-            Fund(fund()).withdraw(MFI, claim.recipient, rewardAmount),
-            "There seems to be a lack of MFI in the incentive fund!"
-        );
+
+        Fund(fund()).withdraw(MFI, claim.recipient, rewardAmount);
+
 
         claim.startingRewardRateFP = aggregatePeriodicRewardRateFP[tranche];
     }
