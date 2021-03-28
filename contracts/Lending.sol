@@ -162,8 +162,7 @@ contract Lending is
         // gets withdrawn here
         withdrawClaim(msg.sender, bond.token, bond.originalPrice);
 
-        super._withdrawBond(bond);
-        delete bonds[bondId];
+        super._withdrawBond(bondId, bond);
     }
 
     function initBorrowYieldAccumulator(address token) external {

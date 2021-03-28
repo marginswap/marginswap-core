@@ -93,11 +93,14 @@ abstract contract BondLending is BaseLending {
         }
     }
 
-    function _withdrawBond(Bond storage bond) internal {
+    function _withdrawBond(uint256 bondId, Bond storage bond) internal {
         address token = bond.token;
         uint256 bucketIndex = getBucketIndex(token, bond.runtime);
+        uint256 returnAmount = bond.returnAmount;
+        address holder = bond.holder;
+
         uint256 interpolatedAmount =
-            (bond.originalPrice + bond.returnAmount) / 2;
+            (bond.originalPrice + returnAmount) / 2;
 
         LendingMetadata storage meta = lendingMeta[token];
         meta.totalLending -= interpolatedAmount;
@@ -110,15 +113,16 @@ abstract contract BondLending is BaseLending {
             bond.originalPrice
         );
 
+        delete bonds[bondId];
         if (
             meta.totalBorrowed > meta.totalLending ||
-            IERC20(token).balanceOf(fund()) < bond.returnAmount
+            IERC20(token).balanceOf(fund()) < returnAmount
         ) {
             // apparently there is a liquidity issue
-            emit LiquidityWarning(token, bond.holder, bond.returnAmount);
-            _makeFallbackBond(token, bond.holder, bond.returnAmount);
+            emit LiquidityWarning(token, holder, returnAmount);
+            _makeFallbackBond(token, holder, returnAmount);
         } else {
-            Fund(fund()).withdraw(token, bond.holder, bond.returnAmount);
+            Fund(fund()).withdraw(token, holder, returnAmount);
         }
     }
 
