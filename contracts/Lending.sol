@@ -139,9 +139,11 @@ contract Lending is
                 amount,
                 minReturn
             );
-            bondIds[msg.sender].push(bondIndex);
+            if (bondIndex > 0) {
+                bondIds[msg.sender].push(bondIndex);
 
-            stakeClaim(msg.sender, token, amount);
+                stakeClaim(msg.sender, token, amount);
+            }
         }
     }
 
