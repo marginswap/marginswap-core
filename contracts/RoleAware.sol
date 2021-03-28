@@ -6,7 +6,7 @@ import "./Roles.sol";
 /// Main characters are for service discovery
 /// Whereas roles are for access control
 contract RoleAware {
-    uint16 public constant WITHDRAWER = 1;
+    uint16 public constant FUND_TRANSFERER = 1;
     uint16 public constant MARGIN_CALLER = 2;
     uint16 public constant BORROWER = 3;
     uint16 public constant MARGIN_TRADER = 4;
@@ -87,8 +87,8 @@ contract RoleAware {
         return roleCache[contr][BORROWER];
     }
 
-    function isWithdrawer(address contr) internal view returns (bool) {
-        return roleCache[contr][WITHDRAWER];
+    function isFundTransferer(address contr) internal view returns (bool) {
+        return roleCache[contr][FUND_TRANSFERER];
     }
 
     function isMarginTrader(address contr) internal view returns (bool) {
