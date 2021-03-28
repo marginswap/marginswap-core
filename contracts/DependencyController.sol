@@ -45,6 +45,9 @@ contract DependencyController is RoleAware, Ownable, IDelegateOwner {
         for (uint256 i = 0; len > i; i++) {
             address contr = managedContracts[i];
             ownsAll = ownsAll && ownsContract(contr);
+            if (!ownsAll) {
+                break;
+            }
         }
     }
 
@@ -54,7 +57,9 @@ contract DependencyController is RoleAware, Ownable, IDelegateOwner {
         for (uint256 i = 0; len > i; i++) {
             address contr = managedContracts[i];
             ownsAll = ownsAll && ownsContractStrict(contr);
-        }
+            if (!ownsAll) {
+                break;
+            }}
     }
 
     function ownsContract(address contr) public view returns (bool) {
