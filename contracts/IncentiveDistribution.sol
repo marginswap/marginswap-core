@@ -13,15 +13,15 @@ struct Claim {
 
 contract IncentiveDistribution is RoleAware, Ownable {
     // fixed point number factor
-    uint256 constant FP32 = 2**32;
+    uint256 constant internal FP32 = 2**32;
     // the amount of contraction per thousand, per day
     // of the overal daily incentive distribution
     // https://en.wikipedia.org/wiki/Per_mil
-    uint256 constant contractionPerMil = 999;
+    uint256 constant public contractionPerMil = 999;
     // the period for which claims are batch updated
-    uint256 constant period = 4 hours;
-    uint256 constant periodsPerDay = 24 hours / period;
-    address immutable MFI;
+    uint256 constant public period = 4 hours;
+    uint256 constant public periodsPerDay = 24 hours / period;
+    address immutable public MFI;
 
     constructor(
         address _MFI,
