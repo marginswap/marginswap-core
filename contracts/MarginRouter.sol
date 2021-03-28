@@ -175,11 +175,10 @@ contract MarginRouter is RoleAware, IncentivizedHolder, Ownable {
     /// @dev internal helper swapping exact token for token on AMM
     function _swapExactT4T(
         address factory,
-        uint256 amountIn,
+        uint256[] memory amounts,
         uint256 amountOutMin,
         address[] calldata path
-    ) internal returns (uint256[] memory amounts) {
-        amounts = UniswapV2Library.getAmountsOut(factory, amountIn, path);
+    ) internal {
         require(
             amounts[amounts.length - 1] >= amountOutMin,
             "MarginRouter: INSUFFICIENT_OUTPUT_AMOUNT"
@@ -198,23 +197,23 @@ contract MarginRouter is RoleAware, IncentivizedHolder, Ownable {
         uint256 amountIn,
         uint256 amountOutMin,
         address[] calldata path
-    ) external returns (uint256[] memory) {
+    ) external returns (uint256[] memory amounts) {
         require(
             isAuthorizedFundTrader(msg.sender),
             "Calling contract is not authorized to trade with protocl funds"
         );
-        return _swapExactT4T(factory, amountIn, amountOutMin, path);
+        amounts = UniswapV2Library.getAmountsOut(factory, amountIn, path);
+        _swapExactT4T(factory, amounts, amountOutMin, path);
     }
 
     // @dev internal helper swapping exact token for token on on AMM
     function _swapT4ExactT(
         address factory,
-        uint256 amountOut,
+        uint256[] memory amounts,
         uint256 amountInMax,
         address[] calldata path
-    ) internal returns (uint256[] memory amounts) {
+    ) internal {
         // TODO minimum trade?
-        amounts = UniswapV2Library.getAmountsIn(factory, amountOut, path);
         require(
             amounts[0] <= amountInMax,
             "MarginRouter: EXCESSIVE_INPUT_AMOUNT"
@@ -233,12 +232,13 @@ contract MarginRouter is RoleAware, IncentivizedHolder, Ownable {
         uint256 amountOut,
         uint256 amountInMax,
         address[] calldata path
-    ) external returns (uint256[] memory) {
+    ) external returns (uint256[] memory amounts) {
         require(
             isAuthorizedFundTrader(msg.sender),
             "Calling contract is not authorized to trade with protocl funds"
         );
-        return _swapT4ExactT(factory, amountOut, amountInMax, path);
+        amounts = UniswapV2Library.getAmountsIn(factory, amountOut, path);
+        _swapT4ExactT(factory, amounts, amountInMax, path);
     }
 
     /// @dev entry point for swapping tokens held in cross margin account
@@ -254,14 +254,11 @@ contract MarginRouter is RoleAware, IncentivizedHolder, Ownable {
             Admin(feeController()).takeFeesFromInput(path[0], amountIn);
 
         requireAuthorizedAMM(ammFactory);
-        // swap
-        amounts = _swapExactT4T(
-            ammFactory,
-            amountIn - fees,
-            amountOutMin,
-            path
-        );
 
+        // swap
+        amounts = UniswapV2Library.getAmountsOut(ammFactory, amountIn - fees, path);
+
+        // checks that trader is within allowed lending bounds
         registerTrade(
             msg.sender,
             path[0],
@@ -269,6 +266,14 @@ contract MarginRouter is RoleAware, IncentivizedHolder, Ownable {
             amountIn,
             amounts[amounts.length - 1]
         );
+
+        _swapExactT4T(
+            ammFactory,
+            amounts,
+            amountOutMin,
+            path
+        );
+
     }
 
     /// @dev entry point for swapping tokens held in cross margin account
@@ -288,19 +293,22 @@ contract MarginRouter is RoleAware, IncentivizedHolder, Ownable {
 
         requireAuthorizedAMM(ammFactory);
         // swap
-        amounts = _swapT4ExactT(
-            ammFactory,
-            amountOut + fees,
-            amountInMax,
-            path
-        );
+        amounts = UniswapV2Library.getAmountsIn(ammFactory, amountOut + fees, path);
 
+        // checks that trader is within allowed lending bounds
         registerTrade(
             msg.sender,
             path[0],
             path[path.length - 1],
             amounts[0],
             amountOut
+        );
+
+        _swapT4ExactT(
+            ammFactory,
+            amounts,
+            amountInMax,
+            path
         );
     }
 
