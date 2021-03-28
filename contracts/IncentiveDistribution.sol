@@ -253,11 +253,8 @@ contract IncentiveDistribution is RoleAware, Ownable {
         returns (uint256 rewardAmount)
     {
         rewardAmount = calcRewardAmount(tranche, claim);
-
+        claim.startingRewardRateFP = aggregatePeriodicRewardRateFP[tranche];
 
         Fund(fund()).withdraw(MFI, claim.recipient, rewardAmount);
-
-
-        claim.startingRewardRateFP = aggregatePeriodicRewardRateFP[tranche];
     }
 }
