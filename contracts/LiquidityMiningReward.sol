@@ -12,7 +12,7 @@ contract LiquidityMiningReward is Ownable {
     IERC20 public stakeToken;
     mapping(address => uint256) public claimIds;
     mapping(address => uint256) public stakeAmounts;
-    IncentiveDistribution incentiveDistributor;
+    IncentiveDistribution internal incentiveDistributor;
     uint256 public incentiveStart;
 
     constructor(
