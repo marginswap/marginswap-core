@@ -3,6 +3,7 @@ pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import "@openzeppelin/contracts/utils/Address.sol";
 import "../interfaces/IWETH.sol";
 import "./RoleAware.sol";
 
@@ -77,6 +78,6 @@ contract Fund is RoleAware, Ownable {
     function withdrawETH(address recipient, uint256 withdrawalAmount) external {
         require(isWithdrawer(msg.sender), "Not authorized to withdraw");
         IWETH(WETH).withdraw(withdrawalAmount);
-        payable(recipient).transfer(withdrawalAmount);
+        Address.sendValue(payable(recipient), withdrawalAmount);
     }
 }
