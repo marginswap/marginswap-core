@@ -103,7 +103,7 @@ task('list-deployments', 'List all the deployed contracts for a network', async 
 });
 
 task('export-addresses', "Export deployment addresses to JSON file", async (args, hre) => {
-  const addresses = require('./artifacts/addresses');
+  const addresses = require('./build/addresses');
   const networkAddresses = Object.entries(await hre.deployments.all())
     .map(([name, deployRecord]:[string, Deployment]) => {
       return [name, deployRecord.address];
@@ -112,7 +112,7 @@ task('export-addresses', "Export deployment addresses to JSON file", async (args
   const stringRepresentation = JSON.stringify(addresses, null, 2);
   console.log(addresses);
 
-  fs.writeFileSync("./artifacts/addresses.json", stringRepresentation);
+  fs.writeFileSync("./build/addresses.json", stringRepresentation);
 });
 
 task('print-network', "Print network name", async (args, hre) => console.log(hre.network.name));
@@ -130,6 +130,9 @@ function infuraUrl(networkName: string) {
  * @type import('hardhat/config').HardhatUserConfig
  */
 export default {
+  paths: {
+    artifacts: './build/artifacts'
+  },
   defaultNetwork: "hardhat",
   networks: {
     hardhat: {
