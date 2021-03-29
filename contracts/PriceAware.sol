@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: GPL-2.0-only
+// SPDX-License-Identifier: BUSL-1.1
 pragma solidity ^0.8.0;
 
 import "./RoleAware.sol";
@@ -68,6 +68,26 @@ abstract contract PriceAware is Ownable, RoleAware {
             return getUpdatedPriceInPeg(token, inAmount);
         } else {
             return (inAmount * 1000 ether) / tokenPrice.tokenPer1k;
+        }
+    }
+
+    function viewCurrentPriceInPeg(address token, uint256 inAmount)
+        internal
+        view
+        returns (uint256)
+    {
+        if (token == peg) {
+            return inAmount;
+        } else {
+            TokenPrice storage tokenPrice = tokenPrices[token];
+            uint256[] memory pathAmounts =
+                MarginRouter(router()).getAmountsOut(
+                    UNI,
+                    inAmount,
+                    tokenPrice.liquidationPath
+                );
+            uint256 outAmount = pathAmounts[pathAmounts.length - 1];
+            return outAmount;
         }
     }
 
