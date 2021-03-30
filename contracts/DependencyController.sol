@@ -8,6 +8,10 @@ import "../interfaces/IDelegateOwner.sol";
 /// @dev Provides a single point of reference to verify ownership integrity
 /// within our system as well as performing cache invalidation for
 /// roles and inter-contract relationships
+/// The dependency controller owns the Roles contract and in turn is owned
+/// by a multisig wallet (0xEED9D1c6B4cdEcB3af070D85bfd394E7aF179CBd) during
+/// beta and will then be transfered to governance
+/// https://github.com/marginswap/governance
 contract DependencyController is RoleAware, Ownable, IDelegateOwner {
     constructor(address _roles) RoleAware(_roles) Ownable() {}
 
