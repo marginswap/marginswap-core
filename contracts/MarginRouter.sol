@@ -18,6 +18,9 @@ contract MarginRouter is RoleAware, IncentivizedHolder, Ownable {
     address public immutable WETH;
     address public constant UNI = 0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f;
     address public constant SUSHI = 0xC0AEe478e3658e2610c5F7A4A2E1777cE9e4f2Ac;
+
+    uint256 public constant feesPer10k = 10;
+
     /// emitted when a trader depoits on cross margin
     event CrossDeposit(
         address trader,
@@ -279,8 +282,7 @@ contract MarginRouter is RoleAware, IncentivizedHolder, Ownable {
         uint256 deadline
     ) external ensure(deadline) returns (uint256[] memory amounts) {
         // calc fees
-        uint256 fees =
-            Admin(feeController()).takeFeesFromInput(path[0], amountIn);
+        uint256 fees = takeFeesFromInput(amountIn);
 
         requireAuthorizedAMM(ammFactory);
 
@@ -314,11 +316,7 @@ contract MarginRouter is RoleAware, IncentivizedHolder, Ownable {
         uint256 deadline
     ) external ensure(deadline) returns (uint256[] memory amounts) {
         // calc fees
-        uint256 fees =
-            Admin(feeController()).takeFeesFromOutput(
-                path[path.length - 1],
-                amountOut
-            );
+        uint256 fees =takeFeesFromOutput(amountOut);
 
         requireAuthorizedAMM(ammFactory);
         // swap
@@ -399,5 +397,21 @@ contract MarginRouter is RoleAware, IncentivizedHolder, Ownable {
             ammFactory == UNI || ammFactory == SUSHI || factories[ammFactory],
             "Not using an authorized AMM"
         );
+    }
+
+    function takeFeesFromOutput(uint256 amount)
+        internal
+        pure
+        returns (uint256 fees)
+    {
+        fees = (feesPer10k * amount) / 10_000;
+    }
+
+    function takeFeesFromInput(uint256 amount)
+        internal
+        pure
+        returns (uint256 fees)
+    {
+        fees = (feesPer10k * amount) / (10_000 + feesPer10k);
     }
 }

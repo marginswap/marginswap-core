@@ -15,9 +15,6 @@ contract Admin is RoleAware, Ownable {
     uint256 public totalStakes;
     mapping(address => uint256) public claimIds;
 
-    uint256 public immutable feesPer10k;
-    mapping(address => uint256) public collectedFees;
-
     uint256 public maintenanceStakePerBlock = 10 ether;
     mapping(address => address) public nextMaintenanceStaker;
     mapping(address => mapping(address => bool)) public maintenanceDelegateTo;
@@ -27,14 +24,12 @@ contract Admin is RoleAware, Ownable {
     address public immutable lockedMFI;
 
     constructor(
-        uint256 _feesPer10k,
         address _MFI,
         address _lockedMFI,
         address lockedMFIDelegate,
         address _roles
     ) RoleAware(_roles) Ownable() {
         MFI = _MFI;
-        feesPer10k = _feesPer10k;
         maintenanceStakePerBlock = 1 ether;
         lockedMFI = _lockedMFI;
 
@@ -115,24 +110,6 @@ contract Admin is RoleAware, Ownable {
             "You can't withdraw while you're authorized staker"
         );
         _withdrawStake(msg.sender, amount, msg.sender);
-    }
-
-    function takeFeesFromOutput(address token, uint256 amount)
-        external
-        returns (uint256 fees)
-    {
-        require(isFeeSource(msg.sender), "Not authorized to source fees");
-        fees = (feesPer10k * amount) / 10_000;
-        collectedFees[token] += fees;
-    }
-
-    function takeFeesFromInput(address token, uint256 amount)
-        external
-        returns (uint256 fees)
-    {
-        require(isFeeSource(msg.sender), "Not authorized to source fees");
-        fees = (feesPer10k * amount) / (10_000 + feesPer10k);
-        collectedFees[token] += fees;
     }
 
     function depositMaintenanceStake(uint256 amount) external {
