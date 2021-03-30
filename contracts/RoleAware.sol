@@ -27,7 +27,7 @@ contract RoleAware {
     uint16 public constant INCENTIVE_DISTRIBUTION = 108;
     uint16 public constant TOKEN_ADMIN = 109;
 
-    Roles public roles;
+    Roles public immutable roles;
     mapping(uint16 => address) public mainCharacterCache;
     mapping(address => mapping(uint16 => bool)) public roleCache;
 
