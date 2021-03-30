@@ -63,43 +63,47 @@ abstract contract BondLending is BaseLending {
             );
         uint256 bondReturn = (yieldFP * amount) / FP32;
         if (bondReturn >= minReturn) {
-            if (Fund(fund()).depositFor(holder, token, amount)) {
-                uint256 interpolatedAmount = (amount + bondReturn) / 2;
-                totalLending[token] += interpolatedAmount;
+            Fund(fund()).depositFor(holder, token, amount);
+            uint256 interpolatedAmount = (amount + bondReturn) / 2;
+            lendingMeta[token].totalLending += interpolatedAmount;
 
-                totalLendingPerRuntime[token][
+            totalLendingPerRuntime[token][
                     bucketIndex
-                ] += interpolatedAmount;
+            ] += interpolatedAmount;
 
-                bondIndex = nextBondIndex;
-                nextBondIndex++;
+            bondIndex = nextBondIndex;
+            nextBondIndex++;
 
-                bonds[bondIndex] = Bond({
-                    holder: holder,
-                    token: token,
-                    originalPrice: amount,
-                    returnAmount: bondReturn,
-                    maturityTimestamp: block.timestamp + runtime,
-                    runtime: runtime,
-                    yieldFP: yieldFP
-                });
+            bonds[bondIndex] = Bond({
+                holder: holder,
+                token: token,
+                originalPrice: amount,
+                returnAmount: bondReturn,
+                maturityTimestamp: block.timestamp + runtime,
+                runtime: runtime,
+                yieldFP: yieldFP
+            });
 
-                updateSpeed(
-                    buyingSpeed[token],
-                    lastBought[token],
-                    bucketIndex,
-                    amount
-                );
-            }
+            updateSpeed(
+                buyingSpeed[token],
+                lastBought[token],
+                bucketIndex,
+                amount
+            );
         }
     }
 
-    function _withdrawBond(Bond storage bond) internal {
+    function _withdrawBond(uint256 bondId, Bond storage bond) internal {
         address token = bond.token;
         uint256 bucketIndex = getBucketIndex(token, bond.runtime);
+        uint256 returnAmount = bond.returnAmount;
+        address holder = bond.holder;
+
         uint256 interpolatedAmount =
-            (bond.originalPrice + bond.returnAmount) / 2;
-        totalLending[token] -= interpolatedAmount;
+            (bond.originalPrice + returnAmount) / 2;
+
+        LendingMetadata storage meta = lendingMeta[token];
+        meta.totalLending -= interpolatedAmount;
         totalLendingPerRuntime[token][bucketIndex] -= interpolatedAmount;
 
         updateSpeed(
@@ -109,13 +113,16 @@ abstract contract BondLending is BaseLending {
             bond.originalPrice
         );
 
+        delete bonds[bondId];
         if (
-            totalBorrowed[token] > totalLending[token] ||
-            !Fund(fund()).withdraw(token, bond.holder, bond.returnAmount)
+            meta.totalBorrowed > meta.totalLending ||
+            IERC20(token).balanceOf(fund()) < returnAmount
         ) {
             // apparently there is a liquidity issue
-            emit LiquidityWarning(token, bond.holder, bond.returnAmount);
-            _makeFallbackBond(token, bond.holder, bond.returnAmount);
+            emit LiquidityWarning(token, holder, returnAmount);
+            _makeFallbackBond(token, holder, returnAmount);
+        } else {
+            Fund(fund()).withdraw(token, holder, returnAmount);
         }
     }
 
@@ -142,8 +149,9 @@ abstract contract BondLending is BaseLending {
         yieldFP = runtimeYieldsFP[token][bucketIndex];
         uint256 lastUpdated = yieldLastUpdated[token][bucketIndex];
 
+        LendingMetadata storage meta = lendingMeta[token];
         uint256 bucketTarget =
-            (lendingTarget(token) * runtimeWeights[token][bucketIndex]) /
+            (lendingTarget(meta) * runtimeWeights[token][bucketIndex]) /
                 WEIGHT_TOTAL_10k;
 
         uint256 buying = buyingSpeed[token][bucketIndex];
@@ -220,10 +228,10 @@ abstract contract BondLending is BaseLending {
     function setRuntimeWeights(address token, uint256[] memory weights)
         external
     {
-        //require(
-        //    isTokenActivator(msg.sender),
-        //    "not autorized to set runtime weights"
-        //);
+        require(
+            isTokenActivator(msg.sender),
+            "not autorized to set runtime weights"
+        );
         require(
             runtimeWeights[token].length == 0 ||
                 runtimeWeights[token].length == weights.length,
@@ -242,7 +250,7 @@ abstract contract BondLending is BaseLending {
             uint256 hourlyYieldFP = (110 * FP32) / 100 / (24 * 365);
             uint256 bucketSize = diffMaxMinRuntime / weights.length;
 
-            for (uint24 i = 0; weights.length > i; i++) {
+            for (uint256 i = 0; weights.length > i; i++) {
                 uint256 runtime = minRuntime + bucketSize * i;
                 // Do a best guess of initializing
                 runtimeYieldsFP[token][i] =
@@ -260,6 +268,7 @@ abstract contract BondLending is BaseLending {
 
     function setMinRuntime(uint256 runtime) external onlyOwner {
         require(runtime > 1 hours, "Min runtime needs to be at least 1 hour");
+        require(maxRuntime > runtime, "Min runtime must be smaller than max runtime");
         minRuntime = runtime;
     }
 

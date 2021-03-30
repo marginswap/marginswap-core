@@ -2,11 +2,14 @@
 pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import "@openzeppelin/contracts/utils/Address.sol";
 import "../interfaces/IWETH.sol";
 import "./RoleAware.sol";
 
 contract Fund is RoleAware, Ownable {
-    address public WETH;
+    using SafeERC20 for IERC20;
+    address public immutable WETH;
     mapping(address => bool) public activeTokens;
 
     constructor(address _WETH, address _roles) Ownable() RoleAware(_roles) {
@@ -31,11 +34,9 @@ contract Fund is RoleAware, Ownable {
 
     function deposit(address depositToken, uint256 depositAmount)
         external
-        returns (bool)
     {
         require(activeTokens[depositToken], "Deposit token is not active");
-        return
-            IERC20(depositToken).transferFrom(
+            IERC20(depositToken).safeTransferFrom(
                 msg.sender,
                 address(this),
                 depositAmount
@@ -46,11 +47,10 @@ contract Fund is RoleAware, Ownable {
         address sender,
         address depositToken,
         uint256 depositAmount
-    ) external returns (bool) {
+    ) external {
         require(activeTokens[depositToken], "Deposit token is not active");
-        require(isWithdrawer(msg.sender), "Contract not authorized to deposit");
-        return
-            IERC20(depositToken).transferFrom(
+        require(isFundTransferer(msg.sender), "Contract not authorized to deposit for user");
+            IERC20(depositToken).safeTransferFrom(
                 sender,
                 address(this),
                 depositAmount
@@ -66,18 +66,18 @@ contract Fund is RoleAware, Ownable {
         address withdrawalToken,
         address recipient,
         uint256 withdrawalAmount
-    ) external returns (bool) {
+    ) external {
         require(
-            isWithdrawer(msg.sender),
+            isFundTransferer(msg.sender),
             "Contract not authorized to withdraw"
         );
-        return IERC20(withdrawalToken).transfer(recipient, withdrawalAmount);
+        IERC20(withdrawalToken).safeTransfer(recipient, withdrawalAmount);
     }
 
     // withdrawers role
     function withdrawETH(address recipient, uint256 withdrawalAmount) external {
-        require(isWithdrawer(msg.sender), "Not authorized to withdraw");
+        require(isFundTransferer(msg.sender), "Not authorized to withdraw");
         IWETH(WETH).withdraw(withdrawalAmount);
-        payable(recipient).transfer(withdrawalAmount);
+        Address.sendValue(payable(recipient), withdrawalAmount);
     }
 }

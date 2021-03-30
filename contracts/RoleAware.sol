@@ -6,32 +6,35 @@ import "./Roles.sol";
 /// Main characters are for service discovery
 /// Whereas roles are for access control
 contract RoleAware {
-    uint16 public constant WITHDRAWER = 1;
-    uint16 public constant MARGIN_CALLER = 2;
-    uint16 public constant BORROWER = 3;
-    uint16 public constant MARGIN_TRADER = 4;
-    uint16 public constant FEE_SOURCE = 5;
-    uint16 public constant LIQUIDATOR = 6;
-    uint16 public constant AUTHORIZED_FUND_TRADER = 7;
-    uint16 public constant INCENTIVE_REPORTER = 8;
-    uint16 public constant TOKEN_ACTIVATOR = 9;
-    uint16 public constant STAKE_PENALIZER = 10;
+    // we chose not to go with an enum
+    // to make this list easy to extend
+    uint256 constant FUND_TRANSFERER = 1;
+    uint256 constant MARGIN_CALLER = 2;
+    uint256 constant BORROWER = 3;
+    uint256 constant MARGIN_TRADER = 4;
+    uint256 constant FEE_SOURCE = 5;
+    uint256 constant LIQUIDATOR = 6;
+    uint256 constant AUTHORIZED_FUND_TRADER = 7;
+    uint256 constant INCENTIVE_REPORTER = 8;
+    uint256 constant TOKEN_ACTIVATOR = 9;
+    uint256 constant STAKE_PENALIZER = 10;
 
-    uint16 public constant FUND = 101;
-    uint16 public constant LENDING = 102;
-    uint16 public constant ROUTER = 103;
-    uint16 public constant MARGIN_TRADING = 104;
-    uint16 public constant FEE_CONTROLLER = 105;
-    uint16 public constant PRICE_CONTROLLER = 106;
-    uint16 public constant ADMIN = 107;
-    uint16 public constant INCENTIVE_DISTRIBUTION = 108;
-    uint16 public constant TOKEN_ADMIN = 109;
+    uint256 constant FUND = 101;
+    uint256 constant LENDING = 102;
+    uint256 constant ROUTER = 103;
+    uint256 constant MARGIN_TRADING = 104;
+    uint256 constant FEE_CONTROLLER = 105;
+    uint256 constant PRICE_CONTROLLER = 106;
+    uint256 constant ADMIN = 107;
+    uint256 constant INCENTIVE_DISTRIBUTION = 108;
+    uint256 constant TOKEN_ADMIN = 109;
 
-    Roles public roles;
-    mapping(uint16 => address) public mainCharacterCache;
-    mapping(address => mapping(uint16 => bool)) public roleCache;
+    Roles public immutable roles;
+    mapping(uint256 => address) public mainCharacterCache;
+    mapping(address => mapping(uint256 => bool)) public roleCache;
 
     constructor(address _roles) {
+        require(_roles != address(0), "Please provide valid roles address");
         roles = Roles(_roles);
     }
 
@@ -43,11 +46,11 @@ contract RoleAware {
         _;
     }
 
-    function updateRoleCache(uint16 role, address contr) public virtual {
+    function updateRoleCache(uint256 role, address contr) public virtual {
         roleCache[contr][role] = roles.getRole(role, contr);
     }
 
-    function updateMainCharacterCache(uint16 role) public virtual {
+    function updateMainCharacterCache(uint256 role) public virtual {
         mainCharacterCache[role] = roles.mainCharacters(role);
     }
 
@@ -87,8 +90,8 @@ contract RoleAware {
         return roleCache[contr][BORROWER];
     }
 
-    function isWithdrawer(address contr) internal view returns (bool) {
-        return roleCache[contr][WITHDRAWER];
+    function isFundTransferer(address contr) internal view returns (bool) {
+        return roleCache[contr][FUND_TRANSFERER];
     }
 
     function isMarginTrader(address contr) internal view returns (bool) {

@@ -8,5 +8,5 @@ interface IExecutor {
 
     function requiredProperties() external view returns (address[] memory);
 
-    function requiredRoles() external view returns (uint16[] memory);
+    function requiredRoles() external view returns (uint256[] memory);
 }

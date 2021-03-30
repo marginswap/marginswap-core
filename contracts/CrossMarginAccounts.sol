@@ -35,7 +35,7 @@ abstract contract CrossMarginAccounts is RoleAware, PriceAware {
     uint256 public liquidationThresholdPercent;
 
     /// @dev record of all cross margin accounts
-    mapping(address => CrossMarginAccount) marginAccounts;
+    mapping(address => CrossMarginAccount) internal marginAccounts;
     /// @dev total token caps
     mapping(address => uint256) public tokenCaps;
     /// @dev tracks total of short positions per token
@@ -43,49 +43,6 @@ abstract contract CrossMarginAccounts is RoleAware, PriceAware {
     /// @dev tracks total of long positions per token
     mapping(address => uint256) public totalLong;
     uint256 public coolingOffPeriod;
-
-    /// @dev view function to display account held assets state
-    function getHoldingAmounts(address trader)
-        external
-        view
-        returns (
-            address[] memory holdingTokens,
-            uint256[] memory holdingAmounts
-        )
-    {
-        CrossMarginAccount storage account = marginAccounts[trader];
-        holdingTokens = account.holdingTokens;
-
-        holdingAmounts = new uint256[](account.holdingTokens.length);
-        for (uint256 idx = 0; holdingTokens.length > idx; idx++) {
-            address tokenAddress = holdingTokens[idx];
-            holdingAmounts[idx] = account.holdings[tokenAddress];
-        }
-
-        (holdingTokens, holdingAmounts);
-    }
-
-    /// @dev view function to display account borrowing state
-    function getBorrowAmounts(address trader)
-        external
-        view
-        returns (address[] memory borrowTokens, uint256[] memory borrowAmounts)
-    {
-        CrossMarginAccount storage account = marginAccounts[trader];
-        borrowTokens = account.borrowTokens;
-
-        borrowAmounts = new uint256[](account.borrowTokens.length);
-        for (uint256 idx = 0; borrowTokens.length > idx; idx++) {
-            address tokenAddress = borrowTokens[idx];
-            borrowAmounts[idx] = Lending(lending()).viewBorrowInterest(
-                account.borrowed[tokenAddress],
-                tokenAddress,
-                account.borrowedYieldQuotientsFP[tokenAddress]
-            );
-        }
-
-        (borrowTokens, borrowAmounts);
-    }
 
     /// @dev view function to get loan amount in peg
     function viewLoanInPeg(address trader)
@@ -107,8 +64,6 @@ abstract contract CrossMarginAccounts is RoleAware, PriceAware {
         CrossMarginAccount storage account = marginAccounts[trader];
         return viewTokensInPeg(account.holdingTokens, account.holdings);
     }
-
-    /// @dev view function to get total holding amount in peg
 
     /// @dev last time this account deposited
     /// relevant for withdrawal window
@@ -194,6 +149,19 @@ abstract contract CrossMarginAccounts is RoleAware, PriceAware {
         if (account.borrowed[debtToken] > 0) {
             account.borrowedYieldQuotientsFP[debtToken] = Lending(lending())
                 .viewBorrowingYieldFP(debtToken);
+        } else {
+            delete account.borrowedYieldQuotientsFP[debtToken];
+
+            bool decrement = false;
+            for (uint256 i = 0; account.borrowTokens.length > i; i++) {
+                address currToken = account.borrowTokens[i];
+                if (currToken == debtToken) {
+                    decrement = true;
+                } else if (decrement) {
+                    account.borrowTokens[i - 1] = currToken;
+                }
+            }
+            account.borrowTokens.pop();
         }
     }
 

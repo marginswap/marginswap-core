@@ -13,14 +13,15 @@ struct Claim {
 
 contract IncentiveDistribution is RoleAware, Ownable {
     // fixed point number factor
-    uint256 constant FP32 = 2**32;
+    uint256 constant internal FP32 = 2**32;
     // the amount of contraction per thousand, per day
     // of the overal daily incentive distribution
-    uint256 constant contractionPerMil = 999;
+    // https://en.wikipedia.org/wiki/Per_mil
+    uint256 constant public contractionPerMil = 999;
     // the period for which claims are batch updated
-    uint256 constant period = 4 hours;
-    uint256 constant periodsPerDay = 24 hours / period;
-    address MFI;
+    uint256 constant public period = 4 hours;
+    uint256 constant public periodsPerDay = 24 hours / period;
+    address immutable public MFI;
 
     constructor(
         address _MFI,
@@ -99,6 +100,9 @@ contract IncentiveDistribution is RoleAware, Ownable {
         lastUpdatedPeriods[tranche] = currentPeriod;
     }
 
+    // @dev can be called by anyone, if they want to ensure rewards
+    // are distributed to a high level of accuracy (if several days
+    // pass without update rewards will be slightly underestimated)
     function forcePeriodTotalUpdate(uint8 tranche) external {
         updatePeriodTotals(tranche);
     }
@@ -210,9 +214,7 @@ contract IncentiveDistribution is RoleAware, Ownable {
 
         if (claim.startingRewardRateFP > 0) {
             _withdrawReward(tranche, claim);
-            delete claim.recipient;
-            delete claim.startingRewardRateFP;
-            delete claim.amount;
+            delete claims[claimId];
         }
     }
 
@@ -253,12 +255,8 @@ contract IncentiveDistribution is RoleAware, Ownable {
         returns (uint256 rewardAmount)
     {
         rewardAmount = calcRewardAmount(tranche, claim);
-
-        require(
-            Fund(fund()).withdraw(MFI, claim.recipient, rewardAmount),
-            "There seems to be a lack of MFI in the incentive fund!"
-        );
-
         claim.startingRewardRateFP = aggregatePeriodicRewardRateFP[tranche];
+
+        Fund(fund()).withdraw(MFI, claim.recipient, rewardAmount);
     }
 }

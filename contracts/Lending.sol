@@ -29,6 +29,8 @@ contract Lending is
         address token,
         uint256 yieldQuotientFP
     ) external returns (uint256 balanceWithInterest) {
+        require(isBorrower(msg.sender), "Not an approved borrower");
+
         YieldAccumulator storage yA = borrowYieldAccumulators[token];
         balanceWithInterest = applyInterest(
             balance,
@@ -37,7 +39,8 @@ contract Lending is
         );
 
         uint256 deltaAmount = balanceWithInterest - balance;
-        totalBorrowed[token] += deltaAmount;
+        LendingMetadata storage meta = lendingMeta[token];
+        meta.totalBorrowed += deltaAmount;
     }
 
     /// @dev view function to get current borrowing interest
@@ -59,9 +62,10 @@ contract Lending is
     function registerBorrow(address token, uint256 amount) external {
         require(isBorrower(msg.sender), "Not an approved borrower");
         require(Fund(fund()).activeTokens(token), "Not an approved token");
-        totalBorrowed[token] += amount;
+        LendingMetadata storage meta = lendingMeta[token];
+        meta.totalBorrowed += amount;
         require(
-            totalLending[token] >= totalBorrowed[token],
+            meta.totalLending >= meta.totalBorrowed,
             "Insufficient capital to lend, try again later!"
         );
     }
@@ -69,7 +73,7 @@ contract Lending is
     /// @dev gets called by router if loan is extinguished
     function payOff(address token, uint256 amount) external {
         require(isBorrower(msg.sender), "Not an approved borrower");
-        totalBorrowed[token] -= amount;
+        lendingMeta[token].totalBorrowed -= amount;
     }
 
     /// @dev get the borrow yield
@@ -107,11 +111,10 @@ contract Lending is
 
     /// @dev buy hourly bond subscription
     function buyHourlyBondSubscription(address token, uint256 amount) external {
-        if (lendingTarget(token) >= totalLending[token] + amount) {
-            require(
-                Fund(fund()).depositFor(msg.sender, token, amount),
-                "Could not transfer bond deposit token to fund"
-            );
+        LendingMetadata storage meta = lendingMeta[token];
+        if (lendingTarget(meta) >= meta.totalLending + amount) {
+            Fund(fund()).depositFor(msg.sender, token, amount);
+
             super._makeHourlyBond(token, msg.sender, amount);
 
             stakeClaim(msg.sender, token, amount);
@@ -125,8 +128,9 @@ contract Lending is
         uint256 amount,
         uint256 minReturn
     ) external returns (uint256 bondIndex) {
+        LendingMetadata storage meta = lendingMeta[token];
         if (
-            lendingTarget(token) >= totalLending[token] + amount &&
+            lendingTarget(meta) >= meta.totalLending + amount &&
             maxRuntime >= runtime &&
             runtime >= minRuntime
         ) {
@@ -137,9 +141,11 @@ contract Lending is
                 amount,
                 minReturn
             );
-            bondIds[msg.sender].push(bondIndex);
+            if (bondIndex > 0) {
+                bondIds[msg.sender].push(bondIndex);
 
-            stakeClaim(msg.sender, token, amount);
+                stakeClaim(msg.sender, token, amount);
+            }
         }
     }
 
@@ -151,13 +157,12 @@ contract Lending is
             block.timestamp > bond.maturityTimestamp,
             "bond is still immature"
         );
-
-        super._withdrawBond(bond);
-        delete bonds[bondId];
         // in case of a shortfall, governance can step in to provide
         // additonal compensation beyond the usual incentive which
         // gets withdrawn here
         withdrawClaim(msg.sender, bond.token, bond.originalPrice);
+
+        super._withdrawBond(bondId, bond);
     }
 
     function initBorrowYieldAccumulator(address token) external {
@@ -165,6 +170,9 @@ contract Lending is
             isTokenActivator(msg.sender),
             "not autorized to init yield accumulator"
         );
+        require(borrowYieldAccumulators[token].accumulatorFP == 0,
+                "trying to re-initialize yield accumulator");
+
         borrowYieldAccumulators[token].accumulatorFP = FP32;
     }
 

@@ -5,7 +5,7 @@ import "./IncentiveDistribution.sol";
 import "./RoleAware.sol";
 
 /// @dev helper class to facilitate staking and unstaking
-/// within the incentive system
+/// within the incentive system.
 abstract contract IncentivizedHolder is RoleAware {
     // here we cache incentive tranches to save on a bit of gas
     mapping(address => uint8) public incentiveTranches;
@@ -33,7 +33,11 @@ abstract contract IncentivizedHolder is RoleAware {
             iD.addToClaimAmount(tranche, claimId, amount);
         } else {
             claimId = iD.startClaim(tranche, claimant, amount);
-            claimIds[claimant][token] = claimId;
+
+            // check that distribution hasn't ended yet
+            if(claimId > 0) {
+                claimIds[claimant][token] = claimId;
+            }
         }
     }
 
@@ -43,11 +47,23 @@ abstract contract IncentivizedHolder is RoleAware {
         uint256 amount
     ) internal {
         uint256 claimId = claimIds[claimant][token];
+        if (claimId > 0) {
+            uint8 tranche = incentiveTranches[token];
+            // this does not end claims if they zero out, but we are willing
+            // to sacrifice the gas refund from zeroing out for simplicity
+            // sake and saving storage cost wwhen starting a claim
+            IncentiveDistribution(incentiveDistributor()).subtractFromClaimAmount(
+                tranche,
+                claimId,
+                amount
+            );
+        }
+    }
+
+    function endClaim(address claimant, address token) internal {
+        uint256 claimId = claimIds[claimant][token];
         uint8 tranche = incentiveTranches[token];
-        IncentiveDistribution(incentiveDistributor()).subtractFromClaimAmount(
-            tranche,
-            claimId,
-            amount
-        );
+        IncentiveDistribution(incentiveDistributor()).endClaim(tranche, claimId);
+        claimIds[claimant][token] = 0;
     }
 }

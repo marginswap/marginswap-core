@@ -39,7 +39,7 @@ contract TokenAdmin is RoleAware, Ownable, IDelegateOwner {
         uint256 exposureCap,
         uint256 lendingBuffer,
         uint256 incentiveWeight,
-        address[] memory liquidationPath
+        address[] calldata liquidationPath
     ) external onlyOwner {
         require(!Fund(fund()).activeTokens(token), "Token already is active");
 

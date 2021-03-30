@@ -5,7 +5,7 @@ import "./SelfDestructReturningExec.sol";
 import "../TokenAdmin.sol";
 
 contract TokenActivation is SelfDestructReturningExec {
-    uint16 public constant TOKEN_ADMIN = 109;
+    uint256 public constant TOKEN_ADMIN = 109;
     address[] public tokens;
     uint256[] public exposureCaps;
     uint256[] public lendingBuffers;

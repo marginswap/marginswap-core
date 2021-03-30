@@ -15,7 +15,7 @@ contract MarginRouter is RoleAware, IncentivizedHolder, Ownable {
     /// different uniswap compatible factories to talk to
     mapping(address => bool) public factories;
     /// wrapped ETH ERC20 contract
-    address public WETH;
+    address public immutable WETH;
     address public constant UNI = 0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f;
     address public constant SUSHI = 0xC0AEe478e3658e2610c5F7A4A2E1777cE9e4f2Ac;
     /// emitted when a trader depoits on cross margin
@@ -67,10 +67,8 @@ contract MarginRouter is RoleAware, IncentivizedHolder, Ownable {
     function crossDeposit(address depositToken, uint256 depositAmount)
         external
     {
-        require(
-            Fund(fund()).depositFor(msg.sender, depositToken, depositAmount),
-            "Cannot transfer deposit to margin account"
-        );
+        Fund(fund()).depositFor(msg.sender, depositToken, depositAmount);
+
         uint256 extinguishAmount =
             IMarginTrading(marginTrading()).registerDeposit(
                 msg.sender,
@@ -109,10 +107,7 @@ contract MarginRouter is RoleAware, IncentivizedHolder, Ownable {
             withdrawToken,
             withdrawAmount
         );
-        require(
-            Fund(fund()).withdraw(withdrawToken, msg.sender, withdrawAmount),
-            "Could not withdraw from fund"
-        );
+        Fund(fund()).withdraw(withdrawToken, msg.sender, withdrawAmount);
         emit CrossWithdraw(msg.sender, withdrawToken, withdrawAmount);
     }
 
@@ -137,6 +132,19 @@ contract MarginRouter is RoleAware, IncentivizedHolder, Ownable {
 
         stakeClaim(msg.sender, borrowToken, borrowAmount);
         emit CrossBorrow(msg.sender, borrowToken, borrowAmount);
+    }
+
+    /// @dev close an account that is no longer borrowing and return gains
+    function crossCloseAccount() external {
+        (address[] memory holdingTokens,
+         uint256[] memory holdingAmounts) = IMarginTrading(marginTrading()).getHoldingAmounts(msg.sender);
+
+        // requires all debts paid off
+        IMarginTrading(marginTrading()).registerLiquidation(msg.sender);
+
+        for (uint256 i = 0; holdingTokens.length > i; i++) {
+            Fund(fund()).withdraw(holdingTokens[i], msg.sender, holdingAmounts[i]);
+        }
     }
 
     // **** SWAP ****
@@ -167,22 +175,18 @@ contract MarginRouter is RoleAware, IncentivizedHolder, Ownable {
     /// @dev internal helper swapping exact token for token on AMM
     function _swapExactT4T(
         address factory,
-        uint256 amountIn,
+        uint256[] memory amounts,
         uint256 amountOutMin,
         address[] calldata path
-    ) internal returns (uint256[] memory amounts) {
-        amounts = UniswapV2Library.getAmountsOut(factory, amountIn, path);
+    ) internal {
         require(
             amounts[amounts.length - 1] >= amountOutMin,
             "MarginRouter: INSUFFICIENT_OUTPUT_AMOUNT"
         );
-        require(
-            Fund(fund()).withdraw(
+        Fund(fund()).withdraw(
                 path[0],
                 UniswapV2Library.pairFor(factory, path[0], path[1]),
                 amounts[0]
-            ),
-            "MarginRouter: Insufficient lending funds"
         );
         _swap(factory, amounts, path, fund());
     }
@@ -193,34 +197,31 @@ contract MarginRouter is RoleAware, IncentivizedHolder, Ownable {
         uint256 amountIn,
         uint256 amountOutMin,
         address[] calldata path
-    ) external returns (uint256[] memory) {
+    ) external returns (uint256[] memory amounts) {
         require(
             isAuthorizedFundTrader(msg.sender),
             "Calling contract is not authorized to trade with protocl funds"
         );
-        return _swapExactT4T(factory, amountIn, amountOutMin, path);
+        amounts = UniswapV2Library.getAmountsOut(factory, amountIn, path);
+        _swapExactT4T(factory, amounts, amountOutMin, path);
     }
 
     // @dev internal helper swapping exact token for token on on AMM
     function _swapT4ExactT(
         address factory,
-        uint256 amountOut,
+        uint256[] memory amounts,
         uint256 amountInMax,
         address[] calldata path
-    ) internal returns (uint256[] memory amounts) {
+    ) internal {
         // TODO minimum trade?
-        amounts = UniswapV2Library.getAmountsIn(factory, amountOut, path);
         require(
             amounts[0] <= amountInMax,
             "MarginRouter: EXCESSIVE_INPUT_AMOUNT"
         );
-        require(
-            Fund(fund()).withdraw(
+        Fund(fund()).withdraw(
                 path[0],
                 UniswapV2Library.pairFor(factory, path[0], path[1]),
                 amounts[0]
-            ),
-            "MarginRouter: Insufficient lending funds"
         );
         _swap(factory, amounts, path, fund());
     }
@@ -231,12 +232,13 @@ contract MarginRouter is RoleAware, IncentivizedHolder, Ownable {
         uint256 amountOut,
         uint256 amountInMax,
         address[] calldata path
-    ) external returns (uint256[] memory) {
+    ) external returns (uint256[] memory amounts) {
         require(
             isAuthorizedFundTrader(msg.sender),
             "Calling contract is not authorized to trade with protocl funds"
         );
-        return _swapT4ExactT(factory, amountOut, amountInMax, path);
+        amounts = UniswapV2Library.getAmountsIn(factory, amountOut, path);
+        _swapT4ExactT(factory, amounts, amountInMax, path);
     }
 
     /// @dev entry point for swapping tokens held in cross margin account
@@ -249,17 +251,14 @@ contract MarginRouter is RoleAware, IncentivizedHolder, Ownable {
     ) external ensure(deadline) returns (uint256[] memory amounts) {
         // calc fees
         uint256 fees =
-            Admin(feeController()).subtractTradingFees(path[0], amountIn);
+            Admin(feeController()).takeFeesFromInput(path[0], amountIn);
 
         requireAuthorizedAMM(ammFactory);
-        // swap
-        amounts = _swapExactT4T(
-            ammFactory,
-            amountIn - fees,
-            amountOutMin,
-            path
-        );
 
+        // swap
+        amounts = UniswapV2Library.getAmountsOut(ammFactory, amountIn - fees, path);
+
+        // checks that trader is within allowed lending bounds
         registerTrade(
             msg.sender,
             path[0],
@@ -267,6 +266,14 @@ contract MarginRouter is RoleAware, IncentivizedHolder, Ownable {
             amountIn,
             amounts[amounts.length - 1]
         );
+
+        _swapExactT4T(
+            ammFactory,
+            amounts,
+            amountOutMin,
+            path
+        );
+
     }
 
     /// @dev entry point for swapping tokens held in cross margin account
@@ -279,26 +286,29 @@ contract MarginRouter is RoleAware, IncentivizedHolder, Ownable {
     ) external ensure(deadline) returns (uint256[] memory amounts) {
         // calc fees
         uint256 fees =
-            Admin(feeController()).addTradingFees(
+            Admin(feeController()).takeFeesFromOutput(
                 path[path.length - 1],
                 amountOut
             );
 
         requireAuthorizedAMM(ammFactory);
         // swap
-        amounts = _swapT4ExactT(
-            ammFactory,
-            amountOut + fees,
-            amountInMax,
-            path
-        );
+        amounts = UniswapV2Library.getAmountsIn(ammFactory, amountOut + fees, path);
 
+        // checks that trader is within allowed lending bounds
         registerTrade(
             msg.sender,
             path[0],
             path[path.length - 1],
             amounts[0],
             amountOut
+        );
+
+        _swapT4ExactT(
+            ammFactory,
+            amounts,
+            amountInMax,
+            path
         );
     }
 

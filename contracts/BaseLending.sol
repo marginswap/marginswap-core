@@ -6,10 +6,13 @@ abstract contract BaseLending is RoleAware, Ownable {
     uint256 constant FP32 = 2**32;
     uint256 constant ACCUMULATOR_INIT = 10**18;
 
-    mapping(address => uint256) public totalLending;
-    mapping(address => uint256) public totalBorrowed;
-    mapping(address => uint256) public lendingBuffer;
-    mapping(address => uint256) public lendingCap;
+    struct LendingMetadata {
+        uint256 totalLending;
+        uint256 totalBorrowed;
+        uint256 lendingBuffer;
+        uint256 lendingCap;
+    }
+    mapping(address => LendingMetadata) public lendingMeta;
 
     uint256 public maxHourlyYieldFP;
     uint256 public yieldChangePerSecondFP;
@@ -45,10 +48,7 @@ abstract contract BaseLending is RoleAware, Ownable {
             buyingSpeed >= withdrawingSpeed
         ) {
             yieldFP -= min(yieldFP, yieldDiff);
-        } else if (
-            bucketTarget > totalLendingInBucket &&
-            withdrawingSpeed > buyingSpeed
-        ) {
+        } else {
             yieldFP += yieldDiff;
             if (yieldFP > bucketMaxYield) {
                 yieldFP = bucketMaxYield;
@@ -71,9 +71,14 @@ abstract contract BaseLending is RoleAware, Ownable {
         uint256 amount
     ) internal virtual;
 
-    function lendingTarget(address token) public view returns (uint256) {
+    function lendingTarget(LendingMetadata storage meta) internal view returns (uint256) {
         return
-            min(lendingCap[token], totalBorrowed[token] + lendingBuffer[token]);
+            min(meta.lendingCap, meta.totalBorrowed + meta.lendingBuffer);
+    }
+
+    function viewLendingTarget(address token) external view returns (uint256) {
+        LendingMetadata storage meta = lendingMeta[token];
+        return lendingTarget(meta);
     }
 
     function setLendingCap(address token, uint256 cap) external {
@@ -81,7 +86,7 @@ abstract contract BaseLending is RoleAware, Ownable {
             isTokenActivator(msg.sender),
             "not authorized to set lending cap"
         );
-        lendingCap[token] = cap;
+        lendingMeta[token].lendingCap = cap;
     }
 
     function setLendingBuffer(address token, uint256 buffer) external {
@@ -89,7 +94,7 @@ abstract contract BaseLending is RoleAware, Ownable {
             isTokenActivator(msg.sender),
             "not autorized to set lending buffer"
         );
-        lendingBuffer[token] = buffer;
+        lendingMeta[token].lendingBuffer = buffer;
     }
 
     function setMaxHourlyYieldFP(uint256 maxYieldFP) external onlyOwner {

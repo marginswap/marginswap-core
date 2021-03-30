@@ -10,12 +10,12 @@ import "./CrossMarginTrading.sol";
 /// @dev Here we support staking for MFI incentives as well as
 /// staking to perform the maintenance role.
 contract Admin is RoleAware, Ownable {
-    address MFI;
+    address public immutable MFI;
     mapping(address => uint256) public stakes;
     uint256 public totalStakes;
     mapping(address => uint256) public claimIds;
 
-    uint256 feesPer10k;
+    uint256 public immutable feesPer10k;
     mapping(address => uint256) public collectedFees;
 
     uint256 public maintenanceStakePerBlock = 10 ether;
@@ -24,7 +24,7 @@ contract Admin is RoleAware, Ownable {
     address public currentMaintenanceStaker;
     address public prevMaintenanceStaker;
     uint256 public currentMaintenanceStakerStartBlock;
-    address public lockedMFI;
+    address public immutable lockedMFI;
 
     constructor(
         uint256 _feesPer10k,
@@ -47,10 +47,10 @@ contract Admin is RoleAware, Ownable {
         // by fees like any other maintainer
         // furthermore others could step in to liquidate via the attacker route
         // and take away the team fees if they were delinquent
-        nextMaintenanceStaker[lockedMFI] = lockedMFI;
-        currentMaintenanceStaker = lockedMFI;
-        prevMaintenanceStaker = lockedMFI;
-        maintenanceDelegateTo[lockedMFI][lockedMFIDelegate];
+        nextMaintenanceStaker[_lockedMFI] = _lockedMFI;
+        currentMaintenanceStaker = _lockedMFI;
+        prevMaintenanceStaker = _lockedMFI;
+        maintenanceDelegateTo[_lockedMFI][lockedMFIDelegate];
         currentMaintenanceStakerStartBlock = block.number;
     }
 
@@ -59,10 +59,8 @@ contract Admin is RoleAware, Ownable {
     }
 
     function _stake(address holder, uint256 amount) internal {
-        require(
-            Fund(fund()).depositFor(holder, MFI, amount),
-            "Could not deposit stake funds (perhaps make allowance to fund contract?"
-        );
+        Fund(fund()).depositFor(holder, MFI, amount);
+
         stakes[holder] += amount;
         totalStakes += amount;
 
@@ -95,12 +93,10 @@ contract Admin is RoleAware, Ownable {
     ) internal {
         uint256 stakeAmount = stakes[holder];
         // overflow failure desirable
-        stakes[holder] = amount;
+        stakes[holder] -= amount;
         totalStakes -= amount;
-        require(
-            Fund(fund()).withdraw(MFI, recipient, amount),
-            "Insufficient funds -- something went really wrong."
-        );
+        Fund(fund()).withdraw(MFI, recipient, amount);
+
         if (stakeAmount == amount) {
             IncentiveDistribution(incentiveDistributor()).endClaim(
                 0,
@@ -121,7 +117,7 @@ contract Admin is RoleAware, Ownable {
         _withdrawStake(msg.sender, amount, msg.sender);
     }
 
-    function addTradingFees(address token, uint256 amount)
+    function takeFeesFromOutput(address token, uint256 amount)
         external
         returns (uint256 fees)
     {
@@ -130,7 +126,7 @@ contract Admin is RoleAware, Ownable {
         collectedFees[token] += fees;
     }
 
-    function subtractTradingFees(address token, uint256 amount)
+    function takeFeesFromInput(address token, uint256 amount)
         external
         returns (uint256 fees)
     {
@@ -181,7 +177,7 @@ contract Admin is RoleAware, Ownable {
                 currentMaintenanceStaker = nextOne;
             } else {
                 currentMaintenanceStakerStartBlock +=
-                    stakes[currentMaintenanceStaker] /
+                    currentStake /
                     maintenanceStakePerBlock;
 
                 prevMaintenanceStaker = currentMaintenanceStaker;
@@ -212,7 +208,7 @@ contract Admin is RoleAware, Ownable {
                 currentStake = getMaintenanceStakerStake(staker);
             } else {
                 startBlock +=
-                    stakes[currentMaintenanceStaker] /
+                    currentStake /
                     maintenanceStakePerBlock;
                 staker = nextMaintenanceStaker[staker];
                 currentStake = getMaintenanceStakerStake(staker);

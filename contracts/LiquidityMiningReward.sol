@@ -9,11 +9,11 @@ import "./IncentiveDistribution.sol";
 contract LiquidityMiningReward is Ownable {
     using SafeERC20 for IERC20;
 
-    IERC20 public stakeToken;
+    IERC20 public immutable stakeToken;
     mapping(address => uint256) public claimIds;
     mapping(address => uint256) public stakeAmounts;
-    IncentiveDistribution incentiveDistributor;
-    uint256 public incentiveStart;
+    IncentiveDistribution internal immutable incentiveDistributor;
+    uint256 public immutable incentiveStart;
 
     constructor(
         address _incentiveDistributor,
@@ -23,13 +23,6 @@ contract LiquidityMiningReward is Ownable {
         incentiveDistributor = IncentiveDistribution(_incentiveDistributor);
         stakeToken = IERC20(_stakeToken);
         incentiveStart = startTimestamp;
-    }
-
-    function migrateIncentiveDistributor(address newDistributor)
-        external
-        onlyOwner
-    {
-        incentiveDistributor = IncentiveDistribution(newDistributor);
     }
 
     function depositStake(uint256 amount) external {
@@ -60,7 +53,6 @@ contract LiquidityMiningReward is Ownable {
         uint256 stakeAmount = stakeAmounts[msg.sender];
         require(stakeAmount >= amount, "Not enough stake to withdraw");
 
-        stakeToken.safeTransfer(msg.sender, amount);
         stakeAmounts[msg.sender] = stakeAmount - amount;
 
         if (stakeAmount == amount) {
@@ -73,6 +65,8 @@ contract LiquidityMiningReward is Ownable {
                 amount
             );
         }
+
+        stakeToken.safeTransfer(msg.sender, amount);
     }
 
     function withdrawReward() external returns (uint256) {

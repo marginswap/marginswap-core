@@ -28,13 +28,13 @@ abstract contract CrossMarginLiquidation is CrossMarginAccounts {
     }
 
     mapping(address => Liquidation) liquidationAmounts;
-    address[] sellTokens;
-    address[] buyTokens;
-    address[] tradersToLiquidate;
+    address[] internal sellTokens;
+    address[] internal buyTokens;
+    address[] internal tradersToLiquidate;
 
     mapping(address => uint256) public maintenanceFailures;
     mapping(address => AccountLiqRecord) public stakeAttackRecords;
-    uint256 public avgLiquidationPerBlock = 10;
+    uint256 public avgLiquidationPerCall = 10;
 
     uint256 public liqStakeAttackWindow = 5;
     uint256 public MAINTAINER_CUT_PERCENT = 5;
@@ -154,19 +154,15 @@ abstract contract CrossMarginLiquidation is CrossMarginAccounts {
             Admin a = Admin(admin());
             uint256 penalty =
                 (a.maintenanceStakePerBlock() * attackerCut) /
-                    avgLiquidationPerBlock;
+                    avgLiquidationPerCall;
             a.penalizeMaintenanceStake(
                 liqAttackRecord.loser,
                 penalty,
                 liqAttackRecord.stakeAttacker
             );
 
-            liqAttackRecord.amount = 0;
-            liqAttackRecord.stakeAttacker = address(0);
-            liqAttackRecord.blockNum = 0;
-            liqAttackRecord.loser = address(0);
-
-            returnAmount -= attackerCut;
+            // return remainder, after cut was taken to authorized stakekr
+            returnAmount = liqAttackRecord.amount - attackerCut;
         }
     }
 
@@ -174,12 +170,14 @@ abstract contract CrossMarginLiquidation is CrossMarginAccounts {
         external
     {
         for (uint256 i = 0; liquidatedAccounts.length > i; i++) {
+            address liqAccount = liquidatedAccounts[i];
             AccountLiqRecord storage liqAttackRecord =
-                stakeAttackRecords[liquidatedAccounts[i]];
+                stakeAttackRecords[liqAccount];
             if (
                 block.number > liqAttackRecord.blockNum + liqStakeAttackWindow
             ) {
                 _disburseLiqAttack(liqAttackRecord);
+                delete stakeAttackRecords[liqAccount];
             }
         }
     }
@@ -189,7 +187,7 @@ abstract contract CrossMarginLiquidation is CrossMarginAccounts {
             address buyToken = buyTokens[tokenIdx];
             Liquidation storage liq = liquidationAmounts[buyToken];
             if (liq.buy > liq.sell) {
-                pegAmount += PriceAware.liquidateToPeg(
+                pegAmount += PriceAware.liquidateFromPeg(
                     buyToken,
                     liq.buy - liq.sell
                 );
@@ -221,12 +219,13 @@ abstract contract CrossMarginLiquidation is CrossMarginAccounts {
             Admin(admin()).viewCurrentMaintenanceStaker();
         return
             maintenanceFailures[currentMaintainer] >
-            failureThreshold * avgLiquidationPerBlock;
+            failureThreshold * avgLiquidationPerCall;
     }
 
     /// called by maintenance stakers to liquidate accounts below liquidation threshold
     function liquidate(address[] memory liquidationCandidates)
         external
+        noIntermediary
         returns (uint256 maintainerCut)
     {
         bool isAuthorized = Admin(admin()).isAuthorizedStaker(msg.sender);
@@ -236,9 +235,7 @@ abstract contract CrossMarginLiquidation is CrossMarginAccounts {
         // * aggregates both sell and buy side targets to be liquidated
         // * returns attacker cuts to them
         // * aggregates any returned fees from unauthorized (attacking) attempts
-        uint256 attackReturns2Authorized =
-            calcLiquidationAmounts(liquidationCandidates, isAuthorized);
-        maintainerCut = attackReturns2Authorized;
+        maintainerCut = calcLiquidationAmounts(liquidationCandidates, isAuthorized);
 
         uint256 sale2pegAmount = liquidateToPeg();
         uint256 peg2targetCost = liquidateFromPeg();
@@ -304,9 +301,13 @@ abstract contract CrossMarginLiquidation is CrossMarginAccounts {
             deleteAccount(account);
         }
 
-        avgLiquidationPerBlock =
-            (avgLiquidationPerBlock * 99 + maintainerCut) /
+        avgLiquidationPerCall =
+            (avgLiquidationPerCall * 99 + maintainerCut) /
             100;
+
+        if (canTakeNow) {
+            Fund(fund()).withdraw(PriceAware.peg, msg.sender, maintainerCut);
+        }
 
         address currentMaintainer = Admin(admin()).getUpdatedCurrentStaker();
         if (isAuthorized) {
