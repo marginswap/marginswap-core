@@ -17,7 +17,7 @@ contract CrossMarginTradingTest is CrossMarginTrading {
         returns (uint256)
     {
         if (inAmount > 0) {
-            confidentUpdatePriceInPeg(tokenPrices[token], inAmount, inAmount);
+            updatePriceInPeg(tokenPrices[token], inAmount, inAmount);
         }
         return inAmount;
     }

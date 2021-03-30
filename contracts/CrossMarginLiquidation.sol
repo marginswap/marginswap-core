@@ -225,6 +225,7 @@ abstract contract CrossMarginLiquidation is CrossMarginAccounts {
     /// called by maintenance stakers to liquidate accounts below liquidation threshold
     function liquidate(address[] memory liquidationCandidates)
         external
+        noIntermediary
         returns (uint256 maintainerCut)
     {
         bool isAuthorized = Admin(admin()).isAuthorizedStaker(msg.sender);

@@ -12,14 +12,23 @@ struct TokenPrice {
     address[] inverseLiquidationPath;
 }
 
+/// @dev The protocol features several mechanisms to prevent vulnerability to
+/// price manipulation:
+/// 1) global exposure caps on all tokens which need to be raised gradually
+///    during the process of introducing a new token, making attacks unprofitable
+///    due to lack  of scale
+/// 2) Exponential moving average with cautious price update. Prices for estimating
+///    how much a trader can borrow need not be extremely current and precise, mainly
+///    they must be resilient against extreme manipulation
+/// 3) Liquidators may not call from a contract address, to prevent extreme forms of
+///    of front-running and other price manipulation.
 abstract contract PriceAware is Ownable, RoleAware {
     address public constant UNI = 0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f;
     address public peg;
     mapping(address => TokenPrice) public tokenPrices;
     /// update window in blocks
     uint16 public priceUpdateWindow = 8;
-    uint256 public TEPID_UPDATE_RATE_PERMIL = 20;
-    uint256 public CONFIDENT_UPDATE_RATE_PERMIL = 650;
+    uint256 public UPDATE_RATE_PERMIL = 80;
     uint256 UPDATE_MAX_PEG_AMOUNT = 50_000;
     uint256 UPDATE_MIN_PEG_AMOUNT = 1_000;
 
@@ -31,19 +40,15 @@ abstract contract PriceAware is Ownable, RoleAware {
         priceUpdateWindow = window;
     }
 
-    function setTepidUpdateRate(uint256 rate) external onlyOwner {
-        TEPID_UPDATE_RATE_PERMIL = rate;
-    }
-
     function setConfidentUpdateRate(uint256 rate) external onlyOwner {
-        CONFIDENT_UPDATE_RATE_PERMIL = rate;
+        UPDATE_RATE_PERMIL = rate;
     }
 
-    function forcePriceUpdate(address token, uint256 inAmount)
-        public
+    function encouragePriceUpdate(address token, uint256 inAmount)
+        external
         returns (uint256)
     {
-        return getUpdatedPriceInPeg(token, inAmount);
+        return getCurrentPriceInPeg(token, inAmount, true);
     }
 
     function setUpdateMaxPegAmount(uint256 amount) external onlyOwner {
@@ -60,15 +65,25 @@ abstract contract PriceAware is Ownable, RoleAware {
         bool forceCurBlock
     ) internal returns (uint256) {
         TokenPrice storage tokenPrice = tokenPrices[token];
-        if (
-            block.number - tokenPrice.blockLastUpdated > priceUpdateWindow ||
-            (forceCurBlock && block.number != tokenPrice.blockLastUpdated) ||
-            tokenPrice.tokenPer1k == 0
-        ) {
+        if (forceCurBlock) {
+            if (block.number - tokenPrice.blockLastUpdated > priceUpdateWindow) {
+                // update the currently cached price
+                return getUpdatedPriceInPeg(token, inAmount);
+            } else {
+                // just get the current price from AMM
+                return viewCurrentPriceInPeg(token, inAmount);
+            }
+        } else if (tokenPrice.tokenPer1k == 0) {
+            // do the best we can if it's at zero
             return getUpdatedPriceInPeg(token, inAmount);
-        } else {
-            return (inAmount * 1000 ether) / tokenPrice.tokenPer1k;
         }
+
+        if (block.number - tokenPrice.blockLastUpdated > priceUpdateWindow) {
+            // update the price somewhat
+            getUpdatedPriceInPeg(token, inAmount);
+        }
+
+        return (inAmount * 1000 ether) / tokenPrice.tokenPer1k;
     }
 
     function viewCurrentPriceInPeg(address token, uint256 inAmount)
@@ -112,28 +127,14 @@ abstract contract PriceAware is Ownable, RoleAware {
                 outAmount > UPDATE_MIN_PEG_AMOUNT &&
                 outAmount < UPDATE_MAX_PEG_AMOUNT
             ) {
-                confidentUpdatePriceInPeg(tokenPrice, inAmount, outAmount);
+                updatePriceInPeg(tokenPrice, inAmount, outAmount);
             }
 
             return outAmount;
         }
     }
 
-    // /// Do a tepid update of price coming from a potentially unreliable source
-    // function tepidUpdatePriceInPeg(
-    //     address token,
-    //     uint256 inAmount,
-    //     uint256 outAmount
-    // ) internal {
-    //     _updatePriceInPeg(
-    //         tokenPrices[token],
-    //         inAmount,
-    //         outAmount,
-    //         TEPID_UPDATE_RATE_PERMIL
-    //     );
-    // }
-
-    function confidentUpdatePriceInPeg(
+    function updatePriceInPeg(
         TokenPrice storage tokenPrice,
         uint256 inAmount,
         uint256 outAmount
@@ -142,7 +143,7 @@ abstract contract PriceAware is Ownable, RoleAware {
             tokenPrice,
             inAmount,
             outAmount,
-            CONFIDENT_UPDATE_RATE_PERMIL
+            UPDATE_RATE_PERMIL
         );
         tokenPrice.blockLastUpdated = block.number;
     }
@@ -201,7 +202,7 @@ abstract contract PriceAware is Ownable, RoleAware {
                 );
 
             uint256 outAmount = amounts[amounts.length - 1];
-            confidentUpdatePriceInPeg(tP, amount, outAmount);
+            updatePriceInPeg(tP, amount, outAmount);
 
             return outAmount;
         }
@@ -223,7 +224,7 @@ abstract contract PriceAware is Ownable, RoleAware {
                     tP.inverseLiquidationPath
                 );
 
-            confidentUpdatePriceInPeg(tP, targetAmount, amounts[0]);
+            updatePriceInPeg(tP, targetAmount, amounts[0]);
 
             return amounts[0];
         }
