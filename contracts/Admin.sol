@@ -7,9 +7,12 @@ import "./RoleAware.sol";
 import "./Fund.sol";
 import "./CrossMarginTrading.sol";
 
-/// @dev Here we support staking for MFI incentives as well as
-/// staking to perform the maintenance role.
+/** 
+@title Here we support staking for MFI incentives as well as
+staking to perform the maintenance role.
+*/
 contract Admin is RoleAware, Ownable {
+    /// Margenswap (MFI) token address
     address public immutable MFI;
     mapping(address => uint256) public stakes;
     uint256 public totalStakes;
@@ -49,6 +52,7 @@ contract Admin is RoleAware, Ownable {
         currentMaintenanceStakerStartBlock = block.number;
     }
 
+    /// Maintence stake setter
     function setMaintenanceStakePerBlock(uint256 amount) external onlyOwner {
         maintenanceStakePerBlock = amount;
     }
@@ -77,6 +81,7 @@ contract Admin is RoleAware, Ownable {
         }
     }
 
+    /// Deposit a stake for sender
     function depositStake(uint256 amount) external {
         _stake(msg.sender, amount);
     }
@@ -104,6 +109,7 @@ contract Admin is RoleAware, Ownable {
         }
     }
 
+    /// Withdraw stake for sender
     function withdrawStake(uint256 amount) external {
         require(
             !isAuthorizedStaker(msg.sender),
@@ -112,6 +118,7 @@ contract Admin is RoleAware, Ownable {
         _withdrawStake(msg.sender, amount, msg.sender);
     }
 
+    /// Deposit maintenance stake
     function depositMaintenanceStake(uint256 amount) external {
         require(
             amount + stakes[msg.sender] >= maintenanceStakePerBlock,
@@ -184,15 +191,14 @@ contract Admin is RoleAware, Ownable {
                 staker = nextMaintenanceStaker[staker];
                 currentStake = getMaintenanceStakerStake(staker);
             } else {
-                startBlock +=
-                    currentStake /
-                    maintenanceStakePerBlock;
+                startBlock += currentStake / maintenanceStakePerBlock;
                 staker = nextMaintenanceStaker[staker];
                 currentStake = getMaintenanceStakerStake(staker);
             }
         }
     }
 
+    /// Add a delegate for staker
     function addDelegate(address forStaker, address delegate) external {
         require(
             msg.sender == forStaker ||
@@ -202,6 +208,7 @@ contract Admin is RoleAware, Ownable {
         maintenanceDelegateTo[forStaker][delegate] = true;
     }
 
+    /// Remove a delegate for staker
     function removeDelegate(address forStaker, address delegate) external {
         require(
             msg.sender == forStaker ||
@@ -221,6 +228,7 @@ contract Admin is RoleAware, Ownable {
             maintenanceDelegateTo[currentStaker][caller];
     }
 
+    /// Penalize a staker
     function penalizeMaintenanceStake(
         address maintainer,
         uint256 penalty,
