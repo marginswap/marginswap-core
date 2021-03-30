@@ -60,7 +60,7 @@ abstract contract CrossMarginAccounts is RoleAware, PriceAware {
     }
 
     /// @dev total of assets of account, expressed in reference currency
-    function viewHoldingsInPeg(address trader) internal view returns (uint256) {
+    function viewHoldingsInPeg(address trader) external view returns (uint256) {
         CrossMarginAccount storage account = marginAccounts[trader];
         return viewTokensInPeg(account.holdingTokens, account.holdings);
     }
