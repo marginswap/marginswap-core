@@ -16,14 +16,14 @@ contract DependencyController is RoleAware, Ownable, IDelegateOwner {
     constructor(address _roles) RoleAware(_roles) Ownable() {}
 
     address[] public managedContracts;
-    mapping(uint16 => bool) public knownCharacters;
-    mapping(uint16 => bool) public knownRoles;
+    mapping(uint256 => bool) public knownCharacters;
+    mapping(uint256 => bool) public knownRoles;
     mapping(address => address) public delegateOwner;
     mapping(address => bool) public disabler;
     address public currentExecutor = address(0);
 
-    uint16[] public allCharacters;
-    uint16[] public allRoles;
+    uint256[] public allCharacters;
+    uint256[] public allRoles;
 
     modifier onlyOwnerOrExecOrDisabler() {
         require(
@@ -112,7 +112,7 @@ contract DependencyController is RoleAware, Ownable, IDelegateOwner {
             }
         }
 
-        uint16[] memory requiredRoles = IExecutor(executor).requiredRoles();
+        uint256[] memory requiredRoles = IExecutor(executor).requiredRoles();
 
         for (uint256 i = 0; requiredRoles.length > i; i++) {
             _giveRole(requiredRoles[i], executor);
@@ -148,8 +148,8 @@ contract DependencyController is RoleAware, Ownable, IDelegateOwner {
 
     function manageContract(
         address contr,
-        uint16[] memory charactersPlayed,
-        uint16[] memory rolesPlayed,
+        uint256[] memory charactersPlayed,
+        uint256[] memory rolesPlayed,
         address[] memory ownsAsDelegate
     ) external onlyOwnerOrExec {
         managedContracts.push(contr);
@@ -157,14 +157,14 @@ contract DependencyController is RoleAware, Ownable, IDelegateOwner {
         // set up all characters this contract plays
         uint256 len = charactersPlayed.length;
         for (uint256 i = 0; len > i; i++) {
-            uint16 character = charactersPlayed[i];
+            uint256 character = charactersPlayed[i];
             _setMainCharacter(character, contr);
         }
 
         // all roles this contract plays
         len = rolesPlayed.length;
         for (uint256 i = 0; len > i; i++) {
-            uint16 role = rolesPlayed[i];
+            uint256 role = rolesPlayed[i];
             _giveRole(role, contr);
         }
 
@@ -212,30 +212,30 @@ contract DependencyController is RoleAware, Ownable, IDelegateOwner {
         }
     }
 
-    function giveRole(uint16 role, address actor) external onlyOwnerOrExec {
+    function giveRole(uint256 role, address actor) external onlyOwnerOrExec {
         _giveRole(role, actor);
     }
 
-    function removeRole(uint16 role, address actor)
+    function removeRole(uint256 role, address actor)
         external
         onlyOwnerOrExecOrDisabler
     {
         _removeRole(role, actor);
     }
 
-    function _removeRole(uint16 role, address actor) internal {
+    function _removeRole(uint256 role, address actor) internal {
         roles.removeRole(role, actor);
         updateRoleCache(role, actor);
     }
 
-    function setMainCharacter(uint16 role, address actor)
+    function setMainCharacter(uint256 role, address actor)
         external
         onlyOwnerOrExec
     {
         _setMainCharacter(role, actor);
     }
 
-    function _giveRole(uint16 role, address actor) internal {
+    function _giveRole(uint256 role, address actor) internal {
         if (!knownRoles[role]) {
             knownRoles[role] = true;
             allRoles.push(role);
@@ -244,7 +244,7 @@ contract DependencyController is RoleAware, Ownable, IDelegateOwner {
         updateRoleCache(role, actor);
     }
 
-    function _setMainCharacter(uint16 character, address actor) internal {
+    function _setMainCharacter(uint256 character, address actor) internal {
         if (!knownCharacters[character]) {
             knownCharacters[character] = true;
             allCharacters.push(character);
@@ -253,14 +253,14 @@ contract DependencyController is RoleAware, Ownable, IDelegateOwner {
         updateMainCharacterCache(character);
     }
 
-    function updateMainCharacterCache(uint16 character) public override {
+    function updateMainCharacterCache(uint256 character) public override {
         uint256 len = managedContracts.length;
         for (uint256 i = 0; len > i; i++) {
             RoleAware(managedContracts[i]).updateMainCharacterCache(character);
         }
     }
 
-    function updateRoleCache(uint16 role, address contr) public override {
+    function updateRoleCache(uint256 role, address contr) public override {
         uint256 len = managedContracts.length;
         for (uint256 i = 0; len > i; i++) {
             RoleAware(managedContracts[i]).updateRoleCache(role, contr);

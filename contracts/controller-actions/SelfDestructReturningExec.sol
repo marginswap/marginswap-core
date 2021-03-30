@@ -5,15 +5,15 @@ import "../DependencyController.sol";
 
 abstract contract SelfDestructReturningExec is IExecutor {
     address public override rightfulOwner;
-    uint16[] public _requiredRoles;
-    uint16[] public propertyCharacters;
+    uint256[] public _requiredRoles;
+    uint256[] public propertyCharacters;
     address[] public extraProperties;
 
     constructor(address controller) {
         rightfulOwner = controller;
     }
 
-    function requiredRoles() external view override returns (uint16[] memory) {
+    function requiredRoles() external view override returns (uint256[] memory) {
         return _requiredRoles;
     }
 

@@ -8,30 +8,30 @@ import "./Roles.sol";
 contract RoleAware {
     // we chose not to go with an enum
     // to make this list easy to extend
-    uint16 constant FUND_TRANSFERER = 1;
-    uint16 constant MARGIN_CALLER = 2;
-    uint16 constant BORROWER = 3;
-    uint16 constant MARGIN_TRADER = 4;
-    uint16 constant FEE_SOURCE = 5;
-    uint16 constant LIQUIDATOR = 6;
-    uint16 constant AUTHORIZED_FUND_TRADER = 7;
-    uint16 constant INCENTIVE_REPORTER = 8;
-    uint16 constant TOKEN_ACTIVATOR = 9;
-    uint16 constant STAKE_PENALIZER = 10;
+    uint256 constant FUND_TRANSFERER = 1;
+    uint256 constant MARGIN_CALLER = 2;
+    uint256 constant BORROWER = 3;
+    uint256 constant MARGIN_TRADER = 4;
+    uint256 constant FEE_SOURCE = 5;
+    uint256 constant LIQUIDATOR = 6;
+    uint256 constant AUTHORIZED_FUND_TRADER = 7;
+    uint256 constant INCENTIVE_REPORTER = 8;
+    uint256 constant TOKEN_ACTIVATOR = 9;
+    uint256 constant STAKE_PENALIZER = 10;
 
-    uint16 constant FUND = 101;
-    uint16 constant LENDING = 102;
-    uint16 constant ROUTER = 103;
-    uint16 constant MARGIN_TRADING = 104;
-    uint16 constant FEE_CONTROLLER = 105;
-    uint16 constant PRICE_CONTROLLER = 106;
-    uint16 constant ADMIN = 107;
-    uint16 constant INCENTIVE_DISTRIBUTION = 108;
-    uint16 constant TOKEN_ADMIN = 109;
+    uint256 constant FUND = 101;
+    uint256 constant LENDING = 102;
+    uint256 constant ROUTER = 103;
+    uint256 constant MARGIN_TRADING = 104;
+    uint256 constant FEE_CONTROLLER = 105;
+    uint256 constant PRICE_CONTROLLER = 106;
+    uint256 constant ADMIN = 107;
+    uint256 constant INCENTIVE_DISTRIBUTION = 108;
+    uint256 constant TOKEN_ADMIN = 109;
 
     Roles public immutable roles;
-    mapping(uint16 => address) public mainCharacterCache;
-    mapping(address => mapping(uint16 => bool)) public roleCache;
+    mapping(uint256 => address) public mainCharacterCache;
+    mapping(address => mapping(uint256 => bool)) public roleCache;
 
     constructor(address _roles) {
         roles = Roles(_roles);
@@ -45,11 +45,11 @@ contract RoleAware {
         _;
     }
 
-    function updateRoleCache(uint16 role, address contr) public virtual {
+    function updateRoleCache(uint256 role, address contr) public virtual {
         roleCache[contr][role] = roles.getRole(role, contr);
     }
 
-    function updateMainCharacterCache(uint16 role) public virtual {
+    function updateMainCharacterCache(uint256 role) public virtual {
         mainCharacterCache[role] = roles.mainCharacters(role);
     }
 
