@@ -228,4 +228,25 @@ contract CrossMarginTrading is CrossMarginLiquidation, IMarginTrading {
             );
         }
     }
+
+    /// @dev view function to get loan amount in peg
+    function viewLoanInPeg(address trader)
+        external
+        view
+        returns (uint256 amount)
+    {
+        CrossMarginAccount storage account = marginAccounts[trader];
+        return
+            viewTokensInPegWithYield(
+                account.borrowTokens,
+                account.borrowed,
+                account.borrowedYieldQuotientsFP
+            );
+    }
+
+    /// @dev total of assets of account, expressed in reference currency
+    function viewHoldingsInPeg(address trader) external view returns (uint256) {
+        CrossMarginAccount storage account = marginAccounts[trader];
+        return viewTokensInPeg(account.holdingTokens, account.holdings);
+    }
 }

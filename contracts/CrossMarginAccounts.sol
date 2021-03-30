@@ -44,27 +44,6 @@ abstract contract CrossMarginAccounts is RoleAware, PriceAware {
     mapping(address => uint256) public totalLong;
     uint256 public coolingOffPeriod;
 
-    /// @dev view function to get loan amount in peg
-    function viewLoanInPeg(address trader)
-        external
-        view
-        returns (uint256 amount)
-    {
-        CrossMarginAccount storage account = marginAccounts[trader];
-        return
-            viewTokensInPegWithYield(
-                account.borrowTokens,
-                account.borrowed,
-                account.borrowedYieldQuotientsFP
-            );
-    }
-
-    /// @dev total of assets of account, expressed in reference currency
-    function viewHoldingsInPeg(address trader) external view returns (uint256) {
-        CrossMarginAccount storage account = marginAccounts[trader];
-        return viewTokensInPeg(account.holdingTokens, account.holdings);
-    }
-
     /// @dev last time this account deposited
     /// relevant for withdrawal window
     function getLastDepositBlock(address trader)
