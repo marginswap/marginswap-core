@@ -29,8 +29,8 @@ abstract contract PriceAware is Ownable, RoleAware {
     /// update window in blocks
     uint16 public priceUpdateWindow = 8;
     uint256 public UPDATE_RATE_PERMIL = 80;
-    uint256 UPDATE_MAX_PEG_AMOUNT = 50_000;
-    uint256 UPDATE_MIN_PEG_AMOUNT = 1_000;
+    uint256 public UPDATE_MAX_PEG_AMOUNT = 50_000;
+    uint256 public UPDATE_MIN_PEG_AMOUNT = 1_000;
 
     constructor(address _peg) Ownable() {
         peg = _peg;
