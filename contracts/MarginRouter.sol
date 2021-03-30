@@ -47,6 +47,14 @@ contract MarginRouter is RoleAware, IncentivizedHolder, Ownable {
         uint256 borrowAmount
     );
 
+    /// emmited on deposit-borrow-withdraw
+    event CrossOvercollateralizedBorrow(
+        address trader,
+        address depositToken,
+        uint256 depositAmount,
+        address borrowToken,
+        uint256 withdrawAmount);
+
     modifier ensure(uint256 deadline) {
         require(deadline >= block.timestamp, "Trade has expired");
         _;
@@ -132,6 +140,27 @@ contract MarginRouter is RoleAware, IncentivizedHolder, Ownable {
 
         stakeClaim(msg.sender, borrowToken, borrowAmount);
         emit CrossBorrow(msg.sender, borrowToken, borrowAmount);
+    }
+
+    /// @dev convenience function to perform overcollateralized borrowing
+    /// against a cross margin account.
+    /// caution: the account still has to have a positive balaance at the end
+    /// of the withdraw. So an underwater account may not be able to withdraw
+    function crossOvercollateralizedBorrow(address depositToken, uint256 depositAmount, address borrowToken, uint256 withdrawAmount) external {
+        Fund(fund()).depositFor(msg.sender, depositToken, depositAmount);
+
+        Lending(lending()).registerBorrow(borrowToken, withdrawAmount);
+        IMarginTrading(marginTrading()).registerOvercollateralizedBorrow(
+                msg.sender,
+                depositToken,
+                depositAmount,
+                borrowToken,
+                withdrawAmount
+            );
+
+        Fund(fund()).withdraw(borrowToken, msg.sender, withdrawAmount);
+        stakeClaim(msg.sender, borrowToken, withdrawAmount);
+        emit CrossOvercollateralizedBorrow(msg.sender, depositToken, depositAmount, borrowToken, withdrawAmount);
     }
 
     /// @dev close an account that is no longer borrowing and return gains

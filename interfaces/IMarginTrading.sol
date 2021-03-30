@@ -28,6 +28,13 @@ interface IMarginTrading {
         uint256 outAmount
     ) external returns (uint256 extinguishAmount, uint256 borrowAmount);
 
+    function registerOvercollateralizedBorrow(
+        address trader,
+        address depositToken,
+        uint256 depositAmount,
+        address borrowToken,
+        uint256 withdrawAmount) external;
+
     function registerLiquidation(address trader) external;
 
     function getHoldingAmounts(address trader)
