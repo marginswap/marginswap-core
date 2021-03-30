@@ -34,6 +34,7 @@ contract RoleAware {
     mapping(address => mapping(uint256 => bool)) public roleCache;
 
     constructor(address _roles) {
+        require(_roles != address(0), "Please provide valid roles address");
         roles = Roles(_roles);
     }
 
