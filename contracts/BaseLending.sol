@@ -2,6 +2,7 @@
 pragma solidity ^0.8.0;
 import "./RoleAware.sol";
 
+/// @title Base lending behavior
 abstract contract BaseLending is RoleAware, Ownable {
     uint256 constant FP32 = 2**32;
     uint256 constant ACCUMULATOR_INIT = 10**18;
@@ -71,16 +72,21 @@ abstract contract BaseLending is RoleAware, Ownable {
         uint256 amount
     ) internal virtual;
 
-    function lendingTarget(LendingMetadata storage meta) internal view returns (uint256) {
-        return
-            min(meta.lendingCap, meta.totalBorrowed + meta.lendingBuffer);
+    function lendingTarget(LendingMetadata storage meta)
+        internal
+        view
+        returns (uint256)
+    {
+        return min(meta.lendingCap, meta.totalBorrowed + meta.lendingBuffer);
     }
 
+    /// View lending target
     function viewLendingTarget(address token) external view returns (uint256) {
         LendingMetadata storage meta = lendingMeta[token];
         return lendingTarget(meta);
     }
 
+    /// Set lending cap
     function setLendingCap(address token, uint256 cap) external {
         require(
             isTokenActivator(msg.sender),
@@ -89,6 +95,7 @@ abstract contract BaseLending is RoleAware, Ownable {
         lendingMeta[token].lendingCap = cap;
     }
 
+    /// Set lending buffer
     function setLendingBuffer(address token, uint256 buffer) external {
         require(
             isTokenActivator(msg.sender),
@@ -97,10 +104,12 @@ abstract contract BaseLending is RoleAware, Ownable {
         lendingMeta[token].lendingBuffer = buffer;
     }
 
+    /// Set maximum hourly yield in floating point
     function setMaxHourlyYieldFP(uint256 maxYieldFP) external onlyOwner {
         maxHourlyYieldFP = maxYieldFP;
     }
 
+    /// Set yield change per second in floating point
     function setYieldChangePerSecondFP(uint256 changePerSecondFP)
         external
         onlyOwner
