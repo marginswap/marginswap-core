@@ -6,26 +6,28 @@ import "./Roles.sol";
 /// Main characters are for service discovery
 /// Whereas roles are for access control
 contract RoleAware {
-    uint16 public constant FUND_TRANSFERER = 1;
-    uint16 public constant MARGIN_CALLER = 2;
-    uint16 public constant BORROWER = 3;
-    uint16 public constant MARGIN_TRADER = 4;
-    uint16 public constant FEE_SOURCE = 5;
-    uint16 public constant LIQUIDATOR = 6;
-    uint16 public constant AUTHORIZED_FUND_TRADER = 7;
-    uint16 public constant INCENTIVE_REPORTER = 8;
-    uint16 public constant TOKEN_ACTIVATOR = 9;
-    uint16 public constant STAKE_PENALIZER = 10;
+    // we chose not to go with an enum
+    // to make this list easy to extend
+    uint16 constant FUND_TRANSFERER = 1;
+    uint16 constant MARGIN_CALLER = 2;
+    uint16 constant BORROWER = 3;
+    uint16 constant MARGIN_TRADER = 4;
+    uint16 constant FEE_SOURCE = 5;
+    uint16 constant LIQUIDATOR = 6;
+    uint16 constant AUTHORIZED_FUND_TRADER = 7;
+    uint16 constant INCENTIVE_REPORTER = 8;
+    uint16 constant TOKEN_ACTIVATOR = 9;
+    uint16 constant STAKE_PENALIZER = 10;
 
-    uint16 public constant FUND = 101;
-    uint16 public constant LENDING = 102;
-    uint16 public constant ROUTER = 103;
-    uint16 public constant MARGIN_TRADING = 104;
-    uint16 public constant FEE_CONTROLLER = 105;
-    uint16 public constant PRICE_CONTROLLER = 106;
-    uint16 public constant ADMIN = 107;
-    uint16 public constant INCENTIVE_DISTRIBUTION = 108;
-    uint16 public constant TOKEN_ADMIN = 109;
+    uint16 constant FUND = 101;
+    uint16 constant LENDING = 102;
+    uint16 constant ROUTER = 103;
+    uint16 constant MARGIN_TRADING = 104;
+    uint16 constant FEE_CONTROLLER = 105;
+    uint16 constant PRICE_CONTROLLER = 106;
+    uint16 constant ADMIN = 107;
+    uint16 constant INCENTIVE_DISTRIBUTION = 108;
+    uint16 constant TOKEN_ADMIN = 109;
 
     Roles public immutable roles;
     mapping(uint16 => address) public mainCharacterCache;
