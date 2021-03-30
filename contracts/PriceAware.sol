@@ -202,7 +202,6 @@ abstract contract PriceAware is Ownable, RoleAware {
                 );
 
             uint256 outAmount = amounts[amounts.length - 1];
-            updatePriceInPeg(tP, amount, outAmount);
 
             return outAmount;
         }
@@ -223,8 +222,6 @@ abstract contract PriceAware is Ownable, RoleAware {
                     type(uint256).max,
                     tP.inverseLiquidationPath
                 );
-
-            updatePriceInPeg(tP, targetAmount, amounts[0]);
 
             return amounts[0];
         }
