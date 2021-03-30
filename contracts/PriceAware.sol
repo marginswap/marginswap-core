@@ -24,7 +24,7 @@ struct TokenPrice {
 ///    of front-running and other price manipulation.
 abstract contract PriceAware is Ownable, RoleAware {
     address public constant UNI = 0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f;
-    address public peg;
+    address public immutable peg;
     mapping(address => TokenPrice) public tokenPrices;
     /// update window in blocks
     uint16 public priceUpdateWindow = 8;
