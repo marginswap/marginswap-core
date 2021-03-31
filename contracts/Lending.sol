@@ -52,8 +52,7 @@ contract Lending is
     ) external view returns (uint256) {
         uint256 accumulatorFP =
             viewCumulativeYieldFP(
-                token,
-                borrowYieldAccumulators,
+                borrowYieldAccumulators[token],
                 block.timestamp
             );
         return applyInterest(balance, accumulatorFP, yieldQuotientFP);
@@ -85,8 +84,7 @@ contract Lending is
     {
         return
             viewCumulativeYieldFP(
-                token,
-                borrowYieldAccumulators,
+                borrowYieldAccumulators[token],
                 block.timestamp
             );
     }

@@ -66,6 +66,24 @@ abstract contract BaseLending is RoleAware, Ownable {
         }
     }
 
+    function updateSpeed(
+        uint256 speed,
+        uint256 lastAction,
+        uint256 amount,
+        uint256 runtime
+    ) internal view returns (uint256 newSpeed, uint256 newLastAction) {
+        uint256 timeDiff = block.timestamp - lastAction;
+        uint256 updateAmount = amount * runtime / (timeDiff + 1);
+
+        uint256 oldSpeedWeight = (runtime + 120 minutes) / 3;
+        uint256 updateWeight = timeDiff + 1;
+        // scale adjustment relative to runtime
+        newSpeed =
+            (speed * oldSpeedWeight + updateAmount * updateWeight) /
+            (oldSpeedWeight + updateWeight);
+        newLastAction = block.timestamp;
+    }
+
     /// @dev minimum
     function min(uint256 a, uint256 b) internal pure returns (uint256) {
         if (a > b) {
