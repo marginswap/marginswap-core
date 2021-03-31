@@ -132,7 +132,8 @@ abstract contract CrossMarginAccounts is RoleAware, PriceAware {
             delete account.borrowedYieldQuotientsFP[debtToken];
 
             bool decrement = false;
-            for (uint256 i = 0; account.borrowTokens.length > i; i++) {
+            uint256 len = account.borrowTokens.length;
+            for (uint256 i; len > i; i++) {
                 address currToken = account.borrowTokens[i];
                 if (currToken == debtToken) {
                     decrement = true;
@@ -208,7 +209,8 @@ abstract contract CrossMarginAccounts is RoleAware, PriceAware {
         mapping(address => uint256) storage amounts,
         bool forceCurBlock
     ) internal returns (uint256 totalPeg) {
-        for (uint256 tokenId = 0; tokenId < tokens.length; tokenId++) {
+        uint256 len = tokens.length;
+        for (uint256 tokenId; tokenId < len; tokenId++) {
             address token = tokens[tokenId];
             totalPeg += PriceAware.getCurrentPriceInPeg(
                 token,
@@ -223,7 +225,8 @@ abstract contract CrossMarginAccounts is RoleAware, PriceAware {
         address[] storage tokens,
         mapping(address => uint256) storage amounts
     ) internal view returns (uint256 totalPeg) {
-        for (uint256 tokenId = 0; tokenId < tokens.length; tokenId++) {
+        uint256 len = tokens.length;
+        for (uint256 tokenId; tokenId < len; tokenId++) {
             address token = tokens[tokenId];
             totalPeg += PriceAware.viewCurrentPriceInPeg(token, amounts[token]);
         }
@@ -236,7 +239,8 @@ abstract contract CrossMarginAccounts is RoleAware, PriceAware {
         mapping(address => uint256) storage yieldQuotientsFP,
         bool forceCurBlock
     ) internal returns (uint256 totalPeg) {
-        for (uint256 tokenId = 0; tokenId < tokens.length; tokenId++) {
+        uint256 len = tokens.length;
+        for (uint256 tokenId; tokenId < len; tokenId++) {
             address token = tokens[tokenId];
             totalPeg += yieldTokenInPeg(
                 token,
@@ -253,7 +257,8 @@ abstract contract CrossMarginAccounts is RoleAware, PriceAware {
         mapping(address => uint256) storage amounts,
         mapping(address => uint256) storage yieldQuotientsFP
     ) internal view returns (uint256 totalPeg) {
-        for (uint256 tokenId = 0; tokenId < tokens.length; tokenId++) {
+        uint256 len = tokens.length;
+        for (uint256 tokenId; tokenId < len; tokenId++) {
             address token = tokens[tokenId];
             totalPeg += viewYieldTokenInPeg(
                 token,
@@ -307,9 +312,10 @@ abstract contract CrossMarginAccounts is RoleAware, PriceAware {
 
     /// sets borrow and holding to zero
     function deleteAccount(CrossMarginAccount storage account) internal {
+        uint256 len = account.borrowTokens.length;
         for (
-            uint256 borrowIdx = 0;
-            account.borrowTokens.length > borrowIdx;
+            uint256 borrowIdx;
+            len > borrowIdx;
             borrowIdx++
         ) {
             address borrowToken = account.borrowTokens[borrowIdx];
@@ -317,9 +323,10 @@ abstract contract CrossMarginAccounts is RoleAware, PriceAware {
             account.borrowed[borrowToken] = 0;
             account.borrowedYieldQuotientsFP[borrowToken] = 0;
         }
+        len = account.holdingTokens.length;
         for (
-            uint256 holdingIdx = 0;
-            account.holdingTokens.length > holdingIdx;
+            uint256 holdingIdx;
+            len > holdingIdx;
             holdingIdx++
         ) {
             address holdingToken = account.holdingTokens[holdingIdx];

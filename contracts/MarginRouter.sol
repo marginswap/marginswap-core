@@ -175,7 +175,7 @@ contract MarginRouter is RoleAware, IncentivizedHolder, Ownable {
         // requires all debts paid off
         IMarginTrading(marginTrading()).registerLiquidation(msg.sender);
 
-        for (uint256 i = 0; holdingTokens.length > i; i++) {
+        for (uint256 i; holdingTokens.length > i; i++) {
             Fund(fund()).withdraw(
                 holdingTokens[i],
                 msg.sender,
