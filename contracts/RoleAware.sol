@@ -3,6 +3,7 @@ pragma solidity ^0.8.0;
 
 import "./Roles.sol";
 
+/// @title Role management behavior
 /// Main characters are for service discovery
 /// Whereas roles are for access control
 contract RoleAware {

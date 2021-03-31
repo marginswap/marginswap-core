@@ -4,14 +4,15 @@ pragma solidity ^0.8.0;
 import "./IncentiveDistribution.sol";
 import "./RoleAware.sol";
 
-/// @dev helper class to facilitate staking and unstaking
+/// @title helper class to facilitate staking and unstaking
 /// within the incentive system.
 abstract contract IncentivizedHolder is RoleAware {
-    // here we cache incentive tranches to save on a bit of gas
+    /// @dev here we cache incentive tranches to save on a bit of gas
     mapping(address => uint8) public incentiveTranches;
     // claimant => token => claimId
     mapping(address => mapping(address => uint256)) public claimIds;
 
+    /// Set incentive tranche
     function setIncentiveTranche(address token, uint8 tranche) external {
         require(
             isTokenActivator(msg.sender),
@@ -35,7 +36,7 @@ abstract contract IncentivizedHolder is RoleAware {
             claimId = iD.startClaim(tranche, claimant, amount);
 
             // check that distribution hasn't ended yet
-            if(claimId > 0) {
+            if (claimId > 0) {
                 claimIds[claimant][token] = claimId;
             }
         }
@@ -52,18 +53,18 @@ abstract contract IncentivizedHolder is RoleAware {
             // this does not end claims if they zero out, but we are willing
             // to sacrifice the gas refund from zeroing out for simplicity
             // sake and saving storage cost wwhen starting a claim
-            IncentiveDistribution(incentiveDistributor()).subtractFromClaimAmount(
-                tranche,
-                claimId,
-                amount
-            );
+            IncentiveDistribution(incentiveDistributor())
+                .subtractFromClaimAmount(tranche, claimId, amount);
         }
     }
 
     function endClaim(address claimant, address token) internal {
         uint256 claimId = claimIds[claimant][token];
         uint8 tranche = incentiveTranches[token];
-        IncentiveDistribution(incentiveDistributor()).endClaim(tranche, claimId);
+        IncentiveDistribution(incentiveDistributor()).endClaim(
+            tranche,
+            claimId
+        );
         claimIds[claimant][token] = 0;
     }
 }

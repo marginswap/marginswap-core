@@ -12,7 +12,7 @@ struct TokenPrice {
     address[] inverseLiquidationPath;
 }
 
-/// @dev The protocol features several mechanisms to prevent vulnerability to
+/// @title The protocol features several mechanisms to prevent vulnerability to
 /// price manipulation:
 /// 1) global exposure caps on all tokens which need to be raised gradually
 ///    during the process of introducing a new token, making attacks unprofitable
@@ -36,14 +36,17 @@ abstract contract PriceAware is Ownable, RoleAware {
         peg = _peg;
     }
 
+    /// Set window for price updates
     function setPriceUpdateWindow(uint16 window) external onlyOwner {
         priceUpdateWindow = window;
     }
 
+    /// Set rate for confident updates
     function setConfidentUpdateRate(uint256 rate) external onlyOwner {
         UPDATE_RATE_PERMIL = rate;
     }
 
+    /// Get current price of token in peg
     function encouragePriceUpdate(address token, uint256 inAmount)
         external
         returns (uint256)
@@ -59,6 +62,7 @@ abstract contract PriceAware is Ownable, RoleAware {
         UPDATE_MIN_PEG_AMOUNT = amount;
     }
 
+    /// Get current price of token in peg
     function getCurrentPriceInPeg(
         address token,
         uint256 inAmount,
@@ -66,7 +70,9 @@ abstract contract PriceAware is Ownable, RoleAware {
     ) internal returns (uint256) {
         TokenPrice storage tokenPrice = tokenPrices[token];
         if (forceCurBlock) {
-            if (block.number - tokenPrice.blockLastUpdated > priceUpdateWindow) {
+            if (
+                block.number - tokenPrice.blockLastUpdated > priceUpdateWindow
+            ) {
                 // update the currently cached price
                 return getUpdatedPriceInPeg(token, inAmount);
             } else {
@@ -86,6 +92,7 @@ abstract contract PriceAware is Ownable, RoleAware {
         return (inAmount * 1000 ether) / tokenPrice.tokenPer1k;
     }
 
+    /// Get view of current price of token in peg
     function viewCurrentPriceInPeg(address token, uint256 inAmount)
         internal
         view
@@ -139,12 +146,7 @@ abstract contract PriceAware is Ownable, RoleAware {
         uint256 inAmount,
         uint256 outAmount
     ) internal {
-        _updatePriceInPeg(
-            tokenPrice,
-            inAmount,
-            outAmount,
-            UPDATE_RATE_PERMIL
-        );
+        _updatePriceInPeg(tokenPrice, inAmount, outAmount, UPDATE_RATE_PERMIL);
         tokenPrice.blockLastUpdated = block.number;
     }
 
@@ -163,7 +165,7 @@ abstract contract PriceAware is Ownable, RoleAware {
             1000;
     }
 
-    // add path from token to current liquidation peg
+    /// add path from token to current liquidation peg
     function setLiquidationPath(address[] memory path) external {
         require(
             isTokenActivator(msg.sender),

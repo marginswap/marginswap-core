@@ -7,15 +7,19 @@ import "@openzeppelin/contracts/utils/Address.sol";
 import "../interfaces/IWETH.sol";
 import "./RoleAware.sol";
 
+/// @title Manage funding
 contract Fund is RoleAware, Ownable {
     using SafeERC20 for IERC20;
+    /// wrapped ether
     address public immutable WETH;
+    /// map of available tokens
     mapping(address => bool) public activeTokens;
 
     constructor(address _WETH, address _roles) Ownable() RoleAware(_roles) {
         WETH = _WETH;
     }
 
+    /// Make a token available for protocol
     function activateToken(address token) external {
         require(
             isTokenActivator(msg.sender),
@@ -24,6 +28,7 @@ contract Fund is RoleAware, Ownable {
         activeTokens[token] = true;
     }
 
+    /// Remove a token from trading availability
     function deactivateToken(address token) external {
         require(
             isTokenActivator(msg.sender),
@@ -32,31 +37,35 @@ contract Fund is RoleAware, Ownable {
         activeTokens[token] = false;
     }
 
-    function deposit(address depositToken, uint256 depositAmount)
-        external
-    {
+    /// Deposit an active token
+    function deposit(address depositToken, uint256 depositAmount) external {
         require(activeTokens[depositToken], "Deposit token is not active");
-            IERC20(depositToken).safeTransferFrom(
-                msg.sender,
-                address(this),
-                depositAmount
-            );
+        IERC20(depositToken).safeTransferFrom(
+            msg.sender,
+            address(this),
+            depositAmount
+        );
     }
 
+    /// Deposit token on behalf of `sender`
     function depositFor(
         address sender,
         address depositToken,
         uint256 depositAmount
     ) external {
         require(activeTokens[depositToken], "Deposit token is not active");
-        require(isFundTransferer(msg.sender), "Contract not authorized to deposit for user");
-            IERC20(depositToken).safeTransferFrom(
-                sender,
-                address(this),
-                depositAmount
-            );
+        require(
+            isFundTransferer(msg.sender),
+            "Contract not authorized to deposit for user"
+        );
+        IERC20(depositToken).safeTransferFrom(
+            sender,
+            address(this),
+            depositAmount
+        );
     }
 
+    /// Deposit to wrapped ether
     function depositToWETH() external payable {
         IWETH(WETH).deposit{value: msg.value}();
     }

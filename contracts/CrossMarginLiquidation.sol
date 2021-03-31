@@ -3,12 +3,14 @@ pragma solidity ^0.8.0;
 
 import "./CrossMarginAccounts.sol";
 
-/// @dev Handles liquidation of accounts below maintenance threshold
-/// Liquidation can be called by the authorized staker, as determined
-/// in the Admin contract.
-/// If the authorized staker is delinquent, other participants can jump
-/// in and attack, taking their fees and potentially even their stake,
-/// depending how delinquent the responsible authorized staker is.
+/** 
+@title Handles liquidation of accounts below maintenance threshold
+@notice Liquidation can be called by the authorized staker, 
+as determined in the Admin contract.
+If the authorized staker is delinquent, other participants can jump
+in and attack, taking their fees and potentially even their stake,
+depending how delinquent the responsible authorized staker is.
+*/
 abstract contract CrossMarginLiquidation is CrossMarginAccounts {
     event LiquidationShortfall(uint256 amount);
     event AccountLiquidated(address account);
@@ -41,14 +43,17 @@ abstract contract CrossMarginLiquidation is CrossMarginAccounts {
 
     uint256 public failureThreshold = 10;
 
+    /// Set failure threshold
     function setFailureThreshold(uint256 threshFactor) external onlyOwner {
         failureThreshold = threshFactor;
     }
 
+    /// Set liquidity stake attack window
     function setLiqStakeAttackWindow(uint256 window) external onlyOwner {
         liqStakeAttackWindow = window;
     }
 
+    /// Set maintainer's percent cut
     function setMaintainerCutPercent(uint256 cut) external onlyOwner {
         MAINTAINER_CUT_PERCENT = cut;
     }
@@ -166,6 +171,7 @@ abstract contract CrossMarginLiquidation is CrossMarginAccounts {
         }
     }
 
+    /// Disburse liquidity stake attacks
     function disburseLiqStakeAttacks(address[] memory liquidatedAccounts)
         external
     {
@@ -235,7 +241,10 @@ abstract contract CrossMarginLiquidation is CrossMarginAccounts {
         // * aggregates both sell and buy side targets to be liquidated
         // * returns attacker cuts to them
         // * aggregates any returned fees from unauthorized (attacking) attempts
-        maintainerCut = calcLiquidationAmounts(liquidationCandidates, isAuthorized);
+        maintainerCut = calcLiquidationAmounts(
+            liquidationCandidates,
+            isAuthorized
+        );
 
         uint256 sale2pegAmount = liquidateToPeg();
         uint256 peg2targetCost = liquidateFromPeg();

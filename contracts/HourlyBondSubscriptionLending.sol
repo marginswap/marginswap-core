@@ -16,7 +16,7 @@ struct HourlyBond {
     uint256 moduloHour;
 }
 
-/// @dev Here we offer subscriptions to auto-renewing hourly bonds
+/// @title Here we offer subscriptions to auto-renewing hourly bonds
 /// Funds are locked in for an 50 minutes per hour, while interest rates float
 abstract contract HourlyBondSubscriptionLending is BaseLending {
     uint256 public withdrawalWindow = 10 minutes;
@@ -33,6 +33,7 @@ abstract contract HourlyBondSubscriptionLending is BaseLending {
     mapping(address => uint256) public hourlyBondBuyingSpeed;
     mapping(address => uint256) public hourlyBondWithdrawingSpeed;
 
+    /// Set hourly yield APR for token
     function setHourlyYieldAPR(address token, uint256 aprPercent) external {
         require(
             isTokenActivator(msg.sender),
@@ -46,13 +47,11 @@ abstract contract HourlyBondSubscriptionLending is BaseLending {
             });
         } else {
             YieldAccumulator storage yA = getUpdatedHourlyYield(token);
-            yA.hourlyYieldFP =
-                (FP32 * (100 + aprPercent)) /
-                100 /
-                (24 * 365);
+            yA.hourlyYieldFP = (FP32 * (100 + aprPercent)) / 100 / (24 * 365);
         }
     }
 
+    /// Set withdrawal window
     function setWithdrawalWindow(uint256 window) external onlyOwner {
         withdrawalWindow = window;
     }
@@ -133,6 +132,7 @@ abstract contract HourlyBondSubscriptionLending is BaseLending {
         lendingMeta[token].totalLending -= amount;
     }
 
+    /// Shut down hourly bond account for `token`
     function closeHourlyBondAccount(address token) external {
         HourlyBond storage bond = hourlyBondAccounts[token][msg.sender];
         // apply all interest

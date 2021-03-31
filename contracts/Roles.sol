@@ -3,6 +3,7 @@ pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
 
+/// @title Manage permissions of contracts
 contract Roles is Ownable {
     mapping(address => mapping(uint256 => bool)) public roles;
     mapping(uint256 => address) public mainCharacters;
