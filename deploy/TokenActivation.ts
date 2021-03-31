@@ -30,7 +30,7 @@ type TokenInitRecord = {
   exposureCap: number,
   lendingBuffer: number,
   incentiveWeight: number,
-  liquidationPatah: string[],
+  liquidationPath?: string[],
   liquidationTokenPath?: string[];
 };
 const tokenParams: { [tokenName: string]: TokenInitRecord; } = {
@@ -104,7 +104,8 @@ const deploy: DeployFunction = async function ({
       exposureCaps,
       lendingBuffers,
       incentiveWeights,
-      liquidationPaths
+      liquidationPaths,
+      liquidationTokens
     ],
     log: true,
     skipIfAlreadyDeployed: true,
@@ -113,7 +114,7 @@ const deploy: DeployFunction = async function ({
   if (await ethers.getDefaultProvider().getCode(TokenActivation.address) != "0x") {
     // execute if the contract hasn't self-destroyed yet
     const tx = await dc.executeAsOwner(TokenActivation.address);
-    console.log(`executing ${TokenActivation} as owner, by ${dc.address}, tx: ${tx.hash}`);  
+    console.log(`executing ${TokenActivation} as owner, by ${dc.address}, tx: ${tx.hash}`);
   }
 };
 
