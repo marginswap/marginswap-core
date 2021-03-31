@@ -6,6 +6,7 @@ import "./HourlyBondSubscriptionLending.sol";
 import "./BondLending.sol";
 import "./IncentivizedHolder.sol";
 
+/// @title Manage lending
 contract Lending is
     BaseLending,
     HourlyBondSubscriptionLending,
@@ -170,8 +171,10 @@ contract Lending is
             isTokenActivator(msg.sender),
             "not autorized to init yield accumulator"
         );
-        require(borrowYieldAccumulators[token].accumulatorFP == 0,
-                "trying to re-initialize yield accumulator");
+        require(
+            borrowYieldAccumulators[token].accumulatorFP == 0,
+            "trying to re-initialize yield accumulator"
+        );
 
         borrowYieldAccumulators[token].accumulatorFP = FP32;
     }

@@ -5,7 +5,7 @@ import "./RoleAware.sol";
 import "../interfaces/IExecutor.sol";
 import "../interfaces/IDelegateOwner.sol";
 
-/// @dev Provides a single point of reference to verify ownership integrity
+/// @title Provides a single point of reference to verify ownership integrity
 /// within our system as well as performing cache invalidation for
 /// roles and inter-contract relationships
 /// The dependency controller owns the Roles contract and in turn is owned
@@ -43,6 +43,7 @@ contract DependencyController is RoleAware, Ownable, IDelegateOwner {
         _;
     }
 
+    /// Verify ownership of contracts
     function verifyOwnership() external view returns (bool ownsAll) {
         ownsAll = ownsContractStrict(address(roles));
         uint256 len = managedContracts.length;
@@ -55,6 +56,7 @@ contract DependencyController is RoleAware, Ownable, IDelegateOwner {
         }
     }
 
+    /// Strictly verify ownership of contracts
     function verifyOwnershipStrict() external view returns (bool ownsAll) {
         ownsAll = ownsContractStrict(address(roles));
         uint256 len = managedContracts.length;
@@ -63,7 +65,8 @@ contract DependencyController is RoleAware, Ownable, IDelegateOwner {
             ownsAll = ownsAll && ownsContractStrict(contr);
             if (!ownsAll) {
                 break;
-            }}
+            }
+        }
     }
 
     function ownsContract(address contr) public view returns (bool) {
@@ -72,7 +75,7 @@ contract DependencyController is RoleAware, Ownable, IDelegateOwner {
             contrOwner == address(this) ||
             contrOwner == owner() ||
             (delegateOwner[contr] != address(0) &&
-             contrOwner == delegateOwner[contr]);
+                contrOwner == delegateOwner[contr]);
     }
 
     function ownsContractStrict(address contr) public view returns (bool) {
@@ -83,6 +86,7 @@ contract DependencyController is RoleAware, Ownable, IDelegateOwner {
                 Ownable(delegateOwner[contr]).owner() == address(this));
     }
 
+    /// Remove ownership of contract
     function relinquishOwnership(address ownableContract, address newOwner)
         external
         override
@@ -91,6 +95,7 @@ contract DependencyController is RoleAware, Ownable, IDelegateOwner {
         Ownable(ownableContract).transferOwnership(newOwner);
     }
 
+    /// Approve disabler permission
     function setDisabler(address disablerAddress, bool authorized)
         external
         onlyOwnerOrExec
@@ -146,6 +151,7 @@ contract DependencyController is RoleAware, Ownable, IDelegateOwner {
         }
     }
 
+    /// Orchestrate roles and permission for contract
     function manageContract(
         address contr,
         uint256[] memory charactersPlayed,
@@ -175,7 +181,7 @@ contract DependencyController is RoleAware, Ownable, IDelegateOwner {
         }
 
         // update this contract with all roles for all contracts we know about
-        len = allRoles. length;
+        len = allRoles.length;
         for (uint256 i = 0; len > i; i++) {
             for (uint256 j = 0; managedContracts.length > j; j++) {
                 RoleAware(contr).updateRoleCache(
@@ -192,6 +198,7 @@ contract DependencyController is RoleAware, Ownable, IDelegateOwner {
         }
     }
 
+    ///  Remove roles and permissions for contract
     function disableContract(address contr) external onlyOwnerOrExecOrDisabler {
         _disableContract(contr);
     }
@@ -212,10 +219,12 @@ contract DependencyController is RoleAware, Ownable, IDelegateOwner {
         }
     }
 
+    /// Activate role
     function giveRole(uint256 role, address actor) external onlyOwnerOrExec {
         _giveRole(role, actor);
     }
 
+    /// Disable role
     function removeRole(uint256 role, address actor)
         external
         onlyOwnerOrExecOrDisabler

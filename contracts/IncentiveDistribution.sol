@@ -11,17 +11,18 @@ struct Claim {
     uint256 amount;
 }
 
+/// @title Manage distribution of liquidity stake incentives
 contract IncentiveDistribution is RoleAware, Ownable {
     // fixed point number factor
-    uint256 constant internal FP32 = 2**32;
+    uint256 internal constant FP32 = 2**32;
     // the amount of contraction per thousand, per day
     // of the overal daily incentive distribution
     // https://en.wikipedia.org/wiki/Per_mil
-    uint256 constant public contractionPerMil = 999;
+    uint256 public constant contractionPerMil = 999;
     // the period for which claims are batch updated
-    uint256 constant public period = 4 hours;
-    uint256 constant public periodsPerDay = 24 hours / period;
-    address immutable public MFI;
+    uint256 public constant period = 4 hours;
+    uint256 public constant periodsPerDay = 24 hours / period;
+    address public immutable MFI;
 
     constructor(
         address _MFI,
@@ -56,6 +57,7 @@ contract IncentiveDistribution is RoleAware, Ownable {
     mapping(uint256 => Claim) public claims;
     uint256 public nextClaimId = 1;
 
+    /// Set share of tranche
     function setTrancheShare(uint8 tranche, uint256 share) external onlyOwner {
         require(
             lastUpdatedPeriods[tranche] > 0,
@@ -73,6 +75,7 @@ contract IncentiveDistribution is RoleAware, Ownable {
         trancheShare[tranche] = share;
     }
 
+    /// Initialize tranche
     function initTranche(uint8 tranche, uint256 share) external onlyOwner {
         _setTrancheShare(tranche, share);
 
@@ -100,9 +103,9 @@ contract IncentiveDistribution is RoleAware, Ownable {
         lastUpdatedPeriods[tranche] = currentPeriod;
     }
 
-    // @dev can be called by anyone, if they want to ensure rewards
-    // are distributed to a high level of accuracy (if several days
-    // pass without update rewards will be slightly underestimated)
+    /// @notice can be called by anyone, if they want to ensure rewards
+    /// are distributed to a high level of accuracy (if several days
+    /// pass without update rewards will be slightly underestimated)
     function forcePeriodTotalUpdate(uint8 tranche) external {
         updatePeriodTotals(tranche);
     }
@@ -136,6 +139,7 @@ contract IncentiveDistribution is RoleAware, Ownable {
         return tranchePeriodDistributionFP / currentPeriodTotals[tranche];
     }
 
+    /// Start a claim
     function startClaim(
         uint8 tranche,
         address recipient,
@@ -162,6 +166,7 @@ contract IncentiveDistribution is RoleAware, Ownable {
         }
     }
 
+    /// Increase amount of claim
     function addToClaimAmount(
         uint8 tranche,
         uint256 claimId,
@@ -186,6 +191,7 @@ contract IncentiveDistribution is RoleAware, Ownable {
         }
     }
 
+    /// Decrease amount of claim
     function subtractFromClaimAmount(
         uint8 tranche,
         uint256 claimId,
@@ -204,6 +210,7 @@ contract IncentiveDistribution is RoleAware, Ownable {
         claim.amount -= subtractAmount;
     }
 
+    /// Shut down claim and remove it
     function endClaim(uint8 tranche, uint256 claimId) external {
         require(
             isIncentiveReporter(msg.sender),
@@ -229,6 +236,7 @@ contract IncentiveDistribution is RoleAware, Ownable {
                     claim.startingRewardRateFP)) / FP32;
     }
 
+    /// Get a view of reward amount
     function viewRewardAmount(uint8 tranche, uint256 claimId)
         external
         view
@@ -237,6 +245,7 @@ contract IncentiveDistribution is RoleAware, Ownable {
         return calcRewardAmount(tranche, claims[claimId]);
     }
 
+    /// Withdraw current reward amount
     function withdrawReward(uint8 tranche, uint256 claimId)
         external
         returns (uint256)

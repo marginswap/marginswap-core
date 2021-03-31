@@ -11,14 +11,16 @@ import "./Lending.sol";
 import "./Admin.sol";
 import "./IncentivizedHolder.sol";
 
+/// @title Top level transaction controller
 contract MarginRouter is RoleAware, IncentivizedHolder, Ownable {
     /// different uniswap compatible factories to talk to
     mapping(address => bool) public factories;
-    /// wrapped ETH ERC20 contract
+    /// @notice wrapped ETH ERC20 contract
     address public immutable WETH;
+    /// @notice Uniswap Token address
     address public constant UNI = 0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f;
+    /// @notice Sushiswap Token address
     address public constant SUSHI = 0xC0AEe478e3658e2610c5F7A4A2E1777cE9e4f2Ac;
-
     uint256 public constant feesPer10k = 10;
 
     /// emitted when a trader depoits on cross margin
@@ -56,7 +58,8 @@ contract MarginRouter is RoleAware, IncentivizedHolder, Ownable {
         address depositToken,
         uint256 depositAmount,
         address borrowToken,
-        uint256 withdrawAmount);
+        uint256 withdrawAmount
+    );
 
     modifier ensure(uint256 deadline) {
         require(deadline >= block.timestamp, "Trade has expired");
@@ -70,11 +73,12 @@ contract MarginRouter is RoleAware, IncentivizedHolder, Ownable {
         WETH = _WETH;
     }
 
+    /// @notice Authjorize Automated Market Maker
     function authorizeAMM(address ammFactory) external onlyOwner {
         factories[ammFactory] = true;
     }
 
-    /// @dev traders call this to deposit funds on cross margin
+    /// @notice traders call this to deposit funds on cross margin
     function crossDeposit(address depositToken, uint256 depositAmount)
         external
     {
@@ -93,7 +97,7 @@ contract MarginRouter is RoleAware, IncentivizedHolder, Ownable {
         emit CrossDeposit(msg.sender, depositToken, depositAmount);
     }
 
-    /// @dev deposit wrapped ehtereum into cross margin account
+    /// @notice deposit wrapped ehtereum into cross margin account
     function crossDepositETH() external payable {
         Fund(fund()).depositToWETH{value: msg.value}();
         uint256 extinguishAmount =
@@ -109,7 +113,7 @@ contract MarginRouter is RoleAware, IncentivizedHolder, Ownable {
         emit CrossDeposit(msg.sender, WETH, msg.value);
     }
 
-    /// @dev withdraw deposits/earnings from cross margin account
+    /// @notice withdraw deposits/earnings from cross margin account
     function crossWithdraw(address withdrawToken, uint256 withdrawAmount)
         external
     {
@@ -122,7 +126,7 @@ contract MarginRouter is RoleAware, IncentivizedHolder, Ownable {
         emit CrossWithdraw(msg.sender, withdrawToken, withdrawAmount);
     }
 
-    /// @dev withdraw ethereum from cross margin account
+    /// @notice withdraw ethereum from cross margin account
     function crossWithdrawETH(uint256 withdrawAmount) external {
         IMarginTrading(marginTrading()).registerWithdrawal(
             msg.sender,
@@ -132,7 +136,7 @@ contract MarginRouter is RoleAware, IncentivizedHolder, Ownable {
         Fund(fund()).withdrawETH(msg.sender, withdrawAmount);
     }
 
-    /// @dev borrow into cross margin trading account
+    /// @notice borrow into cross margin trading account
     function crossBorrow(address borrowToken, uint256 borrowAmount) external {
         Lending(lending()).registerBorrow(borrowToken, borrowAmount);
         IMarginTrading(marginTrading()).registerBorrow(
@@ -145,42 +149,57 @@ contract MarginRouter is RoleAware, IncentivizedHolder, Ownable {
         emit CrossBorrow(msg.sender, borrowToken, borrowAmount);
     }
 
-    /// @dev convenience function to perform overcollateralized borrowing
+    /// @notice convenience function to perform overcollateralized borrowing
     /// against a cross margin account.
-    /// caution: the account still has to have a positive balaance at the end
+    /// @dev caution: the account still has to have a positive balaance at the end
     /// of the withdraw. So an underwater account may not be able to withdraw
-    function crossOvercollateralizedBorrow(address depositToken, uint256 depositAmount, address borrowToken, uint256 withdrawAmount) external {
+    function crossOvercollateralizedBorrow(
+        address depositToken,
+        uint256 depositAmount,
+        address borrowToken,
+        uint256 withdrawAmount
+    ) external {
         Fund(fund()).depositFor(msg.sender, depositToken, depositAmount);
 
         Lending(lending()).registerBorrow(borrowToken, withdrawAmount);
         IMarginTrading(marginTrading()).registerOvercollateralizedBorrow(
-                msg.sender,
-                depositToken,
-                depositAmount,
-                borrowToken,
-                withdrawAmount
-            );
+            msg.sender,
+            depositToken,
+            depositAmount,
+            borrowToken,
+            withdrawAmount
+        );
 
         Fund(fund()).withdraw(borrowToken, msg.sender, withdrawAmount);
         stakeClaim(msg.sender, borrowToken, withdrawAmount);
-        emit CrossOvercollateralizedBorrow(msg.sender, depositToken, depositAmount, borrowToken, withdrawAmount);
+        emit CrossOvercollateralizedBorrow(
+            msg.sender,
+            depositToken,
+            depositAmount,
+            borrowToken,
+            withdrawAmount
+        );
     }
 
-    /// @dev close an account that is no longer borrowing and return gains
+    /// @notice close an account that is no longer borrowing and return gains
     function crossCloseAccount() external {
-        (address[] memory holdingTokens,
-         uint256[] memory holdingAmounts) = IMarginTrading(marginTrading()).getHoldingAmounts(msg.sender);
+        (address[] memory holdingTokens, uint256[] memory holdingAmounts) =
+            IMarginTrading(marginTrading()).getHoldingAmounts(msg.sender);
 
         // requires all debts paid off
         IMarginTrading(marginTrading()).registerLiquidation(msg.sender);
 
         for (uint256 i = 0; holdingTokens.length > i; i++) {
-            Fund(fund()).withdraw(holdingTokens[i], msg.sender, holdingAmounts[i]);
+            Fund(fund()).withdraw(
+                holdingTokens[i],
+                msg.sender,
+                holdingAmounts[i]
+            );
         }
     }
 
     // **** SWAP ****
-    // requires the initial amount to have already been sent to the first pair
+    /// @dev requires the initial amount to have already been sent to the first pair
     function _swap(
         address factory,
         uint256[] memory amounts,
@@ -216,14 +235,14 @@ contract MarginRouter is RoleAware, IncentivizedHolder, Ownable {
             "MarginRouter: INSUFFICIENT_OUTPUT_AMOUNT"
         );
         Fund(fund()).withdraw(
-                path[0],
-                UniswapV2Library.pairFor(factory, path[0], path[1]),
-                amounts[0]
+            path[0],
+            UniswapV2Library.pairFor(factory, path[0], path[1]),
+            amounts[0]
         );
         _swap(factory, amounts, path, fund());
     }
 
-    /// @dev external function to make swaps on AMM using protocol funds, only for authorized contracts
+    /// @notice make swaps on AMM using protocol funds, only for authorized contracts
     function authorizedSwapExactT4T(
         address factory,
         uint256 amountIn,
@@ -251,14 +270,14 @@ contract MarginRouter is RoleAware, IncentivizedHolder, Ownable {
             "MarginRouter: EXCESSIVE_INPUT_AMOUNT"
         );
         Fund(fund()).withdraw(
-                path[0],
-                UniswapV2Library.pairFor(factory, path[0], path[1]),
-                amounts[0]
+            path[0],
+            UniswapV2Library.pairFor(factory, path[0], path[1]),
+            amounts[0]
         );
         _swap(factory, amounts, path, fund());
     }
 
-    //// @dev external function for swapping protocol funds on AMM, only for authorized
+    //// @notice swap protocol funds on AMM, only for authorized
     function authorizedSwapT4ExactT(
         address factory,
         uint256 amountOut,
@@ -273,7 +292,7 @@ contract MarginRouter is RoleAware, IncentivizedHolder, Ownable {
         _swapT4ExactT(factory, amounts, amountInMax, path);
     }
 
-    /// @dev entry point for swapping tokens held in cross margin account
+    /// @notice entry point for swapping tokens held in cross margin account
     function crossSwapExactTokensForTokens(
         address ammFactory,
         uint256 amountIn,
@@ -287,7 +306,11 @@ contract MarginRouter is RoleAware, IncentivizedHolder, Ownable {
         requireAuthorizedAMM(ammFactory);
 
         // swap
-        amounts = UniswapV2Library.getAmountsOut(ammFactory, amountIn - fees, path);
+        amounts = UniswapV2Library.getAmountsOut(
+            ammFactory,
+            amountIn - fees,
+            path
+        );
 
         // checks that trader is within allowed lending bounds
         registerTrade(
@@ -298,16 +321,10 @@ contract MarginRouter is RoleAware, IncentivizedHolder, Ownable {
             amounts[amounts.length - 1]
         );
 
-        _swapExactT4T(
-            ammFactory,
-            amounts,
-            amountOutMin,
-            path
-        );
-
+        _swapExactT4T(ammFactory, amounts, amountOutMin, path);
     }
 
-    /// @dev entry point for swapping tokens held in cross margin account
+    /// @notice entry point for swapping tokens held in cross margin account
     function crossSwapTokensForExactTokens(
         address ammFactory,
         uint256 amountOut,
@@ -316,11 +333,15 @@ contract MarginRouter is RoleAware, IncentivizedHolder, Ownable {
         uint256 deadline
     ) external ensure(deadline) returns (uint256[] memory amounts) {
         // calc fees
-        uint256 fees =takeFeesFromOutput(amountOut);
+        uint256 fees = takeFeesFromOutput(amountOut);
 
         requireAuthorizedAMM(ammFactory);
         // swap
-        amounts = UniswapV2Library.getAmountsIn(ammFactory, amountOut + fees, path);
+        amounts = UniswapV2Library.getAmountsIn(
+            ammFactory,
+            amountOut + fees,
+            path
+        );
 
         // checks that trader is within allowed lending bounds
         registerTrade(
@@ -331,12 +352,7 @@ contract MarginRouter is RoleAware, IncentivizedHolder, Ownable {
             amountOut
         );
 
-        _swapT4ExactT(
-            ammFactory,
-            amounts,
-            amountInMax,
-            path
-        );
+        _swapT4ExactT(ammFactory, amounts, amountInMax, path);
     }
 
     /// @dev helper function does all the work of telling other contracts

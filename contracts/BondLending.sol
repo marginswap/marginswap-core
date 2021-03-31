@@ -13,18 +13,22 @@ struct Bond {
     uint256 yieldFP;
 }
 
-/// @dev Lending for fixed runtime, fixed interest
-/// Lenders can pick their own bond maturity date --
-/// In order to manage interest rates for the different
-/// maturities and create a yield curve we bucket
-/// bond runtimes into weighted baskets and adjust
-/// rates individually per bucket, based on supply and demand.
+/** 
+@title Lending for fixed runtime, fixed interest
+Lenders can pick their own bond maturity date
+@dev In order to manage interest rates for the different
+maturities and create a yield curve we bucket
+bond runtimes into weighted baskets and adjust
+rates individually per bucket, based on supply and demand.
+*/
 abstract contract BondLending is BaseLending {
     uint256 public minRuntime = 30 days;
     uint256 public maxRuntime = 365 days;
     uint256 public diffMaxMinRuntime;
-    // this is the numerator under runtimeWeights.
-    // any excess left over is the weight of hourly bonds
+    /** 
+    @dev this is the numerator under runtimeWeights.
+    any excess left over is the weight of hourly bonds
+    */
     uint256 public constant WEIGHT_TOTAL_10k = 10_000;
     uint256 public borrowingMarkupFP;
 
@@ -67,9 +71,7 @@ abstract contract BondLending is BaseLending {
             uint256 interpolatedAmount = (amount + bondReturn) / 2;
             lendingMeta[token].totalLending += interpolatedAmount;
 
-            totalLendingPerRuntime[token][
-                    bucketIndex
-            ] += interpolatedAmount;
+            totalLendingPerRuntime[token][bucketIndex] += interpolatedAmount;
 
             bondIndex = nextBondIndex;
             nextBondIndex++;
@@ -99,8 +101,7 @@ abstract contract BondLending is BaseLending {
         uint256 returnAmount = bond.returnAmount;
         address holder = bond.holder;
 
-        uint256 interpolatedAmount =
-            (bond.originalPrice + returnAmount) / 2;
+        uint256 interpolatedAmount = (bond.originalPrice + returnAmount) / 2;
 
         LendingMetadata storage meta = lendingMeta[token];
         meta.totalLending -= interpolatedAmount;
@@ -171,6 +172,7 @@ abstract contract BondLending is BaseLending {
         );
     }
 
+    /// Get view of returns on bond
     function viewBondReturn(
         address token,
         uint256 runtime,
@@ -218,6 +220,7 @@ abstract contract BondLending is BaseLending {
         lastAction[bucketIndex] = block.timestamp;
     }
 
+    /// Set runtime yields in floating point
     function setRuntimeYieldsFP(address token, uint256[] memory yieldsFP)
         external
         onlyOwner
@@ -225,6 +228,7 @@ abstract contract BondLending is BaseLending {
         runtimeYieldsFP[token] = yieldsFP;
     }
 
+    /// Set runtime weights in floating point
     function setRuntimeWeights(address token, uint256[] memory weights)
         external
     {
@@ -266,12 +270,17 @@ abstract contract BondLending is BaseLending {
         runtimeWeights[token] = weights;
     }
 
+    /// Set miniumum runtime
     function setMinRuntime(uint256 runtime) external onlyOwner {
         require(runtime > 1 hours, "Min runtime needs to be at least 1 hour");
-        require(maxRuntime > runtime, "Min runtime must be smaller than max runtime");
+        require(
+            maxRuntime > runtime,
+            "Min runtime must be smaller than max runtime"
+        );
         minRuntime = runtime;
     }
 
+    /// Set maximum runtime
     function setMaxRuntime(uint256 runtime) external onlyOwner {
         require(
             runtime > minRuntime,

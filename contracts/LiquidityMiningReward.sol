@@ -6,6 +6,7 @@ import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "./IncentiveDistribution.sol";
 
+/// @title Manaage rewards for liquidity mining
 contract LiquidityMiningReward is Ownable {
     using SafeERC20 for IERC20;
 
@@ -25,6 +26,7 @@ contract LiquidityMiningReward is Ownable {
         incentiveStart = startTimestamp;
     }
 
+    /// Deposit stake tokens
     function depositStake(uint256 amount) external {
         require(
             block.timestamp > incentiveStart,
@@ -49,6 +51,7 @@ contract LiquidityMiningReward is Ownable {
         stakeAmounts[msg.sender] += amount;
     }
 
+    /// Withdraw stake tokens
     function withdrawStake(uint256 amount) external {
         uint256 stakeAmount = stakeAmounts[msg.sender];
         require(stakeAmount >= amount, "Not enough stake to withdraw");
@@ -69,6 +72,7 @@ contract LiquidityMiningReward is Ownable {
         stakeToken.safeTransfer(msg.sender, amount);
     }
 
+    /// Withdraw liqiudity mining reward
     function withdrawReward() external returns (uint256) {
         uint256 claimId = claimIds[msg.sender];
         require(claimId > 0, "No registered claim");

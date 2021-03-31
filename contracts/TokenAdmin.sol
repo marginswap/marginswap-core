@@ -8,7 +8,7 @@ import "./CrossMarginTrading.sol";
 import "./MarginRouter.sol";
 import "../interfaces/IDelegateOwner.sol";
 
-/// @dev A helper contract to manage the initialization of new tokens
+/// @title A helper contract to manage the initialization of new tokens
 /// across different parts of the protocol, as well as changing some
 /// parameters throughout the lifetime of a token
 contract TokenAdmin is RoleAware, Ownable, IDelegateOwner {
@@ -34,6 +34,7 @@ contract TokenAdmin is RoleAware, Ownable, IDelegateOwner {
         totalBorrowingTargetPortion = borrowingTargetPortion;
     }
 
+    /// Activate a token for trading
     function activateToken(
         address token,
         uint256 exposureCap,
@@ -87,6 +88,7 @@ contract TokenAdmin is RoleAware, Ownable, IDelegateOwner {
         }
     }
 
+    /// Update token cap
     function changeTokenCap(address token, uint256 exposureCap)
         external
         onlyOwner
@@ -95,6 +97,7 @@ contract TokenAdmin is RoleAware, Ownable, IDelegateOwner {
         CrossMarginTrading(marginTrading()).setTokenCap(token, exposureCap);
     }
 
+    /// Change weight of token incentive
     function changeTokenIncentiveWeight(address token, uint256 tokenWeight)
         external
         onlyOwner
@@ -108,6 +111,7 @@ contract TokenAdmin is RoleAware, Ownable, IDelegateOwner {
         updateIncentiveShares(IncentiveDistribution(incentiveDistributor()));
     }
 
+    /// Update lending buffer
     function changeLendingBuffer(address token, uint256 lendingBuffer)
         external
         onlyOwner
@@ -147,10 +151,12 @@ contract TokenAdmin is RoleAware, Ownable, IDelegateOwner {
         return (incentiveWeight * targetPortion) / totalTokenWeights;
     }
 
+    /// Set lending target portion
     function setLendingTargetPortion(uint256 portion) external onlyOwner {
         totalLendingTargetPortion = portion;
     }
 
+    /// Set borrowing target portion
     function setBorrowingTargetPortion(uint256 portion) external onlyOwner {
         totalBorrowingTargetPortion = portion;
     }
@@ -162,6 +168,7 @@ contract TokenAdmin is RoleAware, Ownable, IDelegateOwner {
         Lending(lending()).setHourlyYieldAPR(token, aprPercent);
     }
 
+    /// Set initial hourly yield APR
     function setInitHourlyYieldAPR(uint256 value) external onlyOwner {
         initHourlyYieldAPRPercent = value;
     }
