@@ -30,7 +30,8 @@ type TokenInitRecord = {
   exposureCap: number,
   lendingBuffer: number,
   incentiveWeight: number,
-  liquidationPath?: string[];
+  liquidationPatah: string[],
+  liquidationTokenPath?: string[];
 };
 const tokenParams: { [tokenName: string]: TokenInitRecord; } = {
   DAI: {
@@ -87,8 +88,12 @@ const deploy: DeployFunction = async function ({
     return ethers.utils.parseUnits(`${tokenParams[name].lendingBuffer}`, 18);
   });
   const incentiveWeights = tokenNames.map((name) => tokenParams[name].incentiveWeight);
+  // TODO get the pairs from uni/sushi
   const liquidationPaths = tokenNames.map((name) => {
-    return tokens[name].liquidationPath || [tokens[name], peg];
+    return tokens[name].liquidationPath;
+  });
+  const liquidationTokens = tokenNames.map((name) => {
+    return tokens[name].liquidationTokenPath || [tokens[name], peg];
   });
 
   const TokenActivation = await deploy("TokenActivation", {

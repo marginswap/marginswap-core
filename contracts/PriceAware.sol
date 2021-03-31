@@ -3,13 +3,18 @@ pragma solidity ^0.8.0;
 
 import "./RoleAware.sol";
 import "./MarginRouter.sol";
+import "../libraries/UniswapStyleLib.sol";
 
 /// Stores how many of token you could get for 1k of peg
 struct TokenPrice {
     uint256 blockLastUpdated;
     uint256 tokenPer1k;
-    address[] liquidationPath;
-    address[] inverseLiquidationPath;
+
+    address[] liquidationPairs;
+    address[] inverseLiquidationPairs;
+
+    address[] liquidationTokens;
+    address[] inverseLiquidationTokens;
 }
 
 /// @title The protocol features several mechanisms to prevent vulnerability to
@@ -23,7 +28,6 @@ struct TokenPrice {
 /// 3) Liquidators may not call from a contract address, to prevent extreme forms of
 ///    of front-running and other price manipulation.
 abstract contract PriceAware is Ownable, RoleAware {
-    address public constant UNI = 0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f;
     address public immutable peg;
     mapping(address => TokenPrice) public tokenPrices;
     /// update window in blocks
@@ -103,10 +107,10 @@ abstract contract PriceAware is Ownable, RoleAware {
         } else {
             TokenPrice storage tokenPrice = tokenPrices[token];
             uint256[] memory pathAmounts =
-                MarginRouter(router()).getAmountsOut(
-                    UNI,
+                UniswapStyleLib.getAmountsOut(
                     inAmount,
-                    tokenPrice.liquidationPath
+                    tokenPrice.liquidationPairs,
+                    tokenPrice.liquidationTokens
                 );
             uint256 outAmount = pathAmounts[pathAmounts.length - 1];
             return outAmount;
@@ -123,10 +127,10 @@ abstract contract PriceAware is Ownable, RoleAware {
         } else {
             TokenPrice storage tokenPrice = tokenPrices[token];
             uint256[] memory pathAmounts =
-                MarginRouter(router()).getAmountsOut(
-                    UNI,
+                UniswapStyleLib.getAmountsOut(
                     inAmount,
-                    tokenPrice.liquidationPath
+                    tokenPrice.liquidationPairs,
+                    tokenPrice.liquidationTokens
                 );
             uint256 outAmount = pathAmounts[pathAmounts.length - 1];
 
@@ -166,25 +170,36 @@ abstract contract PriceAware is Ownable, RoleAware {
     }
 
     /// add path from token to current liquidation peg
-    function setLiquidationPath(address[] memory path) external {
+    function setLiquidationPath(address[] memory path, address[] memory tokens) external {
         require(
             isTokenActivator(msg.sender),
             "not authorized to set lending cap"
         );
-        address token = path[0];
-        tokenPrices[token].liquidationPath = new address[](path.length);
-        tokenPrices[token].inverseLiquidationPath = new address[](path.length);
+        
+        address token = tokens[0];
 
-        for (uint16 i = 0; path.length > i; i++) {
-            tokenPrices[token].liquidationPath[i] = path[i];
-            tokenPrices[token].inverseLiquidationPath[i] = path[
+        TokenPrice storage tokenPrice = tokenPrices[token];
+        tokenPrice.liquidationPairs = new address[](path.length);
+        tokenPrice.inverseLiquidationPairs = new address[](path.length);
+        tokenPrice.liquidationTokens = new address[](tokens.length);
+        tokenPrice.inverseLiquidationTokens = new address[](tokens.length);
+
+        for (uint256 i = 0; path.length > i; i++) {
+            tokenPrice.liquidationPairs[i] = path[i];
+            tokenPrice.inverseLiquidationPairs[i] = path[
                 path.length - i - 1
             ];
         }
+
+        for (uint256 i=0; tokens.length > i; i++) {
+            tokenPrice.liquidationTokens[i] = tokens[i];
+            tokenPrice.inverseLiquidationTokens[i] = tokens[tokens.length - i -1];
+        }
+
         uint256[] memory pathAmounts =
-            MarginRouter(router()).getAmountsIn(UNI, 1000 ether, path);
+            UniswapStyleLib.getAmountsIn(1000 ether, path, tokens);
         uint256 inAmount = pathAmounts[0];
-        _updatePriceInPeg(tokenPrices[token], inAmount, 1000 ether, 1000);
+        _updatePriceInPeg(tokenPrice, inAmount, 1000 ether, 1000);
     }
 
     function liquidateToPeg(address token, uint256 amount)
@@ -197,10 +212,10 @@ abstract contract PriceAware is Ownable, RoleAware {
             TokenPrice storage tP = tokenPrices[token];
             uint256[] memory amounts =
                 MarginRouter(router()).authorizedSwapExactT4T(
-                    UNI,
                     amount,
                     0,
-                    tP.liquidationPath
+                    tP.liquidationPairs,
+                    tP.liquidationTokens
                 );
 
             uint256 outAmount = amounts[amounts.length - 1];
@@ -219,10 +234,10 @@ abstract contract PriceAware is Ownable, RoleAware {
             TokenPrice storage tP = tokenPrices[token];
             uint256[] memory amounts =
                 MarginRouter(router()).authorizedSwapT4ExactT(
-                    UNI,
                     targetAmount,
                     type(uint256).max,
-                    tP.inverseLiquidationPath
+                    tP.inverseLiquidationPairs,
+                    tP.inverseLiquidationTokens
                 );
 
             return amounts[0];

@@ -2,7 +2,7 @@
 pragma solidity ^0.8.0;
 
 import "@uniswap/v2-core/contracts/interfaces/IUniswapV2Factory.sol";
-import "../libraries/UniswapV2Library.sol";
+import "../libraries/UniswapStyleLib.sol";
 
 import "./RoleAware.sol";
 import "./Fund.sol";
@@ -13,15 +13,9 @@ import "./IncentivizedHolder.sol";
 
 /// @title Top level transaction controller
 contract MarginRouter is RoleAware, IncentivizedHolder, Ownable {
-    /// different uniswap compatible factories to talk to
-    mapping(address => bool) public factories;
     /// @notice wrapped ETH ERC20 contract
     address public immutable WETH;
-    /// @notice Uniswap Token address
-    address public constant UNI = 0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f;
-    /// @notice Sushiswap Token address
-    address public constant SUSHI = 0xC0AEe478e3658e2610c5F7A4A2E1777cE9e4f2Ac;
-    uint256 public constant feesPer10k = 10;
+    uint256 public constant mswapFeesPer10k = 10;
 
     /// emitted when a trader depoits on cross margin
     event CrossDeposit(
@@ -67,15 +61,7 @@ contract MarginRouter is RoleAware, IncentivizedHolder, Ownable {
     }
 
     constructor(address _WETH, address _roles) RoleAware(_roles) {
-        factories[UNI] = true;
-        factories[SUSHI] = true;
-
         WETH = _WETH;
-    }
-
-    /// @notice Authjorize Automated Market Maker
-    function authorizeAMM(address ammFactory) external onlyOwner {
-        factories[ammFactory] = true;
     }
 
     /// @notice traders call this to deposit funds on cross margin
@@ -201,68 +187,77 @@ contract MarginRouter is RoleAware, IncentivizedHolder, Ownable {
     // **** SWAP ****
     /// @dev requires the initial amount to have already been sent to the first pair
     function _swap(
-        address factory,
         uint256[] memory amounts,
-        address[] memory path,
+        address[] memory pairs,
+        address[] memory tokens,
         address _to
     ) internal virtual {
-        for (uint256 i; i < path.length - 1; i++) {
-            (address input, address output) = (path[i], path[i + 1]);
-            (address token0, ) = UniswapV2Library.sortTokens(input, output);
+        address outToken = tokens[tokens.length - 1];
+        uint256 startingBalance = IERC20(outToken).balanceOf(_to);
+        for (uint256 i; i < pairs.length; i++) {
+            (address input, address output) = (tokens[i], tokens[i + 1]);
+            (address token0, ) = UniswapStyleLib.sortTokens(input, output);
+
             uint256 amountOut = amounts[i + 1];
+
             (uint256 amount0Out, uint256 amount1Out) =
                 input == token0
                     ? (uint256(0), amountOut)
                     : (amountOut, uint256(0));
+
             address to =
-                i < path.length - 2
-                    ? UniswapV2Library.pairFor(factory, output, path[i + 2])
+                i < pairs.length - 1
+                    ? pairs[i + 1]
                     : _to;
-            IUniswapV2Pair(UniswapV2Library.pairFor(factory, input, output))
-                .swap(amount0Out, amount1Out, to, new bytes(0));
+            IUniswapV2Pair pair = IUniswapV2Pair(pairs[i]);
+            pair.swap(amount0Out, amount1Out, to, new bytes(0));
         }
+
+        uint256 endingBalance = IERC20(outToken).balanceOf(_to);
+        require(endingBalance >= startingBalance + amounts[amounts.length - 1],
+                "Defective AMM route; balances don't match");
     }
 
     /// @dev internal helper swapping exact token for token on AMM
     function _swapExactT4T(
-        address factory,
         uint256[] memory amounts,
         uint256 amountOutMin,
-        address[] calldata path
+        address[] calldata pairs,
+        address[] calldata tokens
     ) internal {
         require(
             amounts[amounts.length - 1] >= amountOutMin,
             "MarginRouter: INSUFFICIENT_OUTPUT_AMOUNT"
         );
         Fund(fund()).withdraw(
-            path[0],
-            UniswapV2Library.pairFor(factory, path[0], path[1]),
-            amounts[0]
+                tokens[0],
+                pairs[0],
+                amounts[0]
         );
-        _swap(factory, amounts, path, fund());
+        _swap(amounts, pairs, tokens, fund());
     }
 
     /// @notice make swaps on AMM using protocol funds, only for authorized contracts
     function authorizedSwapExactT4T(
-        address factory,
         uint256 amountIn,
         uint256 amountOutMin,
-        address[] calldata path
+        address[] calldata pairs,
+        address[] calldata tokens
     ) external returns (uint256[] memory amounts) {
         require(
             isAuthorizedFundTrader(msg.sender),
             "Calling contract is not authorized to trade with protocl funds"
         );
-        amounts = UniswapV2Library.getAmountsOut(factory, amountIn, path);
-        _swapExactT4T(factory, amounts, amountOutMin, path);
+        amounts = UniswapStyleLib.getAmountsOut(amountIn, pairs, tokens);
+        _swapExactT4T(amounts, amountOutMin, pairs, tokens);
     }
 
     // @dev internal helper swapping exact token for token on on AMM
     function _swapT4ExactT(
-        address factory,
         uint256[] memory amounts,
         uint256 amountInMax,
-        address[] calldata path
+        address[] calldata pairs,
+        address[] calldata tokens
     ) internal {
         // TODO minimum trade?
         require(
@@ -270,89 +265,87 @@ contract MarginRouter is RoleAware, IncentivizedHolder, Ownable {
             "MarginRouter: EXCESSIVE_INPUT_AMOUNT"
         );
         Fund(fund()).withdraw(
-            path[0],
-            UniswapV2Library.pairFor(factory, path[0], path[1]),
-            amounts[0]
+                tokens[0],
+                pairs[0],
+                amounts[0]
         );
-        _swap(factory, amounts, path, fund());
+        _swap(amounts, pairs, tokens, fund());
     }
 
     //// @notice swap protocol funds on AMM, only for authorized
     function authorizedSwapT4ExactT(
-        address factory,
         uint256 amountOut,
         uint256 amountInMax,
-        address[] calldata path
+        address[] calldata pairs,
+        address[] calldata tokens
     ) external returns (uint256[] memory amounts) {
         require(
             isAuthorizedFundTrader(msg.sender),
             "Calling contract is not authorized to trade with protocl funds"
         );
-        amounts = UniswapV2Library.getAmountsIn(factory, amountOut, path);
-        _swapT4ExactT(factory, amounts, amountInMax, path);
+        amounts = UniswapStyleLib.getAmountsIn(amountOut, pairs, tokens);
+        _swapT4ExactT(amounts, amountInMax, pairs, tokens);
     }
 
     /// @notice entry point for swapping tokens held in cross margin account
     function crossSwapExactTokensForTokens(
-        address ammFactory,
         uint256 amountIn,
         uint256 amountOutMin,
-        address[] calldata path,
+        address[] calldata pairs,
+        address[] calldata tokens,
         uint256 deadline
     ) external ensure(deadline) returns (uint256[] memory amounts) {
         // calc fees
         uint256 fees = takeFeesFromInput(amountIn);
 
-        requireAuthorizedAMM(ammFactory);
-
         // swap
-        amounts = UniswapV2Library.getAmountsOut(
-            ammFactory,
-            amountIn - fees,
-            path
-        );
+        amounts = UniswapStyleLib.getAmountsOut(amountIn - fees, pairs, tokens);
 
         // checks that trader is within allowed lending bounds
         registerTrade(
             msg.sender,
-            path[0],
-            path[path.length - 1],
+            tokens[0],
+            tokens[tokens.length - 1],
             amountIn,
             amounts[amounts.length - 1]
         );
 
-        _swapExactT4T(ammFactory, amounts, amountOutMin, path);
+        _swapExactT4T(
+            amounts,
+            amountOutMin,
+            pairs,
+            tokens
+        );
+
     }
 
     /// @notice entry point for swapping tokens held in cross margin account
     function crossSwapTokensForExactTokens(
-        address ammFactory,
         uint256 amountOut,
         uint256 amountInMax,
-        address[] calldata path,
+        address[] calldata pairs,
+        address[] calldata tokens,
         uint256 deadline
     ) external ensure(deadline) returns (uint256[] memory amounts) {
-        // calc fees
-        uint256 fees = takeFeesFromOutput(amountOut);
 
-        requireAuthorizedAMM(ammFactory);
         // swap
-        amounts = UniswapV2Library.getAmountsIn(
-            ammFactory,
-            amountOut + fees,
-            path
-        );
+        amounts = UniswapStyleLib.getAmountsIn(amountOut + takeFeesFromOutput(amountOut), pairs, tokens);
 
         // checks that trader is within allowed lending bounds
         registerTrade(
             msg.sender,
-            path[0],
-            path[path.length - 1],
+            tokens[0],
+            tokens[tokens.length - 1],
             amounts[0],
             amountOut
         );
 
-        _swapT4ExactT(ammFactory, amounts, amountInMax, path);
+        _swapT4ExactT(
+            amounts,
+            amountInMax,
+            pairs,
+            tokens
+        );
     }
 
     /// @dev helper function does all the work of telling other contracts
@@ -393,26 +386,19 @@ contract MarginRouter is RoleAware, IncentivizedHolder, Ownable {
     }
 
     function getAmountsOut(
-        address factory,
         uint256 inAmount,
-        address[] calldata path
+        address[] calldata pairs,
+        address[] calldata tokens
     ) external view returns (uint256[] memory) {
-        return UniswapV2Library.getAmountsOut(factory, inAmount, path);
+        return UniswapStyleLib.getAmountsOut(inAmount, pairs, tokens);
     }
 
     function getAmountsIn(
-        address factory,
         uint256 outAmount,
-        address[] calldata path
+        address[] calldata pairs,
+        address[] calldata tokens
     ) external view returns (uint256[] memory) {
-        return UniswapV2Library.getAmountsIn(factory, outAmount, path);
-    }
-
-    function requireAuthorizedAMM(address ammFactory) internal view {
-        require(
-            ammFactory == UNI || ammFactory == SUSHI || factories[ammFactory],
-            "Not using an authorized AMM"
-        );
+        return UniswapStyleLib.getAmountsIn(outAmount, pairs, tokens);
     }
 
     function takeFeesFromOutput(uint256 amount)
@@ -420,7 +406,7 @@ contract MarginRouter is RoleAware, IncentivizedHolder, Ownable {
         pure
         returns (uint256 fees)
     {
-        fees = (feesPer10k * amount) / 10_000;
+        fees = (mswapFeesPer10k * amount) / 10_000;
     }
 
     function takeFeesFromInput(uint256 amount)
@@ -428,6 +414,6 @@ contract MarginRouter is RoleAware, IncentivizedHolder, Ownable {
         pure
         returns (uint256 fees)
     {
-        fees = (feesPer10k * amount) / (10_000 + feesPer10k);
+        fees = (mswapFeesPer10k * amount) / (10_000 + mswapFeesPer10k);
     }
 }

@@ -40,7 +40,8 @@ contract TokenAdmin is RoleAware, Ownable, IDelegateOwner {
         uint256 exposureCap,
         uint256 lendingBuffer,
         uint256 incentiveWeight,
-        address[] calldata liquidationPath
+        address[] calldata liquidationPairs,
+        address[] calldata liquidationTokens
     ) external onlyOwner {
         require(!Fund(fund()).activeTokens(token), "Token already is active");
 
@@ -77,13 +78,13 @@ contract TokenAdmin is RoleAware, Ownable, IDelegateOwner {
             incentiveTokens.push(token);
 
             require(
-                liquidationPath[0] == token &&
-                    liquidationPath[liquidationPath.length - 1] ==
+                liquidationTokens[0] == token &&
+                    liquidationTokens[liquidationTokens.length - 1] ==
                     CrossMarginTrading(marginTrading()).peg(),
-                "Invalid liquidationPath -- should go from token to peg"
+                "Invalid liquidationTokens -- should go from token to peg"
             );
             CrossMarginTrading(marginTrading()).setLiquidationPath(
-                liquidationPath
+                liquidationPairs, liquidationTokens
             );
         }
     }
