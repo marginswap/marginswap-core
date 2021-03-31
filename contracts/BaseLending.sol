@@ -7,6 +7,12 @@ abstract contract BaseLending is RoleAware, Ownable {
     uint256 constant FP32 = 2**32;
     uint256 constant ACCUMULATOR_INIT = 10**18;
 
+    struct YieldAccumulator {
+        uint256 accumulatorFP;
+        uint256 lastUpdated;
+        uint256 hourlyYieldFP;
+    }
+
     struct LendingMetadata {
         uint256 totalLending;
         uint256 totalBorrowed;
@@ -14,6 +20,9 @@ abstract contract BaseLending is RoleAware, Ownable {
         uint256 lendingCap;
     }
     mapping(address => LendingMetadata) public lendingMeta;
+
+    /// @dev accumulate interest per token (like compound indices)
+    mapping(address => YieldAccumulator) public borrowYieldAccumulators;
 
     uint256 public maxHourlyYieldFP;
     uint256 public yieldChangePerSecondFP;

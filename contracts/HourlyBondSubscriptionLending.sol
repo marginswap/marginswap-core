@@ -4,12 +4,6 @@ pragma solidity ^0.8.0;
 import "./BaseLending.sol";
 import "./Fund.sol";
 
-struct YieldAccumulator {
-    uint256 accumulatorFP;
-    uint256 lastUpdated;
-    uint256 hourlyYieldFP;
-}
-
 struct HourlyBond {
     uint256 amount;
     uint256 yieldQuotientFP;
@@ -25,8 +19,6 @@ abstract contract HourlyBondSubscriptionLending is BaseLending {
         public hourlyBondAccounts;
 
     mapping(address => YieldAccumulator) public hourlyBondYieldAccumulators;
-    /// @dev accumulate interest per token (like compound indices)
-    mapping(address => YieldAccumulator) public borrowYieldAccumulators;
 
     uint256 public borrowingFactorPercent = 200;
 
@@ -185,6 +177,13 @@ abstract contract HourlyBondSubscriptionLending is BaseLending {
         );
 
         LendingMetadata storage meta = lendingMeta[token];
+        YieldAccumulator storage borrowAccumulator =
+            borrowYieldAccumulators[token];
+
+        uint256 yieldGeneratedFP =
+            borrowAccumulator.hourlyYieldFP * meta.totalBorrowed / (1 + meta.totalLending);
+        uint256 _maxHourlyYieldFP = min(maxHourlyYieldFP, yieldGeneratedFP);
+
         accumulator.hourlyYieldFP = updatedYieldFP(
             accumulator.hourlyYieldFP,
             accumulator.lastUpdated,
@@ -192,19 +191,17 @@ abstract contract HourlyBondSubscriptionLending is BaseLending {
             lendingTarget(meta),
             hourlyBondBuyingSpeed[token],
             hourlyBondWithdrawingSpeed[token],
-            maxHourlyYieldFP
+            _maxHourlyYieldFP
         );
 
-        YieldAccumulator storage borrowAccumulator =
-            borrowYieldAccumulators[token];
         timeDelta = block.timestamp - borrowAccumulator.lastUpdated;
         borrowAccumulator.accumulatorFP = calcCumulativeYieldFP(
             borrowAccumulator,
             timeDelta
         );
 
-        borrowYieldAccumulators[token].hourlyYieldFP =
-            (borrowingFactorPercent * accumulator.hourlyYieldFP) /
+        borrowAccumulator.hourlyYieldFP =
+            1 + (borrowingFactorPercent * accumulator.hourlyYieldFP) /
             100;
 
         accumulator.lastUpdated = block.timestamp;

@@ -159,7 +159,15 @@ abstract contract BondLending is BaseLending {
         uint256 withdrawing = withdrawingSpeed[token][bucketIndex];
 
         uint256 runtime = minRuntime + bucketIndex * diffMaxMinRuntime;
-        uint256 bucketMaxYield = maxHourlyYieldFP * (runtime / (1 hours));
+
+        YieldAccumulator storage borrowAccumulator =
+            borrowYieldAccumulators[token];
+
+        uint256 yieldGeneratedFP =
+            borrowAccumulator.hourlyYieldFP * meta.totalBorrowed / (1 + meta.totalLending);
+        uint256 _maxHourlyYieldFP = min(maxHourlyYieldFP, yieldGeneratedFP);
+
+        uint256 bucketMaxYield = _maxHourlyYieldFP * (runtime / (1 hours));
 
         yieldFP = updatedYieldFP(
             yieldFP,
