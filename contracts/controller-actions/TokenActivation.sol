@@ -10,14 +10,16 @@ contract TokenActivation is SelfDestructReturningExec {
     uint256[] public exposureCaps;
     uint256[] public lendingBuffers;
     uint256[] public incentiveWeights;
-    address[][] public liquidationPaths;
+    address[][] public liquidationPairs;
+    address[][] public liquidationTokens;
 
     constructor(address controller,
                 address[] memory tokens2activate,
                 uint256[] memory _exposureCaps,
                 uint256[] memory _lendingBuffers,
                 uint256[] memory _incentiveWeights,
-                address[][] memory _liquidationPaths
+                address[][] memory _liquidationPairs,
+                address[][] memory _liquidationTokens
                 )
         SelfDestructReturningExec(controller)
     {
@@ -25,7 +27,8 @@ contract TokenActivation is SelfDestructReturningExec {
         exposureCaps = _exposureCaps;
         lendingBuffers = _lendingBuffers;
         incentiveWeights = _incentiveWeights;
-        liquidationPaths = _liquidationPaths;
+        liquidationPairs = _liquidationPairs;
+        liquidationTokens = _liquidationTokens;
         
         propertyCharacters.push(TOKEN_ADMIN);
         
@@ -37,14 +40,16 @@ contract TokenActivation is SelfDestructReturningExec {
             uint256 exposureCap = exposureCaps[i];
             uint256 lendingBuffer = lendingBuffers[i];
             uint256 incentiveWeight = incentiveWeights[i];
-            address[] memory liquidationPath = liquidationPaths[i];
+            address[] memory liquidationPairPath = liquidationPairs[i];
+            address[] memory liquidationTokenPath = liquidationTokens[i];
 
             TokenAdmin(roles().mainCharacters(TOKEN_ADMIN))
                 .activateToken(token,
                                exposureCap,
                                lendingBuffer,
                                incentiveWeight,
-                               liquidationPath);
+                               liquidationPairPath,
+                               liquidationTokenPath);
         }
     }
 }

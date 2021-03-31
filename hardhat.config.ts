@@ -8,6 +8,8 @@ import path from 'path';
 import { hrtime } from "node:process";
 import * as types from 'hardhat/internal/core/params/argumentTypes';
 import { Deployment } from "hardhat-deploy/dist/types";
+import "hardhat-contract-sizer";
+import "@nomiclabs/hardhat-solhint";
 
 
 // ChainIds
@@ -155,11 +157,11 @@ export default {
     },
   },
   solidity: {
-    version: "0.8.1",
+    version: "0.8.3",
     settings: {
       optimizer: {
         enabled: true,
-        runs: 200000,
+        runs: 9900,
       },
     },
   },
