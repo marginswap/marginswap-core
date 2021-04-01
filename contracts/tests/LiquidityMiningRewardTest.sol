@@ -38,7 +38,8 @@ contract LiquidityMiningRewardTest {
 
         rewardToken = new ERC20PresetMinterPauser("Reward Token", "REW");
         rewardToken.mint(address(fund), 100_000 ether);
-        fund.activateToken(address(rewardToken));
+        // TODO activate in lending instead
+        //fund.activateToken(address(rewardToken));
 
         incentiveDistro = new IncentiveDistribution(
             address(rewardToken),

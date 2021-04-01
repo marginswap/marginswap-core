@@ -3,7 +3,7 @@ pragma solidity ^0.8.0;
 import "./RoleAware.sol";
 
 /// @title Base lending behavior
-abstract contract BaseLending is RoleAware, Ownable {
+abstract contract BaseLending is Ownable {
     uint256 constant FP32 = 2**32;
     uint256 constant ACCUMULATOR_INIT = 10**18;
 
@@ -21,7 +21,7 @@ abstract contract BaseLending is RoleAware, Ownable {
     }
     mapping(address => LendingMetadata) public lendingMeta;
 
-    /// @dev accumulate interest per token (like compound indices)
+    /// @dev accumulate interest per issuer (like compound indices)
     mapping(address => YieldAccumulator) public borrowYieldAccumulators;
 
     uint256 public maxHourlyYieldFP;
@@ -94,7 +94,7 @@ abstract contract BaseLending is RoleAware, Ownable {
     }
 
     function _makeFallbackBond(
-        address token,
+        address issuer,
         address holder,
         uint256 amount
     ) internal virtual;
@@ -108,27 +108,9 @@ abstract contract BaseLending is RoleAware, Ownable {
     }
 
     /// View lending target
-    function viewLendingTarget(address token) external view returns (uint256) {
-        LendingMetadata storage meta = lendingMeta[token];
+    function viewLendingTarget(address issuer) external view returns (uint256) {
+        LendingMetadata storage meta = lendingMeta[issuer];
         return lendingTarget(meta);
-    }
-
-    /// Set lending cap
-    function setLendingCap(address token, uint256 cap) external {
-        require(
-            isTokenActivator(msg.sender),
-            "not authorized to set lending cap"
-        );
-        lendingMeta[token].lendingCap = cap;
-    }
-
-    /// Set lending buffer
-    function setLendingBuffer(address token, uint256 buffer) external {
-        require(
-            isTokenActivator(msg.sender),
-            "not autorized to set lending buffer"
-        );
-        lendingMeta[token].lendingBuffer = buffer;
     }
 
     /// Set maximum hourly yield in floating point
@@ -143,4 +125,11 @@ abstract contract BaseLending is RoleAware, Ownable {
     {
         yieldChangePerSecondFP = changePerSecondFP;
     }
+
+    /// Available tokens to this issuance
+    function issuanceBalance(address issuance)
+        internal
+        view
+        virtual
+        returns (uint256);
 }

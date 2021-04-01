@@ -43,17 +43,9 @@ abstract contract PriceAware is Ownable, RoleAware {
         priceUpdateWindow = window;
     }
 
-    /// Set rate for confident updates
-    function setConfidentUpdateRate(uint256 rate) external onlyOwner {
+    /// Set rate for updates
+    function setUpdateRate(uint256 rate) external onlyOwner {
         UPDATE_RATE_PERMIL = rate;
-    }
-
-    /// Get current price of token in peg
-    function encouragePriceUpdate(address token, uint256 inAmount)
-        external
-        returns (uint256)
-    {
-        return getCurrentPriceInPeg(token, inAmount, true);
     }
 
     function setUpdateMaxPegAmount(uint256 amount) external onlyOwner {
@@ -69,26 +61,26 @@ abstract contract PriceAware is Ownable, RoleAware {
         address token,
         uint256 inAmount,
         bool forceCurBlock
-    ) internal returns (uint256) {
+    ) public returns (uint256) {
         TokenPrice storage tokenPrice = tokenPrices[token];
         if (forceCurBlock) {
             if (
                 block.number - tokenPrice.blockLastUpdated > priceUpdateWindow
             ) {
                 // update the currently cached price
-                return getUpdatedPriceInPeg(token, inAmount);
+                return getPriceFromAMM(token, inAmount);
             } else {
                 // just get the current price from AMM
                 return viewCurrentPriceInPeg(token, inAmount);
             }
         } else if (tokenPrice.tokenPer1k == 0) {
             // do the best we can if it's at zero
-            return getUpdatedPriceInPeg(token, inAmount);
+            return getPriceFromAMM(token, inAmount);
         }
 
         if (block.number - tokenPrice.blockLastUpdated > priceUpdateWindow) {
             // update the price somewhat
-            getUpdatedPriceInPeg(token, inAmount);
+            getPriceFromAMM(token, inAmount);
         }
 
         return (inAmount * 1000 ether) / tokenPrice.tokenPer1k;
@@ -96,7 +88,7 @@ abstract contract PriceAware is Ownable, RoleAware {
 
     /// Get view of current price of token in peg
     function viewCurrentPriceInPeg(address token, uint256 inAmount)
-        internal
+        public
         view
         returns (uint256)
     {
@@ -115,7 +107,8 @@ abstract contract PriceAware is Ownable, RoleAware {
         }
     }
 
-    function getUpdatedPriceInPeg(address token, uint256 inAmount)
+    /// @dev retrieves the price from the AMM
+    function getPriceFromAMM(address token, uint256 inAmount)
         internal
         virtual
         returns (uint256)
@@ -136,23 +129,23 @@ abstract contract PriceAware is Ownable, RoleAware {
                 outAmount > UPDATE_MIN_PEG_AMOUNT &&
                 outAmount < UPDATE_MAX_PEG_AMOUNT
             ) {
-                updatePriceInPeg(tokenPrice, inAmount, outAmount);
+                setPriceVal(tokenPrice, inAmount, outAmount);
             }
 
             return outAmount;
         }
     }
 
-    function updatePriceInPeg(
+    function setPriceVal(
         TokenPrice storage tokenPrice,
         uint256 inAmount,
         uint256 outAmount
     ) internal {
-        _updatePriceInPeg(tokenPrice, inAmount, outAmount, UPDATE_RATE_PERMIL);
+        _setPriceVal(tokenPrice, inAmount, outAmount, UPDATE_RATE_PERMIL);
         tokenPrice.blockLastUpdated = block.number;
     }
 
-    function _updatePriceInPeg(
+    function _setPriceVal(
         TokenPrice storage tokenPrice,
         uint256 inAmount,
         uint256 outAmount,
@@ -199,7 +192,7 @@ abstract contract PriceAware is Ownable, RoleAware {
         uint256[] memory pathAmounts =
             UniswapStyleLib.getAmountsIn(1000 ether, path, tokens);
         uint256 inAmount = pathAmounts[0];
-        _updatePriceInPeg(tokenPrice, inAmount, 1000 ether, 1000);
+        _setPriceVal(tokenPrice, inAmount, 1000 ether, 1000);
     }
 
     function liquidateToPeg(address token, uint256 amount)
