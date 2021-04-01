@@ -32,7 +32,7 @@ const TOKEN_ADMIN = 109;
 
 const managedContracts: ManagedContract[] = [
   { contractName: "Admin", charactersPlayed: [ADMIN, FEE_CONTROLLER], rolesPlayed: [] },
-  { contractName: "CrossMarginTrading", charactersPlayed: [MARGIN_TRADING, BORROWER], rolesPlayed: [WITHDRAWER, AUTHORIZED_FUND_TRADER, STAKE_PENALIZER] },
+  { contractName: "CrossMarginTrading", charactersPlayed: [MARGIN_TRADING, BORROWER, PRICE_CONTROLLER], rolesPlayed: [WITHDRAWER, AUTHORIZED_FUND_TRADER, STAKE_PENALIZER] },
   { contractName: "Fund", charactersPlayed: [FUND], rolesPlayed: [] },
   { contractName: "IncentiveDistribution", charactersPlayed: [INCENTIVE_DISTRIBUTION], rolesPlayed: [] },
   { contractName: "Lending", charactersPlayed: [LENDING], rolesPlayed: [WITHDRAWER, INCENTIVE_REPORTER] },

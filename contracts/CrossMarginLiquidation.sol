@@ -58,9 +58,10 @@ abstract contract CrossMarginLiquidation is CrossMarginAccounts {
         MAINTAINER_CUT_PERCENT = cut;
     }
 
-    /// @dev calcLiquidationamounts does a number of tasks in this contract
+    /// @dev calcLiquidationAmounts does a number of tasks in this contract
     /// and some of them are not straightforward.
-    /// First of all it aggregates liquidation amounts in storage (not in memory)
+    /// First of all it aggregates liquidation amounts,
+    /// as well as which traders are ripe for liquidation, in storage (not in memory)
     /// owing to the fact that arrays can't be pushed to and hash maps don't
     /// exist in memory.
     /// Then it also returns any stake attack funds if the stake was unsuccessful
@@ -256,7 +257,8 @@ abstract contract CrossMarginLiquidation is CrossMarginAccounts {
             (peg2targetCost * (100 + MAINTAINER_CUT_PERCENT)) / 100 >
             sale2pegAmount
         ) {
-            emit LiquidationShortfall(peg2targetCost - sale2pegAmount);
+            emit LiquidationShortfall(peg2targetCost  * (100 + MAINTAINER_CUT_PERCENT) / 100
+                - sale2pegAmount);
         }
 
         address loser = address(0);

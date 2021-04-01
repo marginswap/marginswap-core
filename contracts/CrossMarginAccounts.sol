@@ -29,7 +29,7 @@ struct CrossMarginAccount {
 
 abstract contract CrossMarginAccounts is RoleAware, PriceAware {
     /// @dev gets used in calculating how much accounts can borrow
-    uint256 public leverage;
+    uint256 public leveragePercent;
 
     /// @dev percentage of assets held per assets borrowed at which to liquidate
     uint256 public liquidationThresholdPercent;
@@ -100,9 +100,9 @@ abstract contract CrossMarginAccounts is RoleAware, PriceAware {
         uint256 loan = loanInPeg(account, false);
         uint256 holdings = holdingsInPeg(account, false);
         // The following condition should hold:
-        // holdings / loan >= leverage / (leverage - 1)
+        // holdings / loan >= leveragePercent / (leveragePercent - 100)
         // =>
-        return holdings * (leverage - 1) >= loan * leverage;
+        return holdings * (leveragePercent - 100) >= loan * leveragePercent;
     }
 
     /// @dev internal function adjusting holding and borrow balances when debt extinguished

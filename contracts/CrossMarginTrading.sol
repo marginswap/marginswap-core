@@ -20,6 +20,7 @@ contract CrossMarginTrading is CrossMarginLiquidation, IMarginTrading {
     {
         liquidationThresholdPercent = 110;
         coolingOffPeriod = 20;
+        leveragePercent = 300;
     }
 
     /// @dev admin function to set the token cap
@@ -37,8 +38,8 @@ contract CrossMarginTrading is CrossMarginLiquidation, IMarginTrading {
     }
 
     /// @dev admin function to set leverage
-    function setLeverage(uint256 _leverage) external onlyOwner {
-        leverage = _leverage;
+    function setLeverage(uint256 _leveragePercent) external onlyOwner {
+        leveragePercent = _leveragePercent;
     }
 
     /// @dev admin function to set liquidation threshold
@@ -88,7 +89,7 @@ contract CrossMarginTrading is CrossMarginLiquidation, IMarginTrading {
         );
     }
 
-    /// @dev gets called by router to affirm isolated borrowing event
+    /// @dev gets called by router to affirm borrowing event
     function registerBorrow(
         address trader,
         address borrowToken,
