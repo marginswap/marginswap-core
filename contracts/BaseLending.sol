@@ -127,5 +127,9 @@ abstract contract BaseLending is Ownable {
     }
 
     /// Available tokens to this issuance
-    function issuanceBalance(address issuance) internal virtual view returns (uint256);
+    function issuanceBalance(address issuance)
+        internal
+        view
+        virtual
+        returns (uint256);
 }

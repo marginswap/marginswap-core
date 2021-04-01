@@ -8,7 +8,10 @@ import "./IncentivizedHolder.sol";
 
 // TODO activate bonds for lending
 
-/// @title Manage lending
+// TODO disburse token if isolated bond issuer
+// and if isolated issuer, allow for haircuts
+
+/// @title Manage lending for a variety of bond issuers
 contract Lending is
     RoleAware,
     BaseLending,
@@ -18,6 +21,13 @@ contract Lending is
 {
     /// @dev IDs for all bonds held by an address
     mapping(address => uint256[]) public bondIds;
+
+    /// mapping issuers to tokens
+    /// (in crossmargin, the issuers are tokens  themselves)
+    mapping(address => address) public issuerTokens;
+
+    /// In case of shortfall, adjust debt
+    mapping(address => uint256) public haircuts;
 
     /// map of available issuers
     mapping(address => bool) public activeIssuers;
@@ -32,11 +42,17 @@ contract Lending is
 
     /// Make a issuer available for protocol
     function activateIssuer(address issuer) external {
+        activateIssuer(issuer, issuer);
+    }
+
+    /// Make issuer != token available for protocol (isol. margin)
+    function activateIssuer(address issuer, address token) public {
         require(
             isTokenActivator(msg.sender),
             "Address not authorized to activate issuers"
         );
         activeIssuers[issuer] = true;
+        issuerTokens[issuer] = token;
     }
 
     /// Remove a issuer from trading availability
@@ -221,7 +237,7 @@ contract Lending is
             delete hourlyBondAccounts[issuer][msg.sender];
         }
 
-        Fund(fund()).withdraw(issuer, msg.sender, amount);
+        disburse(issuer, msg.sender, amount);
 
         withdrawClaim(msg.sender, issuer, amount);
     }
@@ -234,7 +250,8 @@ contract Lending is
 
         uint256 amount = bond.amount;
         super._withdrawHourlyBond(issuer, bond, amount);
-        Fund(fund()).withdraw(issuer, msg.sender, amount);
+
+        disburse(issuer, msg.sender, amount);
 
         delete hourlyBondAccounts[issuer][msg.sender];
 
@@ -242,12 +259,14 @@ contract Lending is
     }
 
     /// @dev buy hourly bond subscription
-    function buyHourlyBondSubscription(address issuer, uint256 amount) external {
+    function buyHourlyBondSubscription(address issuer, uint256 amount)
+        external
+    {
         require(activeIssuers[issuer], "Not an approved issuer");
 
         LendingMetadata storage meta = lendingMeta[issuer];
         if (lendingTarget(meta) >= meta.totalLending + amount) {
-            Fund(fund()).depositFor(msg.sender, issuer, amount);
+            collectToken(issuer, msg.sender, amount);
 
             super._makeHourlyBond(issuer, msg.sender, amount);
 
@@ -281,6 +300,7 @@ contract Lending is
                 Fund(fund()).depositFor(msg.sender, issuer, amount);
                 bondIds[msg.sender].push(bondIndex);
 
+                collectToken(issuer, msg.sender, amount);
                 stakeClaim(msg.sender, issuer, amount);
             }
         }
@@ -300,7 +320,7 @@ contract Lending is
         withdrawClaim(msg.sender, bond.issuer, bond.originalPrice);
 
         uint256 withdrawAmount = super._withdrawBond(bondId, bond);
-        Fund(fund()).withdraw(bond.issuer, msg.sender, withdrawAmount);
+        disburse(bond.issuer, msg.sender, withdrawAmount);
     }
 
     function initBorrowYieldAccumulator(address issuer) external {
@@ -323,7 +343,48 @@ contract Lending is
         borrowingFactorPercent = borrowingFactor;
     }
 
-    function issuanceBalance(address issuer) internal override view returns (uint256) {
-        return IERC20(issuer).balanceOf(fund());
+    function issuanceBalance(address issuer)
+        internal
+        view
+        override
+        returns (uint256)
+    {
+        address token = issuerTokens[issuer];
+        if (token == issuer) {
+            // cross margin
+            return IERC20(token).balanceOf(fund());
+        } else {
+            return lendingMeta[issuer].totalLending - haircuts[issuer];
+        }
+    }
+
+    function disburse(
+        address issuer,
+        address recipient,
+        uint256 amount
+    ) internal {
+        uint256 haircutAmount = haircuts[issuer];
+        if (haircutAmount > 0 && amount > 0) {
+            uint256 totalLending = lendingMeta[issuer].totalLending;
+            uint256 adjustment =
+                (amount * min(totalLending, haircutAmount)) / totalLending;
+            amount = amount - adjustment;
+            haircuts[issuer] -= adjustment;
+        }
+
+        address token = issuerTokens[issuer];
+        Fund(fund()).withdraw(token, recipient, amount);
+    }
+
+    function collectToken(
+        address issuer,
+        address source,
+        uint256 amount
+    ) internal {
+        Fund(fund()).depositFor(source, issuer, amount);
+    }
+
+    function haircut(uint256 amount) external {
+        haircuts[msg.sender] += amount;
     }
 }

@@ -96,7 +96,10 @@ abstract contract BondLending is BaseLending {
         }
     }
 
-    function _withdrawBond(uint256 bondId, Bond storage bond) internal returns (uint256 withdrawAmount) {
+    function _withdrawBond(uint256 bondId, Bond storage bond)
+        internal
+        returns (uint256 withdrawAmount)
+    {
         address issuer = bond.issuer;
         uint256 bucketIndex = getBucketIndex(issuer, bond.runtime);
         BondBucketMetadata storage bondMeta =
