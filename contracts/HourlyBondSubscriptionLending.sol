@@ -2,7 +2,6 @@
 pragma solidity ^0.8.0;
 
 import "./BaseLending.sol";
-import "./Fund.sol";
 
 struct HourlyBond {
     uint256 amount;
@@ -29,32 +28,6 @@ abstract contract HourlyBondSubscriptionLending is BaseLending {
         public hourlyBondAccounts;
 
     uint256 public borrowingFactorPercent = 200;
-
-    /// Set hourly yield APR for token
-    function setHourlyYieldAPR(address token, uint256 aprPercent) external {
-        require(
-            isTokenActivator(msg.sender),
-            "not authorized to set hourly yield"
-        );
-
-        HourlyBondMetadata storage bondMeta = hourlyBondMetadata[token];
-
-        if (bondMeta.yieldAccumulator.accumulatorFP == 0) {
-            bondMeta.yieldAccumulator = YieldAccumulator({
-                accumulatorFP: FP32,
-                lastUpdated: block.timestamp,
-                hourlyYieldFP: (FP32 * (100 + aprPercent)) / 100 / (24 * 365)
-            });
-            bondMeta.buyingSpeed = 1;
-            bondMeta.withdrawingSpeed = 1;
-            bondMeta.lastBought = block.timestamp;
-            bondMeta.lastWithdrawn = block.timestamp;
-        } else {
-            YieldAccumulator storage yA =
-                getUpdatedHourlyYield(token, bondMeta);
-            yA.hourlyYieldFP = (FP32 * (100 + aprPercent)) / 100 / (24 * 365);
-        }
-    }
 
     /// Set withdrawal window
     function setWithdrawalWindow(uint256 window) external onlyOwner {
@@ -129,7 +102,6 @@ abstract contract HourlyBondSubscriptionLending is BaseLending {
     function _withdrawHourlyBond(
         address token,
         HourlyBond storage bond,
-        address recipient,
         uint256 amount
     ) internal {
         // how far the current hour has advanced (relative to acccount hourly clock)
@@ -139,8 +111,6 @@ abstract contract HourlyBondSubscriptionLending is BaseLending {
             withdrawalWindow >= currentOffset,
             "Tried withdrawing outside subscription cancellation time window"
         );
-
-        Fund(fund()).withdraw(token, recipient, amount);
 
         bond.amount -= amount;
         lendingMeta[token].totalLending -= amount;
@@ -152,18 +122,6 @@ abstract contract HourlyBondSubscriptionLending is BaseLending {
             bond.amount,
             1 hours
         );
-    }
-
-    /// Shut down hourly bond account for `token`
-    function closeHourlyBondAccount(address token) external {
-        HourlyBond storage bond = hourlyBondAccounts[token][msg.sender];
-        // apply all interest
-        updateHourlyBondAmount(token, bond);
-        _withdrawHourlyBond(token, bond, msg.sender, bond.amount);
-
-        bond.amount = 0;
-        bond.yieldQuotientFP = 0;
-        bond.moduloHour = 0;
     }
 
     function calcCumulativeYieldFP(

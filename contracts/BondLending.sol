@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: BUSL-1.1
 pragma solidity ^0.8.0;
 import "./BaseLending.sol";
-import "./Fund.sol";
 
 struct Bond {
     address holder;
@@ -70,7 +69,6 @@ abstract contract BondLending is BaseLending {
 
         uint256 bondReturn = (yieldFP * amount) / FP32;
         if (bondReturn >= minReturn) {
-            Fund(fund()).depositFor(holder, token, amount);
             uint256 interpolatedAmount = (amount + bondReturn) / 2;
             lendingMeta[token].totalLending += interpolatedAmount;
 
@@ -98,7 +96,7 @@ abstract contract BondLending is BaseLending {
         }
     }
 
-    function _withdrawBond(uint256 bondId, Bond storage bond) internal {
+    function _withdrawBond(uint256 bondId, Bond storage bond) internal returns (uint256 withdrawAmount) {
         address token = bond.token;
         uint256 bucketIndex = getBucketIndex(token, bond.runtime);
         BondBucketMetadata storage bondMeta =
@@ -123,13 +121,13 @@ abstract contract BondLending is BaseLending {
         delete bonds[bondId];
         if (
             meta.totalBorrowed > meta.totalLending ||
-            IERC20(token).balanceOf(fund()) < returnAmount
+            issuanceBalance(token) < returnAmount
         ) {
             // apparently there is a liquidity issue
             emit LiquidityWarning(token, holder, returnAmount);
             _makeFallbackBond(token, holder, returnAmount);
         } else {
-            Fund(fund()).withdraw(token, holder, returnAmount);
+            withdrawAmount = returnAmount;
         }
     }
 
@@ -207,49 +205,6 @@ abstract contract BondLending is BaseLending {
         BondBucketMetadata[] storage bondMetas = bondBucketMetadata[token];
         for (uint256 i; bondMetas.length > i; i++) {
             bondMetas[i].runtimeYieldFP = yieldsFP[i];
-        }
-    }
-
-    /// Set runtime weights in floating point
-    function setRuntimeWeights(address token, uint256[] memory weights)
-        external
-    {
-        require(
-            isTokenActivator(msg.sender),
-            "not autorized to set runtime weights"
-        );
-
-        BondBucketMetadata[] storage bondMetas = bondBucketMetadata[token];
-
-        if (bondMetas.length == 0) {
-            // we are initializing
-
-            uint256 hourlyYieldFP = (110 * FP32) / 100 / (24 * 365);
-            uint256 bucketSize = diffMaxMinRuntime / weights.length;
-
-            for (uint256 i; weights.length > i; i++) {
-                uint256 runtime = minRuntime + bucketSize * i;
-                bondMetas.push(
-                    BondBucketMetadata({
-                        runtimeYieldFP: (hourlyYieldFP * runtime) / (1 hours),
-                        lastBought: block.timestamp,
-                        lastWithdrawn: block.timestamp,
-                        yieldLastUpdated: block.timestamp,
-                        buyingSpeed: 1,
-                        withdrawingSpeed: 1,
-                        runtimeWeight: weights[i],
-                        totalLending: 0
-                    })
-                );
-            }
-        } else {
-            require(
-                weights.length == bondMetas.length,
-                "Weights don't match buckets"
-            );
-            for (uint256 i; weights.length > i; i++) {
-                bondMetas[i].runtimeWeight = weights[i];
-            }
         }
     }
 

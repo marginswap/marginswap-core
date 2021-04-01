@@ -3,7 +3,7 @@ pragma solidity ^0.8.0;
 import "./RoleAware.sol";
 
 /// @title Base lending behavior
-abstract contract BaseLending is RoleAware, Ownable {
+abstract contract BaseLending is Ownable {
     uint256 constant FP32 = 2**32;
     uint256 constant ACCUMULATOR_INIT = 10**18;
 
@@ -113,24 +113,6 @@ abstract contract BaseLending is RoleAware, Ownable {
         return lendingTarget(meta);
     }
 
-    /// Set lending cap
-    function setLendingCap(address token, uint256 cap) external {
-        require(
-            isTokenActivator(msg.sender),
-            "not authorized to set lending cap"
-        );
-        lendingMeta[token].lendingCap = cap;
-    }
-
-    /// Set lending buffer
-    function setLendingBuffer(address token, uint256 buffer) external {
-        require(
-            isTokenActivator(msg.sender),
-            "not autorized to set lending buffer"
-        );
-        lendingMeta[token].lendingBuffer = buffer;
-    }
-
     /// Set maximum hourly yield in floating point
     function setMaxHourlyYieldFP(uint256 maxYieldFP) external onlyOwner {
         maxHourlyYieldFP = maxYieldFP;
@@ -143,4 +125,7 @@ abstract contract BaseLending is RoleAware, Ownable {
     {
         yieldChangePerSecondFP = changePerSecondFP;
     }
+
+    /// Available tokens to this issuance
+    function issuanceBalance(address issuance) internal virtual view returns (uint256);
 }

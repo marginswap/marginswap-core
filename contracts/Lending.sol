@@ -6,8 +6,11 @@ import "./HourlyBondSubscriptionLending.sol";
 import "./BondLending.sol";
 import "./IncentivizedHolder.sol";
 
+// TODO activate bonds for lending
+
 /// @title Manage lending
 contract Lending is
+    RoleAware,
     BaseLending,
     HourlyBondSubscriptionLending,
     BondLending,
@@ -22,6 +25,93 @@ contract Lending is
 
         uint256 aprChangePerMil = 3;
         yieldChangePerSecondFP = (FP32 * aprChangePerMil) / 1000;
+    }
+
+    /// Set lending cap
+    function setLendingCap(address token, uint256 cap) external {
+        require(
+            isTokenActivator(msg.sender),
+            "not authorized to set lending cap"
+        );
+        lendingMeta[token].lendingCap = cap;
+    }
+
+    /// Set lending buffer
+    function setLendingBuffer(address token, uint256 buffer) external {
+        require(
+            isTokenActivator(msg.sender),
+            "not autorized to set lending buffer"
+        );
+        lendingMeta[token].lendingBuffer = buffer;
+    }
+
+    /// Set hourly yield APR for token
+    function setHourlyYieldAPR(address token, uint256 aprPercent) external {
+        require(
+            isTokenActivator(msg.sender),
+            "not authorized to set hourly yield"
+        );
+
+        HourlyBondMetadata storage bondMeta = hourlyBondMetadata[token];
+
+        if (bondMeta.yieldAccumulator.accumulatorFP == 0) {
+            bondMeta.yieldAccumulator = YieldAccumulator({
+                accumulatorFP: FP32,
+                lastUpdated: block.timestamp,
+                hourlyYieldFP: (FP32 * (100 + aprPercent)) / 100 / (24 * 365)
+            });
+            bondMeta.buyingSpeed = 1;
+            bondMeta.withdrawingSpeed = 1;
+            bondMeta.lastBought = block.timestamp;
+            bondMeta.lastWithdrawn = block.timestamp;
+        } else {
+            YieldAccumulator storage yA =
+                getUpdatedHourlyYield(token, bondMeta);
+            yA.hourlyYieldFP = (FP32 * (100 + aprPercent)) / 100 / (24 * 365);
+        }
+    }
+
+    /// Set runtime weights in floating point
+    function setRuntimeWeights(address token, uint256[] memory weights)
+        external
+    {
+        require(
+            isTokenActivator(msg.sender),
+            "not autorized to set runtime weights"
+        );
+
+        BondBucketMetadata[] storage bondMetas = bondBucketMetadata[token];
+
+        if (bondMetas.length == 0) {
+            // we are initializing
+
+            uint256 hourlyYieldFP = (110 * FP32) / 100 / (24 * 365);
+            uint256 bucketSize = diffMaxMinRuntime / weights.length;
+
+            for (uint256 i; weights.length > i; i++) {
+                uint256 runtime = minRuntime + bucketSize * i;
+                bondMetas.push(
+                    BondBucketMetadata({
+                        runtimeYieldFP: (hourlyYieldFP * runtime) / (1 hours),
+                        lastBought: block.timestamp,
+                        lastWithdrawn: block.timestamp,
+                        yieldLastUpdated: block.timestamp,
+                        buyingSpeed: 1,
+                        withdrawingSpeed: 1,
+                        runtimeWeight: weights[i],
+                        totalLending: 0
+                    })
+                );
+            }
+        } else {
+            require(
+                weights.length == bondMetas.length,
+                "Weights don't match buckets"
+            );
+            for (uint256 i; weights.length > i; i++) {
+                bondMetas[i].runtimeWeight = weights[i];
+            }
+        }
     }
 
     /// @dev how much interest has accrued to a borrowed balance over time
@@ -103,7 +193,28 @@ contract Lending is
         HourlyBond storage bond = hourlyBondAccounts[token][msg.sender];
         // apply all interest
         updateHourlyBondAmount(token, bond);
-        super._withdrawHourlyBond(token, bond, msg.sender, amount);
+        super._withdrawHourlyBond(token, bond, amount);
+
+        if (bond.amount == 0) {
+            delete hourlyBondAccounts[token][msg.sender];
+        }
+
+        Fund(fund()).withdraw(token, msg.sender, amount);
+
+        withdrawClaim(msg.sender, token, amount);
+    }
+
+    /// Shut down hourly bond account for `token`
+    function closeHourlyBondAccount(address token) external {
+        HourlyBond storage bond = hourlyBondAccounts[token][msg.sender];
+        // apply all interest
+        updateHourlyBondAmount(token, bond);
+
+        uint256 amount = bond.amount;
+        super._withdrawHourlyBond(token, bond, amount);
+        Fund(fund()).withdraw(token, msg.sender, amount);
+
+        delete hourlyBondAccounts[token][msg.sender];
 
         withdrawClaim(msg.sender, token, amount);
     }
@@ -141,6 +252,7 @@ contract Lending is
                 minReturn
             );
             if (bondIndex > 0) {
+                Fund(fund()).depositFor(msg.sender, token, amount);
                 bondIds[msg.sender].push(bondIndex);
 
                 stakeClaim(msg.sender, token, amount);
@@ -161,7 +273,8 @@ contract Lending is
         // gets withdrawn here
         withdrawClaim(msg.sender, bond.token, bond.originalPrice);
 
-        super._withdrawBond(bondId, bond);
+        uint256 withdrawAmount = super._withdrawBond(bondId, bond);
+        Fund(fund()).withdraw(bond.token, msg.sender, withdrawAmount);
     }
 
     function initBorrowYieldAccumulator(address token) external {
@@ -182,5 +295,9 @@ contract Lending is
         onlyOwner
     {
         borrowingFactorPercent = borrowingFactor;
+    }
+
+    function issuanceBalance(address token) internal override view returns (uint256) {
+        return IERC20(token).balanceOf(fund());
     }
 }
