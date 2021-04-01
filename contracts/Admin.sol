@@ -12,7 +12,7 @@ import "./CrossMarginTrading.sol";
 staking to perform the maintenance role.
 */
 contract Admin is RoleAware, Ownable {
-    /// Margenswap (MFI) token address
+    /// Marginswap (MFI) token address
     address public immutable MFI;
     mapping(address => uint256) public stakes;
     uint256 public totalStakes;
@@ -244,5 +244,10 @@ contract Admin is RoleAware, Ownable {
             stakeTaken = penalty;
         }
         _withdrawStake(maintainer, stakeTaken, recipient);
+    }
+
+    /// View MFI maintenance stake amount
+    function viewMaintenanceStakeAmount() external view returns (uint256) {
+        return stakes[msg.sender];
     }
 }

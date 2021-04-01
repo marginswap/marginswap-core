@@ -78,6 +78,11 @@ contract LiquidityMiningReward is Ownable {
         require(claimId > 0, "No registered claim");
         return incentiveDistributor.withdrawReward(0, claimId);
     }
+
+    /// View liquidity token stake amount
+    function viewStakeAmount() external view returns (uint256) {
+        return stakeAmounts[msg.sender];
+    }
 }
 
 // USDC - MFI pair token
