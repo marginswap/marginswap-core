@@ -313,22 +313,14 @@ abstract contract CrossMarginAccounts is RoleAware, PriceAware {
     /// sets borrow and holding to zero
     function deleteAccount(CrossMarginAccount storage account) internal {
         uint256 len = account.borrowTokens.length;
-        for (
-            uint256 borrowIdx;
-            len > borrowIdx;
-            borrowIdx++
-        ) {
+        for (uint256 borrowIdx; len > borrowIdx; borrowIdx++) {
             address borrowToken = account.borrowTokens[borrowIdx];
             totalShort[borrowToken] -= account.borrowed[borrowToken];
             account.borrowed[borrowToken] = 0;
             account.borrowedYieldQuotientsFP[borrowToken] = 0;
         }
         len = account.holdingTokens.length;
-        for (
-            uint256 holdingIdx;
-            len > holdingIdx;
-            holdingIdx++
-        ) {
+        for (uint256 holdingIdx; len > holdingIdx; holdingIdx++) {
             address holdingToken = account.holdingTokens[holdingIdx];
             totalLong[holdingToken] -= account.holdings[holdingToken];
             account.holdings[holdingToken] = 0;

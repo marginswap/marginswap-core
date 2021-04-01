@@ -86,7 +86,6 @@ contract CrossMarginTrading is CrossMarginLiquidation, IMarginTrading {
             tokenCaps[token] >= totalLong[token],
             "Exceeding global exposure cap to token -- try again later"
         );
-
     }
 
     /// @dev gets called by router to affirm isolated borrowing event
@@ -136,7 +135,8 @@ contract CrossMarginTrading is CrossMarginLiquidation, IMarginTrading {
     function _registerWithdrawal(
         CrossMarginAccount storage account,
         address withdrawToken,
-        uint256 withdrawAmount) internal {
+        uint256 withdrawAmount
+    ) internal {
         require(
             block.number > account.lastDepositBlock + coolingOffPeriod,
             "To prevent attacks you must wait until your cooling off period is over to withdraw"
@@ -159,8 +159,8 @@ contract CrossMarginTrading is CrossMarginLiquidation, IMarginTrading {
         address depositToken,
         uint256 depositAmount,
         address borrowToken,
-        uint256 withdrawAmount) external override {
-
+        uint256 withdrawAmount
+    ) external override {
         require(
             isMarginTrader(msg.sender),
             "Calling contract not authorized to deposit"
@@ -230,7 +230,10 @@ contract CrossMarginTrading is CrossMarginLiquidation, IMarginTrading {
             "Calling contract is not an authorized margin trader agent"
         );
         CrossMarginAccount storage account = marginAccounts[trader];
-        require(loanInPeg(account, false) == 0, "Can't liquidate currently borrowing account");
+        require(
+            loanInPeg(account, false) == 0,
+            "Can't liquidate currently borrowing account"
+        );
 
         deleteAccount(account);
     }
@@ -238,8 +241,8 @@ contract CrossMarginTrading is CrossMarginLiquidation, IMarginTrading {
     /// @dev view function to display account held assets state
     function getHoldingAmounts(address trader)
         external
-        override
         view
+        override
         returns (
             address[] memory holdingTokens,
             uint256[] memory holdingAmounts
@@ -258,8 +261,8 @@ contract CrossMarginTrading is CrossMarginLiquidation, IMarginTrading {
     /// @dev view function to display account borrowing state
     function getBorrowAmounts(address trader)
         external
-        override
         view
+        override
         returns (address[] memory borrowTokens, uint256[] memory borrowAmounts)
     {
         CrossMarginAccount storage account = marginAccounts[trader];

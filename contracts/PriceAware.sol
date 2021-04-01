@@ -9,10 +9,8 @@ import "../libraries/UniswapStyleLib.sol";
 struct TokenPrice {
     uint256 blockLastUpdated;
     uint256 tokenPer1k;
-
     address[] liquidationPairs;
     address[] inverseLiquidationPairs;
-
     address[] liquidationTokens;
     address[] inverseLiquidationTokens;
 }
@@ -170,12 +168,14 @@ abstract contract PriceAware is Ownable, RoleAware {
     }
 
     /// add path from token to current liquidation peg
-    function setLiquidationPath(address[] memory path, address[] memory tokens) external {
+    function setLiquidationPath(address[] memory path, address[] memory tokens)
+        external
+    {
         require(
             isTokenActivator(msg.sender),
             "not authorized to set lending cap"
         );
-        
+
         address token = tokens[0];
 
         TokenPrice storage tokenPrice = tokenPrices[token];
@@ -186,14 +186,14 @@ abstract contract PriceAware is Ownable, RoleAware {
 
         for (uint256 i = 0; path.length > i; i++) {
             tokenPrice.liquidationPairs[i] = path[i];
-            tokenPrice.inverseLiquidationPairs[i] = path[
-                path.length - i - 1
-            ];
+            tokenPrice.inverseLiquidationPairs[i] = path[path.length - i - 1];
         }
 
-        for (uint256 i=0; tokens.length > i; i++) {
+        for (uint256 i = 0; tokens.length > i; i++) {
             tokenPrice.liquidationTokens[i] = tokens[i];
-            tokenPrice.inverseLiquidationTokens[i] = tokens[tokens.length - i -1];
+            tokenPrice.inverseLiquidationTokens[i] = tokens[
+                tokens.length - i - 1
+            ];
         }
 
         uint256[] memory pathAmounts =

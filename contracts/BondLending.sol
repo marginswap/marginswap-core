@@ -39,7 +39,6 @@ abstract contract BondLending is BaseLending {
         uint256 withdrawingSpeed;
         uint256 lastWithdrawn;
         uint256 yieldLastUpdated;
-
         uint256 totalLending;
         uint256 runtimeYieldFP;
     }
@@ -64,15 +63,10 @@ abstract contract BondLending is BaseLending {
         uint256 minReturn
     ) internal returns (uint256 bondIndex) {
         uint256 bucketIndex = getBucketIndex(token, runtime);
-        BondBucketMetadata storage bondMeta = bondBucketMetadata[token][bucketIndex];
+        BondBucketMetadata storage bondMeta =
+            bondBucketMetadata[token][bucketIndex];
 
-        uint256 yieldFP =
-            calcBondYieldFP(
-                token,
-                amount,
-                runtime,
-                bondMeta
-            );
+        uint256 yieldFP = calcBondYieldFP(token, amount, runtime, bondMeta);
 
         uint256 bondReturn = (yieldFP * amount) / FP32;
         if (bondReturn >= minReturn) {
@@ -95,8 +89,7 @@ abstract contract BondLending is BaseLending {
                 yieldFP: yieldFP
             });
 
-            (bondMeta.buyingSpeed, bondMeta.lastBought) =
-                updateSpeed(
+            (bondMeta.buyingSpeed, bondMeta.lastBought) = updateSpeed(
                 bondMeta.buyingSpeed,
                 bondMeta.lastBought,
                 amount,
@@ -108,7 +101,8 @@ abstract contract BondLending is BaseLending {
     function _withdrawBond(uint256 bondId, Bond storage bond) internal {
         address token = bond.token;
         uint256 bucketIndex = getBucketIndex(token, bond.runtime);
-        BondBucketMetadata storage bondMeta = bondBucketMetadata[token][bucketIndex];
+        BondBucketMetadata storage bondMeta =
+            bondBucketMetadata[token][bucketIndex];
 
         uint256 returnAmount = bond.returnAmount;
         address holder = bond.holder;
@@ -119,9 +113,8 @@ abstract contract BondLending is BaseLending {
         meta.totalLending -= interpolatedAmount;
         bondMeta.totalLending -= interpolatedAmount;
 
-        (bondMeta.withdrawingSpeed, bondMeta.lastWithdrawn) =
-            updateSpeed(
-                    bondMeta.withdrawingSpeed,
+        (bondMeta.withdrawingSpeed, bondMeta.lastWithdrawn) = updateSpeed(
+            bondMeta.withdrawingSpeed,
             bondMeta.lastWithdrawn,
             bond.originalPrice,
             bond.runtime
@@ -153,8 +146,7 @@ abstract contract BondLending is BaseLending {
 
         LendingMetadata storage meta = lendingMeta[token];
         uint256 bucketTarget =
-            (lendingTarget(meta) * bucketMeta.runtimeWeight) /
-                WEIGHT_TOTAL_10k;
+            (lendingTarget(meta) * bucketMeta.runtimeWeight) / WEIGHT_TOTAL_10k;
 
         uint256 buying = bucketMeta.buyingSpeed;
         uint256 withdrawing = bucketMeta.withdrawingSpeed;
@@ -163,7 +155,8 @@ abstract contract BondLending is BaseLending {
             borrowYieldAccumulators[token];
 
         uint256 yieldGeneratedFP =
-            borrowAccumulator.hourlyYieldFP * meta.totalBorrowed / (1 + meta.totalLending);
+            (borrowAccumulator.hourlyYieldFP * meta.totalBorrowed) /
+                (1 + meta.totalLending);
         uint256 _maxHourlyYieldFP = min(maxHourlyYieldFP, yieldGeneratedFP);
 
         uint256 bucketMaxYield = _maxHourlyYieldFP * (runtime / (1 hours));
@@ -201,7 +194,8 @@ abstract contract BondLending is BaseLending {
         view
         returns (uint256 bucketIndex)
     {
-        uint256 bucketSize = diffMaxMinRuntime / bondBucketMetadata[token].length;
+        uint256 bucketSize =
+            diffMaxMinRuntime / bondBucketMetadata[token].length;
         bucketIndex = (runtime - minRuntime) / bucketSize;
     }
 
@@ -211,7 +205,7 @@ abstract contract BondLending is BaseLending {
         onlyOwner
     {
         BondBucketMetadata[] storage bondMetas = bondBucketMetadata[token];
-        for(uint i; bondMetas.length > i; i++) {
+        for (uint256 i; bondMetas.length > i; i++) {
             bondMetas[i].runtimeYieldFP = yieldsFP[i];
         }
     }
@@ -233,22 +227,27 @@ abstract contract BondLending is BaseLending {
             uint256 hourlyYieldFP = (110 * FP32) / 100 / (24 * 365);
             uint256 bucketSize = diffMaxMinRuntime / weights.length;
 
-            for (uint i; weights.length > i; i++) {
+            for (uint256 i; weights.length > i; i++) {
                 uint256 runtime = minRuntime + bucketSize * i;
-                bondMetas.push(BondBucketMetadata({
-                        runtimeYieldFP: hourlyYieldFP * runtime / (1 hours),
-                                lastBought: block.timestamp,
-                                lastWithdrawn: block.timestamp,
-                                yieldLastUpdated: block.timestamp,
-                                buyingSpeed: 1,
-                                withdrawingSpeed: 1,
-                                runtimeWeight: weights[i],
-                                totalLending: 0
-                                }));
+                bondMetas.push(
+                    BondBucketMetadata({
+                        runtimeYieldFP: (hourlyYieldFP * runtime) / (1 hours),
+                        lastBought: block.timestamp,
+                        lastWithdrawn: block.timestamp,
+                        yieldLastUpdated: block.timestamp,
+                        buyingSpeed: 1,
+                        withdrawingSpeed: 1,
+                        runtimeWeight: weights[i],
+                        totalLending: 0
+                    })
+                );
             }
         } else {
-            require(weights.length == bondMetas.length, "Weights don't match buckets");
-            for (uint i; weights.length > i; i++) {
+            require(
+                weights.length == bondMetas.length,
+                "Weights don't match buckets"
+            );
+            for (uint256 i; weights.length > i; i++) {
                 bondMetas[i].runtimeWeight = weights[i];
             }
         }

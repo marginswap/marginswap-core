@@ -205,17 +205,16 @@ contract MarginRouter is RoleAware, IncentivizedHolder, Ownable {
                     ? (uint256(0), amountOut)
                     : (amountOut, uint256(0));
 
-            address to =
-                i < pairs.length - 1
-                    ? pairs[i + 1]
-                    : _to;
+            address to = i < pairs.length - 1 ? pairs[i + 1] : _to;
             IUniswapV2Pair pair = IUniswapV2Pair(pairs[i]);
             pair.swap(amount0Out, amount1Out, to, new bytes(0));
         }
 
         uint256 endingBalance = IERC20(outToken).balanceOf(_to);
-        require(endingBalance >= startingBalance + amounts[amounts.length - 1],
-                "Defective AMM route; balances don't match");
+        require(
+            endingBalance >= startingBalance + amounts[amounts.length - 1],
+            "Defective AMM route; balances don't match"
+        );
     }
 
     /// @dev internal helper swapping exact token for token on AMM
@@ -229,11 +228,7 @@ contract MarginRouter is RoleAware, IncentivizedHolder, Ownable {
             amounts[amounts.length - 1] >= amountOutMin,
             "MarginRouter: INSUFFICIENT_OUTPUT_AMOUNT"
         );
-        Fund(fund()).withdraw(
-                tokens[0],
-                pairs[0],
-                amounts[0]
-        );
+        Fund(fund()).withdraw(tokens[0], pairs[0], amounts[0]);
         _swap(amounts, pairs, tokens, fund());
     }
 
@@ -264,11 +259,7 @@ contract MarginRouter is RoleAware, IncentivizedHolder, Ownable {
             amounts[0] <= amountInMax,
             "MarginRouter: EXCESSIVE_INPUT_AMOUNT"
         );
-        Fund(fund()).withdraw(
-                tokens[0],
-                pairs[0],
-                amounts[0]
-        );
+        Fund(fund()).withdraw(tokens[0], pairs[0], amounts[0]);
         _swap(amounts, pairs, tokens, fund());
     }
 
@@ -310,13 +301,7 @@ contract MarginRouter is RoleAware, IncentivizedHolder, Ownable {
             amounts[amounts.length - 1]
         );
 
-        _swapExactT4T(
-            amounts,
-            amountOutMin,
-            pairs,
-            tokens
-        );
-
+        _swapExactT4T(amounts, amountOutMin, pairs, tokens);
     }
 
     /// @notice entry point for swapping tokens held in cross margin account
@@ -327,9 +312,12 @@ contract MarginRouter is RoleAware, IncentivizedHolder, Ownable {
         address[] calldata tokens,
         uint256 deadline
     ) external ensure(deadline) returns (uint256[] memory amounts) {
-
         // swap
-        amounts = UniswapStyleLib.getAmountsIn(amountOut + takeFeesFromOutput(amountOut), pairs, tokens);
+        amounts = UniswapStyleLib.getAmountsIn(
+            amountOut + takeFeesFromOutput(amountOut),
+            pairs,
+            tokens
+        );
 
         // checks that trader is within allowed lending bounds
         registerTrade(
@@ -340,12 +328,7 @@ contract MarginRouter is RoleAware, IncentivizedHolder, Ownable {
             amountOut
         );
 
-        _swapT4ExactT(
-            amounts,
-            amountInMax,
-            pairs,
-            tokens
-        );
+        _swapT4ExactT(amounts, amountInMax, pairs, tokens);
     }
 
     /// @dev helper function does all the work of telling other contracts

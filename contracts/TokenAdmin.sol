@@ -84,7 +84,8 @@ contract TokenAdmin is RoleAware, Ownable, IDelegateOwner {
                 "Invalid liquidationTokens -- should go from token to peg"
             );
             CrossMarginTrading(marginTrading()).setLiquidationPath(
-                liquidationPairs, liquidationTokens
+                liquidationPairs,
+                liquidationTokens
             );
         }
     }

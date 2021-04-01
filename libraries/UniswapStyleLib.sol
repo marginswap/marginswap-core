@@ -104,5 +104,4 @@ library UniswapStyleLib {
             amounts[i - 1] = getAmountIn(amounts[i], reserveIn, reserveOut);
         }
     }
-
 }
