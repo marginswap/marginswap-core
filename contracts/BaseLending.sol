@@ -21,7 +21,7 @@ abstract contract BaseLending is Ownable {
     }
     mapping(address => LendingMetadata) public lendingMeta;
 
-    /// @dev accumulate interest per token (like compound indices)
+    /// @dev accumulate interest per issuer (like compound indices)
     mapping(address => YieldAccumulator) public borrowYieldAccumulators;
 
     uint256 public maxHourlyYieldFP;
@@ -94,7 +94,7 @@ abstract contract BaseLending is Ownable {
     }
 
     function _makeFallbackBond(
-        address token,
+        address issuer,
         address holder,
         uint256 amount
     ) internal virtual;
@@ -108,8 +108,8 @@ abstract contract BaseLending is Ownable {
     }
 
     /// View lending target
-    function viewLendingTarget(address token) external view returns (uint256) {
-        LendingMetadata storage meta = lendingMeta[token];
+    function viewLendingTarget(address issuer) external view returns (uint256) {
+        LendingMetadata storage meta = lendingMeta[issuer];
         return lendingTarget(meta);
     }
 

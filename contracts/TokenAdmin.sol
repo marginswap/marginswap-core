@@ -43,9 +43,9 @@ contract TokenAdmin is RoleAware, Ownable, IDelegateOwner {
         address[] calldata liquidationPairs,
         address[] calldata liquidationTokens
     ) external onlyOwner {
-        require(!Fund(fund()).activeTokens(token), "Token already is active");
+        require(!Lending(lending()).activeIssuers(token), "Token already is active");
 
-        Fund(fund()).activateToken(token);
+        Lending(lending()).activateIssuer(token);
         CrossMarginTrading(marginTrading()).setTokenCap(token, exposureCap);
         Lending(lending()).setLendingCap(token, exposureCap);
         Lending(lending()).setLendingBuffer(token, lendingBuffer);

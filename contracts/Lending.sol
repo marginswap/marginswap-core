@@ -19,6 +19,9 @@ contract Lending is
     /// @dev IDs for all bonds held by an address
     mapping(address => uint256[]) public bondIds;
 
+    /// map of available issuers
+    mapping(address => bool) public activeIssuers;
+
     constructor(address _roles) RoleAware(_roles) Ownable() {
         uint256 APR = 899;
         maxHourlyYieldFP = (FP32 * APR) / 100 / (24 * 365);
@@ -27,32 +30,50 @@ contract Lending is
         yieldChangePerSecondFP = (FP32 * aprChangePerMil) / 1000;
     }
 
+    /// Make a issuer available for protocol
+    function activateIssuer(address issuer) external {
+        require(
+            isTokenActivator(msg.sender),
+            "Address not authorized to activate issuers"
+        );
+        activeIssuers[issuer] = true;
+    }
+
+    /// Remove a issuer from trading availability
+    function deactivateIssuer(address issuer) external {
+        require(
+            isTokenActivator(msg.sender),
+            "Address not authorized to activate issuers"
+        );
+        activeIssuers[issuer] = false;
+    }
+
     /// Set lending cap
-    function setLendingCap(address token, uint256 cap) external {
+    function setLendingCap(address issuer, uint256 cap) external {
         require(
             isTokenActivator(msg.sender),
             "not authorized to set lending cap"
         );
-        lendingMeta[token].lendingCap = cap;
+        lendingMeta[issuer].lendingCap = cap;
     }
 
     /// Set lending buffer
-    function setLendingBuffer(address token, uint256 buffer) external {
+    function setLendingBuffer(address issuer, uint256 buffer) external {
         require(
             isTokenActivator(msg.sender),
             "not autorized to set lending buffer"
         );
-        lendingMeta[token].lendingBuffer = buffer;
+        lendingMeta[issuer].lendingBuffer = buffer;
     }
 
-    /// Set hourly yield APR for token
-    function setHourlyYieldAPR(address token, uint256 aprPercent) external {
+    /// Set hourly yield APR for issuer
+    function setHourlyYieldAPR(address issuer, uint256 aprPercent) external {
         require(
             isTokenActivator(msg.sender),
             "not authorized to set hourly yield"
         );
 
-        HourlyBondMetadata storage bondMeta = hourlyBondMetadata[token];
+        HourlyBondMetadata storage bondMeta = hourlyBondMetadata[issuer];
 
         if (bondMeta.yieldAccumulator.accumulatorFP == 0) {
             bondMeta.yieldAccumulator = YieldAccumulator({
@@ -66,13 +87,13 @@ contract Lending is
             bondMeta.lastWithdrawn = block.timestamp;
         } else {
             YieldAccumulator storage yA =
-                getUpdatedHourlyYield(token, bondMeta);
+                getUpdatedHourlyYield(issuer, bondMeta);
             yA.hourlyYieldFP = (FP32 * (100 + aprPercent)) / 100 / (24 * 365);
         }
     }
 
     /// Set runtime weights in floating point
-    function setRuntimeWeights(address token, uint256[] memory weights)
+    function setRuntimeWeights(address issuer, uint256[] memory weights)
         external
     {
         require(
@@ -80,7 +101,7 @@ contract Lending is
             "not autorized to set runtime weights"
         );
 
-        BondBucketMetadata[] storage bondMetas = bondBucketMetadata[token];
+        BondBucketMetadata[] storage bondMetas = bondBucketMetadata[issuer];
 
         if (bondMetas.length == 0) {
             // we are initializing
@@ -117,12 +138,12 @@ contract Lending is
     /// @dev how much interest has accrued to a borrowed balance over time
     function applyBorrowInterest(
         uint256 balance,
-        address token,
+        address issuer,
         uint256 yieldQuotientFP
     ) external returns (uint256 balanceWithInterest) {
         require(isBorrower(msg.sender), "Not an approved borrower");
 
-        YieldAccumulator storage yA = borrowYieldAccumulators[token];
+        YieldAccumulator storage yA = borrowYieldAccumulators[issuer];
         balanceWithInterest = applyInterest(
             balance,
             yA.accumulatorFP,
@@ -130,29 +151,30 @@ contract Lending is
         );
 
         uint256 deltaAmount = balanceWithInterest - balance;
-        LendingMetadata storage meta = lendingMeta[token];
+        LendingMetadata storage meta = lendingMeta[issuer];
         meta.totalBorrowed += deltaAmount;
     }
 
     /// @dev view function to get current borrowing interest
     function viewBorrowInterest(
         uint256 balance,
-        address token,
+        address issuer,
         uint256 yieldQuotientFP
     ) external view returns (uint256) {
         uint256 accumulatorFP =
             viewCumulativeYieldFP(
-                borrowYieldAccumulators[token],
+                borrowYieldAccumulators[issuer],
                 block.timestamp
             );
         return applyInterest(balance, accumulatorFP, yieldQuotientFP);
     }
 
-    /// @dev gets called by router to register if a trader borrows tokens
-    function registerBorrow(address token, uint256 amount) external {
+    /// @dev gets called by router to register if a trader borrows issuers
+    function registerBorrow(address issuer, uint256 amount) external {
         require(isBorrower(msg.sender), "Not an approved borrower");
-        require(Fund(fund()).activeTokens(token), "Not an approved token");
-        LendingMetadata storage meta = lendingMeta[token];
+        require(activeIssuers[issuer], "Not an approved issuer");
+
+        LendingMetadata storage meta = lendingMeta[issuer];
         meta.totalBorrowed += amount;
         require(
             meta.totalLending >= meta.totalBorrowed,
@@ -161,84 +183,88 @@ contract Lending is
     }
 
     /// @dev gets called by router if loan is extinguished
-    function payOff(address token, uint256 amount) external {
+    function payOff(address issuer, uint256 amount) external {
         require(isBorrower(msg.sender), "Not an approved borrower");
-        lendingMeta[token].totalBorrowed -= amount;
+        lendingMeta[issuer].totalBorrowed -= amount;
     }
 
     /// @dev get the borrow yield
-    function viewBorrowingYieldFP(address token)
+    function viewBorrowingYieldFP(address issuer)
         external
         view
         returns (uint256)
     {
         return
             viewCumulativeYieldFP(
-                borrowYieldAccumulators[token],
+                borrowYieldAccumulators[issuer],
                 block.timestamp
             );
     }
 
     /// @dev In a liquidity crunch make a fallback bond until liquidity is good again
     function _makeFallbackBond(
-        address token,
+        address issuer,
         address holder,
         uint256 amount
     ) internal override {
-        _makeHourlyBond(token, holder, amount);
+        _makeHourlyBond(issuer, holder, amount);
     }
 
     /// @dev withdraw an hour bond
-    function withdrawHourlyBond(address token, uint256 amount) external {
-        HourlyBond storage bond = hourlyBondAccounts[token][msg.sender];
+    function withdrawHourlyBond(address issuer, uint256 amount) external {
+        HourlyBond storage bond = hourlyBondAccounts[issuer][msg.sender];
         // apply all interest
-        updateHourlyBondAmount(token, bond);
-        super._withdrawHourlyBond(token, bond, amount);
+        updateHourlyBondAmount(issuer, bond);
+        super._withdrawHourlyBond(issuer, bond, amount);
 
         if (bond.amount == 0) {
-            delete hourlyBondAccounts[token][msg.sender];
+            delete hourlyBondAccounts[issuer][msg.sender];
         }
 
-        Fund(fund()).withdraw(token, msg.sender, amount);
+        Fund(fund()).withdraw(issuer, msg.sender, amount);
 
-        withdrawClaim(msg.sender, token, amount);
+        withdrawClaim(msg.sender, issuer, amount);
     }
 
-    /// Shut down hourly bond account for `token`
-    function closeHourlyBondAccount(address token) external {
-        HourlyBond storage bond = hourlyBondAccounts[token][msg.sender];
+    /// Shut down hourly bond account for `issuer`
+    function closeHourlyBondAccount(address issuer) external {
+        HourlyBond storage bond = hourlyBondAccounts[issuer][msg.sender];
         // apply all interest
-        updateHourlyBondAmount(token, bond);
+        updateHourlyBondAmount(issuer, bond);
 
         uint256 amount = bond.amount;
-        super._withdrawHourlyBond(token, bond, amount);
-        Fund(fund()).withdraw(token, msg.sender, amount);
+        super._withdrawHourlyBond(issuer, bond, amount);
+        Fund(fund()).withdraw(issuer, msg.sender, amount);
 
-        delete hourlyBondAccounts[token][msg.sender];
+        delete hourlyBondAccounts[issuer][msg.sender];
 
-        withdrawClaim(msg.sender, token, amount);
+        withdrawClaim(msg.sender, issuer, amount);
     }
 
     /// @dev buy hourly bond subscription
-    function buyHourlyBondSubscription(address token, uint256 amount) external {
-        LendingMetadata storage meta = lendingMeta[token];
+    function buyHourlyBondSubscription(address issuer, uint256 amount) external {
+        require(activeIssuers[issuer], "Not an approved issuer");
+
+        LendingMetadata storage meta = lendingMeta[issuer];
         if (lendingTarget(meta) >= meta.totalLending + amount) {
-            Fund(fund()).depositFor(msg.sender, token, amount);
+            Fund(fund()).depositFor(msg.sender, issuer, amount);
 
-            super._makeHourlyBond(token, msg.sender, amount);
+            super._makeHourlyBond(issuer, msg.sender, amount);
 
-            stakeClaim(msg.sender, token, amount);
+            stakeClaim(msg.sender, issuer, amount);
         }
     }
 
     /// @dev buy fixed term bond that does not renew
     function buyBond(
-        address token,
+        address issuer,
         uint256 runtime,
         uint256 amount,
         uint256 minReturn
     ) external returns (uint256 bondIndex) {
-        LendingMetadata storage meta = lendingMeta[token];
+        require(activeIssuers[issuer], "Not an approved issuer");
+
+        LendingMetadata storage meta = lendingMeta[issuer];
         if (
             lendingTarget(meta) >= meta.totalLending + amount &&
             maxRuntime >= runtime &&
@@ -246,16 +272,16 @@ contract Lending is
         ) {
             bondIndex = super._makeBond(
                 msg.sender,
-                token,
+                issuer,
                 runtime,
                 amount,
                 minReturn
             );
             if (bondIndex > 0) {
-                Fund(fund()).depositFor(msg.sender, token, amount);
+                Fund(fund()).depositFor(msg.sender, issuer, amount);
                 bondIds[msg.sender].push(bondIndex);
 
-                stakeClaim(msg.sender, token, amount);
+                stakeClaim(msg.sender, issuer, amount);
             }
         }
     }
@@ -271,23 +297,23 @@ contract Lending is
         // in case of a shortfall, governance can step in to provide
         // additonal compensation beyond the usual incentive which
         // gets withdrawn here
-        withdrawClaim(msg.sender, bond.token, bond.originalPrice);
+        withdrawClaim(msg.sender, bond.issuer, bond.originalPrice);
 
         uint256 withdrawAmount = super._withdrawBond(bondId, bond);
-        Fund(fund()).withdraw(bond.token, msg.sender, withdrawAmount);
+        Fund(fund()).withdraw(bond.issuer, msg.sender, withdrawAmount);
     }
 
-    function initBorrowYieldAccumulator(address token) external {
+    function initBorrowYieldAccumulator(address issuer) external {
         require(
             isTokenActivator(msg.sender),
             "not autorized to init yield accumulator"
         );
         require(
-            borrowYieldAccumulators[token].accumulatorFP == 0,
+            borrowYieldAccumulators[issuer].accumulatorFP == 0,
             "trying to re-initialize yield accumulator"
         );
 
-        borrowYieldAccumulators[token].accumulatorFP = FP32;
+        borrowYieldAccumulators[issuer].accumulatorFP = FP32;
     }
 
     function setBorrowingFactorPercent(uint256 borrowingFactor)
@@ -297,7 +323,7 @@ contract Lending is
         borrowingFactorPercent = borrowingFactor;
     }
 
-    function issuanceBalance(address token) internal override view returns (uint256) {
-        return IERC20(token).balanceOf(fund());
+    function issuanceBalance(address issuer) internal override view returns (uint256) {
+        return IERC20(issuer).balanceOf(fund());
     }
 }

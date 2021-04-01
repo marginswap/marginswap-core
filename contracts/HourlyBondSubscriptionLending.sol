@@ -23,7 +23,7 @@ abstract contract HourlyBondSubscriptionLending is BaseLending {
     mapping(address => HourlyBondMetadata) hourlyBondMetadata;
 
     uint256 public withdrawalWindow = 10 minutes;
-    // token => holder => bond record
+    // issuer => holder => bond record
     mapping(address => mapping(address => HourlyBond))
         public hourlyBondAccounts;
 
@@ -35,18 +35,18 @@ abstract contract HourlyBondSubscriptionLending is BaseLending {
     }
 
     function _makeHourlyBond(
-        address token,
+        address issuer,
         address holder,
         uint256 amount
     ) internal {
-        HourlyBond storage bond = hourlyBondAccounts[token][holder];
-        updateHourlyBondAmount(token, bond);
+        HourlyBond storage bond = hourlyBondAccounts[issuer][holder];
+        updateHourlyBondAmount(issuer, bond);
 
-        HourlyBondMetadata storage bondMeta = hourlyBondMetadata[token];
+        HourlyBondMetadata storage bondMeta = hourlyBondMetadata[issuer];
         bond.yieldQuotientFP = bondMeta.yieldAccumulator.accumulatorFP;
         bond.moduloHour = block.timestamp % (1 hours);
         bond.amount += amount;
-        lendingMeta[token].totalLending += amount;
+        lendingMeta[issuer].totalLending += amount;
 
         (bondMeta.buyingSpeed, bondMeta.lastBought) = updateSpeed(
             bondMeta.buyingSpeed,
@@ -56,13 +56,13 @@ abstract contract HourlyBondSubscriptionLending is BaseLending {
         );
     }
 
-    function updateHourlyBondAmount(address token, HourlyBond storage bond)
+    function updateHourlyBondAmount(address issuer, HourlyBond storage bond)
         internal
     {
         uint256 yieldQuotientFP = bond.yieldQuotientFP;
         if (yieldQuotientFP > 0) {
             YieldAccumulator storage yA =
-                getUpdatedHourlyYield(token, hourlyBondMetadata[token]);
+                getUpdatedHourlyYield(issuer, hourlyBondMetadata[issuer]);
 
             uint256 oldAmount = bond.amount;
             bond.amount = applyInterest(
@@ -72,22 +72,22 @@ abstract contract HourlyBondSubscriptionLending is BaseLending {
             );
 
             uint256 deltaAmount = bond.amount - oldAmount;
-            lendingMeta[token].totalLending += deltaAmount;
+            lendingMeta[issuer].totalLending += deltaAmount;
         }
     }
 
-    // Retrieves bond balance for token and holder
-    function viewHourlyBondAmount(address token, address holder)
+    // Retrieves bond balance for issuer and holder
+    function viewHourlyBondAmount(address issuer, address holder)
         public
         view
         returns (uint256)
     {
-        HourlyBond storage bond = hourlyBondAccounts[token][holder];
+        HourlyBond storage bond = hourlyBondAccounts[issuer][holder];
         uint256 yieldQuotientFP = bond.yieldQuotientFP;
 
         uint256 cumulativeYield =
             viewCumulativeYieldFP(
-                hourlyBondMetadata[token].yieldAccumulator,
+                hourlyBondMetadata[issuer].yieldAccumulator,
                 block.timestamp
             );
 
@@ -100,7 +100,7 @@ abstract contract HourlyBondSubscriptionLending is BaseLending {
     }
 
     function _withdrawHourlyBond(
-        address token,
+        address issuer,
         HourlyBond storage bond,
         uint256 amount
     ) internal {
@@ -113,9 +113,9 @@ abstract contract HourlyBondSubscriptionLending is BaseLending {
         );
 
         bond.amount -= amount;
-        lendingMeta[token].totalLending -= amount;
+        lendingMeta[issuer].totalLending -= amount;
 
-        HourlyBondMetadata storage bondMeta = hourlyBondMetadata[token];
+        HourlyBondMetadata storage bondMeta = hourlyBondMetadata[issuer];
         (bondMeta.withdrawingSpeed, bondMeta.lastWithdrawn) = updateSpeed(
             bondMeta.withdrawingSpeed,
             bondMeta.lastWithdrawn,
@@ -153,7 +153,7 @@ abstract contract HourlyBondSubscriptionLending is BaseLending {
 
     /// @dev updates yield accumulators for both borrowing and lending
     function getUpdatedHourlyYield(
-        address token,
+        address issuer,
         HourlyBondMetadata storage bondMeta
     ) internal returns (YieldAccumulator storage accumulator) {
         accumulator = bondMeta.yieldAccumulator;
@@ -164,9 +164,9 @@ abstract contract HourlyBondSubscriptionLending is BaseLending {
             timeDelta
         );
 
-        LendingMetadata storage meta = lendingMeta[token];
+        LendingMetadata storage meta = lendingMeta[issuer];
         YieldAccumulator storage borrowAccumulator =
-            borrowYieldAccumulators[token];
+            borrowYieldAccumulators[issuer];
 
         uint256 yieldGeneratedFP =
             (borrowAccumulator.hourlyYieldFP * meta.totalBorrowed) /

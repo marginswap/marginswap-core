@@ -4,7 +4,7 @@ import "./BaseLending.sol";
 
 struct Bond {
     address holder;
-    address token;
+    address issuer;
     uint256 originalPrice;
     uint256 returnAmount;
     uint256 maturityTimestamp;
@@ -49,28 +49,28 @@ abstract contract BondLending is BaseLending {
     uint256 public nextBondIndex = 1;
 
     event LiquidityWarning(
-        address indexed token,
+        address indexed issuer,
         address indexed holder,
         uint256 value
     );
 
     function _makeBond(
         address holder,
-        address token,
+        address issuer,
         uint256 runtime,
         uint256 amount,
         uint256 minReturn
     ) internal returns (uint256 bondIndex) {
-        uint256 bucketIndex = getBucketIndex(token, runtime);
+        uint256 bucketIndex = getBucketIndex(issuer, runtime);
         BondBucketMetadata storage bondMeta =
-            bondBucketMetadata[token][bucketIndex];
+            bondBucketMetadata[issuer][bucketIndex];
 
-        uint256 yieldFP = calcBondYieldFP(token, amount, runtime, bondMeta);
+        uint256 yieldFP = calcBondYieldFP(issuer, amount, runtime, bondMeta);
 
         uint256 bondReturn = (yieldFP * amount) / FP32;
         if (bondReturn >= minReturn) {
             uint256 interpolatedAmount = (amount + bondReturn) / 2;
-            lendingMeta[token].totalLending += interpolatedAmount;
+            lendingMeta[issuer].totalLending += interpolatedAmount;
 
             bondMeta.totalLending += interpolatedAmount;
 
@@ -79,7 +79,7 @@ abstract contract BondLending is BaseLending {
 
             bonds[bondIndex] = Bond({
                 holder: holder,
-                token: token,
+                issuer: issuer,
                 originalPrice: amount,
                 returnAmount: bondReturn,
                 maturityTimestamp: block.timestamp + runtime,
@@ -97,17 +97,17 @@ abstract contract BondLending is BaseLending {
     }
 
     function _withdrawBond(uint256 bondId, Bond storage bond) internal returns (uint256 withdrawAmount) {
-        address token = bond.token;
-        uint256 bucketIndex = getBucketIndex(token, bond.runtime);
+        address issuer = bond.issuer;
+        uint256 bucketIndex = getBucketIndex(issuer, bond.runtime);
         BondBucketMetadata storage bondMeta =
-            bondBucketMetadata[token][bucketIndex];
+            bondBucketMetadata[issuer][bucketIndex];
 
         uint256 returnAmount = bond.returnAmount;
         address holder = bond.holder;
 
         uint256 interpolatedAmount = (bond.originalPrice + returnAmount) / 2;
 
-        LendingMetadata storage meta = lendingMeta[token];
+        LendingMetadata storage meta = lendingMeta[issuer];
         meta.totalLending -= interpolatedAmount;
         bondMeta.totalLending -= interpolatedAmount;
 
@@ -121,18 +121,18 @@ abstract contract BondLending is BaseLending {
         delete bonds[bondId];
         if (
             meta.totalBorrowed > meta.totalLending ||
-            issuanceBalance(token) < returnAmount
+            issuanceBalance(issuer) < returnAmount
         ) {
             // apparently there is a liquidity issue
-            emit LiquidityWarning(token, holder, returnAmount);
-            _makeFallbackBond(token, holder, returnAmount);
+            emit LiquidityWarning(issuer, holder, returnAmount);
+            _makeFallbackBond(issuer, holder, returnAmount);
         } else {
             withdrawAmount = returnAmount;
         }
     }
 
     function calcBondYieldFP(
-        address token,
+        address issuer,
         uint256 addedAmount,
         uint256 runtime,
         BondBucketMetadata storage bucketMeta
@@ -142,7 +142,7 @@ abstract contract BondLending is BaseLending {
         yieldFP = bucketMeta.runtimeYieldFP;
         uint256 lastUpdated = bucketMeta.yieldLastUpdated;
 
-        LendingMetadata storage meta = lendingMeta[token];
+        LendingMetadata storage meta = lendingMeta[issuer];
         uint256 bucketTarget =
             (lendingTarget(meta) * bucketMeta.runtimeWeight) / WEIGHT_TOTAL_10k;
 
@@ -150,7 +150,7 @@ abstract contract BondLending is BaseLending {
         uint256 withdrawing = bucketMeta.withdrawingSpeed;
 
         YieldAccumulator storage borrowAccumulator =
-            borrowYieldAccumulators[token];
+            borrowYieldAccumulators[issuer];
 
         uint256 yieldGeneratedFP =
             (borrowAccumulator.hourlyYieldFP * meta.totalBorrowed) /
@@ -172,37 +172,37 @@ abstract contract BondLending is BaseLending {
 
     /// Get view of returns on bond
     function viewBondReturn(
-        address token,
+        address issuer,
         uint256 runtime,
         uint256 amount
     ) external view returns (uint256) {
-        uint256 bucketIndex = getBucketIndex(token, runtime);
+        uint256 bucketIndex = getBucketIndex(issuer, runtime);
         uint256 yieldFP =
             calcBondYieldFP(
-                token,
-                amount + bondBucketMetadata[token][bucketIndex].totalLending,
+                issuer,
+                amount + bondBucketMetadata[issuer][bucketIndex].totalLending,
                 runtime,
-                bondBucketMetadata[token][bucketIndex]
+                bondBucketMetadata[issuer][bucketIndex]
             );
         return (yieldFP * amount) / FP32;
     }
 
-    function getBucketIndex(address token, uint256 runtime)
+    function getBucketIndex(address issuer, uint256 runtime)
         internal
         view
         returns (uint256 bucketIndex)
     {
         uint256 bucketSize =
-            diffMaxMinRuntime / bondBucketMetadata[token].length;
+            diffMaxMinRuntime / bondBucketMetadata[issuer].length;
         bucketIndex = (runtime - minRuntime) / bucketSize;
     }
 
     /// Set runtime yields in floating point
-    function setRuntimeYieldsFP(address token, uint256[] memory yieldsFP)
+    function setRuntimeYieldsFP(address issuer, uint256[] memory yieldsFP)
         external
         onlyOwner
     {
-        BondBucketMetadata[] storage bondMetas = bondBucketMetadata[token];
+        BondBucketMetadata[] storage bondMetas = bondBucketMetadata[issuer];
         for (uint256 i; bondMetas.length > i; i++) {
             bondMetas[i].runtimeYieldFP = yieldsFP[i];
         }
