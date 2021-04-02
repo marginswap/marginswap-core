@@ -25,7 +25,7 @@ struct TokenPrice {
 ///    they must be resilient against extreme manipulation
 /// 3) Liquidators may not call from a contract address, to prevent extreme forms of
 ///    of front-running and other price manipulation.
-abstract contract PriceAware is Ownable, RoleAware {
+abstract contract PriceAware is RoleAware {
     address public immutable peg;
     mapping(address => TokenPrice) public tokenPrices;
     /// update window in blocks
@@ -34,25 +34,25 @@ abstract contract PriceAware is Ownable, RoleAware {
     uint256 public UPDATE_MAX_PEG_AMOUNT = 50_000;
     uint256 public UPDATE_MIN_PEG_AMOUNT = 1_000;
 
-    constructor(address _peg) Ownable() {
+    constructor(address _peg) {
         peg = _peg;
     }
 
     /// Set window for price updates
-    function setPriceUpdateWindow(uint16 window) external onlyOwner {
+    function setPriceUpdateWindow(uint16 window) external onlyOwnerExec {
         priceUpdateWindow = window;
     }
 
     /// Set rate for updates
-    function setUpdateRate(uint256 rate) external onlyOwner {
+    function setUpdateRate(uint256 rate) external onlyOwnerExec {
         UPDATE_RATE_PERMIL = rate;
     }
 
-    function setUpdateMaxPegAmount(uint256 amount) external onlyOwner {
+    function setUpdateMaxPegAmount(uint256 amount) external onlyOwnerExec {
         UPDATE_MAX_PEG_AMOUNT = amount;
     }
 
-    function setUpdateMinPegAmount(uint256 amount) external onlyOwner {
+    function setUpdateMinPegAmount(uint256 amount) external onlyOwnerExec {
         UPDATE_MIN_PEG_AMOUNT = amount;
     }
 
@@ -163,12 +163,8 @@ abstract contract PriceAware is Ownable, RoleAware {
     /// add path from token to current liquidation peg
     function setLiquidationPath(address[] memory path, address[] memory tokens)
         external
+        onlyOwnerExecActivator
     {
-        require(
-            isTokenActivator(msg.sender),
-            "not authorized to set lending cap"
-        );
-
         address token = tokens[0];
 
         TokenPrice storage tokenPrice = tokenPrices[token];

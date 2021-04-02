@@ -5,23 +5,31 @@ import "./Lending.sol";
 import "./CrossMarginTrading.sol";
 
 /// @title anyone can call this contract to update relending levels
-contract Relender is RoleAware, Ownable {
+contract Relender is RoleAware {
     uint256 public relendPercent = 10;
 
-    constructor(address _roles) RoleAware(_roles) Ownable() {}
+    constructor(address _roles) RoleAware(_roles) {}
 
-    function setRelendPercent(uint256 newRelendPercent) external onlyOwner {
+    function setRelendPercent(uint256 newRelendPercent) external onlyOwnerExec {
         relendPercent = newRelendPercent;
     }
 
     /// @dev relend from cross margin holdings
     function crossRelend(address token) external {
-        uint256 relendBalance = Lending(lending()).viewHourlyBondAmount(token, address(this));
-        uint256 relendTarget = CrossMarginTrading(marginTrading()).totalLong(token);
+        uint256 relendBalance =
+            Lending(lending()).viewHourlyBondAmount(token, address(this));
+        uint256 relendTarget =
+            CrossMarginTrading(marginTrading()).totalLong(token);
         if (relendBalance > relendTarget) {
-            Lending(lending()).withdrawHourlyBond(token, relendBalance - relendTarget);
+            Lending(lending()).withdrawHourlyBond(
+                token,
+                relendBalance - relendTarget
+            );
         } else {
-            Lending(lending()).buyHourlyBondSubscription(token, relendTarget - relendBalance);
+            Lending(lending()).buyHourlyBondSubscription(
+                token,
+                relendTarget - relendBalance
+            );
         }
     }
 }

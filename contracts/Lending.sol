@@ -32,7 +32,7 @@ contract Lending is
     /// map of available issuers
     mapping(address => bool) public activeIssuers;
 
-    constructor(address _roles) RoleAware(_roles) Ownable() {
+    constructor(address _roles) RoleAware(_roles) {
         uint256 APR = 899;
         maxHourlyYieldFP = (FP32 * APR) / 100 / (24 * 365);
 
@@ -46,49 +46,45 @@ contract Lending is
     }
 
     /// Make issuer != token available for protocol (isol. margin)
-    function activateIssuer(address issuer, address token) public {
-        require(
-            isTokenActivator(msg.sender),
-            "Address not authorized to activate issuers"
-        );
+    function activateIssuer(address issuer, address token)
+        public
+        onlyOwnerExecActivator
+    {
         activeIssuers[issuer] = true;
         issuerTokens[issuer] = token;
     }
 
     /// Remove a issuer from trading availability
-    function deactivateIssuer(address issuer) external {
-        require(
-            isTokenActivator(msg.sender),
-            "Address not authorized to activate issuers"
-        );
+    function deactivateIssuer(address issuer) external onlyOwnerExecActivator {
         activeIssuers[issuer] = false;
     }
 
     /// Set lending cap
-    function setLendingCap(address issuer, uint256 cap) external {
-        require(
-            isTokenActivator(msg.sender),
-            "not authorized to set lending cap"
-        );
+    function setLendingCap(address issuer, uint256 cap)
+        external
+        onlyOwnerExecActivator
+    {
         lendingMeta[issuer].lendingCap = cap;
     }
 
     /// Set lending buffer
-    function setLendingBuffer(address issuer, uint256 buffer) external {
-        require(
-            isTokenActivator(msg.sender),
-            "not autorized to set lending buffer"
-        );
+    function setLendingBuffer(address issuer, uint256 buffer)
+        external
+        onlyOwnerExecActivator
+    {
         lendingMeta[issuer].lendingBuffer = buffer;
     }
 
-    /// Set hourly yield APR for issuer
-    function setHourlyYieldAPR(address issuer, uint256 aprPercent) external {
-        require(
-            isTokenActivator(msg.sender),
-            "not authorized to set hourly yield"
-        );
+    /// Set withdrawal window
+    function setWithdrawalWindow(uint256 window) external onlyOwnerExec {
+        withdrawalWindow = window;
+    }
 
+    /// Set hourly yield APR for issuer
+    function setHourlyYieldAPR(address issuer, uint256 aprPercent)
+        external
+        onlyOwnerExecActivator
+    {
         HourlyBondMetadata storage bondMeta = hourlyBondMetadata[issuer];
 
         if (bondMeta.yieldAccumulator.accumulatorFP == 0) {
@@ -108,15 +104,54 @@ contract Lending is
         }
     }
 
+    /// Set maximum hourly yield in floating point
+    function setMaxHourlyYieldFP(uint256 maxYieldFP) external onlyOwnerExec {
+        maxHourlyYieldFP = maxYieldFP;
+    }
+
+    /// Set yield change per second in floating point
+    function setYieldChangePerSecondFP(uint256 changePerSecondFP)
+        external
+        onlyOwnerExec
+    {
+        yieldChangePerSecondFP = changePerSecondFP;
+    }
+
+    /// Set runtime yields in floating point
+    function setRuntimeYieldsFP(address issuer, uint256[] memory yieldsFP)
+        external
+        onlyOwnerExec
+    {
+        BondBucketMetadata[] storage bondMetas = bondBucketMetadata[issuer];
+        for (uint256 i; bondMetas.length > i; i++) {
+            bondMetas[i].runtimeYieldFP = yieldsFP[i];
+        }
+    }
+
+    /// Set miniumum runtime
+    function setMinRuntime(uint256 runtime) external onlyOwnerExec {
+        require(runtime > 1 hours, "Min runtime needs to be at least 1 hour");
+        require(
+            maxRuntime > runtime,
+            "Min runtime must be smaller than max runtime"
+        );
+        minRuntime = runtime;
+    }
+
+    /// Set maximum runtime
+    function setMaxRuntime(uint256 runtime) external onlyOwnerExec {
+        require(
+            runtime > minRuntime,
+            "Max runtime must be greater than min runtime"
+        );
+        maxRuntime = runtime;
+    }
+
     /// Set runtime weights in floating point
     function setRuntimeWeights(address issuer, uint256[] memory weights)
         external
+        onlyOwnerExecActivator
     {
-        require(
-            isTokenActivator(msg.sender),
-            "not autorized to set runtime weights"
-        );
-
         BondBucketMetadata[] storage bondMetas = bondBucketMetadata[issuer];
 
         if (bondMetas.length == 0) {
@@ -323,11 +358,10 @@ contract Lending is
         disburse(bond.issuer, msg.sender, withdrawAmount);
     }
 
-    function initBorrowYieldAccumulator(address issuer) external {
-        require(
-            isTokenActivator(msg.sender),
-            "not autorized to init yield accumulator"
-        );
+    function initBorrowYieldAccumulator(address issuer)
+        external
+        onlyOwnerExecActivator
+    {
         require(
             borrowYieldAccumulators[issuer].accumulatorFP == 0,
             "trying to re-initialize yield accumulator"
@@ -338,7 +372,7 @@ contract Lending is
 
     function setBorrowingFactorPercent(uint256 borrowingFactor)
         external
-        onlyOwner
+        onlyOwnerExec
     {
         borrowingFactorPercent = borrowingFactor;
     }

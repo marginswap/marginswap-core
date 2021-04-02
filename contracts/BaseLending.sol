@@ -3,7 +3,7 @@ pragma solidity ^0.8.0;
 import "./RoleAware.sol";
 
 /// @title Base lending behavior
-abstract contract BaseLending is Ownable {
+abstract contract BaseLending {
     uint256 constant FP32 = 2**32;
     uint256 constant ACCUMULATOR_INIT = 10**18;
 
@@ -111,19 +111,6 @@ abstract contract BaseLending is Ownable {
     function viewLendingTarget(address issuer) external view returns (uint256) {
         LendingMetadata storage meta = lendingMeta[issuer];
         return lendingTarget(meta);
-    }
-
-    /// Set maximum hourly yield in floating point
-    function setMaxHourlyYieldFP(uint256 maxYieldFP) external onlyOwner {
-        maxHourlyYieldFP = maxYieldFP;
-    }
-
-    /// Set yield change per second in floating point
-    function setYieldChangePerSecondFP(uint256 changePerSecondFP)
-        external
-        onlyOwner
-    {
-        yieldChangePerSecondFP = changePerSecondFP;
     }
 
     /// Available tokens to this issuance

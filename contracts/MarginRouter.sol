@@ -12,7 +12,7 @@ import "./Admin.sol";
 import "./IncentivizedHolder.sol";
 
 /// @title Top level transaction controller
-contract MarginRouter is RoleAware, IncentivizedHolder, Ownable {
+contract MarginRouter is RoleAware, IncentivizedHolder {
     /// @notice wrapped ETH ERC20 contract
     address public immutable WETH;
     uint256 public constant mswapFeesPer10k = 10;

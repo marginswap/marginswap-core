@@ -12,7 +12,7 @@ struct Claim {
 }
 
 /// @title Manage distribution of liquidity stake incentives
-contract IncentiveDistribution is RoleAware, Ownable {
+contract IncentiveDistribution is RoleAware {
     // fixed point number factor
     uint256 internal constant FP32 = 2**32;
     // the amount of contraction per thousand, per day
@@ -28,7 +28,7 @@ contract IncentiveDistribution is RoleAware, Ownable {
         address _MFI,
         uint256 startingDailyDistributionWithoutDecimals,
         address _roles
-    ) RoleAware(_roles) Ownable() {
+    ) RoleAware(_roles) {
         MFI = _MFI;
         currentDailyDistribution =
             startingDailyDistributionWithoutDecimals *
@@ -58,7 +58,10 @@ contract IncentiveDistribution is RoleAware, Ownable {
     uint256 public nextClaimId = 1;
 
     /// Set share of tranche
-    function setTrancheShare(uint8 tranche, uint256 share) external onlyOwner {
+    function setTrancheShare(uint8 tranche, uint256 share)
+        external
+        onlyOwnerExecActivator
+    {
         require(
             lastUpdatedPeriods[tranche] > 0,
             "Tranche is not initialized, please initialize first"
@@ -76,7 +79,10 @@ contract IncentiveDistribution is RoleAware, Ownable {
     }
 
     /// Initialize tranche
-    function initTranche(uint8 tranche, uint256 share) external onlyOwner {
+    function initTranche(uint8 tranche, uint256 share)
+        external
+        onlyOwnerExecActivator
+    {
         _setTrancheShare(tranche, share);
 
         lastUpdatedPeriods[tranche] = block.timestamp / period;

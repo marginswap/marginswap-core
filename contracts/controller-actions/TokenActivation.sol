@@ -1,11 +1,10 @@
 // SPDX-License-Identifier: BUSL-1.1
 pragma solidity ^0.8.0;
 
-import "./SelfDestructReturningExec.sol";
+import "../Executor.sol";
 import "../TokenAdmin.sol";
 
-contract TokenActivation is SelfDestructReturningExec {
-    uint256 public constant TOKEN_ADMIN = 109;
+contract TokenActivation is Executor {
     address[] public tokens;
     uint256[] public exposureCaps;
     uint256[] public lendingBuffers;
@@ -13,15 +12,14 @@ contract TokenActivation is SelfDestructReturningExec {
     address[][] public liquidationPairs;
     address[][] public liquidationTokens;
 
-    constructor(address controller,
+    constructor(address _roles,
                 address[] memory tokens2activate,
                 uint256[] memory _exposureCaps,
                 uint256[] memory _lendingBuffers,
                 uint256[] memory _incentiveWeights,
                 address[][] memory _liquidationPairs,
                 address[][] memory _liquidationTokens
-                )
-        SelfDestructReturningExec(controller)
+                ) RoleAware(_roles)
     {
         tokens = tokens2activate;
         exposureCaps = _exposureCaps;
@@ -29,12 +27,12 @@ contract TokenActivation is SelfDestructReturningExec {
         incentiveWeights = _incentiveWeights;
         liquidationPairs = _liquidationPairs;
         liquidationTokens = _liquidationTokens;
-        
-        propertyCharacters.push(TOKEN_ADMIN);
-        
     }
 
-    function _execute() internal override {
+    function requiredRoles() external override returns (uint256[] memory required) {
+    }
+
+    function execute() external override {
         for (uint24 i = 0; tokens.length > i; i++) {
             address token = tokens[i];
             uint256 exposureCap = exposureCaps[i];
@@ -43,7 +41,7 @@ contract TokenActivation is SelfDestructReturningExec {
             address[] memory liquidationPairPath = liquidationPairs[i];
             address[] memory liquidationTokenPath = liquidationTokens[i];
 
-            TokenAdmin(roles().mainCharacters(TOKEN_ADMIN))
+            TokenAdmin(tokenAdmin())
                 .activateToken(token,
                                exposureCap,
                                lendingBuffer,
@@ -51,5 +49,7 @@ contract TokenActivation is SelfDestructReturningExec {
                                liquidationPairPath,
                                liquidationTokenPath);
         }
+
+        selfdestruct(payable(tx.origin));
     }
 }
