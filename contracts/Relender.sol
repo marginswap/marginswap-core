@@ -16,12 +16,20 @@ contract Relender is RoleAware, Ownable {
 
     /// @dev relend from cross margin holdings
     function crossRelend(address token) external {
-        uint256 relendBalance = Lending(lending()).viewHourlyBondAmount(token, address(this));
-        uint256 relendTarget = CrossMarginTrading(marginTrading()).totalLong(token);
+        uint256 relendBalance =
+            Lending(lending()).viewHourlyBondAmount(token, address(this));
+        uint256 relendTarget =
+            CrossMarginTrading(marginTrading()).totalLong(token);
         if (relendBalance > relendTarget) {
-            Lending(lending()).withdrawHourlyBond(token, relendBalance - relendTarget);
+            Lending(lending()).withdrawHourlyBond(
+                token,
+                relendBalance - relendTarget
+            );
         } else {
-            Lending(lending()).buyHourlyBondSubscription(token, relendTarget - relendBalance);
+            Lending(lending()).buyHourlyBondSubscription(
+                token,
+                relendTarget - relendBalance
+            );
         }
     }
 }
