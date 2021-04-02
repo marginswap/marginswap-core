@@ -8,12 +8,12 @@ import "../interfaces/IWETH.sol";
 import "./RoleAware.sol";
 
 /// @title Manage funding
-contract Fund is RoleAware, Ownable {
+contract Fund is RoleAware {
     using SafeERC20 for IERC20;
     /// wrapped ether
     address public immutable WETH;
 
-    constructor(address _WETH, address _roles) Ownable() RoleAware(_roles) {
+    constructor(address _WETH, address _roles) RoleAware(_roles) {
         WETH = _WETH;
     }
 

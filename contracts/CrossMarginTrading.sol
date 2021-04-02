@@ -2,7 +2,6 @@
 pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
 
 import "./Fund.sol";
 import "./Lending.sol";
@@ -24,28 +23,27 @@ contract CrossMarginTrading is CrossMarginLiquidation, IMarginTrading {
     }
 
     /// @dev admin function to set the token cap
-    function setTokenCap(address token, uint256 cap) external {
-        require(
-            isTokenActivator(msg.sender),
-            "Caller not authorized to set token cap"
-        );
+    function setTokenCap(address token, uint256 cap)
+        external
+        onlyOwnerExecActivator
+    {
         tokenCaps[token] = cap;
     }
 
     /// @dev setter for cooling off period for withdrawing funds after deposit
-    function setCoolingOffPeriod(uint256 blocks) external onlyOwner {
+    function setCoolingOffPeriod(uint256 blocks) external onlyOwnerExec {
         coolingOffPeriod = blocks;
     }
 
     /// @dev admin function to set leverage
-    function setLeverage(uint256 _leveragePercent) external onlyOwner {
+    function setLeverage(uint256 _leveragePercent) external onlyOwnerExec {
         leveragePercent = _leveragePercent;
     }
 
     /// @dev admin function to set liquidation threshold
     function setLiquidationThresholdPercent(uint256 threshold)
         external
-        onlyOwner
+        onlyOwnerExec
     {
         liquidationThresholdPercent = threshold;
     }

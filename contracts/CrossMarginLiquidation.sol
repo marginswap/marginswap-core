@@ -44,17 +44,17 @@ abstract contract CrossMarginLiquidation is CrossMarginAccounts {
     uint256 public failureThreshold = 10;
 
     /// Set failure threshold
-    function setFailureThreshold(uint256 threshFactor) external onlyOwner {
+    function setFailureThreshold(uint256 threshFactor) external onlyOwnerExec {
         failureThreshold = threshFactor;
     }
 
     /// Set liquidity stake attack window
-    function setLiqStakeAttackWindow(uint256 window) external onlyOwner {
+    function setLiqStakeAttackWindow(uint256 window) external onlyOwnerExec {
         liqStakeAttackWindow = window;
     }
 
     /// Set maintainer's percent cut
-    function setMaintainerCutPercent(uint256 cut) external onlyOwner {
+    function setMaintainerCutPercent(uint256 cut) external onlyOwnerExec {
         MAINTAINER_CUT_PERCENT = cut;
     }
 

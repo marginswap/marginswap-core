@@ -6,12 +6,11 @@ import "./IncentiveDistribution.sol";
 import "./Fund.sol";
 import "./CrossMarginTrading.sol";
 import "./MarginRouter.sol";
-import "../interfaces/IDelegateOwner.sol";
 
 /// @title A helper contract to manage the initialization of new tokens
 /// across different parts of the protocol, as well as changing some
 /// parameters throughout the lifetime of a token
-contract TokenAdmin is RoleAware, Ownable, IDelegateOwner {
+contract TokenAdmin is RoleAware {
     uint256 public totalLendingTargetPortion;
     uint256 public totalBorrowingTargetPortion;
     address[] public incentiveTokens;
@@ -29,7 +28,7 @@ contract TokenAdmin is RoleAware, Ownable, IDelegateOwner {
         uint256 lendingTargetPortion,
         uint256 borrowingTargetPortion,
         address _roles
-    ) RoleAware(_roles) Ownable() {
+    ) RoleAware(_roles) {
         totalLendingTargetPortion = lendingTargetPortion;
         totalBorrowingTargetPortion = borrowingTargetPortion;
     }
@@ -42,7 +41,7 @@ contract TokenAdmin is RoleAware, Ownable, IDelegateOwner {
         uint256 incentiveWeight,
         address[] calldata liquidationPairs,
         address[] calldata liquidationTokens
-    ) external onlyOwner {
+    ) external onlyOwnerExec {
         require(
             !Lending(lending()).activeIssuers(token),
             "Token already is active"
@@ -96,7 +95,7 @@ contract TokenAdmin is RoleAware, Ownable, IDelegateOwner {
     /// Update token cap
     function changeTokenCap(address token, uint256 exposureCap)
         external
-        onlyOwner
+        onlyOwnerExec
     {
         Lending(lending()).setLendingCap(token, exposureCap);
         CrossMarginTrading(marginTrading()).setTokenCap(token, exposureCap);
@@ -105,7 +104,7 @@ contract TokenAdmin is RoleAware, Ownable, IDelegateOwner {
     /// Change weight of token incentive
     function changeTokenIncentiveWeight(address token, uint256 tokenWeight)
         external
-        onlyOwner
+        onlyOwnerExec
     {
         totalTokenWeights =
             totalTokenWeights +
@@ -119,12 +118,12 @@ contract TokenAdmin is RoleAware, Ownable, IDelegateOwner {
     /// Update lending buffer
     function changeLendingBuffer(address token, uint256 lendingBuffer)
         external
-        onlyOwner
+        onlyOwnerExec
     {
         Lending(lending()).setLendingBuffer(token, lendingBuffer);
     }
 
-    //function changeBondLendingWeights(address token, uint256[] memory weights) external onlyOwner {
+    //function changeBondLendingWeights(address token, uint256[] memory weights) external onlyOwnerExec {
     //    Lending(lending()).setRuntimeWeights(token, weights);
     //}
 
@@ -157,32 +156,24 @@ contract TokenAdmin is RoleAware, Ownable, IDelegateOwner {
     }
 
     /// Set lending target portion
-    function setLendingTargetPortion(uint256 portion) external onlyOwner {
+    function setLendingTargetPortion(uint256 portion) external onlyOwnerExec {
         totalLendingTargetPortion = portion;
     }
 
     /// Set borrowing target portion
-    function setBorrowingTargetPortion(uint256 portion) external onlyOwner {
+    function setBorrowingTargetPortion(uint256 portion) external onlyOwnerExec {
         totalBorrowingTargetPortion = portion;
     }
 
     function changeHourlyYieldAPR(address token, uint256 aprPercent)
         external
-        onlyOwner
+        onlyOwnerExec
     {
         Lending(lending()).setHourlyYieldAPR(token, aprPercent);
     }
 
     /// Set initial hourly yield APR
-    function setInitHourlyYieldAPR(uint256 value) external onlyOwner {
+    function setInitHourlyYieldAPR(uint256 value) external onlyOwnerExec {
         initHourlyYieldAPRPercent = value;
-    }
-
-    function relinquishOwnership(address property, address newOwner)
-        external
-        override
-        onlyOwner
-    {
-        Ownable(property).transferOwnership(newOwner);
     }
 }

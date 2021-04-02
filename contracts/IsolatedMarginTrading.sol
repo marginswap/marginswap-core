@@ -4,7 +4,7 @@ pragma solidity ^0.8.0;
 import "./IsolatedMarginLiquidation.sol";
 
 contract IsolatedMarginTrading is IsolatedMarginLiquidation {
-    constructor(address _roles) RoleAware(_roles) Ownable() {}
+    constructor(address _roles) RoleAware(_roles) {}
 
     /// @dev last time this account deposited
     /// relevant for withdrawal window
@@ -17,19 +17,22 @@ contract IsolatedMarginTrading is IsolatedMarginLiquidation {
     }
 
     /// @dev setter for cooling off period for withdrawing funds after deposit
-    function setCoolingOffPeriod(uint256 blocks) external onlyOwner {
+    function setCoolingOffPeriod(uint256 blocks) external onlyOwnerExec {
         coolingOffPeriod = blocks;
     }
 
     /// @dev admin function to set leverage
-    function setLeveragePercent(uint256 _leveragePercent) external onlyOwner {
+    function setLeveragePercent(uint256 _leveragePercent)
+        external
+        onlyOwnerExec
+    {
         leveragePercent = _leveragePercent;
     }
 
     /// @dev admin function to set liquidation threshold
     function setLiquidationThresholdPercent(uint256 threshold)
         external
-        onlyOwner
+        onlyOwnerExec
     {
         liquidationThresholdPercent = threshold;
     }

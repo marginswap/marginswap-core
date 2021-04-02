@@ -81,20 +81,12 @@ task('custom-etherscan', 'submit contract source code to etherscan')
       'solcInputs'
     );
 
-    // monkey-patch
-    const allAll = hre.deployments.all;
-    const foo = await allAll();
-    // filter out cross margin trading
-    hre.deployments.all = async () => (({ CrossMarginTrading, ...rest }) => rest)(await allAll());
-
     await submitSources(hre, solcInputsPath, {
       etherscanApiKey,
-      license: "GPL-2.0",
+      license: "None",
       fallbackOnSolcInput: args.solcInput,
       forceLicense: true,
     });
-
-    hre.deployments.all = allAll;
   });
 
 task('list-deployments', 'List all the deployed contracts for a network', async (args, hre) => {

@@ -13,11 +13,10 @@ abstract contract IncentivizedHolder is RoleAware {
     mapping(address => mapping(address => uint256)) public claimIds;
 
     /// Set incentive tranche
-    function setIncentiveTranche(address token, uint8 tranche) external {
-        require(
-            isTokenActivator(msg.sender),
-            "Caller not authorized to set incentive tranche"
-        );
+    function setIncentiveTranche(address token, uint8 tranche)
+        external
+        onlyOwnerExecActivator
+    {
         incentiveTranches[token] = tranche;
     }
 

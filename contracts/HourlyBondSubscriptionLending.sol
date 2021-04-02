@@ -29,11 +29,6 @@ abstract contract HourlyBondSubscriptionLending is BaseLending {
 
     uint256 public borrowingFactorPercent = 200;
 
-    /// Set withdrawal window
-    function setWithdrawalWindow(uint256 window) external onlyOwner {
-        withdrawalWindow = window;
-    }
-
     function _makeHourlyBond(
         address issuer,
         address holder,

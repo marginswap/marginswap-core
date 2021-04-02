@@ -11,7 +11,7 @@ If the authorized staker is delinquent, other participants can jump
 in and attack, taking their fees and potentially even their stake,
 depending how delinquent the responsible authorized staker is.
 */
-abstract contract IsolatedMarginLiquidation is Ownable, IsolatedMarginAccounts {
+abstract contract IsolatedMarginLiquidation is IsolatedMarginAccounts {
     event LiquidationShortfall(uint256 amount);
     event AccountLiquidated(address account);
 
@@ -35,17 +35,17 @@ abstract contract IsolatedMarginLiquidation is Ownable, IsolatedMarginAccounts {
     uint256 public failureThreshold = 10;
 
     /// Set failure threshold
-    function setFailureThreshold(uint256 threshFactor) external onlyOwner {
+    function setFailureThreshold(uint256 threshFactor) external onlyOwnerExec {
         failureThreshold = threshFactor;
     }
 
     /// Set liquidity stake attack window
-    function setLiqStakeAttackWindow(uint256 window) external onlyOwner {
+    function setLiqStakeAttackWindow(uint256 window) external onlyOwnerExec {
         liqStakeAttackWindow = window;
     }
 
     /// Set maintainer's percent cut
-    function setMaintainerCutPercent(uint256 cut) external onlyOwner {
+    function setMaintainerCutPercent(uint256 cut) external onlyOwnerExec {
         MAINTAINER_CUT_PERCENT = cut;
     }
 

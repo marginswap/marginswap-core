@@ -8,22 +8,6 @@ import "../IncentiveDistribution.sol";
 
 contract LiquidityMiningRewardTest {
     address constant WETH = 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2;
-    uint16 public constant WITHDRAWER = 1;
-    uint16 public constant MARGIN_CALLER = 2;
-    uint16 public constant BORROWER = 3;
-    uint16 public constant MARGIN_TRADER = 4;
-    uint16 public constant FEE_SOURCE = 5;
-    uint16 public constant LIQUIDATOR = 6;
-    uint16 public constant AUTHORIZED_FUND_TRADER = 7;
-    uint16 public constant INCENTIVE_REPORTER = 8;
-    uint16 public constant TOKEN_ACTIVATOR = 9;
-
-    uint16 public constant FUND = 101;
-    uint16 public constant LENDING = 102;
-    uint16 public constant ROUTER = 103;
-    uint16 public constant MARGIN_TRADING = 104;
-    uint16 public constant FEE_CONTROLLER = 105;
-    uint16 public constant PRICE_CONTROLLER = 106;
 
     ERC20PresetMinterPauser stakeToken;
     ERC20PresetMinterPauser rewardToken;
@@ -46,7 +30,7 @@ contract LiquidityMiningRewardTest {
             4_000,
             address(roles)
         );
-        roles.giveRole(WITHDRAWER, address(incentiveDistro));
+        roles.giveRole(FUND_TRANSFERER, address(incentiveDistro));
         incentiveDistro.initTranche(0, 200);
 
         stakeToken = new ERC20PresetMinterPauser("Stake Token", "STK");
