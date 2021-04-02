@@ -199,34 +199,4 @@ abstract contract BondLending is BaseLending {
             diffMaxMinRuntime / bondBucketMetadata[issuer].length;
         bucketIndex = (runtime - minRuntime) / bucketSize;
     }
-
-    /// Set runtime yields in floating point
-    function setRuntimeYieldsFP(address issuer, uint256[] memory yieldsFP)
-        external
-        onlyOwner
-    {
-        BondBucketMetadata[] storage bondMetas = bondBucketMetadata[issuer];
-        for (uint256 i; bondMetas.length > i; i++) {
-            bondMetas[i].runtimeYieldFP = yieldsFP[i];
-        }
-    }
-
-    /// Set miniumum runtime
-    function setMinRuntime(uint256 runtime) external onlyOwner {
-        require(runtime > 1 hours, "Min runtime needs to be at least 1 hour");
-        require(
-            maxRuntime > runtime,
-            "Min runtime must be smaller than max runtime"
-        );
-        minRuntime = runtime;
-    }
-
-    /// Set maximum runtime
-    function setMaxRuntime(uint256 runtime) external onlyOwner {
-        require(
-            runtime > minRuntime,
-            "Max runtime must be greater than min runtime"
-        );
-        maxRuntime = runtime;
-    }
 }

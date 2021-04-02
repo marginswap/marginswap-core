@@ -15,7 +15,7 @@ struct Claim {
 /// @title Manage distribution of liquidity stake incentives
 /// Some efforts have been made to reduce gas cost at claim time
 /// and shift gas burden onto those who would want to withdraw
-contract IncentiveDistribution is RoleAware, Ownable {
+contract IncentiveDistribution is RoleAware {
     // fixed point number factor
     uint256 internal constant FP32 = 2**32;
     // the amount of contraction per thousand, per day
@@ -28,7 +28,7 @@ contract IncentiveDistribution is RoleAware, Ownable {
         address _MFI,
         uint256 startingDailyDistributionWithoutDecimals,
         address _roles
-    ) RoleAware(_roles) Ownable() {
+    ) RoleAware(_roles) {
         MFI = _MFI;
         currentDailyDistribution =
             startingDailyDistributionWithoutDecimals *
@@ -71,7 +71,7 @@ contract IncentiveDistribution is RoleAware, Ownable {
     /// Set share of tranche
     function setTrancheShare(uint256 tranche, uint256 share)
         external
-        onlyOwner
+        onlyOwnerExecActivator
     {
         require(
             trancheMetadata[tranche].rewardShare > 0,
@@ -92,7 +92,7 @@ contract IncentiveDistribution is RoleAware, Ownable {
     }
 
     /// Initialize tranche
-    function initTranche(uint256 tranche, uint256 share) external onlyOwner {
+    function initTranche(uint256 tranche, uint256 share) external onlyOwnerExecActivator {
         TrancheMeta storage tm = trancheMetadata[tranche];
         require(tm.rewardShare == 0, "Tranche already initialized");
         _setTrancheShare(tranche, share);

@@ -1,26 +1,24 @@
 // SPDX-License-Identifier: BUSL-1.1
 pragma solidity ^0.8.0;
 
-import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "./IncentiveDistribution.sol";
 
 /// @title Manaage rewards for liquidity mining
-contract LiquidityMiningReward is Ownable {
+contract LiquidityMiningReward is RoleAware {
     using SafeERC20 for IERC20;
 
     IERC20 public immutable stakeToken;
     mapping(address => uint256) public stakeAmounts;
-    IncentiveDistribution internal immutable incentiveDistributor;
+
     uint256 public immutable incentiveStart;
 
     constructor(
-        address _incentiveDistributor,
+        address _roles,
         address _stakeToken,
         uint256 startTimestamp
-    ) {
-        incentiveDistributor = IncentiveDistribution(_incentiveDistributor);
+    ) RoleAware(_roles) {
         stakeToken = IERC20(_stakeToken);
         incentiveStart = startTimestamp;
     }
@@ -34,7 +32,7 @@ contract LiquidityMiningReward is Ownable {
 
         stakeToken.safeTransferFrom(msg.sender, address(this), amount);
 
-        incentiveDistributor.addToClaimAmount(0, msg.sender, amount);
+        IncentiveDistribution(incentiveDistributor()).addToClaimAmount(0, msg.sender, amount);
 
         stakeAmounts[msg.sender] += amount;
     }
@@ -46,7 +44,7 @@ contract LiquidityMiningReward is Ownable {
 
         stakeAmounts[msg.sender] = stakeAmount - amount;
 
-        incentiveDistributor.subtractFromClaimAmount(0, msg.sender, amount);
+        IncentiveDistribution(incentiveDistributor()).subtractFromClaimAmount(0, msg.sender, amount);
 
         stakeToken.safeTransfer(msg.sender, amount);
     }

@@ -11,8 +11,8 @@ import "./CrossMarginTrading.sol";
 @title Here we support staking for MFI incentives as well as
 staking to perform the maintenance role.
 */
-contract Admin is RoleAware, Ownable {
-    /// Marginswap (MFI) token address
+contract Admin is RoleAware {
+    /// Margenswap (MFI) token address
     address public immutable MFI;
     mapping(address => uint256) public stakes;
     uint256 public totalStakes;
@@ -30,7 +30,7 @@ contract Admin is RoleAware, Ownable {
         address _lockedMFI,
         address lockedMFIDelegate,
         address _roles
-    ) RoleAware(_roles) Ownable() {
+    ) RoleAware(_roles) {
         MFI = _MFI;
         maintenanceStakePerBlock = 1 ether;
         lockedMFI = _lockedMFI;
@@ -52,7 +52,10 @@ contract Admin is RoleAware, Ownable {
     }
 
     /// Maintence stake setter
-    function setMaintenanceStakePerBlock(uint256 amount) external onlyOwner {
+    function setMaintenanceStakePerBlock(uint256 amount)
+        external
+        onlyOwnerExec
+    {
         maintenanceStakePerBlock = amount;
     }
 

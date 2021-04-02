@@ -5,12 +5,12 @@ import "./Lending.sol";
 import "./CrossMarginTrading.sol";
 
 /// @title anyone can call this contract to update relending levels
-contract Relender is RoleAware, Ownable {
+contract Relender is RoleAware {
     uint256 public relendPercent = 10;
 
-    constructor(address _roles) RoleAware(_roles) Ownable() {}
+    constructor(address _roles) RoleAware(_roles) {}
 
-    function setRelendPercent(uint256 newRelendPercent) external onlyOwner {
+    function setRelendPercent(uint256 newRelendPercent) external onlyOwnerExec {
         relendPercent = newRelendPercent;
     }
 

@@ -81,25 +81,33 @@ const deploy: DeployFunction = async function ({
   const tokens = tokensPerNetwork[networkName];
   const tokenAddresses = Object.values(tokens);
   const tokenNames = Object.keys(tokens);
+
   const exposureCaps = tokenNames.map((name) => {
     return ethers.utils.parseUnits(`${tokenParams[name].exposureCap}`, 18);
   });
+
   const lendingBuffers = tokenNames.map((name) => {
     return ethers.utils.parseUnits(`${tokenParams[name].lendingBuffer}`, 18);
   });
   const incentiveWeights = tokenNames.map((name) => tokenParams[name].incentiveWeight);
+
   // TODO get the pairs from uni/sushi
   const liquidationPaths = tokenNames.map((name) => {
     return tokens[name].liquidationPath;
   });
+
   const liquidationTokens = tokenNames.map((name) => {
     return tokens[name].liquidationTokenPath || [tokens[name], peg];
   });
 
+
+  const Roles = await deployments.get("Roles");
+  const roles = await ethers.getContractAt("Roles", Roles.address);
+
   const TokenActivation = await deploy("TokenActivation", {
     from: deployer,
     args: [
-      dc.address,
+      roles.address,
       tokenAddresses,
       exposureCaps,
       lendingBuffers,
@@ -111,11 +119,9 @@ const deploy: DeployFunction = async function ({
     skipIfAlreadyDeployed: true,
   });
 
-  if (await ethers.getDefaultProvider().getCode(TokenActivation.address) != "0x") {
-    // execute if the contract hasn't self-destroyed yet
-    const tx = await dc.executeAsOwner(TokenActivation.address);
-    console.log(`executing ${TokenActivation} as owner, by ${dc.address}, tx: ${tx.hash}`);
-  }
+  const tx = await dc.executeAsOwner(TokenActivation.address);
+  console.log(`executing ${TokenActivation} as owner, by ${dc.address}, tx: ${tx.hash}`);
+
 };
 
 deploy.tags = ["TokenActivation", "local"];

@@ -13,15 +13,17 @@ const deploy: DeployFunction = async function ({
 }: HardhatRuntimeEnvironment) {
     const { deploy } = deployments;
     const { deployer, liquidityToken } = await getNamedAccounts();
+
     const incentiveDistribution = await deployments.get("IncentiveDistribution")
         .then(IncentiveDistribution => ethers.getContractAt("IncentiveDistribution", IncentiveDistribution.address));
-    const roles = await deployments.get("Roles")
+
+        const roles = await deployments.get("Roles")
         .then(Roles => ethers.getContractAt("Roles", Roles.address));
     const nowSeconds = Math.floor(new Date().getTime() / 1000);
 
     const liquidityMiningReward = await deploy('LiquidityMiningReward', {
         from: deployer,
-        args: [incentiveDistribution.address, liquidityToken, nowSeconds],
+        args: [roles.address, liquidityToken, nowSeconds],
         log: true,
         skipIfAlreadyDeployed: true,
     });
@@ -36,5 +38,5 @@ const deploy: DeployFunction = async function ({
 };
 
 deploy.tags = ['LiquidityMiningReward', 'local'];
-deploy.dependencies = ['IncentiveDistribution'];
+deploy.dependencies = ['Roles', 'IncentiveDistribution'];
 export default deploy
