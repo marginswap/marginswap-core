@@ -44,26 +44,20 @@ contract IncentiveDistribution is RoleAware, Ownable {
     struct TrancheMeta {
         // portion of daily distribution per each tranche
         uint256 rewardShare;
-
         uint256 currentDayGains;
         uint256 currentDayLosses;
-
         uint256 tomorrowOngoingTotals;
         uint256 yesterdayOngoingTotals;
-
         // aggregate all the unclaimed intra-days
         uint256 intraDayGains;
         uint256 intraDayLosses;
         uint256 intraDayRewardGains;
         uint256 intraDayRewardLosses;
-
-
         // how much each claim unit would get if they had staked from the dawn of time
         // expressed as fixed point number
         // claim amounts are expressed relative to this ongoing aggregate
         uint256 aggregateDailyRewardRateFP;
         uint256 yesterdayRewardRateFP;
-
         mapping(address => Claim) claims;
     }
 
@@ -163,7 +157,7 @@ contract IncentiveDistribution is RoleAware, Ownable {
         TrancheMeta storage tm,
         address recipient,
         Claim storage claim
-                                 ) internal returns (uint256 rewardDelta){
+    ) internal returns (uint256 rewardDelta) {
         if (claim.startingRewardRateFP > 0) {
             rewardDelta = calcRewardAmount(tm, claim);
             accruedReward[recipient] += rewardDelta;
@@ -187,20 +181,21 @@ contract IncentiveDistribution is RoleAware, Ownable {
         }
     }
 
-    function applyIntraDay(
-                           TrancheMeta storage tm,
-        Claim storage claim
-                           ) internal view returns (uint256 gainImpact, uint256 lossImpact) {
+    function applyIntraDay(TrancheMeta storage tm, Claim storage claim)
+        internal
+        view
+        returns (uint256 gainImpact, uint256 lossImpact)
+    {
         uint256 gain = claim.intraDayGain;
         uint256 loss = claim.intraDayLoss;
 
         if (gain + loss > 0) {
             gainImpact =
                 (gain * tm.intraDayRewardGains) /
-                    (tm.intraDayGains + 1);
+                (tm.intraDayGains + 1);
             lossImpact =
                 (loss * tm.intraDayRewardLosses) /
-                    (tm.intraDayLosses + 1);
+                (tm.intraDayLosses + 1);
         }
     }
 
@@ -241,10 +236,7 @@ contract IncentiveDistribution is RoleAware, Ownable {
 
             withdrawAmount += updateAccruedReward(tm, msg.sender, claim);
 
-            (uint256 gainImpact, uint256 lossImpact) = applyIntraDay(
-                                                                     tm,
-                claim
-            );
+            (uint256 gainImpact, uint256 lossImpact) = applyIntraDay(tm, claim);
 
             withdrawAmount = withdrawAmount + gainImpact - lossImpact;
 
@@ -252,7 +244,7 @@ contract IncentiveDistribution is RoleAware, Ownable {
             tm.intraDayLosses -= claim.intraDayLoss;
             tm.intraDayRewardGains -= gainImpact;
             tm.intraDayRewardLosses -= lossImpact;
-            
+
             claim.intraDayGain = 0;
         }
 
@@ -285,7 +277,7 @@ contract IncentiveDistribution is RoleAware, Ownable {
             uint256 todayTotal =
                 tm.yesterdayOngoingTotals +
                     tm.currentDayGains -
-                tm.currentDayLosses;
+                    tm.currentDayLosses;
 
             uint256 todayRewardRateFP =
                 (FP32 * (currentDailyDistribution * tm.rewardShare)) /
@@ -296,13 +288,9 @@ contract IncentiveDistribution is RoleAware, Ownable {
 
             tm.aggregateDailyRewardRateFP += todayRewardRateFP;
 
-            tm.intraDayGains +=
-                tm.currentDayGains *
-                currentDailyDistribution;
+            tm.intraDayGains += tm.currentDayGains * currentDailyDistribution;
 
-            tm.intraDayLosses +=
-                tm.currentDayLosses *
-                currentDailyDistribution;
+            tm.intraDayLosses += tm.currentDayLosses * currentDailyDistribution;
 
             tm.intraDayRewardGains +=
                 (tm.currentDayGains * todayRewardRateFP) /
