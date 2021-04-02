@@ -10,7 +10,6 @@ contract LiquidityMiningReward is RoleAware {
     using SafeERC20 for IERC20;
 
     IERC20 public immutable stakeToken;
-    mapping(address => uint256) public claimIds;
     mapping(address => uint256) public stakeAmounts;
 
     uint256 public immutable incentiveStart;
@@ -33,22 +32,7 @@ contract LiquidityMiningReward is RoleAware {
 
         stakeToken.safeTransferFrom(msg.sender, address(this), amount);
 
-        if (claimIds[msg.sender] > 0) {
-            IncentiveDistribution(incentiveDistributor()).addToClaimAmount(
-                0,
-                claimIds[msg.sender],
-                amount
-            );
-        } else {
-            uint256 claimId =
-                IncentiveDistribution(incentiveDistributor()).startClaim(
-                    0,
-                    msg.sender,
-                    amount
-                );
-            claimIds[msg.sender] = claimId;
-            require(claimId > 0, "Distribution is over or paused");
-        }
+        IncentiveDistribution(incentiveDistributor()).addToClaimAmount(0, msg.sender, amount);
 
         stakeAmounts[msg.sender] += amount;
     }
@@ -60,29 +44,9 @@ contract LiquidityMiningReward is RoleAware {
 
         stakeAmounts[msg.sender] = stakeAmount - amount;
 
-        if (stakeAmount == amount) {
-            IncentiveDistribution(incentiveDistributor()).endClaim(
-                0,
-                claimIds[msg.sender]
-            );
-            claimIds[msg.sender] = 0;
-        } else {
-            IncentiveDistribution(incentiveDistributor())
-                .subtractFromClaimAmount(0, claimIds[msg.sender], amount);
-        }
+        IncentiveDistribution(incentiveDistributor()).subtractFromClaimAmount(0, msg.sender, amount);
 
         stakeToken.safeTransfer(msg.sender, amount);
-    }
-
-    /// Withdraw liqiudity mining reward
-    function withdrawReward() external returns (uint256) {
-        uint256 claimId = claimIds[msg.sender];
-        require(claimId > 0, "No registered claim");
-        return
-            IncentiveDistribution(incentiveDistributor()).withdrawReward(
-                0,
-                claimId
-            );
     }
 }
 

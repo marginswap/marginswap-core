@@ -16,7 +16,6 @@ contract Admin is RoleAware {
     address public immutable MFI;
     mapping(address => uint256) public stakes;
     uint256 public totalStakes;
-    mapping(address => uint256) public claimIds;
 
     uint256 public maintenanceStakePerBlock = 10 ether;
     mapping(address => address) public nextMaintenanceStaker;
@@ -66,22 +65,11 @@ contract Admin is RoleAware {
         stakes[holder] += amount;
         totalStakes += amount;
 
-        if (claimIds[holder] > 0) {
-            IncentiveDistribution(incentiveDistributor()).addToClaimAmount(
-                0,
-                claimIds[holder],
-                amount
-            );
-        } else {
-            uint256 claimId =
-                IncentiveDistribution(incentiveDistributor()).startClaim(
-                    0,
-                    holder,
-                    amount
-                );
-            claimIds[holder] = claimId;
-            require(claimId > 0, "Distribution is over or paused");
-        }
+        IncentiveDistribution(incentiveDistributor()).addToClaimAmount(
+            1,
+            holder,
+            amount
+        );
     }
 
     /// Deposit a stake for sender
@@ -94,22 +82,16 @@ contract Admin is RoleAware {
         uint256 amount,
         address recipient
     ) internal {
-        uint256 stakeAmount = stakes[holder];
         // overflow failure desirable
         stakes[holder] -= amount;
         totalStakes -= amount;
         Fund(fund()).withdraw(MFI, recipient, amount);
 
-        if (stakeAmount == amount) {
-            IncentiveDistribution(incentiveDistributor()).endClaim(
-                0,
-                claimIds[holder]
-            );
-            claimIds[holder] = 0;
-        } else {
-            IncentiveDistribution(incentiveDistributor())
-                .subtractFromClaimAmount(0, claimIds[holder], amount);
-        }
+        IncentiveDistribution(incentiveDistributor()).subtractFromClaimAmount(
+            1,
+            holder,
+            amount
+        );
     }
 
     /// Withdraw stake for sender

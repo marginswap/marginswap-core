@@ -7,11 +7,14 @@ import "./Fund.sol";
 
 struct Claim {
     uint256 startingRewardRateFP;
-    address recipient;
     uint256 amount;
+    uint256 intraDayGain;
+    uint256 intraDayLoss;
 }
 
 /// @title Manage distribution of liquidity stake incentives
+/// Some efforts have been made to reduce gas cost at claim time
+/// and shift gas burden onto those who would want to withdraw
 contract IncentiveDistribution is RoleAware {
     // fixed point number factor
     uint256 internal constant FP32 = 2**32;
@@ -19,9 +22,6 @@ contract IncentiveDistribution is RoleAware {
     // of the overal daily incentive distribution
     // https://en.wikipedia.org/wiki/Per_mil
     uint256 public constant contractionPerMil = 999;
-    // the period for which claims are batch updated
-    uint256 public constant period = 4 hours;
-    uint256 public constant periodsPerDay = 24 hours / period;
     address public immutable MFI;
 
     constructor(
@@ -33,245 +33,276 @@ contract IncentiveDistribution is RoleAware {
         currentDailyDistribution =
             startingDailyDistributionWithoutDecimals *
             (1 ether);
-        lastDailyDistributionUpdate = block.timestamp / (1 days);
     }
 
     // how much is going to be distributed, contracts every day
     uint256 public currentDailyDistribution;
-    // last day on which we updated currentDailyDistribution
-    uint256 lastDailyDistributionUpdate;
-    // portion of daily distribution per each tranche
-    mapping(uint8 => uint256) public trancheShare;
+
     uint256 public trancheShareTotal;
+    uint256[] public allTranches;
 
-    // tranche => claim totals for the period we're currently aggregating
-    mapping(uint8 => uint256) public currentPeriodTotals;
-    // tranche => timestamp / period of last update
-    mapping(uint8 => uint256) public lastUpdatedPeriods;
+    struct TrancheMeta {
+        // portion of daily distribution per each tranche
+        uint256 rewardShare;
+        uint256 currentDayGains;
+        uint256 currentDayLosses;
+        uint256 tomorrowOngoingTotals;
+        uint256 yesterdayOngoingTotals;
+        // aggregate all the unclaimed intra-days
+        uint256 intraDayGains;
+        uint256 intraDayLosses;
+        uint256 intraDayRewardGains;
+        uint256 intraDayRewardLosses;
+        // how much each claim unit would get if they had staked from the dawn of time
+        // expressed as fixed point number
+        // claim amounts are expressed relative to this ongoing aggregate
+        uint256 aggregateDailyRewardRateFP;
+        uint256 yesterdayRewardRateFP;
+        mapping(address => Claim) claims;
+    }
 
-    // how each claim unit would get if they had staked from the dawn of time
-    // expressed as fixed point number
-    // claim amounts are expressed relative to this ongoing aggregate
-    mapping(uint8 => uint256) public aggregatePeriodicRewardRateFP;
-    // claim records
-    mapping(uint256 => Claim) public claims;
-    uint256 public nextClaimId = 1;
+    mapping(uint256 => TrancheMeta) public trancheMetadata;
+
+    // last updated day
+    uint256 public lastUpdatedDay;
+
+    mapping(address => uint256) public accruedReward;
 
     /// Set share of tranche
-    function setTrancheShare(uint8 tranche, uint256 share)
+    function setTrancheShare(uint256 tranche, uint256 share)
         external
         onlyOwnerExecActivator
     {
         require(
-            lastUpdatedPeriods[tranche] > 0,
+            trancheMetadata[tranche].rewardShare > 0,
             "Tranche is not initialized, please initialize first"
         );
         _setTrancheShare(tranche, share);
     }
 
-    function _setTrancheShare(uint8 tranche, uint256 share) internal {
-        if (share > trancheShare[tranche]) {
-            trancheShareTotal += share - trancheShare[tranche];
+    function _setTrancheShare(uint256 tranche, uint256 share) internal {
+        TrancheMeta storage tm = trancheMetadata[tranche];
+
+        if (share > tm.rewardShare) {
+            trancheShareTotal += share - tm.rewardShare;
         } else {
-            trancheShareTotal -= trancheShare[tranche] - share;
+            trancheShareTotal -= tm.rewardShare - share;
         }
-        trancheShare[tranche] = share;
+        tm.rewardShare = share;
     }
 
     /// Initialize tranche
-    function initTranche(uint8 tranche, uint256 share)
-        external
-        onlyOwnerExecActivator
-    {
+    function initTranche(uint256 tranche, uint256 share) external onlyOwnerExecActivator {
+        TrancheMeta storage tm = trancheMetadata[tranche];
+        require(tm.rewardShare == 0, "Tranche already initialized");
         _setTrancheShare(tranche, share);
 
-        lastUpdatedPeriods[tranche] = block.timestamp / period;
         // simply initialize to 1.0
-        aggregatePeriodicRewardRateFP[tranche] = FP32;
+        tm.aggregateDailyRewardRateFP = FP32;
+        allTranches.push(tranche);
     }
 
-    function updatePeriodTotals(uint8 tranche) internal {
-        uint256 currentPeriod = block.timestamp / period;
-
-        // update the amount that gets distributed per day, if there has been
-        // a day transition
-        updateCurrentDailyDistribution();
-        // Do a bunch of updating of periodic variables when the period changes
-        uint256 lU = lastUpdatedPeriods[tranche];
-        uint256 periodDiff = currentPeriod - lU;
-
-        if (periodDiff > 0) {
-            aggregatePeriodicRewardRateFP[tranche] +=
-                currentPeriodicRewardRateFP(tranche) *
-                periodDiff;
-        }
-
-        lastUpdatedPeriods[tranche] = currentPeriod;
-    }
-
-    /// @notice can be called by anyone, if they want to ensure rewards
-    /// are distributed to a high level of accuracy (if several days
-    /// pass without update rewards will be slightly underestimated)
-    function forcePeriodTotalUpdate(uint8 tranche) external {
-        updatePeriodTotals(tranche);
-    }
-
-    function updateCurrentDailyDistribution() internal {
-        uint256 nowDay = block.timestamp / (1 days);
-        uint256 dayDiff = nowDay - lastDailyDistributionUpdate;
-
-        // shrink the daily distribution for every day that has passed
-        for (uint256 i = 0; i < dayDiff; i++) {
-            currentDailyDistribution =
-                (currentDailyDistribution * contractionPerMil) /
-                1000;
-        }
-        // now update this memo
-        lastDailyDistributionUpdate = nowDay;
-    }
-
-    function currentPeriodicRewardRateFP(uint8 tranche)
-        internal
-        view
-        returns (uint256)
-    {
-        // scale daily distribution down to tranche share
-        uint256 tranchePeriodDistributionFP =
-            (FP32 * currentDailyDistribution * trancheShare[tranche]) /
-                trancheShareTotal /
-                periodsPerDay;
-
-        // rate = (total_reward / total_claims) per period
-        return tranchePeriodDistributionFP / currentPeriodTotals[tranche];
-    }
-
-    /// Start a claim
-    function startClaim(
-        uint8 tranche,
+    /// Start / increase amount of claim
+    function addToClaimAmount(
+        uint256 tranche,
         address recipient,
         uint256 claimAmount
-    ) external returns (uint256) {
-        require(
-            isIncentiveReporter(msg.sender),
-            "Contract not authorized to report incentives"
-        );
-        if (currentDailyDistribution > 0) {
-            updatePeriodTotals(tranche);
-
-            currentPeriodTotals[tranche] += claimAmount;
-
-            claims[nextClaimId] = Claim({
-                startingRewardRateFP: aggregatePeriodicRewardRateFP[tranche],
-                recipient: recipient,
-                amount: claimAmount
-            });
-            nextClaimId += 1;
-            return nextClaimId - 1;
-        } else {
-            return 0;
-        }
-    }
-
-    /// Increase amount of claim
-    function addToClaimAmount(
-        uint8 tranche,
-        uint256 claimId,
-        uint256 additionalAmount
     ) external {
         require(
             isIncentiveReporter(msg.sender),
             "Contract not authorized to report incentives"
         );
         if (currentDailyDistribution > 0) {
-            updatePeriodTotals(tranche);
+            TrancheMeta storage tm = trancheMetadata[tranche];
+            Claim storage claim = tm.claims[recipient];
 
-            currentPeriodTotals[tranche] += additionalAmount;
+            uint256 currentDay =
+                claimAmount * (1 days - (block.timestamp % (1 days)));
 
-            Claim storage claim = claims[claimId];
-            require(
-                claim.startingRewardRateFP > 0,
-                "Trying to add to non-existant claim"
-            );
-            _withdrawReward(tranche, claim);
-            claim.amount += additionalAmount;
+            tm.currentDayGains += currentDay;
+            claim.intraDayGain += currentDay * currentDailyDistribution;
+
+            tm.tomorrowOngoingTotals += claimAmount * 1 days;
+            updateAccruedReward(tm, recipient, claim);
+
+            claim.amount += claimAmount * (1 days);
         }
     }
 
     /// Decrease amount of claim
     function subtractFromClaimAmount(
-        uint8 tranche,
-        uint256 claimId,
+        uint256 tranche,
+        address recipient,
         uint256 subtractAmount
     ) external {
         require(
             isIncentiveReporter(msg.sender),
             "Contract not authorized to report incentives"
         );
-        updatePeriodTotals(tranche);
+        uint256 currentDay = subtractAmount * (block.timestamp % (1 days));
 
-        currentPeriodTotals[tranche] -= subtractAmount;
+        TrancheMeta storage tm = trancheMetadata[tranche];
+        Claim storage claim = tm.claims[recipient];
 
-        Claim storage claim = claims[claimId];
-        _withdrawReward((tranche), claim);
-        claim.amount -= subtractAmount;
+        tm.currentDayLosses += currentDay;
+        claim.intraDayLoss += currentDay * currentDailyDistribution;
+
+        tm.tomorrowOngoingTotals -= subtractAmount * 1 days;
+
+        updateAccruedReward(tm, recipient, claim);
+        claim.amount -= subtractAmount * (1 days);
     }
 
-    /// Shut down claim and remove it
-    function endClaim(uint8 tranche, uint256 claimId) external {
-        require(
-            isIncentiveReporter(msg.sender),
-            "Contract not authorized to report incentives"
-        );
-        updatePeriodTotals(tranche);
-        Claim storage claim = claims[claimId];
-
+    function updateAccruedReward(
+        TrancheMeta storage tm,
+        address recipient,
+        Claim storage claim
+    ) internal returns (uint256 rewardDelta) {
         if (claim.startingRewardRateFP > 0) {
-            _withdrawReward(tranche, claim);
-            delete claims[claimId];
+            rewardDelta = calcRewardAmount(tm, claim);
+            accruedReward[recipient] += rewardDelta;
+        }
+        // don't reward for current day (approximately)
+        claim.startingRewardRateFP =
+            tm.yesterdayRewardRateFP +
+            tm.aggregateDailyRewardRateFP;
+    }
+
+    /// @dev additional reward accrued since last update
+    function calcRewardAmount(TrancheMeta storage tm, Claim storage claim)
+        internal
+        view
+        returns (uint256 rewardAmount)
+    {
+        uint256 ours = claim.startingRewardRateFP;
+        uint256 aggregate = tm.aggregateDailyRewardRateFP;
+        if (aggregate > ours) {
+            rewardAmount = (claim.amount * (aggregate - ours)) / FP32;
         }
     }
 
-    function calcRewardAmount(uint8 tranche, Claim storage claim)
+    function applyIntraDay(TrancheMeta storage tm, Claim storage claim)
         internal
         view
-        returns (uint256)
+        returns (uint256 gainImpact, uint256 lossImpact)
     {
-        return
-            (claim.amount *
-                (aggregatePeriodicRewardRateFP[tranche] -
-                    claim.startingRewardRateFP)) / FP32;
+        uint256 gain = claim.intraDayGain;
+        uint256 loss = claim.intraDayLoss;
+
+        if (gain + loss > 0) {
+            gainImpact =
+                (gain * tm.intraDayRewardGains) /
+                (tm.intraDayGains + 1);
+            lossImpact =
+                (loss * tm.intraDayRewardLosses) /
+                (tm.intraDayLosses + 1);
+        }
     }
 
     /// Get a view of reward amount
-    function viewRewardAmount(uint8 tranche, uint256 claimId)
+    function viewRewardAmount(uint256 tranche, address claimant)
         external
         view
         returns (uint256)
     {
-        return calcRewardAmount(tranche, claims[claimId]);
+        TrancheMeta storage tm = trancheMetadata[tranche];
+        Claim storage claim = tm.claims[claimant];
+
+        uint256 rewardAmount =
+            accruedReward[claimant] + calcRewardAmount(tm, claim);
+        (uint256 gainImpact, uint256 lossImpact) = applyIntraDay(tm, claim);
+
+        return rewardAmount + gainImpact - lossImpact;
     }
 
     /// Withdraw current reward amount
-    function withdrawReward(uint8 tranche, uint256 claimId)
+    function withdrawReward(uint256[] calldata tranches)
         external
-        returns (uint256)
+        returns (uint256 withdrawAmount)
     {
         require(
             isIncentiveReporter(msg.sender),
             "Contract not authorized to report incentives"
         );
-        updatePeriodTotals(tranche);
-        Claim storage claim = claims[claimId];
-        return _withdrawReward(tranche, claim);
+
+        updateDayTotals();
+
+        withdrawAmount = accruedReward[msg.sender];
+        for (uint256 i; tranches.length > i; i++) {
+            uint256 tranche = tranches[i];
+
+            TrancheMeta storage tm = trancheMetadata[tranche];
+            Claim storage claim = tm.claims[msg.sender];
+
+            withdrawAmount += updateAccruedReward(tm, msg.sender, claim);
+
+            (uint256 gainImpact, uint256 lossImpact) = applyIntraDay(tm, claim);
+
+            withdrawAmount = withdrawAmount + gainImpact - lossImpact;
+
+            tm.intraDayGains -= claim.intraDayGain;
+            tm.intraDayLosses -= claim.intraDayLoss;
+            tm.intraDayRewardGains -= gainImpact;
+            tm.intraDayRewardLosses -= lossImpact;
+
+            claim.intraDayGain = 0;
+        }
+
+        accruedReward[msg.sender] = 0;
+
+        Fund(fund()).withdraw(MFI, msg.sender, withdrawAmount);
     }
 
-    function _withdrawReward(uint8 tranche, Claim storage claim)
-        internal
-        returns (uint256 rewardAmount)
-    {
-        rewardAmount = calcRewardAmount(tranche, claim);
-        claim.startingRewardRateFP = aggregatePeriodicRewardRateFP[tranche];
+    function updateDayTotals() internal {
+        uint256 nowDay = block.timestamp / (1 days);
+        uint256 dayDiff = nowDay - lastUpdatedDay;
 
-        Fund(fund()).withdraw(MFI, claim.recipient, rewardAmount);
+        // shrink the daily distribution for every day that has passed
+        for (uint256 i = 0; i < dayDiff; i++) {
+            _updateTrancheTotals();
+
+            currentDailyDistribution =
+                (currentDailyDistribution * contractionPerMil) /
+                1000;
+
+            lastUpdatedDay += 1;
+        }
+    }
+
+    function _updateTrancheTotals() internal {
+        for (uint256 i; allTranches.length > i; i++) {
+            uint256 tranche = allTranches[i];
+            TrancheMeta storage tm = trancheMetadata[tranche];
+
+            uint256 todayTotal =
+                tm.yesterdayOngoingTotals +
+                    tm.currentDayGains -
+                    tm.currentDayLosses;
+
+            uint256 todayRewardRateFP =
+                (FP32 * (currentDailyDistribution * tm.rewardShare)) /
+                    trancheShareTotal /
+                    todayTotal;
+
+            tm.yesterdayRewardRateFP = todayRewardRateFP;
+
+            tm.aggregateDailyRewardRateFP += todayRewardRateFP;
+
+            tm.intraDayGains += tm.currentDayGains * currentDailyDistribution;
+
+            tm.intraDayLosses += tm.currentDayLosses * currentDailyDistribution;
+
+            tm.intraDayRewardGains +=
+                (tm.currentDayGains * todayRewardRateFP) /
+                FP32;
+
+            tm.intraDayRewardLosses +=
+                (tm.currentDayLosses * todayRewardRateFP) /
+                FP32;
+
+            tm.yesterdayOngoingTotals = tm.tomorrowOngoingTotals;
+            tm.currentDayGains = 0;
+            tm.currentDayLosses = 0;
+        }
     }
 }

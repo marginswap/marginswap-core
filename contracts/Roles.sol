@@ -3,35 +3,6 @@ pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "../interfaces/IDependencyController.sol";
-<<<<<<< HEAD
-=======
-
-// we chose not to go with an enum
-// to make this list easy to extend
-uint256 constant FUND_TRANSFERER = 1;
-uint256 constant MARGIN_CALLER = 2;
-uint256 constant BORROWER = 3;
-uint256 constant MARGIN_TRADER = 4;
-uint256 constant FEE_SOURCE = 5;
-uint256 constant LIQUIDATOR = 6;
-uint256 constant AUTHORIZED_FUND_TRADER = 7;
-uint256 constant INCENTIVE_REPORTER = 8;
-uint256 constant TOKEN_ACTIVATOR = 9;
-uint256 constant STAKE_PENALIZER = 10;
-
-uint256 constant FUND = 101;
-uint256 constant LENDING = 102;
-uint256 constant ROUTER = 103;
-uint256 constant MARGIN_TRADING = 104;
-uint256 constant FEE_CONTROLLER = 105;
-uint256 constant PRICE_CONTROLLER = 106;
-uint256 constant ADMIN = 107;
-uint256 constant INCENTIVE_DISTRIBUTION = 108;
-uint256 constant TOKEN_ADMIN = 109;
-
-uint256 constant DISABLER = 1001;
-uint256 constant DEPENDENCY_CONTROLLER = 1002;
->>>>>>> ad58977... Ownership reworked
 
 // we chose not to go with an enum
 // to make this list easy to extend

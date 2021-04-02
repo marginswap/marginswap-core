@@ -8,9 +8,7 @@ import "./RoleAware.sol";
 /// within the incentive system.
 abstract contract IncentivizedHolder is RoleAware {
     /// @dev here we cache incentive tranches to save on a bit of gas
-    mapping(address => uint8) public incentiveTranches;
-    // claimant => token => claimId
-    mapping(address => mapping(address => uint256)) public claimIds;
+    mapping(address => uint256) public incentiveTranches;
 
     /// Set incentive tranche
     function setIncentiveTranche(address token, uint8 tranche)
@@ -27,18 +25,10 @@ abstract contract IncentivizedHolder is RoleAware {
     ) internal {
         IncentiveDistribution iD =
             IncentiveDistribution(incentiveDistributor());
-        uint256 claimId = claimIds[claimant][token];
-        uint8 tranche = incentiveTranches[token];
-        if (claimId > 0) {
-            iD.addToClaimAmount(tranche, claimId, amount);
-        } else {
-            claimId = iD.startClaim(tranche, claimant, amount);
 
-            // check that distribution hasn't ended yet
-            if (claimId > 0) {
-                claimIds[claimant][token] = claimId;
-            }
-        }
+        uint256 tranche = incentiveTranches[token];
+
+        iD.addToClaimAmount(tranche, claimant, amount);
     }
 
     function withdrawClaim(
@@ -46,24 +36,12 @@ abstract contract IncentivizedHolder is RoleAware {
         address token,
         uint256 amount
     ) internal {
-        uint256 claimId = claimIds[claimant][token];
-        if (claimId > 0) {
-            uint8 tranche = incentiveTranches[token];
-            // this does not end claims if they zero out, but we are willing
-            // to sacrifice the gas refund from zeroing out for simplicity
-            // sake and saving storage cost wwhen starting a claim
-            IncentiveDistribution(incentiveDistributor())
-                .subtractFromClaimAmount(tranche, claimId, amount);
-        }
-    }
+        uint256 tranche = incentiveTranches[token];
 
-    function endClaim(address claimant, address token) internal {
-        uint256 claimId = claimIds[claimant][token];
-        uint8 tranche = incentiveTranches[token];
-        IncentiveDistribution(incentiveDistributor()).endClaim(
+        IncentiveDistribution(incentiveDistributor()).subtractFromClaimAmount(
             tranche,
-            claimId
+            claimant,
+            amount
         );
-        claimIds[claimant][token] = 0;
     }
 }
