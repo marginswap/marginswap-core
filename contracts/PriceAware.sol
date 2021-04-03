@@ -166,29 +166,32 @@ abstract contract PriceAware is RoleAware {
         onlyOwnerExecActivator
     {
         address token = tokens[0];
+        if (token != peg) {
+            TokenPrice storage tokenPrice = tokenPrices[token];
+            tokenPrice.liquidationPairs = new address[](path.length);
+            tokenPrice.inverseLiquidationPairs = new address[](path.length);
+            tokenPrice.liquidationTokens = new address[](tokens.length);
+            tokenPrice.inverseLiquidationTokens = new address[](tokens.length);
 
-        TokenPrice storage tokenPrice = tokenPrices[token];
-        tokenPrice.liquidationPairs = new address[](path.length);
-        tokenPrice.inverseLiquidationPairs = new address[](path.length);
-        tokenPrice.liquidationTokens = new address[](tokens.length);
-        tokenPrice.inverseLiquidationTokens = new address[](tokens.length);
+            for (uint256 i = 0; path.length > i; i++) {
+                tokenPrice.liquidationPairs[i] = path[i];
+                tokenPrice.inverseLiquidationPairs[i] = path[
+                    path.length - i - 1
+                ];
+            }
 
-        for (uint256 i = 0; path.length > i; i++) {
-            tokenPrice.liquidationPairs[i] = path[i];
-            tokenPrice.inverseLiquidationPairs[i] = path[path.length - i - 1];
+            for (uint256 i = 0; tokens.length > i; i++) {
+                tokenPrice.liquidationTokens[i] = tokens[i];
+                tokenPrice.inverseLiquidationTokens[i] = tokens[
+                    tokens.length - i - 1
+                ];
+            }
+
+            uint256[] memory pathAmounts =
+                UniswapStyleLib.getAmountsIn(1000 ether, path, tokens);
+            uint256 inAmount = pathAmounts[0];
+            _setPriceVal(tokenPrice, inAmount, 1000 ether, 1000);
         }
-
-        for (uint256 i = 0; tokens.length > i; i++) {
-            tokenPrice.liquidationTokens[i] = tokens[i];
-            tokenPrice.inverseLiquidationTokens[i] = tokens[
-                tokens.length - i - 1
-            ];
-        }
-
-        uint256[] memory pathAmounts =
-            UniswapStyleLib.getAmountsIn(1000 ether, path, tokens);
-        uint256 inAmount = pathAmounts[0];
-        _setPriceVal(tokenPrice, inAmount, 1000 ether, 1000);
     }
 
     function liquidateToPeg(address token, uint256 amount)
@@ -200,7 +203,7 @@ abstract contract PriceAware is RoleAware {
         } else {
             TokenPrice storage tP = tokenPrices[token];
             uint256[] memory amounts =
-                MarginRouter(router()).authorizedSwapExactT4T(
+                MarginRouter(marginRouter()).authorizedSwapExactT4T(
                     amount,
                     0,
                     tP.liquidationPairs,
@@ -222,7 +225,7 @@ abstract contract PriceAware is RoleAware {
         } else {
             TokenPrice storage tP = tokenPrices[token];
             uint256[] memory amounts =
-                MarginRouter(router()).authorizedSwapT4ExactT(
+                MarginRouter(marginRouter()).authorizedSwapT4ExactT(
                     targetAmount,
                     type(uint256).max,
                     tP.inverseLiquidationPairs,

@@ -19,7 +19,7 @@ contract Relender is RoleAware {
         uint256 relendBalance =
             Lending(lending()).viewHourlyBondAmount(token, address(this));
         uint256 relendTarget =
-            CrossMarginTrading(marginTrading()).totalLong(token);
+            CrossMarginTrading(crossMarginTrading()).totalLong(token);
         if (relendBalance > relendTarget) {
             Lending(lending()).withdrawHourlyBond(
                 token,

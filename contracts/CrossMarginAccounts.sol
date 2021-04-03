@@ -6,7 +6,6 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "./Fund.sol";
 import "./Lending.sol";
 import "./RoleAware.sol";
-import "./MarginRouter.sol";
 import "./PriceAware.sol";
 
 // Goal: all external functions only accessible to margintrader role

@@ -48,7 +48,10 @@ contract TokenAdmin is RoleAware {
         );
 
         Lending(lending()).activateIssuer(token);
-        CrossMarginTrading(marginTrading()).setTokenCap(token, exposureCap);
+        CrossMarginTrading(crossMarginTrading()).setTokenCap(
+            token,
+            exposureCap
+        );
         Lending(lending()).setLendingCap(token, exposureCap);
         Lending(lending()).setLendingBuffer(token, lendingBuffer);
         Lending(lending()).setHourlyYieldAPR(token, initHourlyYieldAPRPercent);
@@ -73,7 +76,10 @@ contract TokenAdmin is RoleAware {
                 calcTrancheShare(incentiveWeight, totalBorrowingTargetPortion);
             iD.initTranche(nextTrancheIndex, borrowingShare);
             tokenBorrowingTranches[token] = nextTrancheIndex;
-            MarginRouter(router()).setIncentiveTranche(token, nextTrancheIndex);
+            MarginRouter(marginRouter()).setIncentiveTranche(
+                token,
+                nextTrancheIndex
+            );
             nextTrancheIndex++;
 
             updateIncentiveShares(iD);
@@ -82,10 +88,10 @@ contract TokenAdmin is RoleAware {
             require(
                 liquidationTokens[0] == token &&
                     liquidationTokens[liquidationTokens.length - 1] ==
-                    CrossMarginTrading(marginTrading()).peg(),
+                    CrossMarginTrading(crossMarginTrading()).peg(),
                 "Invalid liquidationTokens -- should go from token to peg"
             );
-            CrossMarginTrading(marginTrading()).setLiquidationPath(
+            CrossMarginTrading(crossMarginTrading()).setLiquidationPath(
                 liquidationPairs,
                 liquidationTokens
             );
@@ -98,7 +104,10 @@ contract TokenAdmin is RoleAware {
         onlyOwnerExec
     {
         Lending(lending()).setLendingCap(token, exposureCap);
-        CrossMarginTrading(marginTrading()).setTokenCap(token, exposureCap);
+        CrossMarginTrading(crossMarginTrading()).setTokenCap(
+            token,
+            exposureCap
+        );
     }
 
     /// Change weight of token incentive

@@ -92,7 +92,10 @@ contract IncentiveDistribution is RoleAware {
     }
 
     /// Initialize tranche
-    function initTranche(uint256 tranche, uint256 share) external onlyOwnerExecActivator {
+    function initTranche(uint256 tranche, uint256 share)
+        external
+        onlyOwnerExecActivator
+    {
         TrancheMeta storage tm = trancheMetadata[tranche];
         require(tm.rewardShare == 0, "Tranche already initialized");
         _setTrancheShare(tranche, share);

@@ -32,7 +32,11 @@ contract LiquidityMiningReward is RoleAware {
 
         stakeToken.safeTransferFrom(msg.sender, address(this), amount);
 
-        IncentiveDistribution(incentiveDistributor()).addToClaimAmount(0, msg.sender, amount);
+        IncentiveDistribution(incentiveDistributor()).addToClaimAmount(
+            0,
+            msg.sender,
+            amount
+        );
 
         stakeAmounts[msg.sender] += amount;
     }
@@ -44,7 +48,11 @@ contract LiquidityMiningReward is RoleAware {
 
         stakeAmounts[msg.sender] = stakeAmount - amount;
 
-        IncentiveDistribution(incentiveDistributor()).subtractFromClaimAmount(0, msg.sender, amount);
+        IncentiveDistribution(incentiveDistributor()).subtractFromClaimAmount(
+            0,
+            msg.sender,
+            amount
+        );
 
         stakeToken.safeTransfer(msg.sender, amount);
     }

@@ -19,8 +19,8 @@ uint256 constant STAKE_PENALIZER = 10;
 
 uint256 constant FUND = 101;
 uint256 constant LENDING = 102;
-uint256 constant ROUTER = 103;
-uint256 constant MARGIN_TRADING = 104;
+uint256 constant MARGIN_ROUTER = 103;
+uint256 constant CROSS_MARGIN_TRADING = 104;
 uint256 constant FEE_CONTROLLER = 105;
 uint256 constant PRICE_CONTROLLER = 106;
 uint256 constant ADMIN = 107;

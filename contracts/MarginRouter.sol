@@ -2,21 +2,16 @@
 pragma solidity ^0.8.0;
 
 import "@uniswap/v2-core/contracts/interfaces/IUniswapV2Factory.sol";
-import "../libraries/UniswapStyleLib.sol";
 
 import "./RoleAware.sol";
-import "./Fund.sol";
 import "../interfaces/IMarginTrading.sol";
 import "./Lending.sol";
 import "./Admin.sol";
 import "./IncentivizedHolder.sol";
+import "./BaseRouter.sol";
 
 /// @title Top level transaction controller
-contract MarginRouter is RoleAware, IncentivizedHolder {
-    /// @notice wrapped ETH ERC20 contract
-    address public immutable WETH;
-    uint256 public constant mswapFeesPer10k = 10;
-
+contract MarginRouter is RoleAware, IncentivizedHolder, BaseRouter {
     /// emitted when a trader depoits on cross margin
     event CrossDeposit(
         address trader,
@@ -55,14 +50,14 @@ contract MarginRouter is RoleAware, IncentivizedHolder {
         uint256 withdrawAmount
     );
 
-    modifier ensure(uint256 deadline) {
-        require(deadline >= block.timestamp, "Trade has expired");
-        _;
-    }
+    constructor(address _WETH, address _roles)
+        BaseRouter(_WETH)
+        RoleAware(_roles)
+    {}
 
-    constructor(address _WETH, address _roles) RoleAware(_roles) {
-        WETH = _WETH;
-    }
+    ///////////////////////////
+    // Cross margin endpoints
+    ///////////////////////////
 
     /// @notice traders call this to deposit funds on cross margin
     function crossDeposit(address depositToken, uint256 depositAmount)
@@ -71,7 +66,7 @@ contract MarginRouter is RoleAware, IncentivizedHolder {
         Fund(fund()).depositFor(msg.sender, depositToken, depositAmount);
 
         uint256 extinguishAmount =
-            IMarginTrading(marginTrading()).registerDeposit(
+            IMarginTrading(crossMarginTrading()).registerDeposit(
                 msg.sender,
                 depositToken,
                 depositAmount
@@ -87,7 +82,7 @@ contract MarginRouter is RoleAware, IncentivizedHolder {
     function crossDepositETH() external payable {
         Fund(fund()).depositToWETH{value: msg.value}();
         uint256 extinguishAmount =
-            IMarginTrading(marginTrading()).registerDeposit(
+            IMarginTrading(crossMarginTrading()).registerDeposit(
                 msg.sender,
                 WETH,
                 msg.value
@@ -103,7 +98,7 @@ contract MarginRouter is RoleAware, IncentivizedHolder {
     function crossWithdraw(address withdrawToken, uint256 withdrawAmount)
         external
     {
-        IMarginTrading(marginTrading()).registerWithdrawal(
+        IMarginTrading(crossMarginTrading()).registerWithdrawal(
             msg.sender,
             withdrawToken,
             withdrawAmount
@@ -114,7 +109,7 @@ contract MarginRouter is RoleAware, IncentivizedHolder {
 
     /// @notice withdraw ethereum from cross margin account
     function crossWithdrawETH(uint256 withdrawAmount) external {
-        IMarginTrading(marginTrading()).registerWithdrawal(
+        IMarginTrading(crossMarginTrading()).registerWithdrawal(
             msg.sender,
             WETH,
             withdrawAmount
@@ -125,7 +120,7 @@ contract MarginRouter is RoleAware, IncentivizedHolder {
     /// @notice borrow into cross margin trading account
     function crossBorrow(address borrowToken, uint256 borrowAmount) external {
         Lending(lending()).registerBorrow(borrowToken, borrowAmount);
-        IMarginTrading(marginTrading()).registerBorrow(
+        IMarginTrading(crossMarginTrading()).registerBorrow(
             msg.sender,
             borrowToken,
             borrowAmount
@@ -148,7 +143,7 @@ contract MarginRouter is RoleAware, IncentivizedHolder {
         Fund(fund()).depositFor(msg.sender, depositToken, depositAmount);
 
         Lending(lending()).registerBorrow(borrowToken, withdrawAmount);
-        IMarginTrading(marginTrading()).registerOvercollateralizedBorrow(
+        IMarginTrading(crossMarginTrading()).registerOvercollateralizedBorrow(
             msg.sender,
             depositToken,
             depositAmount,
@@ -170,10 +165,10 @@ contract MarginRouter is RoleAware, IncentivizedHolder {
     /// @notice close an account that is no longer borrowing and return gains
     function crossCloseAccount() external {
         (address[] memory holdingTokens, uint256[] memory holdingAmounts) =
-            IMarginTrading(marginTrading()).getHoldingAmounts(msg.sender);
+            IMarginTrading(crossMarginTrading()).getHoldingAmounts(msg.sender);
 
         // requires all debts paid off
-        IMarginTrading(marginTrading()).registerLiquidation(msg.sender);
+        IMarginTrading(crossMarginTrading()).registerLiquidation(msg.sender);
 
         for (uint256 i; holdingTokens.length > i; i++) {
             Fund(fund()).withdraw(
@@ -182,100 +177,6 @@ contract MarginRouter is RoleAware, IncentivizedHolder {
                 holdingAmounts[i]
             );
         }
-    }
-
-    // **** SWAP ****
-    /// @dev requires the initial amount to have already been sent to the first pair
-    function _swap(
-        uint256[] memory amounts,
-        address[] memory pairs,
-        address[] memory tokens,
-        address _to
-    ) internal virtual {
-        address outToken = tokens[tokens.length - 1];
-        uint256 startingBalance = IERC20(outToken).balanceOf(_to);
-        for (uint256 i; i < pairs.length; i++) {
-            (address input, address output) = (tokens[i], tokens[i + 1]);
-            (address token0, ) = UniswapStyleLib.sortTokens(input, output);
-
-            uint256 amountOut = amounts[i + 1];
-
-            (uint256 amount0Out, uint256 amount1Out) =
-                input == token0
-                    ? (uint256(0), amountOut)
-                    : (amountOut, uint256(0));
-
-            address to = i < pairs.length - 1 ? pairs[i + 1] : _to;
-            IUniswapV2Pair pair = IUniswapV2Pair(pairs[i]);
-            pair.swap(amount0Out, amount1Out, to, new bytes(0));
-        }
-
-        uint256 endingBalance = IERC20(outToken).balanceOf(_to);
-        require(
-            endingBalance >= startingBalance + amounts[amounts.length - 1],
-            "Defective AMM route; balances don't match"
-        );
-    }
-
-    /// @dev internal helper swapping exact token for token on AMM
-    function _swapExactT4T(
-        uint256[] memory amounts,
-        uint256 amountOutMin,
-        address[] calldata pairs,
-        address[] calldata tokens
-    ) internal {
-        require(
-            amounts[amounts.length - 1] >= amountOutMin,
-            "MarginRouter: INSUFFICIENT_OUTPUT_AMOUNT"
-        );
-        Fund(fund()).withdraw(tokens[0], pairs[0], amounts[0]);
-        _swap(amounts, pairs, tokens, fund());
-    }
-
-    /// @notice make swaps on AMM using protocol funds, only for authorized contracts
-    function authorizedSwapExactT4T(
-        uint256 amountIn,
-        uint256 amountOutMin,
-        address[] calldata pairs,
-        address[] calldata tokens
-    ) external returns (uint256[] memory amounts) {
-        require(
-            isAuthorizedFundTrader(msg.sender),
-            "Calling contract is not authorized to trade with protocl funds"
-        );
-        amounts = UniswapStyleLib.getAmountsOut(amountIn, pairs, tokens);
-        _swapExactT4T(amounts, amountOutMin, pairs, tokens);
-    }
-
-    // @dev internal helper swapping exact token for token on on AMM
-    function _swapT4ExactT(
-        uint256[] memory amounts,
-        uint256 amountInMax,
-        address[] calldata pairs,
-        address[] calldata tokens
-    ) internal {
-        // TODO minimum trade?
-        require(
-            amounts[0] <= amountInMax,
-            "MarginRouter: EXCESSIVE_INPUT_AMOUNT"
-        );
-        Fund(fund()).withdraw(tokens[0], pairs[0], amounts[0]);
-        _swap(amounts, pairs, tokens, fund());
-    }
-
-    //// @notice swap protocol funds on AMM, only for authorized
-    function authorizedSwapT4ExactT(
-        uint256 amountOut,
-        uint256 amountInMax,
-        address[] calldata pairs,
-        address[] calldata tokens
-    ) external returns (uint256[] memory amounts) {
-        require(
-            isAuthorizedFundTrader(msg.sender),
-            "Calling contract is not authorized to trade with protocl funds"
-        );
-        amounts = UniswapStyleLib.getAmountsIn(amountOut, pairs, tokens);
-        _swapT4ExactT(amounts, amountInMax, pairs, tokens);
     }
 
     /// @notice entry point for swapping tokens held in cross margin account
@@ -301,7 +202,7 @@ contract MarginRouter is RoleAware, IncentivizedHolder {
             amounts[amounts.length - 1]
         );
 
-        _swapExactT4T(amounts, amountOutMin, pairs, tokens);
+        _fundSwapExactT4T(amounts, amountOutMin, pairs, tokens);
     }
 
     /// @notice entry point for swapping tokens held in cross margin account
@@ -328,11 +229,11 @@ contract MarginRouter is RoleAware, IncentivizedHolder {
             amountOut
         );
 
-        _swapT4ExactT(amounts, amountInMax, pairs, tokens);
+        _fundSwapT4ExactT(amounts, amountInMax, pairs, tokens);
     }
 
     /// @dev helper function does all the work of telling other contracts
-    /// about a trade
+    /// about a cross margin trade
     function registerTrade(
         address trader,
         address inToken,
@@ -341,7 +242,7 @@ contract MarginRouter is RoleAware, IncentivizedHolder {
         uint256 outAmount
     ) internal {
         (uint256 extinguishAmount, uint256 borrowAmount) =
-            IMarginTrading(marginTrading()).registerTradeAndBorrow(
+            IMarginTrading(crossMarginTrading()).registerTradeAndBorrow(
                 trader,
                 inToken,
                 outToken,
@@ -368,20 +269,69 @@ contract MarginRouter is RoleAware, IncentivizedHolder {
         );
     }
 
-    function getAmountsOut(
-        uint256 inAmount,
+    /////////////
+    // Helpers
+    /////////////
+
+    /// @dev internal helper swapping exact token for token on AMM
+    function _fundSwapExactT4T(
+        uint256[] memory amounts,
+        uint256 amountOutMin,
         address[] calldata pairs,
         address[] calldata tokens
-    ) external view returns (uint256[] memory) {
-        return UniswapStyleLib.getAmountsOut(inAmount, pairs, tokens);
+    ) internal {
+        require(
+            amounts[amounts.length - 1] >= amountOutMin,
+            "MarginRouter: INSUFFICIENT_OUTPUT_AMOUNT"
+        );
+        Fund(fund()).withdraw(tokens[0], pairs[0], amounts[0]);
+        _swap(amounts, pairs, tokens, fund());
     }
 
-    function getAmountsIn(
-        uint256 outAmount,
+    /// @notice make swaps on AMM using protocol funds, only for authorized contracts
+    function authorizedSwapExactT4T(
+        uint256 amountIn,
+        uint256 amountOutMin,
         address[] calldata pairs,
         address[] calldata tokens
-    ) external view returns (uint256[] memory) {
-        return UniswapStyleLib.getAmountsIn(outAmount, pairs, tokens);
+    ) external returns (uint256[] memory amounts) {
+        require(
+            isAuthorizedFundTrader(msg.sender),
+            "Calling contract is not authorized to trade with protocl funds"
+        );
+        amounts = UniswapStyleLib.getAmountsOut(amountIn, pairs, tokens);
+        _fundSwapExactT4T(amounts, amountOutMin, pairs, tokens);
+    }
+
+    // @dev internal helper swapping exact token for token on on AMM
+    function _fundSwapT4ExactT(
+        uint256[] memory amounts,
+        uint256 amountInMax,
+        address[] calldata pairs,
+        address[] calldata tokens
+    ) internal {
+        // TODO minimum trade?
+        require(
+            amounts[0] <= amountInMax,
+            "MarginRouter: EXCESSIVE_INPUT_AMOUNT"
+        );
+        Fund(fund()).withdraw(tokens[0], pairs[0], amounts[0]);
+        _swap(amounts, pairs, tokens, fund());
+    }
+
+    //// @notice swap protocol funds on AMM, only for authorized
+    function authorizedSwapT4ExactT(
+        uint256 amountOut,
+        uint256 amountInMax,
+        address[] calldata pairs,
+        address[] calldata tokens
+    ) external returns (uint256[] memory amounts) {
+        require(
+            isAuthorizedFundTrader(msg.sender),
+            "Calling contract is not authorized to trade with protocl funds"
+        );
+        amounts = UniswapStyleLib.getAmountsIn(amountOut, pairs, tokens);
+        _fundSwapT4ExactT(amounts, amountInMax, pairs, tokens);
     }
 
     function takeFeesFromOutput(uint256 amount)
@@ -398,5 +348,21 @@ contract MarginRouter is RoleAware, IncentivizedHolder {
         returns (uint256 fees)
     {
         fees = (mswapFeesPer10k * amount) / (10_000 + mswapFeesPer10k);
+    }
+
+    function getAmountsOut(
+        uint256 inAmount,
+        address[] calldata pairs,
+        address[] calldata tokens
+    ) external view returns (uint256[] memory) {
+        return UniswapStyleLib.getAmountsOut(inAmount, pairs, tokens);
+    }
+
+    function getAmountsIn(
+        uint256 outAmount,
+        address[] calldata pairs,
+        address[] calldata tokens
+    ) external view returns (uint256[] memory) {
+        return UniswapStyleLib.getAmountsIn(outAmount, pairs, tokens);
     }
 }

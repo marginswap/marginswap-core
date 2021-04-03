@@ -81,12 +81,12 @@ contract RoleAware {
         return mainCharacterCache[LENDING];
     }
 
-    function router() internal view returns (address) {
-        return mainCharacterCache[ROUTER];
+    function marginRouter() internal view returns (address) {
+        return mainCharacterCache[MARGIN_ROUTER];
     }
 
-    function marginTrading() internal view returns (address) {
-        return mainCharacterCache[MARGIN_TRADING];
+    function crossMarginTrading() internal view returns (address) {
+        return mainCharacterCache[CROSS_MARGIN_TRADING];
     }
 
     function feeController() internal view returns (address) {

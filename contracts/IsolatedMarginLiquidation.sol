@@ -161,7 +161,7 @@ abstract contract IsolatedMarginLiquidation is IsolatedMarginAccounts {
 
     function liquidateToBorrow(uint256 sellAmount) internal returns (uint256) {
         uint256[] memory amounts =
-            MarginRouter(router()).authorizedSwapExactT4T(
+            MarginRouter(marginRouter()).authorizedSwapExactT4T(
                 sellAmount,
                 0,
                 liquidationPairs,
