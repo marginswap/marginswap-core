@@ -9,10 +9,13 @@ import "@openzeppelin/contracts/utils/Address.sol";
 import "../interfaces/IWETH.sol";
 import "./BaseRouter.sol";
 
-abstract contract SpotRouter is BaseRouter {
+contract SpotRouter is BaseRouter {
     using SafeERC20 for IERC20;
+    address public immutable WETH;
 
-    constructor(address weth) BaseRouter(weth) {}
+    constructor(address _WETH) {
+        WETH = _WETH;
+    }
 
     function swapExactTokensForTokens(
         uint256 amountIn,

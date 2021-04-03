@@ -64,8 +64,10 @@ const deploy: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   const roles = await ethers.getContractAt("Roles", Roles.address);
   
-  const givingRole = await roles.setMainCharacter(DEPENDENCY_CONTROLLER, DependencyController.address);
-  console.log(`Giving dependency controller role: ${givingRole.hash}`);
+  if ((await roles.mainCharacters(DEPENDENCY_CONTROLLER)) != DependencyController.address) {
+    const givingRole = await roles.setMainCharacter(DEPENDENCY_CONTROLLER, DependencyController.address);
+    console.log(`Giving dependency controller role: ${givingRole.hash}`);  
+  }
 
   // TODO admin wallet
   // roles.giveRole(DISABLER, deployer);
