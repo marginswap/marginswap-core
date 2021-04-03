@@ -49,11 +49,12 @@ contract MarginRouter is RoleAware, IncentivizedHolder, BaseRouter {
         address borrowToken,
         uint256 withdrawAmount
     );
+    uint256 public constant mswapFeesPer10k = 10;
+    address public immutable WETH;
 
-    constructor(address _WETH, address _roles)
-        BaseRouter(_WETH)
-        RoleAware(_roles)
-    {}
+    constructor(address _WETH, address _roles) RoleAware(_roles) {
+        WETH = _WETH;
+    }
 
     ///////////////////////////
     // Cross margin endpoints

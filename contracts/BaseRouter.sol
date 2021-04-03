@@ -6,12 +6,6 @@ import "../libraries/UniswapStyleLib.sol";
 
 abstract contract BaseRouter {
     /// @notice wrapped ETH ERC20 contract
-    address public immutable WETH;
-    uint256 public constant mswapFeesPer10k = 10;
-
-    constructor(address weth) {
-        WETH = weth;
-    }
 
     modifier ensure(uint256 deadline) {
         require(deadline >= block.timestamp, "Trade has expired");
