@@ -191,13 +191,16 @@ contract Lending is
         uint256 balance,
         address issuer,
         uint256 yieldQuotientFP
-    ) external returns (uint256 balanceWithInterest) {
+    ) external returns (uint256 balanceWithInterest, uint256 accumulatorFP) {
         require(isBorrower(msg.sender), "Not an approved borrower");
 
         YieldAccumulator storage yA = borrowYieldAccumulators[issuer];
+        updateBorrowYieldAccu(yA);
+        accumulatorFP = yA.accumulatorFP;
+
         balanceWithInterest = applyInterest(
             balance,
-            yA.accumulatorFP,
+            accumulatorFP,
             yieldQuotientFP
         );
 
@@ -206,8 +209,8 @@ contract Lending is
         meta.totalBorrowed += deltaAmount;
     }
 
-    /// @dev view function to get current borrowing interest
-    function viewBorrowInterest(
+    /// @dev view function to get balance with borrowing interest applied
+    function viewWithBorrowInterest(
         uint256 balance,
         address issuer,
         uint256 yieldQuotientFP
@@ -239,17 +242,45 @@ contract Lending is
         lendingMeta[issuer].totalBorrowed -= amount;
     }
 
-    /// @dev get the borrow yield
-    function viewBorrowingYieldFP(address issuer)
+    /// @dev get the borrow yield for a specific issuer/token
+    function viewAccumulatedBorrowingYieldFP(address issuer)
         external
         view
         returns (uint256)
     {
-        return
-            viewCumulativeYieldFP(
-                borrowYieldAccumulators[issuer],
-                block.timestamp
-            );
+        YieldAccumulator storage yA = borrowYieldAccumulators[issuer];
+        return viewCumulativeYieldFP(yA, block.timestamp);
+    }
+
+    function viewAPRPer10k(YieldAccumulator storage yA)
+        internal
+        view
+        returns (uint256)
+    {
+        uint256 hourlyYieldFP = yA.hourlyYieldFP;
+
+        uint256 aprFP =
+            (hourlyYieldFP * 10_000 - FP32 * 10_000) * 365 days / (1 hours);
+
+        return aprFP / FP32;
+    }
+
+    /// @dev get current borrowing interest per 10k for a token / issuer
+    function viewBorrowAPRPer10k(address issuer)
+        external
+        view
+        returns (uint256)
+    {
+        return viewAPRPer10k(borrowYieldAccumulators[issuer]);
+    }
+
+    /// @dev get current lending APR per 10k for a token / issuer
+    function viewHourlyBondAPRPer10k(address issuer)
+        external
+        view
+        returns (uint256)
+    {
+        return viewAPRPer10k(hourlyBondMetadata[issuer].yieldAccumulator);
     }
 
     /// @dev In a liquidity crunch make a fallback bond until liquidity is good again
