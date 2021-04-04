@@ -73,18 +73,22 @@ abstract contract CrossMarginAccounts is RoleAware, PriceAware {
     ) internal {
         if (!hasBorrowedToken(account, borrowToken)) {
             account.borrowTokens.push(borrowToken);
-        } else {
-            account.borrowed[borrowToken] = Lending(lending())
-                .applyBorrowInterest(
-                account.borrowed[borrowToken],
-                borrowToken,
-                account.borrowedYieldQuotientsFP[borrowToken]
-            );
-        }
-        account.borrowedYieldQuotientsFP[borrowToken] = Lending(lending())
-            .viewBorrowingYieldFP(borrowToken);
+            account.borrowedYieldQuotientsFP[borrowToken] = Lending(lending())
+                .getUpdatedBorrowYieldAccuFP(borrowToken);
 
-        account.borrowed[borrowToken] += borrowAmount;
+            account.borrowed[borrowToken] = borrowAmount;
+        } else {
+            (uint256 oldBorrowed, uint256 accumulatorFP) =
+                Lending(lending()).applyBorrowInterest(
+                    account.borrowed[borrowToken],
+                    borrowToken,
+                    account.borrowedYieldQuotientsFP[borrowToken]
+                );
+            account.borrowedYieldQuotientsFP[borrowToken] = accumulatorFP;
+
+            account.borrowed[borrowToken] = oldBorrowed + borrowAmount;
+        }
+
         addHolding(account, borrowToken, borrowAmount);
 
         require(positiveBalance(account), "Can't borrow: insufficient balance");
@@ -110,22 +114,22 @@ abstract contract CrossMarginAccounts is RoleAware, PriceAware {
         uint256 extinguishAmount
     ) internal {
         // will throw if insufficient funds
-        account.borrowed[debtToken] = Lending(lending()).applyBorrowInterest(
-            account.borrowed[debtToken],
-            debtToken,
-            account.borrowedYieldQuotientsFP[debtToken]
-        );
+        (uint256 borrowAmount, uint256 newYieldQuot) =
+            Lending(lending()).applyBorrowInterest(
+                account.borrowed[debtToken],
+                debtToken,
+                account.borrowedYieldQuotientsFP[debtToken]
+            );
 
-        account.borrowed[debtToken] =
-            account.borrowed[debtToken] -
-            extinguishAmount;
+        uint256 newBorrowAmount = borrowAmount - extinguishAmount;
+        account.borrowed[debtToken] = newBorrowAmount;
+
         account.holdings[debtToken] =
             account.holdings[debtToken] -
             extinguishAmount;
 
-        if (account.borrowed[debtToken] > 0) {
-            account.borrowedYieldQuotientsFP[debtToken] = Lending(lending())
-                .viewBorrowingYieldFP(debtToken);
+        if (newBorrowAmount > 0) {
+            account.borrowedYieldQuotientsFP[debtToken] = newYieldQuot;
         } else {
             delete account.borrowedYieldQuotientsFP[debtToken];
 
@@ -273,7 +277,8 @@ abstract contract CrossMarginAccounts is RoleAware, PriceAware {
         mapping(address => uint256) storage yieldQuotientsFP,
         bool forceCurBlock
     ) internal returns (uint256) {
-        uint256 yieldFP = Lending(lending()).viewBorrowingYieldFP(token);
+        uint256 yieldFP =
+            Lending(lending()).viewAccumulatedBorrowingYieldFP(token);
         // 1 * FP / FP = 1
         uint256 amountInToken = (amount * yieldFP) / yieldQuotientsFP[token];
         return
@@ -290,7 +295,8 @@ abstract contract CrossMarginAccounts is RoleAware, PriceAware {
         uint256 amount,
         mapping(address => uint256) storage yieldQuotientsFP
     ) internal view returns (uint256) {
-        uint256 yieldFP = Lending(lending()).viewBorrowingYieldFP(token);
+        uint256 yieldFP =
+            Lending(lending()).viewAccumulatedBorrowingYieldFP(token);
         // 1 * FP / FP = 1
         uint256 amountInToken = (amount * yieldFP) / yieldQuotientsFP[token];
         return PriceAware.viewCurrentPriceInPeg(token, amountInToken);

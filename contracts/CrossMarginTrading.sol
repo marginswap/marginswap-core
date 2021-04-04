@@ -269,7 +269,7 @@ contract CrossMarginTrading is CrossMarginLiquidation, IMarginTrading {
         borrowAmounts = new uint256[](account.borrowTokens.length);
         for (uint256 idx = 0; borrowTokens.length > idx; idx++) {
             address tokenAddress = borrowTokens[idx];
-            borrowAmounts[idx] = Lending(lending()).viewBorrowInterest(
+            borrowAmounts[idx] = Lending(lending()).viewWithBorrowInterest(
                 account.borrowed[tokenAddress],
                 tokenAddress,
                 account.borrowedYieldQuotientsFP[tokenAddress]

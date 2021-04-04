@@ -152,45 +152,67 @@ abstract contract HourlyBondSubscriptionLending is BaseLending {
         HourlyBondMetadata storage bondMeta
     ) internal returns (YieldAccumulator storage accumulator) {
         accumulator = bondMeta.yieldAccumulator;
-        uint256 timeDelta = (block.timestamp - accumulator.lastUpdated);
+        uint256 lastUpdated = accumulator.lastUpdated;
+        uint256 timeDelta = (block.timestamp - lastUpdated);
 
-        accumulator.accumulatorFP = calcCumulativeYieldFP(
-            accumulator,
-            timeDelta
-        );
-
-        LendingMetadata storage meta = lendingMeta[issuer];
         YieldAccumulator storage borrowAccumulator =
             borrowYieldAccumulators[issuer];
 
-        uint256 yieldGeneratedFP =
-            (borrowAccumulator.hourlyYieldFP * meta.totalBorrowed) /
-                (1 + meta.totalLending);
-        uint256 _maxHourlyYieldFP = min(maxHourlyYieldFP, yieldGeneratedFP);
+        if (timeDelta > (5 minutes)) {
+            accumulator.accumulatorFP = calcCumulativeYieldFP(
+                accumulator,
+                timeDelta
+            );
 
-        accumulator.hourlyYieldFP = updatedYieldFP(
-            accumulator.hourlyYieldFP,
-            accumulator.lastUpdated,
-            meta.totalLending,
-            lendingTarget(meta),
-            bondMeta.buyingSpeed,
-            bondMeta.withdrawingSpeed,
-            _maxHourlyYieldFP
-        );
+            LendingMetadata storage meta = lendingMeta[issuer];
 
-        timeDelta = block.timestamp - borrowAccumulator.lastUpdated;
-        borrowAccumulator.accumulatorFP = calcCumulativeYieldFP(
-            borrowAccumulator,
-            timeDelta
-        );
+            uint256 yieldGeneratedFP =
+                (borrowAccumulator.hourlyYieldFP * meta.totalBorrowed) /
+                    (1 + meta.totalLending);
+            uint256 _maxHourlyYieldFP = min(maxHourlyYieldFP, yieldGeneratedFP);
+
+            accumulator.hourlyYieldFP = updatedYieldFP(
+                accumulator.hourlyYieldFP,
+                lastUpdated,
+                meta.totalLending,
+                lendingTarget(meta),
+                bondMeta.buyingSpeed,
+                bondMeta.withdrawingSpeed,
+                _maxHourlyYieldFP
+            );
+            accumulator.lastUpdated = block.timestamp;
+        }
+
+        updateBorrowYieldAccu(borrowAccumulator);
 
         borrowAccumulator.hourlyYieldFP =
             1 +
             (borrowingFactorPercent * accumulator.hourlyYieldFP) /
             100;
+    }
 
-        accumulator.lastUpdated = block.timestamp;
-        borrowAccumulator.lastUpdated = block.timestamp;
+    function updateBorrowYieldAccu(YieldAccumulator storage borrowAccumulator)
+        internal
+    {
+        uint256 timeDelta = block.timestamp - borrowAccumulator.lastUpdated;
+
+        if (timeDelta > (5 minutes)) {
+            borrowAccumulator.accumulatorFP = calcCumulativeYieldFP(
+                borrowAccumulator,
+                timeDelta
+            );
+
+            borrowAccumulator.lastUpdated = block.timestamp;
+        }
+    }
+
+    function getUpdatedBorrowYieldAccuFP(address issuer)
+        external
+        returns (uint256)
+    {
+        YieldAccumulator storage yA = borrowYieldAccumulators[issuer];
+        updateBorrowYieldAccu(yA);
+        return yA.accumulatorFP;
     }
 
     function viewCumulativeYieldFP(
@@ -198,6 +220,10 @@ abstract contract HourlyBondSubscriptionLending is BaseLending {
         uint256 timestamp
     ) internal view returns (uint256) {
         uint256 timeDelta = (timestamp - yA.lastUpdated);
-        return calcCumulativeYieldFP(yA, timeDelta);
+        if (timeDelta > 5 minutes) {
+            return calcCumulativeYieldFP(yA, timeDelta);
+        } else {
+            return yA.accumulatorFP;
+        }
     }
 }

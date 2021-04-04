@@ -41,13 +41,12 @@ abstract contract IsolatedMarginAccounts is RoleAware {
     }
 
     function updateLoan(IsolatedMarginAccount storage account) internal {
-        account.borrowed = Lending(lending()).applyBorrowInterest(
+        (account.borrowed, account.borrowedYieldQuotientFP) = Lending(lending())
+            .applyBorrowInterest(
             account.borrowed,
             address(this),
             account.borrowedYieldQuotientFP
         );
-        account.borrowedYieldQuotientFP = Lending(lending())
-            .viewBorrowingYieldFP(address(this));
     }
 
     /// @dev checks whether account is in the black, deposit + earnings relative to borrowed
