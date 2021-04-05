@@ -1,24 +1,24 @@
-import { HardhatRuntimeEnvironment } from "hardhat/types";
-import { DeployFunction } from "hardhat-deploy/types";
+import { HardhatRuntimeEnvironment } from 'hardhat/types';
+import { DeployFunction } from 'hardhat-deploy/types';
 
 const deploy: DeployFunction = async function ({
-    getNamedAccounts,
-    deployments,
-    getChainId,
-    getUnnamedAccounts,
-    network,
+  getNamedAccounts,
+  deployments,
+  getChainId,
+  getUnnamedAccounts,
+  network
 }: HardhatRuntimeEnvironment) {
-    const { deploy } = deployments;
-    const { deployer, weth } = await getNamedAccounts();
-    const Roles = await deployments.get("Roles");
+  const { deploy } = deployments;
+  const { deployer, weth } = await getNamedAccounts();
+  const Roles = await deployments.get('Roles');
 
-    await deploy("MarginRouter", {
-        from: deployer,
-        args: [weth, Roles.address],
-        log: true,
-        skipIfAlreadyDeployed: true,
-    });
+  await deploy('MarginRouter', {
+    from: deployer,
+    args: [weth, Roles.address],
+    log: true,
+    skipIfAlreadyDeployed: true
+  });
 };
-deploy.tags = ["MarginRouter", "local"];
-deploy.dependencies = ["Roles"];
+deploy.tags = ['MarginRouter', 'local'];
+deploy.dependencies = ['Roles'];
 export default deploy;

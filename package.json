@@ -7,7 +7,9 @@
     "test": "test"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "lint": "eslint --ext .ts --fix deploy/ ; prettier --write contracts/**/*.sol",
+    "dev": "hardhat node"
   },
   "repository": {
     "type": "git",
@@ -27,11 +29,19 @@
     "@uniswap/v2-core": "^1.0.1"
   },
   "devDependencies": {
+    "@ethersproject/address": "^5.1.0",
+    "@ethersproject/solidity": "^5.1.0",
     "@nomiclabs/hardhat-waffle": "^2.0.1",
     "@types/chai": "^4.2.15",
     "@types/mocha": "^8.2.1",
     "@types/node": "^14.14.31",
+    "@typescript-eslint/eslint-plugin": "^4.20.0",
+    "@typescript-eslint/parser": "^4.20.0",
     "chai": "^4.3.0",
+    "eslint": "^7.23.0",
+    "eslint-config-prettier": "^8.1.0",
+    "eslint-plugin-import": "^2.22.1",
+    "eslint-plugin-prettier": "^3.3.1",
     "ethereum-waffle": "^3.2.2",
     "ethers": "^5.0.31",
     "hardhat": "^2.0.11",
@@ -39,7 +49,7 @@
     "hardhat-deploy": "^0.7.0-beta.47",
     "hardhat-deploy-ethers": "^0.3.0-beta.7",
     "prettier": "^2.2.1",
-    "prettier-plugin-solidity": "^1.0.0-beta.5",
+    "prettier-plugin-solidity": "^1.0.0-beta.7",
     "solc": "0.8.3",
     "ts-node": "^9.1.1",
     "typescript": "^4.2.2"

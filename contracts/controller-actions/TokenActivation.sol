@@ -12,15 +12,15 @@ contract TokenActivation is Executor {
     address[][] public liquidationPairs;
     address[][] public liquidationTokens;
 
-    constructor(address _roles,
-                address[] memory tokens2activate,
-                uint256[] memory _exposureCaps,
-                uint256[] memory _lendingBuffers,
-                uint256[] memory _incentiveWeights,
-                address[][] memory _liquidationPairs,
-                address[][] memory _liquidationTokens
-                ) RoleAware(_roles)
-    {
+    constructor(
+        address _roles,
+        address[] memory tokens2activate,
+        uint256[] memory _exposureCaps,
+        uint256[] memory _lendingBuffers,
+        uint256[] memory _incentiveWeights,
+        address[][] memory _liquidationPairs,
+        address[][] memory _liquidationTokens
+    ) RoleAware(_roles) {
         tokens = tokens2activate;
         exposureCaps = _exposureCaps;
         lendingBuffers = _lendingBuffers;
@@ -29,8 +29,11 @@ contract TokenActivation is Executor {
         liquidationTokens = _liquidationTokens;
     }
 
-    function requiredRoles() external override returns (uint256[] memory required) {
-    }
+    function requiredRoles()
+        external
+        override
+        returns (uint256[] memory required)
+    {}
 
     function execute() external override {
         for (uint24 i = 0; tokens.length > i; i++) {
@@ -41,13 +44,14 @@ contract TokenActivation is Executor {
             address[] memory liquidationPairPath = liquidationPairs[i];
             address[] memory liquidationTokenPath = liquidationTokens[i];
 
-            TokenAdmin(tokenAdmin())
-                .activateToken(token,
-                               exposureCap,
-                               lendingBuffer,
-                               incentiveWeight,
-                               liquidationPairPath,
-                               liquidationTokenPath);
+            TokenAdmin(tokenAdmin()).activateToken(
+                token,
+                exposureCap,
+                lendingBuffer,
+                incentiveWeight,
+                liquidationPairPath,
+                liquidationTokenPath
+            );
         }
 
         selfdestruct(payable(tx.origin));

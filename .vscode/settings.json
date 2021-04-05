@@ -1,6 +1,0 @@
-{
-    "solidity.enableLocalNodeCompiler": true,
-    "solidity.compilerOptimization": 20000,
-    "slither.solcPath": "",
-    "slither.hiddenDetectors": []
-}
