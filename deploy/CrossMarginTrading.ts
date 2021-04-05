@@ -2,8 +2,6 @@ import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { DeployFunction } from "hardhat-deploy/types";
 import { deployments } from "hardhat";
 
-const USDT_ADDRESS = "0xdac17f958d2ee523a2206206994597c13d831ec7";
-
 const deploy: DeployFunction = async function ({
   getNamedAccounts,
   deployments,

@@ -20,7 +20,6 @@ const GÖRLI = 5;
 const KOVAN = 42;
 
 // outside addresses
-const WETH = "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2";
 const MFI_ADDRESS = "0xAa4e3edb11AFa93c41db59842b29de64b72E355B";
 const LOCKED_MFI = "0x6c8fbBf8E079246A92E760D440793f2f864a26b3";
 const REAL_TREASURY = "0x16F3Fc1E4BA9d70f47387b902fa5d21020b5C6B5";
@@ -30,6 +29,7 @@ const USDC_ADDRESS = "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48";
 const LIQUIDITY_TOKEN = "0x9d640080af7c81911d87632a7d09cc4ab6b133ac";
 const ROPSTEN_LIQUI_TOKEN = "0xc4c79A0e1C7A9c79f1e943E3a5bEc65396a5434a";
 const MAIN_DEPLOYER = "0x23292e9BA8434e59E6BAC1907bA7425211c4DE27";
+const USDT_ADDRESS = "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2";
 
 
 // roles
@@ -161,23 +161,6 @@ export default {
     deployer: {
       default: 0,
     },
-    roles: {
-      1: "0xB867ABeF538349bC5156F524cC7743fE07942D3F",
-      3: "0x71328517862C481fA7E5Ed39Ffc53fc64c9778e5",
-      42: "0x541769D9578645b5477ace873b484FabcAD6D428",
-    },
-    fund: {
-      1: "0x2AF84B57B9c56D630DB60d4F564254975736C47e",
-      3: "0x690c6ff4C5DdBAeA4282b109dC145cbA19d13206",
-    },
-    incentiveDistribution: {
-      1: "0x20A4Fc1421D7dBe65036C26682A41434f471AeC5",
-      3: "0xEf13Ff3E1749606c11623C8b8064761ba70248e3",
-    },
-    liquidityMiningReward: {
-      1: "0xEfa8122994c742566DB4478d25aD1eC3DF07f477",
-      3: "0x2C71Dc2795224184bC80466b4E4A8bC29008eD7f",
-    },
     liquidityToken: {
       default: LIQUIDITY_TOKEN,
       3: ROPSTEN_LIQUI_TOKEN,
@@ -192,7 +175,12 @@ export default {
       default: MAIN_DEPLOYER
     },
     weth: {
-      default: WETH
+      31337: "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+      1: "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+      42: "0xd0a1e359811322d97991e03f863a0c30c2cf029c",
+    },
+    usdt: {
+      default: USDT_ADDRESS
     }
   },
 };

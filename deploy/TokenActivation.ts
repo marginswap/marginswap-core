@@ -17,11 +17,11 @@ const UNI_INIT_CODE_HASH = '0x96e8ac4277198ff8b6f785478aa9a39f403cb768dd02cbee32
 
 const tokensPerNetwork = {
   kovan: {
+//    USDT: USDT_ADDRESS,
     DAI: "0x4f96fe3b7a6cf9725f59d353f723c1bdb64ca6aa",
     WETH: "0xd0a1e359811322d97991e03f863a0c30c2cf029c",
-    UNI: "0x1f9840a85d5af5bf1d1762f925bdaddc4201f984",
-    MKR: "0xac94ea989f6955c67200dd67f0101e1865a560ea",
-    USDT: USDT_ADDRESS
+//    UNI: "0x1f9840a85d5af5bf1d1762f925bdaddc4201f984",
+//    MKR: "0xac94ea989f6955c67200dd67f0101e1865a560ea",
   },
   mainnet: {
     DAI: "0x6b175474e89094c44da98b954eedeac495271d0f",
@@ -110,7 +110,7 @@ const deploy: DeployFunction = async function ({
   ethers.utils.parseUnits("10000", 18);
 
   const networkName = network.live ? network.name : 'local';
-  const peg = network.live ? USDT_ADDRESS : (await deployments.get("Peg")).address;
+  const peg = (await deployments.get("Peg")).address;
 
   const tokens = network.live ? tokensPerNetwork[networkName] : {LOCALPEG: peg};
 
@@ -156,10 +156,11 @@ const deploy: DeployFunction = async function ({
     skipIfAlreadyDeployed: true,
   });
 
-  if (TokenActivation.newlyDeployed) {
-    console.log('Executing token activation');
+  // run if it hasn't self-destructed yet
+  if ((await ethers.provider.getCode(TokenActivation.address)) !== "0x") {
+    console.log(`Executing token activation ${TokenActivation.address} via dependency controller ${dc.address}`);
     const tx = await dc.executeAsOwner(TokenActivation.address);
-    console.log(`executing ${TokenActivation.address} as owner, by ${dc.address}, tx: ${tx.hash}`);  
+    console.log(`ran ${TokenActivation.address} as owner, tx: ${tx.hash}`);
   }
 };
 

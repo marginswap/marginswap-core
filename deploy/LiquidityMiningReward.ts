@@ -17,7 +17,7 @@ const deploy: DeployFunction = async function ({
     const incentiveDistribution = await deployments.get("IncentiveDistribution")
         .then(IncentiveDistribution => ethers.getContractAt("IncentiveDistribution", IncentiveDistribution.address));
 
-        const roles = await deployments.get("Roles")
+    const roles = await deployments.get("Roles")
         .then(Roles => ethers.getContractAt("Roles", Roles.address));
     const nowSeconds = Math.floor(new Date().getTime() / 1000);
 

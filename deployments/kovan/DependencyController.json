@@ -1,0 +1,505 @@
+{
+  "address": "0xD679BEdfAC96a10A2e3ADDC21f16D4D486821AB1",
+  "abi": [
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "_roles",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "constructor"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "name": "allCharacters",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "allManagedContracts",
+      "outputs": [
+        {
+          "internalType": "address[]",
+          "name": "",
+          "type": "address[]"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "name": "allRoles",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "currentExecutor",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "contr",
+          "type": "address"
+        }
+      ],
+      "name": "disableContract",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "executor",
+          "type": "address"
+        }
+      ],
+      "name": "executeAsOwner",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "role",
+          "type": "uint256"
+        },
+        {
+          "internalType": "address",
+          "name": "actor",
+          "type": "address"
+        }
+      ],
+      "name": "giveRole",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "name": "knownCharacters",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "name": "knownRoles",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "name": "mainCharacterCache",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "contr",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256[]",
+          "name": "charactersPlayed",
+          "type": "uint256[]"
+        },
+        {
+          "internalType": "uint256[]",
+          "name": "rolesPlayed",
+          "type": "uint256[]"
+        }
+      ],
+      "name": "manageContract",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "name": "managedContracts",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "role",
+          "type": "uint256"
+        },
+        {
+          "internalType": "address",
+          "name": "actor",
+          "type": "address"
+        }
+      ],
+      "name": "removeRole",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "name": "roleCache",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "roles",
+      "outputs": [
+        {
+          "internalType": "contract Roles",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "role",
+          "type": "uint256"
+        },
+        {
+          "internalType": "address",
+          "name": "actor",
+          "type": "address"
+        }
+      ],
+      "name": "setMainCharacter",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "contr",
+          "type": "address"
+        }
+      ],
+      "name": "updateCaches",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "character",
+          "type": "uint256"
+        }
+      ],
+      "name": "updateMainCharacterCache",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "role",
+          "type": "uint256"
+        },
+        {
+          "internalType": "address",
+          "name": "contr",
+          "type": "address"
+        }
+      ],
+      "name": "updateRoleCache",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    }
+  ],
+  "transactionHash": "0xab60611ae8d5d4feedf09ba2b8d74e73de4a91d24b19fcb74200e94f42570c3b",
+  "receipt": {
+    "to": null,
+    "from": "0x23292e9BA8434e59E6BAC1907bA7425211c4DE27",
+    "contractAddress": "0xD679BEdfAC96a10A2e3ADDC21f16D4D486821AB1",
+    "transactionIndex": 2,
+    "gasUsed": "1551081",
+    "logsBloom": "0x00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+    "blockHash": "0x24828e0459668e5dc202540a388ef4956fb97ccc64c6bb51223f587ffc82cc0e",
+    "transactionHash": "0xab60611ae8d5d4feedf09ba2b8d74e73de4a91d24b19fcb74200e94f42570c3b",
+    "logs": [],
+    "blockNumber": 24160624,
+    "cumulativeGasUsed": "2447972",
+    "status": 1,
+    "byzantium": true
+  },
+  "args": [
+    "0x1F849DeF2B06A012A992644e20105dfB9Da61069"
+  ],
+  "solcInputHash": "e66e7c1c76f215569f6f28bd742df1f4",
+  "metadata": "{\"compiler\":{\"version\":\"0.8.3+commit.8d00100c\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_roles\",\"type\":\"address\"}],\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"name\":\"allCharacters\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"allManagedContracts\",\"outputs\":[{\"internalType\":\"address[]\",\"name\":\"\",\"type\":\"address[]\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"name\":\"allRoles\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"currentExecutor\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"contr\",\"type\":\"address\"}],\"name\":\"disableContract\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"executor\",\"type\":\"address\"}],\"name\":\"executeAsOwner\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"role\",\"type\":\"uint256\"},{\"internalType\":\"address\",\"name\":\"actor\",\"type\":\"address\"}],\"name\":\"giveRole\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"name\":\"knownCharacters\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"name\":\"knownRoles\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"name\":\"mainCharacterCache\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"contr\",\"type\":\"address\"},{\"internalType\":\"uint256[]\",\"name\":\"charactersPlayed\",\"type\":\"uint256[]\"},{\"internalType\":\"uint256[]\",\"name\":\"rolesPlayed\",\"type\":\"uint256[]\"}],\"name\":\"manageContract\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"name\":\"managedContracts\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"role\",\"type\":\"uint256\"},{\"internalType\":\"address\",\"name\":\"actor\",\"type\":\"address\"}],\"name\":\"removeRole\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"name\":\"roleCache\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"roles\",\"outputs\":[{\"internalType\":\"contract Roles\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"role\",\"type\":\"uint256\"},{\"internalType\":\"address\",\"name\":\"actor\",\"type\":\"address\"}],\"name\":\"setMainCharacter\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"contr\",\"type\":\"address\"}],\"name\":\"updateCaches\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"character\",\"type\":\"uint256\"}],\"name\":\"updateMainCharacterCache\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"role\",\"type\":\"uint256\"},{\"internalType\":\"address\",\"name\":\"contr\",\"type\":\"address\"}],\"name\":\"updateRoleCache\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"}],\"devdoc\":{\"kind\":\"dev\",\"methods\":{},\"title\":\"Provides a single point of reference to verify integrity of the roles structure and facilitate governance actions within our system as well as performing cache invalidation for roles and inter-contract relationships\",\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{\"disableContract(address)\":{\"notice\":\"Remove roles and permissions for contract\"},\"giveRole(uint256,address)\":{\"notice\":\"Activate role\"},\"manageContract(address,uint256[],uint256[])\":{\"notice\":\"Orchestrate roles and permission for contract\"},\"removeRole(uint256,address)\":{\"notice\":\"Disable role\"}},\"version\":1}},\"settings\":{\"compilationTarget\":{\"contracts/DependencyController.sol\":\"DependencyController\"},\"evmVersion\":\"istanbul\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\",\"useLiteralContent\":true},\"optimizer\":{\"enabled\":true,\"runs\":9900},\"remappings\":[]},\"sources\":{\"@openzeppelin/contracts/access/Ownable.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\n\\npragma solidity ^0.8.0;\\n\\nimport \\\"../utils/Context.sol\\\";\\n/**\\n * @dev Contract module which provides a basic access control mechanism, where\\n * there is an account (an owner) that can be granted exclusive access to\\n * specific functions.\\n *\\n * By default, the owner account will be the one that deploys the contract. This\\n * can later be changed with {transferOwnership}.\\n *\\n * This module is used through inheritance. It will make available the modifier\\n * `onlyOwner`, which can be applied to your functions to restrict their use to\\n * the owner.\\n */\\nabstract contract Ownable is Context {\\n    address private _owner;\\n\\n    event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);\\n\\n    /**\\n     * @dev Initializes the contract setting the deployer as the initial owner.\\n     */\\n    constructor () {\\n        address msgSender = _msgSender();\\n        _owner = msgSender;\\n        emit OwnershipTransferred(address(0), msgSender);\\n    }\\n\\n    /**\\n     * @dev Returns the address of the current owner.\\n     */\\n    function owner() public view virtual returns (address) {\\n        return _owner;\\n    }\\n\\n    /**\\n     * @dev Throws if called by any account other than the owner.\\n     */\\n    modifier onlyOwner() {\\n        require(owner() == _msgSender(), \\\"Ownable: caller is not the owner\\\");\\n        _;\\n    }\\n\\n    /**\\n     * @dev Leaves the contract without owner. It will not be possible to call\\n     * `onlyOwner` functions anymore. Can only be called by the current owner.\\n     *\\n     * NOTE: Renouncing ownership will leave the contract without an owner,\\n     * thereby removing any functionality that is only available to the owner.\\n     */\\n    function renounceOwnership() public virtual onlyOwner {\\n        emit OwnershipTransferred(_owner, address(0));\\n        _owner = address(0);\\n    }\\n\\n    /**\\n     * @dev Transfers ownership of the contract to a new account (`newOwner`).\\n     * Can only be called by the current owner.\\n     */\\n    function transferOwnership(address newOwner) public virtual onlyOwner {\\n        require(newOwner != address(0), \\\"Ownable: new owner is the zero address\\\");\\n        emit OwnershipTransferred(_owner, newOwner);\\n        _owner = newOwner;\\n    }\\n}\\n\",\"keccak256\":\"0x1cae4f85f114ff17b90414f5da67365b1d00337abb5bce9bf944eb78a2c0673c\",\"license\":\"MIT\"},\"@openzeppelin/contracts/utils/Context.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\n\\npragma solidity ^0.8.0;\\n\\n/*\\n * @dev Provides information about the current execution context, including the\\n * sender of the transaction and its data. While these are generally available\\n * via msg.sender and msg.data, they should not be accessed in such a direct\\n * manner, since when dealing with meta-transactions the account sending and\\n * paying for execution may not be the actual sender (as far as an application\\n * is concerned).\\n *\\n * This contract is only required for intermediate, library-like contracts.\\n */\\nabstract contract Context {\\n    function _msgSender() internal view virtual returns (address) {\\n        return msg.sender;\\n    }\\n\\n    function _msgData() internal view virtual returns (bytes calldata) {\\n        this; // silence state mutability warning without generating bytecode - see https://github.com/ethereum/solidity/issues/2691\\n        return msg.data;\\n    }\\n}\\n\",\"keccak256\":\"0xf930d2df426bfcfc1f7415be724f04081c96f4fb9ec8d0e3a521c07692dface0\",\"license\":\"MIT\"},\"contracts/DependencyController.sol\":{\"content\":\"// SPDX-License-Identifier: BUSL-1.1\\npragma solidity ^0.8.0;\\n\\nimport \\\"./RoleAware.sol\\\";\\nimport \\\"./Executor.sol\\\";\\nimport \\\"../interfaces/IDependencyController.sol\\\";\\n\\n/// @title Provides a single point of reference to verify integrity\\n/// of the roles structure and facilitate governance actions\\n/// within our system as well as performing cache invalidation for\\n/// roles and inter-contract relationships\\ncontract DependencyController is RoleAware, IDependencyController {\\n    constructor(address _roles) RoleAware(_roles) {}\\n\\n    address public override currentExecutor;\\n\\n    address[] public managedContracts;\\n    mapping(uint256 => bool) public knownCharacters;\\n    mapping(uint256 => bool) public knownRoles;\\n\\n    uint256[] public allCharacters;\\n    uint256[] public allRoles;\\n\\n    function executeAsOwner(address executor) external onlyOwnerExec {\\n        uint256[] memory requiredRoles = Executor(executor).requiredRoles();\\n\\n        for (uint256 i = 0; requiredRoles.length > i; i++) {\\n            _giveRole(requiredRoles[i], executor);\\n        }\\n\\n        updateCaches(executor);\\n        currentExecutor = executor;\\n        Executor(executor).execute();\\n        currentExecutor = address(0);\\n\\n        uint256 len = requiredRoles.length;\\n        for (uint256 i = 0; len > i; i++) {\\n            _removeRole(requiredRoles[i], executor);\\n        }\\n    }\\n\\n    /// Orchestrate roles and permission for contract\\n    function manageContract(\\n        address contr,\\n        uint256[] memory charactersPlayed,\\n        uint256[] memory rolesPlayed\\n    ) external onlyOwnerExec {\\n        managedContracts.push(contr);\\n\\n        // set up all characters this contract plays\\n        uint256 len = charactersPlayed.length;\\n        for (uint256 i = 0; len > i; i++) {\\n            uint256 character = charactersPlayed[i];\\n            _setMainCharacter(character, contr);\\n        }\\n\\n        // all roles this contract plays\\n        len = rolesPlayed.length;\\n        for (uint256 i = 0; len > i; i++) {\\n            uint256 role = rolesPlayed[i];\\n            _giveRole(role, contr);\\n        }\\n\\n        updateCaches(contr);\\n    }\\n\\n    ///  Remove roles and permissions for contract\\n    function disableContract(address contr) external onlyOwnerExecDisabler {\\n        _disableContract(contr);\\n    }\\n\\n    function _disableContract(address contr) internal {\\n        uint256 len = allRoles.length;\\n        for (uint256 i = 0; len > i; i++) {\\n            if (roles.getRole(allRoles[i], contr)) {\\n                _removeRole(allRoles[i], contr);\\n            }\\n        }\\n\\n        len = allCharacters.length;\\n        for (uint256 i = 0; len > i; i++) {\\n            if (roles.mainCharacters(allCharacters[i]) == contr) {\\n                _setMainCharacter(allCharacters[i], address(0));\\n            }\\n        }\\n    }\\n\\n    /// Activate role\\n    function giveRole(uint256 role, address actor) external onlyOwnerExec {\\n        _giveRole(role, actor);\\n    }\\n\\n    /// Disable role\\n    function removeRole(uint256 role, address actor)\\n        external\\n        onlyOwnerExecDisabler\\n    {\\n        _removeRole(role, actor);\\n    }\\n\\n    function _removeRole(uint256 role, address actor) internal {\\n        roles.removeRole(role, actor);\\n        updateRoleCache(role, actor);\\n    }\\n\\n    function setMainCharacter(uint256 role, address actor)\\n        external\\n        onlyOwnerExec\\n    {\\n        _setMainCharacter(role, actor);\\n    }\\n\\n    function _giveRole(uint256 role, address actor) internal {\\n        if (!knownRoles[role]) {\\n            knownRoles[role] = true;\\n            allRoles.push(role);\\n        }\\n        roles.giveRole(role, actor);\\n        updateRoleCache(role, actor);\\n    }\\n\\n    function _setMainCharacter(uint256 character, address actor) internal {\\n        if (!knownCharacters[character]) {\\n            knownCharacters[character] = true;\\n            allCharacters.push(character);\\n        }\\n        roles.setMainCharacter(character, actor);\\n        updateMainCharacterCache(character);\\n    }\\n\\n    function updateMainCharacterCache(uint256 character) public override {\\n        uint256 len = managedContracts.length;\\n        for (uint256 i = 0; len > i; i++) {\\n            RoleAware(managedContracts[i]).updateMainCharacterCache(character);\\n        }\\n    }\\n\\n    function updateRoleCache(uint256 role, address contr) public override {\\n        uint256 len = managedContracts.length;\\n        for (uint256 i = 0; len > i; i++) {\\n            RoleAware(managedContracts[i]).updateRoleCache(role, contr);\\n        }\\n    }\\n\\n    function updateCaches(address contr) public {\\n        // update this contract with all characters we know about\\n        uint256 len = allCharacters.length;\\n        for (uint256 i = 0; len > i; i++) {\\n            RoleAware(contr).updateMainCharacterCache(allCharacters[i]);\\n        }\\n\\n        // update this contract with all roles for all contracts we know about\\n        len = allRoles.length;\\n        for (uint256 i = 0; len > i; i++) {\\n            for (uint256 j = 0; managedContracts.length > j; j++) {\\n                RoleAware(contr).updateRoleCache(\\n                    allRoles[i],\\n                    managedContracts[j]\\n                );\\n            }\\n        }\\n    }\\n\\n    function allManagedContracts() external view returns (address[] memory) {\\n        return managedContracts;\\n    }\\n}\\n\",\"keccak256\":\"0xb3dd9028630633bbacc2b62b6c2382fadd6279b173a0ca36c513d3780d8504ed\",\"license\":\"BUSL-1.1\"},\"contracts/Executor.sol\":{\"content\":\"// SPDX-License-Identifier: BUSL-1.1\\npragma solidity ^0.8.0;\\n\\nimport \\\"./RoleAware.sol\\\";\\n\\nabstract contract Executor is RoleAware {\\n    function requiredRoles() external virtual returns (uint256[] memory);\\n\\n    function execute() external virtual;\\n}\\n\",\"keccak256\":\"0x25e6e6c3525b68f429f5ff479fbf2a0f14920e0b96898de9860965e8ba2411b9\",\"license\":\"BUSL-1.1\"},\"contracts/RoleAware.sol\":{\"content\":\"// SPDX-License-Identifier: BUSL-1.1\\npragma solidity ^0.8.0;\\n\\nimport \\\"./Roles.sol\\\";\\n\\n/// @title Role management behavior\\n/// Main characters are for service discovery\\n/// Whereas roles are for access control\\ncontract RoleAware {\\n    Roles public immutable roles;\\n    mapping(uint256 => address) public mainCharacterCache;\\n    mapping(address => mapping(uint256 => bool)) public roleCache;\\n\\n    constructor(address _roles) {\\n        require(_roles != address(0), \\\"Please provide valid roles address\\\");\\n        roles = Roles(_roles);\\n    }\\n\\n    modifier noIntermediary() {\\n        require(\\n            msg.sender == tx.origin,\\n            \\\"Currently no intermediaries allowed for this function call\\\"\\n        );\\n        _;\\n    }\\n\\n    // @dev Throws if called by any account other than the owner or executor\\n    modifier onlyOwnerExec() {\\n        require(\\n            owner() == msg.sender || executor() == msg.sender,\\n            \\\"Roles: caller is not the owner\\\"\\n        );\\n        _;\\n    }\\n\\n    modifier onlyOwnerExecDisabler() {\\n        require(\\n            owner() == msg.sender ||\\n                executor() == msg.sender ||\\n                disabler() == msg.sender,\\n            \\\"Caller is not the owner, executor or authorized disabler\\\"\\n        );\\n        _;\\n    }\\n\\n    modifier onlyOwnerExecActivator() {\\n        require(\\n            owner() == msg.sender ||\\n                executor() == msg.sender ||\\n                isTokenActivator(msg.sender),\\n            \\\"Caller is not the owner, executor or authorized activator\\\"\\n        );\\n        _;\\n    }\\n\\n    function updateRoleCache(uint256 role, address contr) public virtual {\\n        roleCache[contr][role] = roles.getRole(role, contr);\\n    }\\n\\n    function updateMainCharacterCache(uint256 role) public virtual {\\n        mainCharacterCache[role] = roles.mainCharacters(role);\\n    }\\n\\n    function owner() internal view returns (address) {\\n        return roles.owner();\\n    }\\n\\n    function executor() internal returns (address) {\\n        return roles.executor();\\n    }\\n\\n    function disabler() internal view returns (address) {\\n        return mainCharacterCache[DISABLER];\\n    }\\n\\n    function fund() internal view returns (address) {\\n        return mainCharacterCache[FUND];\\n    }\\n\\n    function lending() internal view returns (address) {\\n        return mainCharacterCache[LENDING];\\n    }\\n\\n    function marginRouter() internal view returns (address) {\\n        return mainCharacterCache[MARGIN_ROUTER];\\n    }\\n\\n    function crossMarginTrading() internal view returns (address) {\\n        return mainCharacterCache[CROSS_MARGIN_TRADING];\\n    }\\n\\n    function feeController() internal view returns (address) {\\n        return mainCharacterCache[FEE_CONTROLLER];\\n    }\\n\\n    function price() internal view returns (address) {\\n        return mainCharacterCache[PRICE_CONTROLLER];\\n    }\\n\\n    function admin() internal view returns (address) {\\n        return mainCharacterCache[ADMIN];\\n    }\\n\\n    function incentiveDistributor() internal view returns (address) {\\n        return mainCharacterCache[INCENTIVE_DISTRIBUTION];\\n    }\\n\\n    function tokenAdmin() internal view returns (address) {\\n        return mainCharacterCache[TOKEN_ADMIN];\\n    }\\n\\n    function isBorrower(address contr) internal view returns (bool) {\\n        return roleCache[contr][BORROWER];\\n    }\\n\\n    function isFundTransferer(address contr) internal view returns (bool) {\\n        return roleCache[contr][FUND_TRANSFERER];\\n    }\\n\\n    function isMarginTrader(address contr) internal view returns (bool) {\\n        return roleCache[contr][MARGIN_TRADER];\\n    }\\n\\n    function isFeeSource(address contr) internal view returns (bool) {\\n        return roleCache[contr][FEE_SOURCE];\\n    }\\n\\n    function isMarginCaller(address contr) internal view returns (bool) {\\n        return roleCache[contr][MARGIN_CALLER];\\n    }\\n\\n    function isLiquidator(address contr) internal view returns (bool) {\\n        return roleCache[contr][LIQUIDATOR];\\n    }\\n\\n    function isAuthorizedFundTrader(address contr)\\n        internal\\n        view\\n        returns (bool)\\n    {\\n        return roleCache[contr][AUTHORIZED_FUND_TRADER];\\n    }\\n\\n    function isIncentiveReporter(address contr) internal view returns (bool) {\\n        return roleCache[contr][INCENTIVE_REPORTER];\\n    }\\n\\n    function isTokenActivator(address contr) internal view returns (bool) {\\n        return roleCache[contr][TOKEN_ACTIVATOR];\\n    }\\n\\n    function isStakePenalizer(address contr) internal view returns (bool) {\\n        return roles.getRole(STAKE_PENALIZER, contr);\\n    }\\n}\\n\",\"keccak256\":\"0xc3fbdad2d0bc97eeb80bea6a4f40cf6059e1cca3de08db5f6522bbdbfda02206\",\"license\":\"BUSL-1.1\"},\"contracts/Roles.sol\":{\"content\":\"// SPDX-License-Identifier: BUSL-1.1\\npragma solidity ^0.8.0;\\n\\nimport \\\"@openzeppelin/contracts/access/Ownable.sol\\\";\\nimport \\\"../interfaces/IDependencyController.sol\\\";\\n\\n// we chose not to go with an enum\\n// to make this list easy to extend\\nuint256 constant FUND_TRANSFERER = 1;\\nuint256 constant MARGIN_CALLER = 2;\\nuint256 constant BORROWER = 3;\\nuint256 constant MARGIN_TRADER = 4;\\nuint256 constant FEE_SOURCE = 5;\\nuint256 constant LIQUIDATOR = 6;\\nuint256 constant AUTHORIZED_FUND_TRADER = 7;\\nuint256 constant INCENTIVE_REPORTER = 8;\\nuint256 constant TOKEN_ACTIVATOR = 9;\\nuint256 constant STAKE_PENALIZER = 10;\\n\\nuint256 constant FUND = 101;\\nuint256 constant LENDING = 102;\\nuint256 constant MARGIN_ROUTER = 103;\\nuint256 constant CROSS_MARGIN_TRADING = 104;\\nuint256 constant FEE_CONTROLLER = 105;\\nuint256 constant PRICE_CONTROLLER = 106;\\nuint256 constant ADMIN = 107;\\nuint256 constant INCENTIVE_DISTRIBUTION = 108;\\nuint256 constant TOKEN_ADMIN = 109;\\n\\nuint256 constant DISABLER = 1001;\\nuint256 constant DEPENDENCY_CONTROLLER = 1002;\\n\\n/// @title Manage permissions of contracts and ownership of everything\\n/// owned by a multisig wallet (0xEED9D1c6B4cdEcB3af070D85bfd394E7aF179CBd) during\\n/// beta and will then be transfered to governance\\n/// https://github.com/marginswap/governance\\ncontract Roles is Ownable {\\n    mapping(address => mapping(uint256 => bool)) public roles;\\n    mapping(uint256 => address) public mainCharacters;\\n\\n    constructor() Ownable() {\\n        // token activation from the get-go\\n        roles[msg.sender][TOKEN_ACTIVATOR] = true;\\n    }\\n\\n    /// @dev Throws if called by any account other than the owner.\\n    modifier onlyOwnerExecDepController() {\\n        require(\\n            owner() == msg.sender ||\\n                executor() == msg.sender ||\\n                mainCharacters[DEPENDENCY_CONTROLLER] == msg.sender,\\n            \\\"Roles: caller is not the owner\\\"\\n        );\\n        _;\\n    }\\n\\n    function giveRole(uint256 role, address actor)\\n        external\\n        onlyOwnerExecDepController\\n    {\\n        roles[actor][role] = true;\\n    }\\n\\n    function removeRole(uint256 role, address actor)\\n        external\\n        onlyOwnerExecDepController\\n    {\\n        roles[actor][role] = false;\\n    }\\n\\n    function setMainCharacter(uint256 role, address actor)\\n        external\\n        onlyOwnerExecDepController\\n    {\\n        mainCharacters[role] = actor;\\n    }\\n\\n    function getRole(uint256 role, address contr) external view returns (bool) {\\n        return roles[contr][role];\\n    }\\n\\n    /// @dev current executor\\n    function executor() public returns (address exec) {\\n        address depController = mainCharacters[DEPENDENCY_CONTROLLER];\\n        if (depController != address(0)) {\\n            exec = IDependencyController(depController).currentExecutor();\\n        }\\n    }\\n}\\n\",\"keccak256\":\"0x9e79bffa78d2e02375f4ea3aae3d58388299fda9b0223555730302e1656090fd\",\"license\":\"BUSL-1.1\"},\"interfaces/IDependencyController.sol\":{\"content\":\"// SPDX-License-Identifier: BUSL-1.1\\npragma solidity ^0.8.0;\\n\\ninterface IDependencyController {\\n    function currentExecutor() external returns (address);\\n}\\n\",\"keccak256\":\"0xc65a455a81ab4bc8e0737d03691c159f28bfd6885ef8b99ddd8dec558ccfeb32\",\"license\":\"BUSL-1.1\"}},\"version\":1}",
+  "bytecode": "0x60a060405234801561001057600080fd5b50604051611c50380380611c5083398101604081905261002f916100ab565b806001600160a01b0381166100955760405162461bcd60e51b815260206004820152602260248201527f506c656173652070726f766964652076616c696420726f6c6573206164647265604482015261737360f01b606482015260840160405180910390fd5b60601b6001600160601b031916608052506100d9565b6000602082840312156100bc578081fd5b81516001600160a01b03811681146100d2578182fd5b9392505050565b60805160601c611b2861012860003960008181610208015281816110b0015281816111550152818161129d015281816113500152818161144d015281816114c2015261162a0152611b286000f3fe608060405234801561001057600080fd5b50600436106101515760003560e01c80635d4ef0b8116100cd578063a154ce8211610081578063e9c3f77d11610066578063e9c3f77d14610322578063f19990d714610358578063f1ce598e1461037b57610151565b8063a154ce82146102fc578063a1fdc4581461030f57610151565b8063713dade2116100b2578063713dade2146102a85780637a1a04df146102bb578063840c53bd146102e957610151565b80635d4ef0b8146102755780636b60a09b1461028857610151565b80632be5c6c011610124578063392f5f6411610109578063392f5f6414610203578063447d52ba1461024f5780634d5377691461026257610151565b80632be5c6c0146101bd5780633238405b146101f057610151565b8063071060a6146101565780631023d3e01461016b57806317b7b61b1461018957806325398f83146101aa575b600080fd5b610169610164366004611961565b61038e565b005b610173610462565b60405161018091906119a8565b60405180910390f35b61019c610197366004611961565b6104d1565b604051908152602001610180565b6101696101b8366004611979565b6104f2565b6101e06101cb366004611961565b60056020526000908152604090205460ff1681565b6040519015158152602001610180565b6101696101fe366004611979565b6105b2565b61022a7f000000000000000000000000000000000000000000000000000000000000000081565b60405173ffffffffffffffffffffffffffffffffffffffff9091168152602001610180565b61016961025d366004611979565b6106f7565b610169610270366004611979565b6107d4565b610169610283366004611810565b61088b565b60025461022a9073ffffffffffffffffffffffffffffffffffffffff1681565b6101696102b63660046117d1565b610a5a565b6101e06102c9366004611883565b600160209081526000928352604080842090915290825290205460ff1681565b61019c6102f7366004611961565b610c4f565b61016961030a3660046117d1565b610c5f565b61016961031d3660046117d1565b610da6565b61022a610330366004611961565b60006020819052908152604090205473ffffffffffffffffffffffffffffffffffffffff1681565b6101e0610366366004611961565b60046020526000908152604090205460ff1681565b61022a610389366004611961565b611075565b60035460005b8082111561045d57600381815481106103bd57634e487b7160e01b600052603260045260246000fd5b6000918252602090912001546040517f071060a60000000000000000000000000000000000000000000000000000000081526004810185905273ffffffffffffffffffffffffffffffffffffffff9091169063071060a690602401600060405180830381600087803b15801561043257600080fd5b505af1158015610446573d6000803e3d6000fd5b50505050808061045590611a75565b915050610394565b505050565b606060038054806020026020016040519081016040528092919081815260200182805480156104c757602002820191906000526020600020905b815473ffffffffffffffffffffffffffffffffffffffff16815260019091019060200180831161049c575b5050505050905090565b600681815481106104e157600080fd5b600091825260209091200154905081565b336104fb6110ac565b73ffffffffffffffffffffffffffffffffffffffff161480610539575033610521611151565b73ffffffffffffffffffffffffffffffffffffffff16145b6105a4576040517f08c379a000000000000000000000000000000000000000000000000000000000815260206004820152601e60248201527f526f6c65733a2063616c6c6572206973206e6f7420746865206f776e6572000060448201526064015b60405180910390fd5b6105ae82826111cf565b5050565b336105bb6110ac565b73ffffffffffffffffffffffffffffffffffffffff1614806105f95750336105e1611151565b73ffffffffffffffffffffffffffffffffffffffff16145b806106615750336106496103e960009081526020527f236f539bf6e1b3b15a335e3cd157d360bc4be88c071635c19ba8a82b4f665e9f5473ffffffffffffffffffffffffffffffffffffffff1690565b73ffffffffffffffffffffffffffffffffffffffff16145b6106ed576040517f08c379a000000000000000000000000000000000000000000000000000000000815260206004820152603860248201527f43616c6c6572206973206e6f7420746865206f776e65722c206578656375746f60448201527f72206f7220617574686f72697a65642064697361626c65720000000000000000606482015260840161059b565b6105ae8282611304565b60035460005b808211156107ce576003818154811061072657634e487b7160e01b600052603260045260246000fd5b6000918252602090912001546040517f447d52ba0000000000000000000000000000000000000000000000000000000081526004810186905273ffffffffffffffffffffffffffffffffffffffff85811660248301529091169063447d52ba90604401600060405180830381600087803b1580156107a357600080fd5b505af11580156107b7573d6000803e3d6000fd5b5050505080806107c690611a75565b9150506106fd565b50505050565b336107dd6110ac565b73ffffffffffffffffffffffffffffffffffffffff16148061081b575033610803611151565b73ffffffffffffffffffffffffffffffffffffffff16145b610881576040517f08c379a000000000000000000000000000000000000000000000000000000000815260206004820152601e60248201527f526f6c65733a2063616c6c6572206973206e6f7420746865206f776e65720000604482015260640161059b565b6105ae828261137f565b336108946110ac565b73ffffffffffffffffffffffffffffffffffffffff1614806108d25750336108ba611151565b73ffffffffffffffffffffffffffffffffffffffff16145b610938576040517f08c379a000000000000000000000000000000000000000000000000000000000815260206004820152601e60248201527f526f6c65733a2063616c6c6572206973206e6f7420746865206f776e65720000604482015260640161059b565b6003805460018101825560009182527fc2575a0e9e593c00f959f8c92f12db2869c3395a3b0502d05e2516446f71f85b0180547fffffffffffffffffffffffff00000000000000000000000000000000000000001673ffffffffffffffffffffffffffffffffffffffff86161790558251905b808211156109fc5760008482815181106109d557634e487b7160e01b600052603260045260246000fd5b602002602001015190506109e9818761137f565b50806109f481611a75565b9150506109ab565b5050805160005b80821115610a54576000838281518110610a2d57634e487b7160e01b600052603260045260246000fd5b60200260200101519050610a4181876111cf565b5080610a4c81611a75565b915050610a03565b506107ce845b60065460005b80821115610b13578273ffffffffffffffffffffffffffffffffffffffff1663071060a660068381548110610aa557634e487b7160e01b600052603260045260246000fd5b90600052602060002001546040518263ffffffff1660e01b8152600401610ace91815260200190565b600060405180830381600087803b158015610ae857600080fd5b505af1158015610afc573d6000803e3d6000fd5b505050508080610b0b90611a75565b915050610a60565b505060075460005b8082111561045d5760005b600354811015610c3c578373ffffffffffffffffffffffffffffffffffffffff1663447d52ba60078481548110610b6d57634e487b7160e01b600052603260045260246000fd5b906000526020600020015460038481548110610b9957634e487b7160e01b600052603260045260246000fd5b60009182526020909120015460405160e084901b7fffffffff00000000000000000000000000000000000000000000000000000000168152600481019290925273ffffffffffffffffffffffffffffffffffffffff166024820152604401600060405180830381600087803b158015610c1157600080fd5b505af1158015610c25573d6000803e3d6000fd5b505050508080610c3490611a75565b915050610b26565b5080610c4781611a75565b915050610b1b565b600781815481106104e157600080fd5b33610c686110ac565b73ffffffffffffffffffffffffffffffffffffffff161480610ca6575033610c8e611151565b73ffffffffffffffffffffffffffffffffffffffff16145b80610d0e575033610cf66103e960009081526020527f236f539bf6e1b3b15a335e3cd157d360bc4be88c071635c19ba8a82b4f665e9f5473ffffffffffffffffffffffffffffffffffffffff1690565b73ffffffffffffffffffffffffffffffffffffffff16145b610d9a576040517f08c379a000000000000000000000000000000000000000000000000000000000815260206004820152603860248201527f43616c6c6572206973206e6f7420746865206f776e65722c206578656375746f60448201527f72206f7220617574686f72697a65642064697361626c65720000000000000000606482015260840161059b565b610da3816114b2565b50565b33610daf6110ac565b73ffffffffffffffffffffffffffffffffffffffff161480610ded575033610dd5611151565b73ffffffffffffffffffffffffffffffffffffffff16145b610e53576040517f08c379a000000000000000000000000000000000000000000000000000000000815260206004820152601e60248201527f526f6c65733a2063616c6c6572206973206e6f7420746865206f776e65720000604482015260640161059b565b60008173ffffffffffffffffffffffffffffffffffffffff1663cd28fc8f6040518163ffffffff1660e01b8152600401600060405180830381600087803b158015610e9d57600080fd5b505af1158015610eb1573d6000803e3d6000fd5b505050506040513d6000823e601f3d9081017fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe0168201604052610ef791908101906118ae565b905060005b8082511115610f4857610f36828281518110610f2857634e487b7160e01b600052603260045260246000fd5b6020026020010151846111cf565b80610f4081611a75565b915050610efc565b50610f5282610a5a565b600280547fffffffffffffffffffffffff00000000000000000000000000000000000000001673ffffffffffffffffffffffffffffffffffffffff8416908117909155604080517f61461954000000000000000000000000000000000000000000000000000000008152905163614619549160048082019260009290919082900301818387803b158015610fe557600080fd5b505af1158015610ff9573d6000803e3d6000fd5b5050600280547fffffffffffffffffffffffff00000000000000000000000000000000000000001690555050805160005b808211156107ce5761106383828151811061105557634e487b7160e01b600052603260045260246000fd5b602002602001015185611304565b8061106d81611a75565b91505061102a565b6003818154811061108557600080fd5b60009182526020909120015473ffffffffffffffffffffffffffffffffffffffff16905081565b60007f000000000000000000000000000000000000000000000000000000000000000073ffffffffffffffffffffffffffffffffffffffff16638da5cb5b6040518163ffffffff1660e01b815260040160206040518083038186803b15801561111457600080fd5b505afa158015611128573d6000803e3d6000fd5b505050506040513d601f19601f8201168201806040525081019061114c91906117f4565b905090565b60007f000000000000000000000000000000000000000000000000000000000000000073ffffffffffffffffffffffffffffffffffffffff1663c34c08e56040518163ffffffff1660e01b8152600401602060405180830381600087803b1580156111bb57600080fd5b505af1158015611128573d6000803e3d6000fd5b60008281526005602052604090205460ff1661125157600082815260056020526040812080547fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff001660019081179091556007805491820181559091527fa66cc928b5edb82af9bd49922954155ab7b0942694bea4ce44661d9a8736c688018290555b6040517f25398f830000000000000000000000000000000000000000000000000000000081526004810183905273ffffffffffffffffffffffffffffffffffffffff82811660248301527f000000000000000000000000000000000000000000000000000000000000000016906325398f83906044015b600060405180830381600087803b1580156112e257600080fd5b505af11580156112f6573d6000803e3d6000fd5b505050506105ae82826106f7565b6040517f3238405b0000000000000000000000000000000000000000000000000000000081526004810183905273ffffffffffffffffffffffffffffffffffffffff82811660248301527f00000000000000000000000000000000000000000000000000000000000000001690633238405b906044016112c8565b60008281526004602052604090205460ff1661140157600082815260046020526040812080547fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff001660019081179091556006805491820181559091527ff652222313e28459528d920b65115c16c04f3efc82aaedc97be59f3f377c0d3f018290555b6040517f4d5377690000000000000000000000000000000000000000000000000000000081526004810183905273ffffffffffffffffffffffffffffffffffffffff82811660248301527f00000000000000000000000000000000000000000000000000000000000000001690634d53776990604401600060405180830381600087803b15801561149157600080fd5b505af11580156114a5573d6000803e3d6000fd5b505050506105ae8261038e565b60075460005b80821115611601577f000000000000000000000000000000000000000000000000000000000000000073ffffffffffffffffffffffffffffffffffffffff166393552a3d6007838154811061151d57634e487b7160e01b600052603260045260246000fd5b9060005260206000200154856040518363ffffffff1660e01b815260040161156592919091825273ffffffffffffffffffffffffffffffffffffffff16602082015260400190565b60206040518083038186803b15801561157d57600080fd5b505afa158015611591573d6000803e3d6000fd5b505050506040513d601f19601f820116820180604052508101906115b59190611941565b156115ef576115ef600782815481106115de57634e487b7160e01b600052603260045260246000fd5b906000526020600020015484611304565b806115f981611a75565b9150506114b8565b505060065460005b8082111561045d578273ffffffffffffffffffffffffffffffffffffffff167f000000000000000000000000000000000000000000000000000000000000000073ffffffffffffffffffffffffffffffffffffffff1663b4ed0b6d6006848154811061168557634e487b7160e01b600052603260045260246000fd5b90600052602060002001546040518263ffffffff1660e01b81526004016116ae91815260200190565b60206040518083038186803b1580156116c657600080fd5b505afa1580156116da573d6000803e3d6000fd5b505050506040513d601f19601f820116820180604052508101906116fe91906117f4565b73ffffffffffffffffffffffffffffffffffffffff161415611750576117506006828154811061173e57634e487b7160e01b600052603260045260246000fd5b9060005260206000200154600061137f565b8061175a81611a75565b915050611609565b600082601f830112611772578081fd5b8135602061178761178283611a51565b611a02565b80838252828201915082860187848660051b89010111156117a6578586fd5b855b858110156117c4578135845292840192908401906001016117a8565b5090979650505050505050565b6000602082840312156117e2578081fd5b81356117ed81611ad0565b9392505050565b600060208284031215611805578081fd5b81516117ed81611ad0565b600080600060608486031215611824578182fd5b833561182f81611ad0565b9250602084013567ffffffffffffffff8082111561184b578384fd5b61185787838801611762565b9350604086013591508082111561186c578283fd5b5061187986828701611762565b9150509250925092565b60008060408385031215611895578182fd5b82356118a081611ad0565b946020939093013593505050565b600060208083850312156118c0578182fd5b825167ffffffffffffffff8111156118d6578283fd5b8301601f810185136118e6578283fd5b80516118f461178282611a51565b80828252848201915084840188868560051b8701011115611913578687fd5b8694505b83851015611935578051835260019490940193918501918501611917565b50979650505050505050565b600060208284031215611952578081fd5b815180151581146117ed578182fd5b600060208284031215611972578081fd5b5035919050565b6000806040838503121561198b578182fd5b82359150602083013561199d81611ad0565b809150509250929050565b6020808252825182820181905260009190848201906040850190845b818110156119f657835173ffffffffffffffffffffffffffffffffffffffff16835292840192918401916001016119c4565b50909695505050505050565b604051601f82017fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe016810167ffffffffffffffff81118282101715611a4957611a49611aba565b604052919050565b600067ffffffffffffffff821115611a6b57611a6b611aba565b5060051b60200190565b60007fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff821415611ab357634e487b7160e01b81526011600452602481fd5b5060010190565b634e487b7160e01b600052604160045260246000fd5b73ffffffffffffffffffffffffffffffffffffffff81168114610da357600080fdfea26469706673582212206d6d4503b5c84d9c66de6ef1cb181ece89e74c7770de3625b8fd26cd409d7c3964736f6c63430008030033",
+  "deployedBytecode": "0x608060405234801561001057600080fd5b50600436106101515760003560e01c80635d4ef0b8116100cd578063a154ce8211610081578063e9c3f77d11610066578063e9c3f77d14610322578063f19990d714610358578063f1ce598e1461037b57610151565b8063a154ce82146102fc578063a1fdc4581461030f57610151565b8063713dade2116100b2578063713dade2146102a85780637a1a04df146102bb578063840c53bd146102e957610151565b80635d4ef0b8146102755780636b60a09b1461028857610151565b80632be5c6c011610124578063392f5f6411610109578063392f5f6414610203578063447d52ba1461024f5780634d5377691461026257610151565b80632be5c6c0146101bd5780633238405b146101f057610151565b8063071060a6146101565780631023d3e01461016b57806317b7b61b1461018957806325398f83146101aa575b600080fd5b610169610164366004611961565b61038e565b005b610173610462565b60405161018091906119a8565b60405180910390f35b61019c610197366004611961565b6104d1565b604051908152602001610180565b6101696101b8366004611979565b6104f2565b6101e06101cb366004611961565b60056020526000908152604090205460ff1681565b6040519015158152602001610180565b6101696101fe366004611979565b6105b2565b61022a7f000000000000000000000000000000000000000000000000000000000000000081565b60405173ffffffffffffffffffffffffffffffffffffffff9091168152602001610180565b61016961025d366004611979565b6106f7565b610169610270366004611979565b6107d4565b610169610283366004611810565b61088b565b60025461022a9073ffffffffffffffffffffffffffffffffffffffff1681565b6101696102b63660046117d1565b610a5a565b6101e06102c9366004611883565b600160209081526000928352604080842090915290825290205460ff1681565b61019c6102f7366004611961565b610c4f565b61016961030a3660046117d1565b610c5f565b61016961031d3660046117d1565b610da6565b61022a610330366004611961565b60006020819052908152604090205473ffffffffffffffffffffffffffffffffffffffff1681565b6101e0610366366004611961565b60046020526000908152604090205460ff1681565b61022a610389366004611961565b611075565b60035460005b8082111561045d57600381815481106103bd57634e487b7160e01b600052603260045260246000fd5b6000918252602090912001546040517f071060a60000000000000000000000000000000000000000000000000000000081526004810185905273ffffffffffffffffffffffffffffffffffffffff9091169063071060a690602401600060405180830381600087803b15801561043257600080fd5b505af1158015610446573d6000803e3d6000fd5b50505050808061045590611a75565b915050610394565b505050565b606060038054806020026020016040519081016040528092919081815260200182805480156104c757602002820191906000526020600020905b815473ffffffffffffffffffffffffffffffffffffffff16815260019091019060200180831161049c575b5050505050905090565b600681815481106104e157600080fd5b600091825260209091200154905081565b336104fb6110ac565b73ffffffffffffffffffffffffffffffffffffffff161480610539575033610521611151565b73ffffffffffffffffffffffffffffffffffffffff16145b6105a4576040517f08c379a000000000000000000000000000000000000000000000000000000000815260206004820152601e60248201527f526f6c65733a2063616c6c6572206973206e6f7420746865206f776e6572000060448201526064015b60405180910390fd5b6105ae82826111cf565b5050565b336105bb6110ac565b73ffffffffffffffffffffffffffffffffffffffff1614806105f95750336105e1611151565b73ffffffffffffffffffffffffffffffffffffffff16145b806106615750336106496103e960009081526020527f236f539bf6e1b3b15a335e3cd157d360bc4be88c071635c19ba8a82b4f665e9f5473ffffffffffffffffffffffffffffffffffffffff1690565b73ffffffffffffffffffffffffffffffffffffffff16145b6106ed576040517f08c379a000000000000000000000000000000000000000000000000000000000815260206004820152603860248201527f43616c6c6572206973206e6f7420746865206f776e65722c206578656375746f60448201527f72206f7220617574686f72697a65642064697361626c65720000000000000000606482015260840161059b565b6105ae8282611304565b60035460005b808211156107ce576003818154811061072657634e487b7160e01b600052603260045260246000fd5b6000918252602090912001546040517f447d52ba0000000000000000000000000000000000000000000000000000000081526004810186905273ffffffffffffffffffffffffffffffffffffffff85811660248301529091169063447d52ba90604401600060405180830381600087803b1580156107a357600080fd5b505af11580156107b7573d6000803e3d6000fd5b5050505080806107c690611a75565b9150506106fd565b50505050565b336107dd6110ac565b73ffffffffffffffffffffffffffffffffffffffff16148061081b575033610803611151565b73ffffffffffffffffffffffffffffffffffffffff16145b610881576040517f08c379a000000000000000000000000000000000000000000000000000000000815260206004820152601e60248201527f526f6c65733a2063616c6c6572206973206e6f7420746865206f776e65720000604482015260640161059b565b6105ae828261137f565b336108946110ac565b73ffffffffffffffffffffffffffffffffffffffff1614806108d25750336108ba611151565b73ffffffffffffffffffffffffffffffffffffffff16145b610938576040517f08c379a000000000000000000000000000000000000000000000000000000000815260206004820152601e60248201527f526f6c65733a2063616c6c6572206973206e6f7420746865206f776e65720000604482015260640161059b565b6003805460018101825560009182527fc2575a0e9e593c00f959f8c92f12db2869c3395a3b0502d05e2516446f71f85b0180547fffffffffffffffffffffffff00000000000000000000000000000000000000001673ffffffffffffffffffffffffffffffffffffffff86161790558251905b808211156109fc5760008482815181106109d557634e487b7160e01b600052603260045260246000fd5b602002602001015190506109e9818761137f565b50806109f481611a75565b9150506109ab565b5050805160005b80821115610a54576000838281518110610a2d57634e487b7160e01b600052603260045260246000fd5b60200260200101519050610a4181876111cf565b5080610a4c81611a75565b915050610a03565b506107ce845b60065460005b80821115610b13578273ffffffffffffffffffffffffffffffffffffffff1663071060a660068381548110610aa557634e487b7160e01b600052603260045260246000fd5b90600052602060002001546040518263ffffffff1660e01b8152600401610ace91815260200190565b600060405180830381600087803b158015610ae857600080fd5b505af1158015610afc573d6000803e3d6000fd5b505050508080610b0b90611a75565b915050610a60565b505060075460005b8082111561045d5760005b600354811015610c3c578373ffffffffffffffffffffffffffffffffffffffff1663447d52ba60078481548110610b6d57634e487b7160e01b600052603260045260246000fd5b906000526020600020015460038481548110610b9957634e487b7160e01b600052603260045260246000fd5b60009182526020909120015460405160e084901b7fffffffff00000000000000000000000000000000000000000000000000000000168152600481019290925273ffffffffffffffffffffffffffffffffffffffff166024820152604401600060405180830381600087803b158015610c1157600080fd5b505af1158015610c25573d6000803e3d6000fd5b505050508080610c3490611a75565b915050610b26565b5080610c4781611a75565b915050610b1b565b600781815481106104e157600080fd5b33610c686110ac565b73ffffffffffffffffffffffffffffffffffffffff161480610ca6575033610c8e611151565b73ffffffffffffffffffffffffffffffffffffffff16145b80610d0e575033610cf66103e960009081526020527f236f539bf6e1b3b15a335e3cd157d360bc4be88c071635c19ba8a82b4f665e9f5473ffffffffffffffffffffffffffffffffffffffff1690565b73ffffffffffffffffffffffffffffffffffffffff16145b610d9a576040517f08c379a000000000000000000000000000000000000000000000000000000000815260206004820152603860248201527f43616c6c6572206973206e6f7420746865206f776e65722c206578656375746f60448201527f72206f7220617574686f72697a65642064697361626c65720000000000000000606482015260840161059b565b610da3816114b2565b50565b33610daf6110ac565b73ffffffffffffffffffffffffffffffffffffffff161480610ded575033610dd5611151565b73ffffffffffffffffffffffffffffffffffffffff16145b610e53576040517f08c379a000000000000000000000000000000000000000000000000000000000815260206004820152601e60248201527f526f6c65733a2063616c6c6572206973206e6f7420746865206f776e65720000604482015260640161059b565b60008173ffffffffffffffffffffffffffffffffffffffff1663cd28fc8f6040518163ffffffff1660e01b8152600401600060405180830381600087803b158015610e9d57600080fd5b505af1158015610eb1573d6000803e3d6000fd5b505050506040513d6000823e601f3d9081017fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe0168201604052610ef791908101906118ae565b905060005b8082511115610f4857610f36828281518110610f2857634e487b7160e01b600052603260045260246000fd5b6020026020010151846111cf565b80610f4081611a75565b915050610efc565b50610f5282610a5a565b600280547fffffffffffffffffffffffff00000000000000000000000000000000000000001673ffffffffffffffffffffffffffffffffffffffff8416908117909155604080517f61461954000000000000000000000000000000000000000000000000000000008152905163614619549160048082019260009290919082900301818387803b158015610fe557600080fd5b505af1158015610ff9573d6000803e3d6000fd5b5050600280547fffffffffffffffffffffffff00000000000000000000000000000000000000001690555050805160005b808211156107ce5761106383828151811061105557634e487b7160e01b600052603260045260246000fd5b602002602001015185611304565b8061106d81611a75565b91505061102a565b6003818154811061108557600080fd5b60009182526020909120015473ffffffffffffffffffffffffffffffffffffffff16905081565b60007f000000000000000000000000000000000000000000000000000000000000000073ffffffffffffffffffffffffffffffffffffffff16638da5cb5b6040518163ffffffff1660e01b815260040160206040518083038186803b15801561111457600080fd5b505afa158015611128573d6000803e3d6000fd5b505050506040513d601f19601f8201168201806040525081019061114c91906117f4565b905090565b60007f000000000000000000000000000000000000000000000000000000000000000073ffffffffffffffffffffffffffffffffffffffff1663c34c08e56040518163ffffffff1660e01b8152600401602060405180830381600087803b1580156111bb57600080fd5b505af1158015611128573d6000803e3d6000fd5b60008281526005602052604090205460ff1661125157600082815260056020526040812080547fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff001660019081179091556007805491820181559091527fa66cc928b5edb82af9bd49922954155ab7b0942694bea4ce44661d9a8736c688018290555b6040517f25398f830000000000000000000000000000000000000000000000000000000081526004810183905273ffffffffffffffffffffffffffffffffffffffff82811660248301527f000000000000000000000000000000000000000000000000000000000000000016906325398f83906044015b600060405180830381600087803b1580156112e257600080fd5b505af11580156112f6573d6000803e3d6000fd5b505050506105ae82826106f7565b6040517f3238405b0000000000000000000000000000000000000000000000000000000081526004810183905273ffffffffffffffffffffffffffffffffffffffff82811660248301527f00000000000000000000000000000000000000000000000000000000000000001690633238405b906044016112c8565b60008281526004602052604090205460ff1661140157600082815260046020526040812080547fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff001660019081179091556006805491820181559091527ff652222313e28459528d920b65115c16c04f3efc82aaedc97be59f3f377c0d3f018290555b6040517f4d5377690000000000000000000000000000000000000000000000000000000081526004810183905273ffffffffffffffffffffffffffffffffffffffff82811660248301527f00000000000000000000000000000000000000000000000000000000000000001690634d53776990604401600060405180830381600087803b15801561149157600080fd5b505af11580156114a5573d6000803e3d6000fd5b505050506105ae8261038e565b60075460005b80821115611601577f000000000000000000000000000000000000000000000000000000000000000073ffffffffffffffffffffffffffffffffffffffff166393552a3d6007838154811061151d57634e487b7160e01b600052603260045260246000fd5b9060005260206000200154856040518363ffffffff1660e01b815260040161156592919091825273ffffffffffffffffffffffffffffffffffffffff16602082015260400190565b60206040518083038186803b15801561157d57600080fd5b505afa158015611591573d6000803e3d6000fd5b505050506040513d601f19601f820116820180604052508101906115b59190611941565b156115ef576115ef600782815481106115de57634e487b7160e01b600052603260045260246000fd5b906000526020600020015484611304565b806115f981611a75565b9150506114b8565b505060065460005b8082111561045d578273ffffffffffffffffffffffffffffffffffffffff167f000000000000000000000000000000000000000000000000000000000000000073ffffffffffffffffffffffffffffffffffffffff1663b4ed0b6d6006848154811061168557634e487b7160e01b600052603260045260246000fd5b90600052602060002001546040518263ffffffff1660e01b81526004016116ae91815260200190565b60206040518083038186803b1580156116c657600080fd5b505afa1580156116da573d6000803e3d6000fd5b505050506040513d601f19601f820116820180604052508101906116fe91906117f4565b73ffffffffffffffffffffffffffffffffffffffff161415611750576117506006828154811061173e57634e487b7160e01b600052603260045260246000fd5b9060005260206000200154600061137f565b8061175a81611a75565b915050611609565b600082601f830112611772578081fd5b8135602061178761178283611a51565b611a02565b80838252828201915082860187848660051b89010111156117a6578586fd5b855b858110156117c4578135845292840192908401906001016117a8565b5090979650505050505050565b6000602082840312156117e2578081fd5b81356117ed81611ad0565b9392505050565b600060208284031215611805578081fd5b81516117ed81611ad0565b600080600060608486031215611824578182fd5b833561182f81611ad0565b9250602084013567ffffffffffffffff8082111561184b578384fd5b61185787838801611762565b9350604086013591508082111561186c578283fd5b5061187986828701611762565b9150509250925092565b60008060408385031215611895578182fd5b82356118a081611ad0565b946020939093013593505050565b600060208083850312156118c0578182fd5b825167ffffffffffffffff8111156118d6578283fd5b8301601f810185136118e6578283fd5b80516118f461178282611a51565b80828252848201915084840188868560051b8701011115611913578687fd5b8694505b83851015611935578051835260019490940193918501918501611917565b50979650505050505050565b600060208284031215611952578081fd5b815180151581146117ed578182fd5b600060208284031215611972578081fd5b5035919050565b6000806040838503121561198b578182fd5b82359150602083013561199d81611ad0565b809150509250929050565b6020808252825182820181905260009190848201906040850190845b818110156119f657835173ffffffffffffffffffffffffffffffffffffffff16835292840192918401916001016119c4565b50909695505050505050565b604051601f82017fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe016810167ffffffffffffffff81118282101715611a4957611a49611aba565b604052919050565b600067ffffffffffffffff821115611a6b57611a6b611aba565b5060051b60200190565b60007fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff821415611ab357634e487b7160e01b81526011600452602481fd5b5060010190565b634e487b7160e01b600052604160045260246000fd5b73ffffffffffffffffffffffffffffffffffffffff81168114610da357600080fdfea26469706673582212206d6d4503b5c84d9c66de6ef1cb181ece89e74c7770de3625b8fd26cd409d7c3964736f6c63430008030033",
+  "devdoc": {
+    "kind": "dev",
+    "methods": {},
+    "title": "Provides a single point of reference to verify integrity of the roles structure and facilitate governance actions within our system as well as performing cache invalidation for roles and inter-contract relationships",
+    "version": 1
+  },
+  "userdoc": {
+    "kind": "user",
+    "methods": {
+      "disableContract(address)": {
+        "notice": "Remove roles and permissions for contract"
+      },
+      "giveRole(uint256,address)": {
+        "notice": "Activate role"
+      },
+      "manageContract(address,uint256[],uint256[])": {
+        "notice": "Orchestrate roles and permission for contract"
+      },
+      "removeRole(uint256,address)": {
+        "notice": "Disable role"
+      }
+    },
+    "version": 1
+  },
+  "storageLayout": {
+    "storage": [
+      {
+        "astId": 11790,
+        "contract": "contracts/DependencyController.sol:DependencyController",
+        "label": "mainCharacterCache",
+        "offset": 0,
+        "slot": "0",
+        "type": "t_mapping(t_uint256,t_address)"
+      },
+      {
+        "astId": 11796,
+        "contract": "contracts/DependencyController.sol:DependencyController",
+        "label": "roleCache",
+        "offset": 0,
+        "slot": "1",
+        "type": "t_mapping(t_address,t_mapping(t_uint256,t_bool))"
+      },
+      {
+        "astId": 5267,
+        "contract": "contracts/DependencyController.sol:DependencyController",
+        "label": "currentExecutor",
+        "offset": 0,
+        "slot": "2",
+        "type": "t_address"
+      },
+      {
+        "astId": 5270,
+        "contract": "contracts/DependencyController.sol:DependencyController",
+        "label": "managedContracts",
+        "offset": 0,
+        "slot": "3",
+        "type": "t_array(t_address)dyn_storage"
+      },
+      {
+        "astId": 5274,
+        "contract": "contracts/DependencyController.sol:DependencyController",
+        "label": "knownCharacters",
+        "offset": 0,
+        "slot": "4",
+        "type": "t_mapping(t_uint256,t_bool)"
+      },
+      {
+        "astId": 5278,
+        "contract": "contracts/DependencyController.sol:DependencyController",
+        "label": "knownRoles",
+        "offset": 0,
+        "slot": "5",
+        "type": "t_mapping(t_uint256,t_bool)"
+      },
+      {
+        "astId": 5281,
+        "contract": "contracts/DependencyController.sol:DependencyController",
+        "label": "allCharacters",
+        "offset": 0,
+        "slot": "6",
+        "type": "t_array(t_uint256)dyn_storage"
+      },
+      {
+        "astId": 5284,
+        "contract": "contracts/DependencyController.sol:DependencyController",
+        "label": "allRoles",
+        "offset": 0,
+        "slot": "7",
+        "type": "t_array(t_uint256)dyn_storage"
+      }
+    ],
+    "types": {
+      "t_address": {
+        "encoding": "inplace",
+        "label": "address",
+        "numberOfBytes": "20"
+      },
+      "t_array(t_address)dyn_storage": {
+        "base": "t_address",
+        "encoding": "dynamic_array",
+        "label": "address[]",
+        "numberOfBytes": "32"
+      },
+      "t_array(t_uint256)dyn_storage": {
+        "base": "t_uint256",
+        "encoding": "dynamic_array",
+        "label": "uint256[]",
+        "numberOfBytes": "32"
+      },
+      "t_bool": {
+        "encoding": "inplace",
+        "label": "bool",
+        "numberOfBytes": "1"
+      },
+      "t_mapping(t_address,t_mapping(t_uint256,t_bool))": {
+        "encoding": "mapping",
+        "key": "t_address",
+        "label": "mapping(address => mapping(uint256 => bool))",
+        "numberOfBytes": "32",
+        "value": "t_mapping(t_uint256,t_bool)"
+      },
+      "t_mapping(t_uint256,t_address)": {
+        "encoding": "mapping",
+        "key": "t_uint256",
+        "label": "mapping(uint256 => address)",
+        "numberOfBytes": "32",
+        "value": "t_address"
+      },
+      "t_mapping(t_uint256,t_bool)": {
+        "encoding": "mapping",
+        "key": "t_uint256",
+        "label": "mapping(uint256 => bool)",
+        "numberOfBytes": "32",
+        "value": "t_bool"
+      },
+      "t_uint256": {
+        "encoding": "inplace",
+        "label": "uint256",
+        "numberOfBytes": "32"
+      }
+    }
+  }
+}
