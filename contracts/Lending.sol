@@ -260,7 +260,7 @@ contract Lending is
         uint256 hourlyYieldFP = yA.hourlyYieldFP;
 
         uint256 aprFP =
-            (hourlyYieldFP * 10_000 - FP32 * 10_000) * 365 days / (1 hours);
+            ((hourlyYieldFP * 10_000 - FP32 * 10_000) * 365 days) / (1 hours);
 
         return aprFP / FP32;
     }

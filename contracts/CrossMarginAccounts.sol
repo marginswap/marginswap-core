@@ -42,16 +42,6 @@ abstract contract CrossMarginAccounts is RoleAware, PriceAware {
     mapping(address => uint256) public totalLong;
     uint256 public coolingOffPeriod;
 
-    /// @dev last time this account deposited
-    /// relevant for withdrawal window
-    function getLastDepositBlock(address trader)
-        external
-        view
-        returns (uint256)
-    {
-        return marginAccounts[trader].lastDepositBlock;
-    }
-
     /// @dev add an asset to be held by account
     function addHolding(
         CrossMarginAccount storage account,
