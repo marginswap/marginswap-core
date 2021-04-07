@@ -30,11 +30,17 @@ const tokensPerNetwork = {
   local: {}
 };
 
+enum AMMs {
+  UNISWAP,
+  SUSHISWAP
+}
+
 type TokenInitRecord = {
   exposureCap: number;
   lendingBuffer: number;
   incentiveWeight: number;
   liquidationTokenPath?: string[];
+  ammPath?: AMMs[];
 };
 const tokenParams: { [tokenName: string]: TokenInitRecord } = {
   DAI: {
@@ -69,24 +75,10 @@ const tokenParams: { [tokenName: string]: TokenInitRecord } = {
   }
 };
 
-function sortsBefore(a: string, b: string) {
-  return a.toLowerCase() < b.toLowerCase();
-}
-
-function tokens2pair(tokenA: string, tokenB: string) {
-  const tokens = sortsBefore(tokenA, tokenB) ? [tokenA, tokenB] : [tokenB, tokenA];
-  return getCreate2Address(
-    UNI_FACTORY_ADDRESS,
-    keccak256(['bytes'], [pack(['address', 'address'], tokens)]),
-    UNI_INIT_CODE_HASH
-  ).toString();
-}
-
-function path2pairs(tokenPath: string[]) {
-  const adjacents = tokenPath.slice(1);
-  return adjacents.map((nextToken, idx) => {
-    return tokens2pair(nextToken, tokenPath[idx]);
-  });
+function encodeAMMPath(ammPath: AMMs[]) {
+  const encoded = ethers.utils.hexlify(ammPath.map((amm: AMMs) => (amm == AMMs.UNISWAP ? 0 : 1)));
+  console.log(encoded);
+  return `${encoded}${'0'.repeat(64 + 2 - encoded.length)}`;
 }
 
 const deploy: DeployFunction = async function ({
@@ -107,7 +99,18 @@ const deploy: DeployFunction = async function ({
   const networkName = network.live ? network.name : 'local';
   const peg = (await deployments.get('Peg')).address;
 
-  const tokens = network.live ? tokensPerNetwork[networkName] : { LOCALPEG: peg };
+  //  const tokens = network.live ? tokensPerNetwork[networkName] : { LOCALPEG: peg };
+  /*
+  const tokens = network.live
+    ? tokensPerNetwork[networkName]
+    : tokensPerNetwork['mainnet'];
+  */
+  const tokens = network.live
+    ? tokensPerNetwork[networkName]
+    : {
+        DAI: '0x6b175474e89094c44da98b954eedeac495271d0f',
+        WETH: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2'
+      };
 
   const tokenAddresses = Object.values(tokens);
   const tokenNames = Object.keys(tokens);
@@ -122,10 +125,12 @@ const deploy: DeployFunction = async function ({
   const incentiveWeights = tokenNames.map(name => tokenParams[name].incentiveWeight);
 
   const liquidationTokens = tokenNames.map(name => {
-    return tokens[name].liquidationTokenPath || [tokens[name], peg];
+    return tokenParams[name].liquidationTokenPath || [tokens[name], peg];
   });
-  // TODO get the pairs from uni/sushi
-  const liquidationPairs = liquidationTokens.map(path2pairs);
+
+  const liquidationAmms = tokenNames.map(name =>
+    tokenParams[name].ammPath ? encodeAMMPath(tokenParams[name].ammPath) : ethers.utils.hexZeroPad('0x00', 32)
+  );
 
   const Roles = await deployments.get('Roles');
   const roles = await ethers.getContractAt('Roles', Roles.address);
@@ -136,9 +141,11 @@ const deploy: DeployFunction = async function ({
     exposureCaps,
     lendingBuffers,
     incentiveWeights,
-    liquidationPairs,
+    liquidationAmms,
     liquidationTokens
   ];
+
+  console.log(args);
 
   const TokenActivation = await deploy('TokenActivation', {
     from: deployer,

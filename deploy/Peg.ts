@@ -24,13 +24,19 @@ const deploy: DeployFunction = async function ({
       address: weth
     });
   } else {
+    // TODO switch paths to USDT as well
+    save('Peg', {
+      abi: ERC20PresetMinterPauser.abi,
+      address: weth
+    });
+    /*
     await deploy('Peg', {
       contract: ERC20PresetMinterPauser,
       from: deployer,
       args: ['TestToken', 'TT'],
       log: true,
       skipIfAlreadyDeployed: true
-    });
+    });*/
   }
 };
 deploy.tags = ['Peg', 'local'];
