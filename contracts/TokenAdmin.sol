@@ -39,7 +39,7 @@ contract TokenAdmin is RoleAware {
         uint256 exposureCap,
         uint256 lendingBuffer,
         uint256 incentiveWeight,
-        address[] calldata liquidationPairs,
+        bytes32 amms,
         address[] calldata liquidationTokens
     ) external onlyOwnerExec {
         require(
@@ -92,7 +92,7 @@ contract TokenAdmin is RoleAware {
                 "Invalid liquidationTokens -- should go from token to peg"
             );
             CrossMarginTrading(crossMarginTrading()).setLiquidationPath(
-                liquidationPairs,
+                amms,
                 liquidationTokens
             );
         }

@@ -9,6 +9,9 @@ import "@openzeppelin/contracts/utils/Address.sol";
 import "../interfaces/IWETH.sol";
 import "./BaseRouter.sol";
 
+/// @title Router for spot trading on uniswap and sushiswap jointly
+/// the paramater amms represents the choice of amm pair along the route
+/// it is a bytes32 value where amms[i] == 0 for uniswap and amms[i] == 1 for sushi
 contract SpotRouter is BaseRouter {
     using SafeERC20 for IERC20;
     address public immutable WETH;
@@ -20,12 +23,18 @@ contract SpotRouter is BaseRouter {
     function swapExactTokensForTokens(
         uint256 amountIn,
         uint256 amountOutMin,
-        address[] calldata pairs,
+        bytes32 amms,
         address[] calldata tokens,
         address to,
         uint256 deadline
     ) external ensure(deadline) returns (uint256[] memory amounts) {
-        amounts = UniswapStyleLib.getAmountsOut(amountIn, pairs, tokens);
+        address[] memory pairs;
+        (amounts, pairs) = UniswapStyleLib.getAmountsOut(
+            amountIn,
+            amms,
+            tokens
+        );
+
         require(
             amounts[amounts.length - 1] >= amountOutMin,
             "SpotRouter: INSUFFICIENT_OUTPUT_AMOUNT"
@@ -38,12 +47,18 @@ contract SpotRouter is BaseRouter {
     function swapTokensForExactTokens(
         uint256 amountOut,
         uint256 amountInMax,
-        address[] calldata pairs,
+        bytes32 amms,
         address[] calldata tokens,
         address to,
         uint256 deadline
     ) external ensure(deadline) returns (uint256[] memory amounts) {
-        amounts = UniswapStyleLib.getAmountsIn(amountOut, pairs, tokens);
+        address[] memory pairs;
+        (amounts, pairs) = UniswapStyleLib.getAmountsIn(
+            amountOut,
+            amms,
+            tokens
+        );
+
         require(
             amounts[0] <= amountInMax,
             "SpotRouter: EXCESSIVE_INPUT_AMOUNT"
@@ -55,13 +70,19 @@ contract SpotRouter is BaseRouter {
 
     function swapExactETHForTokens(
         uint256 amountOutMin,
-        address[] calldata pairs,
+        bytes32 amms,
         address[] calldata tokens,
         address to,
         uint256 deadline
     ) external payable ensure(deadline) returns (uint256[] memory amounts) {
         require(tokens[0] == WETH, "SpotRouter: INVALID_PATH");
-        amounts = UniswapStyleLib.getAmountsOut(msg.value, pairs, tokens);
+
+        address[] memory pairs;
+        (amounts, pairs) = UniswapStyleLib.getAmountsOut(
+            msg.value,
+            amms,
+            tokens
+        );
         require(
             amounts[amounts.length - 1] >= amountOutMin,
             "SpotRouter: INSUFFICIENT_OUTPUT_AMOUNT"
@@ -76,13 +97,20 @@ contract SpotRouter is BaseRouter {
     function swapTokensForExactETH(
         uint256 amountOut,
         uint256 amountInMax,
-        address[] calldata pairs,
+        bytes32 amms,
         address[] calldata tokens,
         address to,
         uint256 deadline
     ) external ensure(deadline) returns (uint256[] memory amounts) {
         require(tokens[tokens.length - 1] == WETH, "SpotRouter: INVALID_PATH");
-        amounts = UniswapStyleLib.getAmountsIn(amountOut, pairs, tokens);
+
+        address[] memory pairs;
+        (amounts, pairs) = UniswapStyleLib.getAmountsIn(
+            amountOut,
+            amms,
+            tokens
+        );
+
         require(
             amounts[0] <= amountInMax,
             "SpotRouter: EXCESSIVE_INPUT_AMOUNT"
@@ -98,13 +126,20 @@ contract SpotRouter is BaseRouter {
     function swapExactTokensForETH(
         uint256 amountIn,
         uint256 amountOutMin,
-        address[] calldata pairs,
+        bytes32 amms,
         address[] calldata tokens,
         address to,
         uint256 deadline
     ) external ensure(deadline) returns (uint256[] memory amounts) {
         require(tokens[tokens.length - 1] == WETH, "SpotRouter: INVALID_PATH");
-        amounts = UniswapStyleLib.getAmountsOut(amountIn, pairs, tokens);
+
+        address[] memory pairs;
+        (amounts, pairs) = UniswapStyleLib.getAmountsOut(
+            amountIn,
+            amms,
+            tokens
+        );
+
         require(
             amounts[amounts.length - 1] >= amountOutMin,
             "SpotRouter: INSUFFICIENT_OUTPUT_AMOUNT"
@@ -118,13 +153,20 @@ contract SpotRouter is BaseRouter {
 
     function swapETHForExactTokens(
         uint256 amountOut,
-        address[] calldata pairs,
+        bytes32 amms,
         address[] calldata tokens,
         address to,
         uint256 deadline
     ) external payable ensure(deadline) returns (uint256[] memory amounts) {
         require(tokens[0] == WETH, "SpotRouter: INVALID_PATH");
-        amounts = UniswapStyleLib.getAmountsIn(amountOut, pairs, tokens);
+
+        address[] memory pairs;
+        (amounts, pairs) = UniswapStyleLib.getAmountsIn(
+            amountOut,
+            amms,
+            tokens
+        );
+
         require(amounts[0] <= msg.value, "SpotRouter: EXCESSIVE_INPUT_AMOUNT");
 
         IWETH(WETH).deposit{value: amounts[0]}();
@@ -138,17 +180,17 @@ contract SpotRouter is BaseRouter {
 
     function getAmountsOut(
         uint256 inAmount,
-        address[] calldata pairs,
+        bytes32 amms,
         address[] calldata tokens
-    ) external view returns (uint256[] memory) {
-        return UniswapStyleLib.getAmountsOut(inAmount, pairs, tokens);
+    ) external view returns (uint256[] memory amounts) {
+        (amounts, ) = UniswapStyleLib.getAmountsOut(inAmount, amms, tokens);
     }
 
     function getAmountsIn(
         uint256 outAmount,
-        address[] calldata pairs,
+        bytes32 amms,
         address[] calldata tokens
-    ) external view returns (uint256[] memory) {
-        return UniswapStyleLib.getAmountsIn(outAmount, pairs, tokens);
+    ) external view returns (uint256[] memory amounts) {
+        (amounts, ) = UniswapStyleLib.getAmountsIn(outAmount, amms, tokens);
     }
 }

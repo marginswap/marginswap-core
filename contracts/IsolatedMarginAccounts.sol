@@ -17,7 +17,7 @@ abstract contract IsolatedMarginAccounts is RoleAware {
 
     uint256 public totalDebt;
 
-    address[] public liquidationPairs;
+    bytes32 public amms;
     address[] public liquidationTokens;
 
     /// update window in blocks

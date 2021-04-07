@@ -5,8 +5,6 @@ import "./Fund.sol";
 import "../libraries/UniswapStyleLib.sol";
 
 abstract contract BaseRouter {
-    /// @notice wrapped ETH ERC20 contract
-
     modifier ensure(uint256 deadline) {
         require(deadline >= block.timestamp, "Trade has expired");
         _;
@@ -14,14 +12,13 @@ abstract contract BaseRouter {
 
     // **** SWAP ****
     /// @dev requires the initial amount to have already been sent to the first pair
+    /// and for pairs to be vetted (which getAmountsIn / getAmountsOut do)
     function _swap(
         uint256[] memory amounts,
         address[] memory pairs,
         address[] memory tokens,
         address _to
     ) internal {
-        address outToken = tokens[tokens.length - 1];
-        uint256 startingBalance = IERC20(outToken).balanceOf(_to);
         for (uint256 i; i < pairs.length; i++) {
             (address input, address output) = (tokens[i], tokens[i + 1]);
             (address token0, ) = UniswapStyleLib.sortTokens(input, output);
@@ -35,13 +32,8 @@ abstract contract BaseRouter {
 
             address to = i < pairs.length - 1 ? pairs[i + 1] : _to;
             IUniswapV2Pair pair = IUniswapV2Pair(pairs[i]);
+
             pair.swap(amount0Out, amount1Out, to, new bytes(0));
         }
-
-        uint256 endingBalance = IERC20(outToken).balanceOf(_to);
-        require(
-            endingBalance >= startingBalance + amounts[amounts.length - 1],
-            "Defective AMM route; balances don't match"
-        );
     }
 }

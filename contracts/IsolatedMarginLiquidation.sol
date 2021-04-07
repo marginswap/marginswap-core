@@ -164,7 +164,7 @@ abstract contract IsolatedMarginLiquidation is IsolatedMarginAccounts {
             MarginRouter(marginRouter()).authorizedSwapExactT4T(
                 sellAmount,
                 0,
-                liquidationPairs,
+                amms,
                 liquidationTokens
             );
 

@@ -9,10 +9,10 @@ import "../libraries/UniswapStyleLib.sol";
 struct TokenPrice {
     uint256 blockLastUpdated;
     uint256 tokenPer1k;
-    address[] liquidationPairs;
-    address[] inverseLiquidationPairs;
     address[] liquidationTokens;
+    bytes32 amms;
     address[] inverseLiquidationTokens;
+    bytes32 inverseAmms;
 }
 
 /// @title The protocol features several mechanisms to prevent vulnerability to
@@ -96,10 +96,10 @@ abstract contract PriceAware is RoleAware {
             return inAmount;
         } else {
             TokenPrice storage tokenPrice = tokenPrices[token];
-            uint256[] memory pathAmounts =
+            (uint256[] memory pathAmounts, ) =
                 UniswapStyleLib.getAmountsOut(
                     inAmount,
-                    tokenPrice.liquidationPairs,
+                    tokenPrice.amms,
                     tokenPrice.liquidationTokens
                 );
             uint256 outAmount = pathAmounts[pathAmounts.length - 1];
@@ -117,10 +117,10 @@ abstract contract PriceAware is RoleAware {
             return inAmount;
         } else {
             TokenPrice storage tokenPrice = tokenPrices[token];
-            uint256[] memory pathAmounts =
+            (uint256[] memory pathAmounts, ) =
                 UniswapStyleLib.getAmountsOut(
                     inAmount,
-                    tokenPrice.liquidationPairs,
+                    tokenPrice.amms,
                     tokenPrice.liquidationTokens
                 );
             uint256 outAmount = pathAmounts[pathAmounts.length - 1];
@@ -161,35 +161,39 @@ abstract contract PriceAware is RoleAware {
     }
 
     /// add path from token to current liquidation peg
-    function setLiquidationPath(address[] memory path, address[] memory tokens)
+    function setLiquidationPath(bytes32 amms, address[] memory tokens)
         external
         onlyOwnerExecActivator
     {
         address token = tokens[0];
         if (token != peg) {
             TokenPrice storage tokenPrice = tokenPrices[token];
-            tokenPrice.liquidationPairs = new address[](path.length);
-            tokenPrice.inverseLiquidationPairs = new address[](path.length);
-            tokenPrice.liquidationTokens = new address[](tokens.length);
+
+            tokenPrice.amms = amms;
+
+            tokenPrice.liquidationTokens = tokens;
             tokenPrice.inverseLiquidationTokens = new address[](tokens.length);
 
-            for (uint256 i = 0; path.length > i; i++) {
-                tokenPrice.liquidationPairs[i] = path[i];
-                tokenPrice.inverseLiquidationPairs[i] = path[
-                    path.length - i - 1
-                ];
+            bytes32 inverseAmms;
+
+            for (uint256 i = 0; tokens.length - 1 > i; i++) {
+                bytes32 shifted =
+                    bytes32(amms[i]) >> ((tokens.length - 2 - i) * 8);
+                inverseAmms = inverseAmms | shifted;
             }
 
+            tokenPrice.inverseAmms = inverseAmms;
+
             for (uint256 i = 0; tokens.length > i; i++) {
-                tokenPrice.liquidationTokens[i] = tokens[i];
                 tokenPrice.inverseLiquidationTokens[i] = tokens[
                     tokens.length - i - 1
                 ];
             }
 
-            uint256[] memory pathAmounts =
-                UniswapStyleLib.getAmountsIn(1000 ether, path, tokens);
+            (uint256[] memory pathAmounts, ) =
+                UniswapStyleLib.getAmountsIn(1000 ether, amms, tokens);
             uint256 inAmount = pathAmounts[0];
+
             _setPriceVal(tokenPrice, inAmount, 1000 ether, 1000);
         }
     }
@@ -206,7 +210,7 @@ abstract contract PriceAware is RoleAware {
                 MarginRouter(marginRouter()).authorizedSwapExactT4T(
                     amount,
                     0,
-                    tP.liquidationPairs,
+                    tP.amms,
                     tP.liquidationTokens
                 );
 
@@ -228,7 +232,7 @@ abstract contract PriceAware is RoleAware {
                 MarginRouter(marginRouter()).authorizedSwapT4ExactT(
                     targetAmount,
                     type(uint256).max,
-                    tP.inverseLiquidationPairs,
+                    tP.amms,
                     tP.inverseLiquidationTokens
                 );
 
