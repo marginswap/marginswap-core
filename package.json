@@ -8,7 +8,7 @@
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "lint": "eslint --ext .ts --fix deploy/ ; prettier --write contracts/**/*.sol",
+    "lint": "eslint --ext .ts --fix deploy/ ; eslint --ext .ts --fix hardhat.config.ts ; prettier --write contracts/**/*.sol",
     "dev": "hardhat node"
   },
   "repository": {

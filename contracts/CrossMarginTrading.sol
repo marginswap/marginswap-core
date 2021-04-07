@@ -297,4 +297,20 @@ contract CrossMarginTrading is CrossMarginLiquidation, IMarginTrading {
         CrossMarginAccount storage account = marginAccounts[trader];
         return viewTokensInPeg(account.holdingTokens, account.holdings);
     }
+
+    /// @dev can this trader be liquidated?
+    function canBeLiquidated(address trader) external view returns (bool) {
+        CrossMarginAccount storage account = marginAccounts[trader];
+        uint256 loan =
+            viewTokensInPegWithYield(
+                account.borrowTokens,
+                account.borrowed,
+                account.borrowedYieldQuotientsFP
+            );
+
+        uint256 holdings =
+            viewTokensInPeg(account.holdingTokens, account.holdings);
+
+        return 100 * holdings >= liquidationThresholdPercent * loan;
+    }
 }

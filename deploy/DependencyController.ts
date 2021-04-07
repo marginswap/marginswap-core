@@ -33,22 +33,42 @@ const DISABLER = 1001;
 const DEPENDENCY_CONTROLLER = 1002;
 
 const managedContracts: ManagedContract[] = [
-  { contractName: 'Admin', charactersPlayed: [ADMIN, FEE_CONTROLLER], rolesPlayed: [] },
+  {
+    contractName: 'Admin',
+    charactersPlayed: [ADMIN, FEE_CONTROLLER],
+    rolesPlayed: []
+  },
   {
     contractName: 'CrossMarginTrading',
     charactersPlayed: [MARGIN_TRADING, BORROWER, PRICE_CONTROLLER],
     rolesPlayed: [WITHDRAWER, AUTHORIZED_FUND_TRADER, STAKE_PENALIZER]
   },
   { contractName: 'Fund', charactersPlayed: [FUND], rolesPlayed: [] },
-  { contractName: 'IncentiveDistribution', charactersPlayed: [INCENTIVE_DISTRIBUTION], rolesPlayed: [] },
-  { contractName: 'Lending', charactersPlayed: [LENDING], rolesPlayed: [WITHDRAWER, INCENTIVE_REPORTER] },
-  { contractName: 'LiquidityMiningReward', charactersPlayed: [], rolesPlayed: [INCENTIVE_REPORTER] },
+  {
+    contractName: 'IncentiveDistribution',
+    charactersPlayed: [INCENTIVE_DISTRIBUTION],
+    rolesPlayed: []
+  },
+  {
+    contractName: 'Lending',
+    charactersPlayed: [LENDING],
+    rolesPlayed: [WITHDRAWER, INCENTIVE_REPORTER]
+  },
+  {
+    contractName: 'LiquidityMiningReward',
+    charactersPlayed: [],
+    rolesPlayed: [INCENTIVE_REPORTER]
+  },
   {
     contractName: 'MarginRouter',
     charactersPlayed: [ROUTER],
     rolesPlayed: [WITHDRAWER, MARGIN_TRADER, BORROWER, INCENTIVE_REPORTER]
   },
-  { contractName: 'TokenAdmin', charactersPlayed: [TOKEN_ADMIN], rolesPlayed: [TOKEN_ACTIVATOR] }
+  {
+    contractName: 'TokenAdmin',
+    charactersPlayed: [TOKEN_ADMIN],
+    rolesPlayed: [TOKEN_ACTIVATOR]
+  }
 ];
 
 const deploy: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
