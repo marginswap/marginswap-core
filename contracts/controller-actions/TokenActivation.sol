@@ -9,7 +9,7 @@ contract TokenActivation is Executor {
     uint256[] public exposureCaps;
     uint256[] public lendingBuffers;
     uint256[] public incentiveWeights;
-    address[][] public liquidationPairs;
+    bytes32[] public amms;
     address[][] public liquidationTokens;
 
     constructor(
@@ -18,14 +18,14 @@ contract TokenActivation is Executor {
         uint256[] memory _exposureCaps,
         uint256[] memory _lendingBuffers,
         uint256[] memory _incentiveWeights,
-        address[][] memory _liquidationPairs,
+        bytes32[] memory _amms,
         address[][] memory _liquidationTokens
     ) RoleAware(_roles) {
         tokens = tokens2activate;
         exposureCaps = _exposureCaps;
         lendingBuffers = _lendingBuffers;
         incentiveWeights = _incentiveWeights;
-        liquidationPairs = _liquidationPairs;
+        amms = _amms;
         liquidationTokens = _liquidationTokens;
     }
 
@@ -41,7 +41,7 @@ contract TokenActivation is Executor {
             uint256 exposureCap = exposureCaps[i];
             uint256 lendingBuffer = lendingBuffers[i];
             uint256 incentiveWeight = incentiveWeights[i];
-            address[] memory liquidationPairPath = liquidationPairs[i];
+            bytes32 ammPath = amms[i];
             address[] memory liquidationTokenPath = liquidationTokens[i];
 
             TokenAdmin(tokenAdmin()).activateToken(
@@ -49,7 +49,7 @@ contract TokenActivation is Executor {
                 exposureCap,
                 lendingBuffer,
                 incentiveWeight,
-                liquidationPairPath,
+                ammPath,
                 liquidationTokenPath
             );
         }

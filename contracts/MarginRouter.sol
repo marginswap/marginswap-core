@@ -184,15 +184,19 @@ contract MarginRouter is RoleAware, IncentivizedHolder, BaseRouter {
     function crossSwapExactTokensForTokens(
         uint256 amountIn,
         uint256 amountOutMin,
-        address[] calldata pairs,
+        bytes32 amms,
         address[] calldata tokens,
         uint256 deadline
     ) external ensure(deadline) returns (uint256[] memory amounts) {
         // calc fees
         uint256 fees = takeFeesFromInput(amountIn);
 
-        // swap
-        amounts = UniswapStyleLib.getAmountsOut(amountIn - fees, pairs, tokens);
+        address[] memory pairs;
+        (amounts, pairs) = UniswapStyleLib.getAmountsOut(
+            amountIn - fees,
+            amms,
+            tokens
+        );
 
         // checks that trader is within allowed lending bounds
         registerTrade(
@@ -210,14 +214,14 @@ contract MarginRouter is RoleAware, IncentivizedHolder, BaseRouter {
     function crossSwapTokensForExactTokens(
         uint256 amountOut,
         uint256 amountInMax,
-        address[] calldata pairs,
+        bytes32 amms,
         address[] calldata tokens,
         uint256 deadline
     ) external ensure(deadline) returns (uint256[] memory amounts) {
-        // swap
-        amounts = UniswapStyleLib.getAmountsIn(
+        address[] memory pairs;
+        (amounts, pairs) = UniswapStyleLib.getAmountsIn(
             amountOut + takeFeesFromOutput(amountOut),
-            pairs,
+            amms,
             tokens
         );
 
@@ -278,7 +282,7 @@ contract MarginRouter is RoleAware, IncentivizedHolder, BaseRouter {
     function _fundSwapExactT4T(
         uint256[] memory amounts,
         uint256 amountOutMin,
-        address[] calldata pairs,
+        address[] memory pairs,
         address[] calldata tokens
     ) internal {
         require(
@@ -293,14 +297,19 @@ contract MarginRouter is RoleAware, IncentivizedHolder, BaseRouter {
     function authorizedSwapExactT4T(
         uint256 amountIn,
         uint256 amountOutMin,
-        address[] calldata pairs,
+        bytes32 amms,
         address[] calldata tokens
     ) external returns (uint256[] memory amounts) {
         require(
             isAuthorizedFundTrader(msg.sender),
             "Calling contract is not authorized to trade with protocl funds"
         );
-        amounts = UniswapStyleLib.getAmountsOut(amountIn, pairs, tokens);
+        address[] memory pairs;
+        (amounts, pairs) = UniswapStyleLib.getAmountsOut(
+            amountIn,
+            amms,
+            tokens
+        );
         _fundSwapExactT4T(amounts, amountOutMin, pairs, tokens);
     }
 
@@ -308,7 +317,7 @@ contract MarginRouter is RoleAware, IncentivizedHolder, BaseRouter {
     function _fundSwapT4ExactT(
         uint256[] memory amounts,
         uint256 amountInMax,
-        address[] calldata pairs,
+        address[] memory pairs,
         address[] calldata tokens
     ) internal {
         // TODO minimum trade?
@@ -324,14 +333,20 @@ contract MarginRouter is RoleAware, IncentivizedHolder, BaseRouter {
     function authorizedSwapT4ExactT(
         uint256 amountOut,
         uint256 amountInMax,
-        address[] calldata pairs,
+        bytes32 amms,
         address[] calldata tokens
     ) external returns (uint256[] memory amounts) {
         require(
             isAuthorizedFundTrader(msg.sender),
             "Calling contract is not authorized to trade with protocl funds"
         );
-        amounts = UniswapStyleLib.getAmountsIn(amountOut, pairs, tokens);
+
+        address[] memory pairs;
+        (amounts, pairs) = UniswapStyleLib.getAmountsIn(
+            amountOut,
+            amms,
+            tokens
+        );
         _fundSwapT4ExactT(amounts, amountInMax, pairs, tokens);
     }
 
@@ -353,17 +368,17 @@ contract MarginRouter is RoleAware, IncentivizedHolder, BaseRouter {
 
     function getAmountsOut(
         uint256 inAmount,
-        address[] calldata pairs,
+        bytes32 amms,
         address[] calldata tokens
-    ) external view returns (uint256[] memory) {
-        return UniswapStyleLib.getAmountsOut(inAmount, pairs, tokens);
+    ) external view returns (uint256[] memory amounts) {
+        (amounts, ) = UniswapStyleLib.getAmountsOut(inAmount, amms, tokens);
     }
 
     function getAmountsIn(
         uint256 outAmount,
-        address[] calldata pairs,
+        bytes32 amms,
         address[] calldata tokens
-    ) external view returns (uint256[] memory) {
-        return UniswapStyleLib.getAmountsIn(outAmount, pairs, tokens);
+    ) external view returns (uint256[] memory amounts) {
+        (amounts, ) = UniswapStyleLib.getAmountsIn(outAmount, amms, tokens);
     }
 }
