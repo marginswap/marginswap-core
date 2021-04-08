@@ -124,7 +124,12 @@ const deploy: DeployFunction = async function ({
 
   const liquidationTokens = tokenNames.map(name => {
     const tokenPath = tokenParams[name].liquidationTokenPath;
-    return tokenPath ? tokenPath.map(tName => tokens[tName]) : [tokens[name], weth, peg];
+    if (network.name === 'mainnet' || !network.live) {
+      // mainnet or forked mainnet
+      return tokenPath ? tokenPath.map(tName => tokens[tName]) : [tokens[name], weth, peg];
+    } else {
+      return [tokens[name], peg];
+    }
   });
 
   const liquidationAmms = tokenNames.map(name =>

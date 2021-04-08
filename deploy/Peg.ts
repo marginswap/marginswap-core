@@ -1,6 +1,5 @@
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
 import { DeployFunction } from 'hardhat-deploy/types';
-import { deployments } from 'hardhat';
 import ERC20PresetMinterPauser from '@openzeppelin/contracts/build/contracts/ERC20PresetMinterPauser.json';
 
 const deploy: DeployFunction = async function ({
