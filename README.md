@@ -5,9 +5,8 @@ Core contracts for marginswap functionality
 
 Install dependencies:
 ```(shell)
-git submodule init
-git submodule update
 yarn install
+git clone git@github.com:marginswap/core-abi.git build
 ```
 
 Place a private key file in your home folder `~/.marginswap-secret`. If you want it to match up with your wallet like MetaMask, create the account in your wallet, copy the private key and paste it into the file.
