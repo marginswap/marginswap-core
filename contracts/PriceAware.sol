@@ -8,7 +8,7 @@ import "../libraries/UniswapStyleLib.sol";
 /// Stores how many of token you could get for 1k of peg
 struct TokenPrice {
     uint256 blockLastUpdated;
-    uint256 tokenPer1k;
+    uint256 tokenPerRefAmount;
     address[] liquidationTokens;
     bytes32 amms;
     address[] inverseLiquidationTokens;
@@ -31,10 +31,8 @@ abstract contract PriceAware is RoleAware {
     address public immutable peg;
     mapping(address => TokenPrice) public tokenPrices;
     /// update window in blocks
-    uint16 public priceUpdateWindow = 8;
-    uint256 public UPDATE_RATE_PERMIL = 80;
-    uint256 public UPDATE_MAX_PEG_AMOUNT = 50_000;
-    uint256 public UPDATE_MIN_PEG_AMOUNT = 1_000;
+    uint16 public priceUpdateWindow = 20;
+    uint256 public UPDATE_RATE_PERMIL = 50;
 
     constructor(address _peg) {
         peg = _peg;
@@ -50,42 +48,24 @@ abstract contract PriceAware is RoleAware {
         UPDATE_RATE_PERMIL = rate;
     }
 
-    function setUpdateMaxPegAmount(uint256 amount) external onlyOwnerExec {
-        UPDATE_MAX_PEG_AMOUNT = amount;
-    }
-
-    function setUpdateMinPegAmount(uint256 amount) external onlyOwnerExec {
-        UPDATE_MIN_PEG_AMOUNT = amount;
-    }
-
     /// Get current price of token in peg
     function getCurrentPriceInPeg(
         address token,
-        uint256 inAmount,
-        bool forceCurBlock
+        uint256 inAmount
     ) public returns (uint256) {
-        TokenPrice storage tokenPrice = tokenPrices[token];
-        if (forceCurBlock) {
-            if (
-                block.number - tokenPrice.blockLastUpdated > priceUpdateWindow
-            ) {
+        if (token == peg) {
+            return inAmount;
+        } else {
+            TokenPrice storage tokenPrice = tokenPrices[token];
+
+            if (block.number - tokenPrice.blockLastUpdated > priceUpdateWindow
+                || tokenPrice.tokenPerRefAmount == 0) {
                 // update the currently cached price
-                return getPriceFromAMM(token, inAmount);
-            } else {
-                // just get the current price from AMM
-                return viewCurrentPriceInPeg(token, inAmount);
+                getPriceFromAMM(tokenPrice);
             }
-        } else if (tokenPrice.tokenPer1k == 0) {
-            // do the best we can if it's at zero
-            return getPriceFromAMM(token, inAmount);
-        }
 
-        if (block.number - tokenPrice.blockLastUpdated > priceUpdateWindow) {
-            // update the price somewhat
-            getPriceFromAMM(token, inAmount);
+            return (inAmount * REFERENCE_PEG_AMOUNT) / (tokenPrice.tokenPerRefAmount + 1);
         }
-
-        return (inAmount * REFERENCE_PEG_AMOUNT) / tokenPrice.tokenPer1k;
     }
 
     /// Get view of current price of token in peg
@@ -110,54 +90,24 @@ abstract contract PriceAware is RoleAware {
     }
 
     /// @dev retrieves the price from the AMM
-    function getPriceFromAMM(address token, uint256 inAmount)
+    function getPriceFromAMM(TokenPrice storage tokenPrice)
         internal
         virtual
-        returns (uint256)
     {
-        if (token == peg) {
-            return inAmount;
-        } else {
-            TokenPrice storage tokenPrice = tokenPrices[token];
-            (uint256[] memory pathAmounts, ) =
-                UniswapStyleLib.getAmountsOut(
-                    inAmount,
-                    tokenPrice.amms,
-                    tokenPrice.liquidationTokens
-                );
-            uint256 outAmount = pathAmounts[pathAmounts.length - 1];
-
-            if (
-                outAmount > UPDATE_MIN_PEG_AMOUNT &&
-                outAmount < UPDATE_MAX_PEG_AMOUNT
-            ) {
-                setPriceVal(tokenPrice, inAmount, outAmount);
-            }
-
-            return outAmount;
-        }
+        (uint256[] memory pathAmounts, ) =
+            UniswapStyleLib.getAmountsIn(
+                REFERENCE_PEG_AMOUNT,
+                tokenPrice.amms,
+                tokenPrice.liquidationTokens
+            );
+        _setPriceVal(tokenPrice, pathAmounts[0], UPDATE_RATE_PERMIL);
     }
 
-    function setPriceVal(
-        TokenPrice storage tokenPrice,
-        uint256 inAmount,
-        uint256 outAmount
-    ) internal {
-        _setPriceVal(tokenPrice, inAmount, outAmount, UPDATE_RATE_PERMIL);
-        tokenPrice.blockLastUpdated = block.number;
-    }
-
-    function _setPriceVal(
-        TokenPrice storage tokenPrice,
-        uint256 inAmount,
-        uint256 outAmount,
-        uint256 weightPerMil
-    ) internal {
-        uint256 updatePer1k = (REFERENCE_PEG_AMOUNT * inAmount) / (outAmount + 1);
-        tokenPrice.tokenPer1k =
-            (tokenPrice.tokenPer1k *
+    function _setPriceVal(TokenPrice storage tokenPrice, uint256 updatePerRefAmount, uint256 weightPerMil) internal {
+        tokenPrice.tokenPerRefAmount =
+            (tokenPrice.tokenPerRefAmount *
                 (1000 - weightPerMil) +
-                updatePer1k *
+                updatePerRefAmount *
                 weightPerMil) /
             1000;
     }
@@ -197,7 +147,7 @@ abstract contract PriceAware is RoleAware {
                 UniswapStyleLib.getAmountsIn(REFERENCE_PEG_AMOUNT, amms, tokens);
             uint256 inAmount = pathAmounts[0];
 
-            _setPriceVal(tokenPrice, inAmount, REFERENCE_PEG_AMOUNT, 1000);
+            _setPriceVal(tokenPrice, inAmount, 1000);
         }
     }
 

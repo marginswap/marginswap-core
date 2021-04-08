@@ -54,8 +54,8 @@ abstract contract IsolatedMarginAccounts is RoleAware {
         internal
         returns (bool)
     {
-        uint256 loan = loanInPeg(account, false);
-        uint256 holdings = holdingInPeg(account, false);
+        uint256 loan = loanInPeg(account);
+        uint256 holdings = holdingInPeg(account);
 
         // The following condition should hold:
         // holdings / loan >= leveragePercent / (leveragePercent - 100)
@@ -79,8 +79,8 @@ abstract contract IsolatedMarginAccounts is RoleAware {
         internal
         returns (bool)
     {
-        uint256 loan = loanInPeg(account, true);
-        uint256 holdings = holdingInPeg(account, true);
+        uint256 loan = loanInPeg(account);
+        uint256 holdings = holdingInPeg(account);
         // The following should hold:
         // holdings / loan >= 1.1
         // => holdings >= loan * 1.1
@@ -89,27 +89,23 @@ abstract contract IsolatedMarginAccounts is RoleAware {
 
     /// @dev calculate loan in reference currency
     function loanInPeg(
-        IsolatedMarginAccount storage account,
-        bool forceCurBlock
+        IsolatedMarginAccount storage account
     ) internal returns (uint256) {
         return
             PriceAware(price()).getCurrentPriceInPeg(
                 borrowToken,
-                account.borrowed,
-                forceCurBlock
+                account.borrowed
             );
     }
 
     /// @dev calculate loan in reference currency
     function holdingInPeg(
-        IsolatedMarginAccount storage account,
-        bool forceCurBlock
+        IsolatedMarginAccount storage account
     ) internal returns (uint256) {
         return
             PriceAware(price()).getCurrentPriceInPeg(
                 holdingToken,
-                account.holding,
-                forceCurBlock
+                account.holding
             );
     }
 
