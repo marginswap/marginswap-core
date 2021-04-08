@@ -29,6 +29,7 @@ library UniswapStyleLib {
         (address token0, ) = sortTokens(tokenA, tokenB);
         (uint256 reserve0, uint256 reserve1, ) =
             IUniswapV2Pair(pair).getReserves();
+
         (reserveA, reserveB) = tokenA == token0
             ? (reserve0, reserve1)
             : (reserve1, reserve0);
@@ -63,6 +64,7 @@ library UniswapStyleLib {
             "UniswapV2Library: INSUFFICIENT_LIQUIDITY"
         );
         uint256 numerator = reserveIn * amountOut * 1_000;
+
         uint256 denominator = (reserveOut - amountOut) - 997;
         amountIn = (numerator / denominator) + 1;
     }

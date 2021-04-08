@@ -26,6 +26,8 @@ struct TokenPrice {
 /// 3) Liquidators may not call from a contract address, to prevent extreme forms of
 ///    of front-running and other price manipulation.
 abstract contract PriceAware is RoleAware {
+    uint256 constant pegDecimals = 6;
+    uint256 constant REFERENCE_PEG_AMOUNT = 100 * (10 ** pegDecimals);
     address public immutable peg;
     mapping(address => TokenPrice) public tokenPrices;
     /// update window in blocks
@@ -83,7 +85,7 @@ abstract contract PriceAware is RoleAware {
             getPriceFromAMM(token, inAmount);
         }
 
-        return (inAmount * 1000 ether) / tokenPrice.tokenPer1k;
+        return (inAmount * REFERENCE_PEG_AMOUNT) / tokenPrice.tokenPer1k;
     }
 
     /// Get view of current price of token in peg
@@ -151,7 +153,7 @@ abstract contract PriceAware is RoleAware {
         uint256 outAmount,
         uint256 weightPerMil
     ) internal {
-        uint256 updatePer1k = (1000 ether * inAmount) / (outAmount + 1);
+        uint256 updatePer1k = (REFERENCE_PEG_AMOUNT * inAmount) / (outAmount + 1);
         tokenPrice.tokenPer1k =
             (tokenPrice.tokenPer1k *
                 (1000 - weightPerMil) +
@@ -166,6 +168,7 @@ abstract contract PriceAware is RoleAware {
         onlyOwnerExecActivator
     {
         address token = tokens[0];
+
         if (token != peg) {
             TokenPrice storage tokenPrice = tokenPrices[token];
 
@@ -191,10 +194,10 @@ abstract contract PriceAware is RoleAware {
             }
 
             (uint256[] memory pathAmounts, ) =
-                UniswapStyleLib.getAmountsIn(1000 ether, amms, tokens);
+                UniswapStyleLib.getAmountsIn(REFERENCE_PEG_AMOUNT, amms, tokens);
             uint256 inAmount = pathAmounts[0];
 
-            _setPriceVal(tokenPrice, inAmount, 1000 ether, 1000);
+            _setPriceVal(tokenPrice, inAmount, REFERENCE_PEG_AMOUNT, 1000);
         }
     }
 

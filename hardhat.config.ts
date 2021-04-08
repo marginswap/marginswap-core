@@ -1,4 +1,4 @@
-import { task } from 'hardhat/config';
+import { task, subtask } from 'hardhat/config';
 import '@nomiclabs/hardhat-waffle';
 import * as fs from 'fs';
 import 'hardhat-deploy';
@@ -9,6 +9,14 @@ import * as types from 'hardhat/internal/core/params/argumentTypes';
 import { Deployment } from 'hardhat-deploy/dist/types';
 import 'hardhat-contract-sizer';
 import '@nomiclabs/hardhat-solhint';
+
+import {
+  TASK_NODE,
+  TASK_TEST,
+  TASK_NODE_GET_PROVIDER,
+  TASK_NODE_SERVER_READY,
+} from 'hardhat/builtin-tasks/task-names';
+import { HardhatRuntimeEnvironment } from 'hardhat/types';
 
 // ChainIds
 const MAINNET = 1;
@@ -27,7 +35,6 @@ const USDC_ADDRESS = '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48';
 const LIQUIDITY_TOKEN = '0x9d640080af7c81911d87632a7d09cc4ab6b133ac';
 const ROPSTEN_LIQUI_TOKEN = '0xc4c79A0e1C7A9c79f1e943E3a5bEc65396a5434a';
 const MAIN_DEPLOYER = '0x23292e9BA8434e59E6BAC1907bA7425211c4DE27';
-const USDT_ADDRESS = '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2';
 
 // roles
 
@@ -89,7 +96,7 @@ task('list-deployments', 'List all the deployed contracts for a network', async 
   }
 });
 
-task('export-addresses', 'Export deployment addresses to JSON file', async (args, hre) => {
+async function exportAddresses(args, hre:HardhatRuntimeEnvironment) {
   const addresses = require('./build/addresses');
   const networkAddresses = Object.entries(await hre.deployments.all()).map(
     ([name, deployRecord]: [string, Deployment]) => {
@@ -98,10 +105,20 @@ task('export-addresses', 'Export deployment addresses to JSON file', async (args
   );
   addresses[hre.network.name] = Object.fromEntries(networkAddresses);
   const stringRepresentation = JSON.stringify(addresses, null, 2);
+  console.log(`Wrote ./build/addresses.json`);
   console.log(addresses);
 
   fs.writeFileSync('./build/addresses.json', stringRepresentation);
+}
+
+task('export-addresses', 'Export deployment addresses to JSON file', exportAddresses);
+
+
+subtask(TASK_NODE_SERVER_READY).setAction(async (args, hre, runSuper) => {
+  await runSuper(args);
+  await exportAddresses(args, hre);
 });
+
 
 task('print-network', 'Print network name', async (args, hre) => console.log(hre.network.name));
 
@@ -175,7 +192,7 @@ export default {
       42: '0xd0a1e359811322d97991e03f863a0c30c2cf029c'
     },
     usdt: {
-      default: USDT_ADDRESS
+      default: '0xdAC17F958D2ee523a2206206994597C13D831ec7'
     }
   }
 };

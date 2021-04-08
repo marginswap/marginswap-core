@@ -24,10 +24,9 @@ const deploy: DeployFunction = async function ({
       address: weth
     });
   } else {
-    // TODO switch paths to USDT as well
     save('Peg', {
       abi: ERC20PresetMinterPauser.abi,
-      address: weth
+      address: usdt
     });
     /*
     await deploy('Peg', {
@@ -38,6 +37,8 @@ const deploy: DeployFunction = async function ({
       skipIfAlreadyDeployed: true
     });*/
   }
+  console.log(`Peg deployed at ${(await deployments.get('Peg')).address}`);
 };
+
 deploy.tags = ['Peg', 'local'];
 export default deploy;
