@@ -92,18 +92,21 @@ task('list-deployments', 'List all the deployed contracts for a network', async 
 });
 
 async function exportAddresses(args, hre: HardhatRuntimeEnvironment) {
-  const addresses = require('./build/addresses');
+  let addresses: Record<string, string> = {};
+  const addressesPath = path.join(__dirname, './build/addresses.json');
+  if (fs.existsSync(addressesPath)) {
+    addresses = JSON.parse((await fs.promises.readFile(addressesPath)).toString());
+  }
   const networkAddresses = Object.entries(await hre.deployments.all()).map(
     ([name, deployRecord]: [string, Deployment]) => {
       return [name, deployRecord.address];
     }
   );
-  addresses[hre.network.name] = Object.fromEntries(networkAddresses);
+  addresses[hre.network.name === 'localhost' ? 'unknown' : hre.network.name] = Object.fromEntries(networkAddresses);
   const stringRepresentation = JSON.stringify(addresses, null, 2);
-  console.log(`Wrote ./build/addresses.json`);
-  console.log(addresses);
 
-  fs.writeFileSync('./build/addresses.json', stringRepresentation);
+  await fs.promises.writeFile(addressesPath, stringRepresentation);
+  console.log(`Wrote ${addressesPath}`);
 }
 
 task('export-addresses', 'Export deployment addresses to JSON file', exportAddresses);
