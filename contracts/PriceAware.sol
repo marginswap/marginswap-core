@@ -78,14 +78,7 @@ abstract contract PriceAware is RoleAware {
             return inAmount;
         } else {
             TokenPrice storage tokenPrice = tokenPrices[token];
-            (uint256[] memory pathAmounts, ) =
-                UniswapStyleLib.getAmountsOut(
-                    inAmount,
-                    tokenPrice.amms,
-                    tokenPrice.liquidationTokens
-                );
-            uint256 outAmount = pathAmounts[pathAmounts.length - 1];
-            return outAmount;
+            return (inAmount * REFERENCE_PEG_AMOUNT) / (tokenPrice.tokenPerRefAmount + 1);
         }
     }
 
