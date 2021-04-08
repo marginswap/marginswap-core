@@ -1,8 +1,7 @@
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
 import { DeployFunction } from 'hardhat-deploy/types';
 import { ethers } from 'hardhat';
-import { getCreate2Address } from '@ethersproject/address';
-import { pack, keccak256 } from '@ethersproject/solidity';
+//import ERC20PresetMinterPauser from '@openzeppelin/contracts/build/contracts/ERC20PresetMinterPauser.json';
 
 const MFI_ADDRESS = '0xAa4e3edb11AFa93c41db59842b29de64b72E355B';
 const TOKEN_ACTIVATOR = 9;
@@ -159,6 +158,26 @@ const deploy: DeployFunction = async function ({
     console.log(`Executing token activation ${TokenActivation.address} via dependency controller ${dc.address}`);
     const tx = await dc.executeAsOwner(TokenActivation.address);
     console.log(`ran ${TokenActivation.address} as owner, tx: ${tx.hash}`);
+  }
+
+  const TREASURY = '0xF9D89Dc506c55738379C44Dc27205fD6f68e1974';
+  //const TREASURY = '0x16F3Fc1E4BA9d70f47387b902fa5d21020b5C6B5';
+  // if we are impersonating, steal some crypto
+  if (!network.live) {
+    await network.provider.request({
+      method: 'hardhat_impersonateAccount',
+      params: [TREASURY]
+    });
+
+    const signer = await ethers.provider.getSigner(TREASURY);
+    const tx = await signer.sendTransaction({ to: deployer, value: ethers.utils.parseEther('10') });
+    console.log(`Sending eth from treasury to ${deployer}:`);
+    console.log(tx);
+
+    // const wbtc = await ethers.getContractAt(ERC20PresetMinterPauser.abi, tokens['WBTC']);
+    // tx = await (wbtc.connect(signer).transfer(deployer, ethers.utils.parseEther("50")));
+    // console.log(`Sending wbtc from treasury to ${deployer}:`);
+    // console.log(tx);
   }
 };
 
