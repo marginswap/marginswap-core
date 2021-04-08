@@ -10,12 +10,7 @@ import { Deployment } from 'hardhat-deploy/dist/types';
 import 'hardhat-contract-sizer';
 import '@nomiclabs/hardhat-solhint';
 
-import {
-  TASK_NODE,
-  TASK_TEST,
-  TASK_NODE_GET_PROVIDER,
-  TASK_NODE_SERVER_READY,
-} from 'hardhat/builtin-tasks/task-names';
+import { TASK_NODE, TASK_TEST, TASK_NODE_GET_PROVIDER, TASK_NODE_SERVER_READY } from 'hardhat/builtin-tasks/task-names';
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
 
 // ChainIds
@@ -96,29 +91,30 @@ task('list-deployments', 'List all the deployed contracts for a network', async 
   }
 });
 
-async function exportAddresses(args, hre:HardhatRuntimeEnvironment) {
-  const addresses = require('./build/addresses');
+async function exportAddresses(args, hre: HardhatRuntimeEnvironment) {
+  let addresses: Record<string, string> = {};
+  const addressesPath = path.join(__dirname, './build/addresses.json');
+  if (fs.existsSync(addressesPath)) {
+    addresses = JSON.parse((await fs.promises.readFile(addressesPath)).toString());
+  }
   const networkAddresses = Object.entries(await hre.deployments.all()).map(
     ([name, deployRecord]: [string, Deployment]) => {
       return [name, deployRecord.address];
     }
   );
-  addresses[hre.network.name] = Object.fromEntries(networkAddresses);
+  addresses[hre.network.name === 'localhost' ? 'unknown' : hre.network.name] = Object.fromEntries(networkAddresses);
   const stringRepresentation = JSON.stringify(addresses, null, 2);
-  console.log(`Wrote ./build/addresses.json`);
-  console.log(addresses);
 
-  fs.writeFileSync('./build/addresses.json', stringRepresentation);
+  await fs.promises.writeFile(addressesPath, stringRepresentation);
+  console.log(`Wrote ${addressesPath}`);
 }
 
 task('export-addresses', 'Export deployment addresses to JSON file', exportAddresses);
-
 
 subtask(TASK_NODE_SERVER_READY).setAction(async (args, hre, runSuper) => {
   await runSuper(args);
   await exportAddresses(args, hre);
 });
-
 
 task('print-network', 'Print network name', async (args, hre) => console.log(hre.network.name));
 
