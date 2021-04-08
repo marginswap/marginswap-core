@@ -91,7 +91,7 @@ contract Lending is
             bondMeta.yieldAccumulator = YieldAccumulator({
                 accumulatorFP: FP32,
                 lastUpdated: block.timestamp,
-                hourlyYieldFP: (FP32 * (100 + aprPercent)) / 100 / (24 * 365)
+                hourlyYieldFP: FP32 + (FP32 * aprPercent) / 100 / (24 * 365)
             });
             bondMeta.buyingSpeed = 1;
             bondMeta.withdrawingSpeed = 1;

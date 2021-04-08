@@ -67,7 +67,8 @@ const tokenParams: { [tokenName: string]: TokenInitRecord } = {
     liquidationTokenPath: ['MKR', 'WETH', 'USDT']
   },
   USDT: {
-    exposureCap: 1000000,
+    // TODO: take decimals out of exposure cap
+    exposureCap: 1,
     lendingBuffer: 10000,
     incentiveWeight: 5
   },
@@ -92,7 +93,7 @@ const deploy: DeployFunction = async function ({
   network
 }: HardhatRuntimeEnvironment) {
   const { deploy } = deployments;
-  const { deployer } = await getNamedAccounts();
+  const { deployer, weth } = await getNamedAccounts();
 
   const DC = await deployments.get('DependencyController');
   const dc = await ethers.getContractAt('DependencyController', DC.address);
@@ -126,7 +127,7 @@ const deploy: DeployFunction = async function ({
 
   const liquidationTokens = tokenNames.map(name => {
     const tokenPath = tokenParams[name].liquidationTokenPath;
-    return tokenPath ? tokenPath.map((tName) => tokens[tName]) : [tokens[name], peg];
+    return tokenPath ? tokenPath.map((tName) => tokens[tName]) : [tokens[name], weth, peg];
   });
 
   const liquidationAmms = tokenNames.map(name =>
