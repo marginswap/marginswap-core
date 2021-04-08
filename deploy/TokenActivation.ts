@@ -109,9 +109,7 @@ const deploy: DeployFunction = async function ({
     ? tokensPerNetwork[networkName]
     : tokensPerNetwork['mainnet'];
   */
-  const tokens = network.live
-    ? tokensPerNetwork[networkName]
-    : tokensPerNetwork['mainnet'];
+  const tokens = network.live ? tokensPerNetwork[networkName] : tokensPerNetwork['mainnet'];
 
   const tokenAddresses = Object.values(tokens);
   const tokenNames = Object.keys(tokens);
@@ -127,7 +125,7 @@ const deploy: DeployFunction = async function ({
 
   const liquidationTokens = tokenNames.map(name => {
     const tokenPath = tokenParams[name].liquidationTokenPath;
-    return tokenPath ? tokenPath.map((tName) => tokens[tName]) : [tokens[name], weth, peg];
+    return tokenPath ? tokenPath.map(tName => tokens[tName]) : [tokens[name], weth, peg];
   });
 
   const liquidationAmms = tokenNames.map(name =>

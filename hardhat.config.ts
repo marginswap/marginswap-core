@@ -10,12 +10,7 @@ import { Deployment } from 'hardhat-deploy/dist/types';
 import 'hardhat-contract-sizer';
 import '@nomiclabs/hardhat-solhint';
 
-import {
-  TASK_NODE,
-  TASK_TEST,
-  TASK_NODE_GET_PROVIDER,
-  TASK_NODE_SERVER_READY,
-} from 'hardhat/builtin-tasks/task-names';
+import { TASK_NODE, TASK_TEST, TASK_NODE_GET_PROVIDER, TASK_NODE_SERVER_READY } from 'hardhat/builtin-tasks/task-names';
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
 
 // ChainIds
@@ -96,7 +91,7 @@ task('list-deployments', 'List all the deployed contracts for a network', async 
   }
 });
 
-async function exportAddresses(args, hre:HardhatRuntimeEnvironment) {
+async function exportAddresses(args, hre: HardhatRuntimeEnvironment) {
   const addresses = require('./build/addresses');
   const networkAddresses = Object.entries(await hre.deployments.all()).map(
     ([name, deployRecord]: [string, Deployment]) => {
@@ -113,12 +108,10 @@ async function exportAddresses(args, hre:HardhatRuntimeEnvironment) {
 
 task('export-addresses', 'Export deployment addresses to JSON file', exportAddresses);
 
-
 subtask(TASK_NODE_SERVER_READY).setAction(async (args, hre, runSuper) => {
   await runSuper(args);
   await exportAddresses(args, hre);
 });
-
 
 task('print-network', 'Print network name', async (args, hre) => console.log(hre.network.name));
 

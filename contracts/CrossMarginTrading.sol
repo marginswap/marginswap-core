@@ -229,7 +229,7 @@ contract CrossMarginTrading is CrossMarginLiquidation, IMarginTrading {
         );
         CrossMarginAccount storage account = marginAccounts[trader];
         require(
-            loanInPeg(account, false) == 0,
+            loanInPeg(account) == 0,
             "Can't liquidate currently borrowing account"
         );
 

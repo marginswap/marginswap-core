@@ -89,8 +89,8 @@ abstract contract CrossMarginAccounts is RoleAware, PriceAware {
         internal
         returns (bool)
     {
-        uint256 loan = loanInPeg(account, false);
-        uint256 holdings = holdingsInPeg(account, false);
+        uint256 loan = loanInPeg(account);
+        uint256 holdings = holdingsInPeg(account);
         // The following condition should hold:
         // holdings / loan >= leveragePercent / (leveragePercent - 100)
         // =>
@@ -156,7 +156,7 @@ abstract contract CrossMarginAccounts is RoleAware, PriceAware {
     }
 
     /// @dev calculate total loan in reference currency, including compound interest
-    function loanInPeg(CrossMarginAccount storage account, bool forceCurBlock)
+    function loanInPeg(CrossMarginAccount storage account)
         internal
         returns (uint256)
     {
@@ -164,21 +164,18 @@ abstract contract CrossMarginAccounts is RoleAware, PriceAware {
             sumTokensInPegWithYield(
                 account.borrowTokens,
                 account.borrowed,
-                account.borrowedYieldQuotientsFP,
-                forceCurBlock
+                account.borrowedYieldQuotientsFP
             );
     }
 
     /// @dev total of assets of account, expressed in reference currency
     function holdingsInPeg(
-        CrossMarginAccount storage account,
-        bool forceCurBlock
+        CrossMarginAccount storage account
     ) internal returns (uint256) {
         return
             sumTokensInPeg(
                 account.holdingTokens,
-                account.holdings,
-                forceCurBlock
+                account.holdings
             );
     }
 
@@ -187,8 +184,8 @@ abstract contract CrossMarginAccounts is RoleAware, PriceAware {
         internal
         returns (bool)
     {
-        uint256 loan = loanInPeg(account, true);
-        uint256 holdings = holdingsInPeg(account, true);
+        uint256 loan = loanInPeg(account);
+        uint256 holdings = holdingsInPeg(account);
         // The following should hold:
         // holdings / loan >= 1.1
         // => holdings >= loan * 1.1
@@ -198,16 +195,14 @@ abstract contract CrossMarginAccounts is RoleAware, PriceAware {
     /// @dev go through list of tokens and their amounts, summing up
     function sumTokensInPeg(
         address[] storage tokens,
-        mapping(address => uint256) storage amounts,
-        bool forceCurBlock
+        mapping(address => uint256) storage amounts
     ) internal returns (uint256 totalPeg) {
         uint256 len = tokens.length;
         for (uint256 tokenId; tokenId < len; tokenId++) {
             address token = tokens[tokenId];
             totalPeg += PriceAware.getCurrentPriceInPeg(
                 token,
-                amounts[token],
-                forceCurBlock
+                amounts[token]
             );
         }
     }
@@ -228,8 +223,7 @@ abstract contract CrossMarginAccounts is RoleAware, PriceAware {
     function sumTokensInPegWithYield(
         address[] storage tokens,
         mapping(address => uint256) storage amounts,
-        mapping(address => uint256) storage yieldQuotientsFP,
-        bool forceCurBlock
+        mapping(address => uint256) storage yieldQuotientsFP
     ) internal returns (uint256 totalPeg) {
         uint256 len = tokens.length;
         for (uint256 tokenId; tokenId < len; tokenId++) {
@@ -237,8 +231,7 @@ abstract contract CrossMarginAccounts is RoleAware, PriceAware {
             totalPeg += yieldTokenInPeg(
                 token,
                 amounts[token],
-                yieldQuotientsFP,
-                forceCurBlock
+                yieldQuotientsFP
             );
         }
     }
@@ -264,8 +257,7 @@ abstract contract CrossMarginAccounts is RoleAware, PriceAware {
     function yieldTokenInPeg(
         address token,
         uint256 amount,
-        mapping(address => uint256) storage yieldQuotientsFP,
-        bool forceCurBlock
+        mapping(address => uint256) storage yieldQuotientsFP
     ) internal returns (uint256) {
         uint256 yieldFP =
             Lending(lending()).viewAccumulatedBorrowingYieldFP(token);
@@ -274,8 +266,7 @@ abstract contract CrossMarginAccounts is RoleAware, PriceAware {
         return
             PriceAware.getCurrentPriceInPeg(
                 token,
-                amountInToken,
-                forceCurBlock
+                amountInToken
             );
     }
 
