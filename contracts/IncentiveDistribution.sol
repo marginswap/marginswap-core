@@ -224,10 +224,6 @@ contract IncentiveDistribution is RoleAware {
         external
         returns (uint256 withdrawAmount)
     {
-        require(
-            isIncentiveReporter(msg.sender),
-            "Contract not authorized to report incentives"
-        );
 
         updateDayTotals();
 
