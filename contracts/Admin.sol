@@ -173,15 +173,11 @@ contract Admin is RoleAware {
             (block.number - startBlock) * maintenanceStakePerBlock >=
             currentStake
         ) {
-            if (maintenanceStakePerBlock > currentStake) {
-                // skip
-                staker = nextMaintenanceStaker[staker];
-                currentStake = getMaintenanceStakerStake(staker);
-            } else {
+            if (currentStake >= maintenanceStakePerBlock) {
                 startBlock += currentStake / maintenanceStakePerBlock;
-                staker = nextMaintenanceStaker[staker];
-                currentStake = getMaintenanceStakerStake(staker);
             }
+            staker = nextMaintenanceStaker[staker];
+            currentStake = getMaintenanceStakerStake(staker);
         }
     }
 
