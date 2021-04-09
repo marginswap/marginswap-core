@@ -80,7 +80,6 @@ const tokenParams: { [tokenName: string]: TokenInitRecord } = {
 
 function encodeAMMPath(ammPath: AMMs[]) {
   const encoded = ethers.utils.hexlify(ammPath.map((amm: AMMs) => (amm == AMMs.UNISWAP ? 0 : 1)));
-  console.log(encoded);
   return `${encoded}${'0'.repeat(64 + 2 - encoded.length)}`;
 }
 
@@ -149,8 +148,6 @@ const deploy: DeployFunction = async function ({
     liquidationTokens
   ];
 
-  console.log(args);
-
   const TokenActivation = await deploy('TokenActivation', {
     from: deployer,
     args,
@@ -178,12 +175,10 @@ const deploy: DeployFunction = async function ({
     const signer = await ethers.provider.getSigner(TREASURY);
     let tx = await signer.sendTransaction({ to: deployer, value: ethers.utils.parseEther('10') });
     console.log(`Sending eth from treasury to ${deployer}:`);
-    console.log(tx);
 
     const dai = await ethers.getContractAt(ERC20PresetMinterPauser.abi, tokens['DAI']);
     tx = await dai.connect(signer).transfer(deployer, ethers.utils.parseEther('200'));
     console.log(`Sending dai from treasury to ${deployer}:`);
-    console.log(tx);
 
     // const usdt = await ethers.getContractAt(ERC20PresetMinterPauser.abi, tokens['USDT']);
     // tx = await usdt.connect(signer).transfer(deployer, ethers.utils.parseEther('50'));
