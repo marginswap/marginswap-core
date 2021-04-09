@@ -17,6 +17,8 @@ contract Admin is RoleAware {
     mapping(address => uint256) public stakes;
     uint256 public totalStakes;
 
+    uint256 public constant mfiStakeTranche = 1;
+
     uint256 public maintenanceStakePerBlock = 10 ether;
     mapping(address => address) public nextMaintenanceStaker;
     mapping(address => mapping(address => bool)) public maintenanceDelegateTo;
@@ -66,7 +68,7 @@ contract Admin is RoleAware {
         totalStakes += amount;
 
         IncentiveDistribution(incentiveDistributor()).addToClaimAmount(
-            1,
+            mfiStakeTranche,
             holder,
             amount
         );
@@ -88,7 +90,7 @@ contract Admin is RoleAware {
         Fund(fund()).withdraw(MFI, recipient, amount);
 
         IncentiveDistribution(incentiveDistributor()).subtractFromClaimAmount(
-            1,
+            mfiStakeTranche,
             holder,
             amount
         );
