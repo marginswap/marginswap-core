@@ -8,9 +8,6 @@ import "./IncentivizedHolder.sol";
 
 // TODO activate bonds for lending
 
-// TODO disburse token if isolated bond issuer
-// and if isolated issuer, allow for haircuts
-
 /// @title Manage lending for a variety of bond issuers
 contract Lending is
     RoleAware,

@@ -32,7 +32,7 @@ contract CrossMarginTrading is CrossMarginLiquidation, IMarginTrading {
     }
 
     /// @dev admin function to set leverage
-    function setLeverage(uint256 _leveragePercent) external onlyOwnerExec {
+    function setLeveragePercent(uint256 _leveragePercent) external onlyOwnerExec {
         leveragePercent = _leveragePercent;
     }
 

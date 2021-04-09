@@ -320,7 +320,7 @@ contract MarginRouter is RoleAware, IncentivizedHolder, BaseRouter {
         address[] memory pairs,
         address[] calldata tokens
     ) internal {
-        // TODO minimum trade?
+
         require(
             amounts[0] <= amountInMax,
             "MarginRouter: EXCESSIVE_INPUT_AMOUNT"
