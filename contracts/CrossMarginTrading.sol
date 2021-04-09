@@ -215,7 +215,13 @@ contract CrossMarginTrading is CrossMarginLiquidation, IMarginTrading {
 
             borrow(account, tokenFrom, borrowAmount);
         }
-        adjustAmounts(account, tokenFrom, tokenTo, sellAmount, outAmount);
+        adjustAmounts(
+            account,
+            tokenFrom,
+            tokenTo,
+            sellAmount,
+            outAmount - extinguishableDebt
+        );
     }
 
     /// @dev can get called by router to register the dissolution of an account
