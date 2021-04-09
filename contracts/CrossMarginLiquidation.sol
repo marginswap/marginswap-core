@@ -83,9 +83,10 @@ abstract contract CrossMarginLiquidation is CrossMarginAccounts {
             CrossMarginAccount storage account = marginAccounts[traderAddress];
             if (belowMaintenanceThreshold(account)) {
                 tradersToLiquidate.push(traderAddress);
+                uint256 len = account.holdingTokens.length;
                 for (
                     uint256 sellIdx = 0;
-                    account.holdingTokens.length > sellIdx;
+                    len > sellIdx;
                     sellIdx++
                 ) {
                     address token = account.holdingTokens[sellIdx];
@@ -100,9 +101,11 @@ abstract contract CrossMarginLiquidation is CrossMarginAccounts {
                         liquidation.sell += account.holdings[token];
                     }
                 }
+
+                len = account.borrowTokens.length;
                 for (
                     uint256 buyIdx = 0;
-                    account.borrowTokens.length > buyIdx;
+                    len > buyIdx;
                     buyIdx++
                 ) {
                     address token = account.borrowTokens[buyIdx];
@@ -190,7 +193,8 @@ abstract contract CrossMarginLiquidation is CrossMarginAccounts {
     }
 
     function liquidateFromPeg() internal returns (uint256 pegAmount) {
-        for (uint256 tokenIdx = 0; buyTokens.length > tokenIdx; tokenIdx++) {
+        uint256 len = buyTokens.length;
+        for (uint256 tokenIdx = 0; len > tokenIdx; tokenIdx++) {
             address buyToken = buyTokens[tokenIdx];
             Liquidation storage liq = liquidationAmounts[buyToken];
             if (liq.buy > liq.sell) {
@@ -205,9 +209,10 @@ abstract contract CrossMarginLiquidation is CrossMarginAccounts {
     }
 
     function liquidateToPeg() internal returns (uint256 pegAmount) {
+        uint256 len = sellTokens.length;
         for (
             uint256 tokenIndex = 0;
-            sellTokens.length > tokenIndex;
+            len > tokenIndex;
             tokenIndex++
         ) {
             address token = sellTokens[tokenIndex];
