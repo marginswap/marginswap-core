@@ -187,7 +187,7 @@ abstract contract CrossMarginAccounts is RoleAware, PriceAware {
         // The following should hold:
         // holdings / loan >= 1.1
         // => holdings >= loan * 1.1
-        return 100 * holdings >= liquidationThresholdPercent * loan;
+        return 100 * holdings < liquidationThresholdPercent * loan;
     }
 
     /// @dev go through list of tokens and their amounts, summing up
