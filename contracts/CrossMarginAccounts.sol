@@ -27,10 +27,10 @@ struct CrossMarginAccount {
 
 abstract contract CrossMarginAccounts is RoleAware, PriceAware {
     /// @dev gets used in calculating how much accounts can borrow
-    uint256 public leveragePercent;
+    uint256 public leveragePercent = 300;
 
     /// @dev percentage of assets held per assets borrowed at which to liquidate
-    uint256 public liquidationThresholdPercent;
+    uint256 public liquidationThresholdPercent = 115;
 
     /// @dev record of all cross margin accounts
     mapping(address => CrossMarginAccount) internal marginAccounts;
@@ -40,7 +40,7 @@ abstract contract CrossMarginAccounts is RoleAware, PriceAware {
     mapping(address => uint256) public totalShort;
     /// @dev tracks total of long positions per token
     mapping(address => uint256) public totalLong;
-    uint256 public coolingOffPeriod;
+    uint256 public coolingOffPeriod = 20;
 
     /// @dev add an asset to be held by account
     function addHolding(
@@ -50,6 +50,7 @@ abstract contract CrossMarginAccounts is RoleAware, PriceAware {
     ) internal {
         if (!hasHoldingToken(account, token)) {
             account.holdingTokens.push(token);
+            account.holdsToken[token] = true;
         }
 
         account.holdings[token] += depositAmount;
@@ -81,7 +82,7 @@ abstract contract CrossMarginAccounts is RoleAware, PriceAware {
 
         addHolding(account, borrowToken, borrowAmount);
 
-        require(positiveBalance(account), "Can't borrow: insufficient balance");
+        require(positiveBalance(account), "Insufficient balance");
     }
 
     /// @dev checks whether account is in the black, deposit + earnings relative to borrowed
@@ -169,14 +170,11 @@ abstract contract CrossMarginAccounts is RoleAware, PriceAware {
     }
 
     /// @dev total of assets of account, expressed in reference currency
-    function holdingsInPeg(
-        CrossMarginAccount storage account
-    ) internal returns (uint256) {
-        return
-            sumTokensInPeg(
-                account.holdingTokens,
-                account.holdings
-            );
+    function holdingsInPeg(CrossMarginAccount storage account)
+        internal
+        returns (uint256)
+    {
+        return sumTokensInPeg(account.holdingTokens, account.holdings);
     }
 
     /// @dev check whether an account can/should be liquidated
@@ -189,7 +187,7 @@ abstract contract CrossMarginAccounts is RoleAware, PriceAware {
         // The following should hold:
         // holdings / loan >= 1.1
         // => holdings >= loan * 1.1
-        return 100 * holdings >= liquidationThresholdPercent * loan;
+        return 100 * holdings < liquidationThresholdPercent * loan;
     }
 
     /// @dev go through list of tokens and their amounts, summing up
@@ -200,10 +198,7 @@ abstract contract CrossMarginAccounts is RoleAware, PriceAware {
         uint256 len = tokens.length;
         for (uint256 tokenId; tokenId < len; tokenId++) {
             address token = tokens[tokenId];
-            totalPeg += PriceAware.getCurrentPriceInPeg(
-                token,
-                amounts[token]
-            );
+            totalPeg += PriceAware.getCurrentPriceInPeg(token, amounts[token]);
         }
     }
 
@@ -263,11 +258,7 @@ abstract contract CrossMarginAccounts is RoleAware, PriceAware {
             Lending(lending()).viewAccumulatedBorrowingYieldFP(token);
         // 1 * FP / FP = 1
         uint256 amountInToken = (amount * yieldFP) / yieldQuotientsFP[token];
-        return
-            PriceAware.getCurrentPriceInPeg(
-                token,
-                amountInToken
-            );
+        return PriceAware.getCurrentPriceInPeg(token, amountInToken);
     }
 
     /// @dev calculate yield for token amount and convert to reference currency

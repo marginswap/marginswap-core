@@ -200,9 +200,10 @@ abstract contract IsolatedMarginLiquidation is IsolatedMarginAccounts {
         // but it gives us the general picture
         liquidationTarget *= (100 + MAINTAINER_CUT_PERCENT) / 100;
         if (liquidationTarget > liquidationReturns) {
-            emit LiquidationShortfall(liquidationTarget - liquidationReturns);
+            uint256 shortfall = liquidationTarget - liquidationReturns;
+            emit LiquidationShortfall(shortfall);
 
-            Lending(lending()).haircut(liquidationTarget - liquidationReturns);
+            Lending(lending()).haircut(shortfall);
         }
 
         address loser = address(0);

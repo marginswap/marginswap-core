@@ -20,12 +20,8 @@ abstract contract IsolatedMarginAccounts is RoleAware {
     bytes32 public amms;
     address[] public liquidationTokens;
 
-    /// update window in blocks
-    uint16 public priceUpdateWindow = 8;
-    uint256 public UPDATE_RATE_PERMIL = 80;
-
     /// @dev percentage of assets held per assets borrowed at which to liquidate
-    uint256 public liquidationThresholdPercent;
+    uint256 public liquidationThresholdPercent = 115;
 
     mapping(address => IsolatedMarginAccount) public marginAccounts;
     uint256 public coolingOffPeriod = 20;
@@ -84,13 +80,14 @@ abstract contract IsolatedMarginAccounts is RoleAware {
         // The following should hold:
         // holdings / loan >= 1.1
         // => holdings >= loan * 1.1
-        return 100 * holdings >= liquidationThresholdPercent * loan;
+        return 100 * holdings < liquidationThresholdPercent * loan;
     }
 
     /// @dev calculate loan in reference currency
-    function loanInPeg(
-        IsolatedMarginAccount storage account
-    ) internal returns (uint256) {
+    function loanInPeg(IsolatedMarginAccount storage account)
+        internal
+        returns (uint256)
+    {
         return
             PriceAware(price()).getCurrentPriceInPeg(
                 borrowToken,
@@ -99,9 +96,10 @@ abstract contract IsolatedMarginAccounts is RoleAware {
     }
 
     /// @dev calculate loan in reference currency
-    function holdingInPeg(
-        IsolatedMarginAccount storage account
-    ) internal returns (uint256) {
+    function holdingInPeg(IsolatedMarginAccount storage account)
+        internal
+        returns (uint256)
+    {
         return
             PriceAware(price()).getCurrentPriceInPeg(
                 holdingToken,

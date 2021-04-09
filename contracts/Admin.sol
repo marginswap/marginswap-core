@@ -17,7 +17,9 @@ contract Admin is RoleAware {
     mapping(address => uint256) public stakes;
     uint256 public totalStakes;
 
-    uint256 public maintenanceStakePerBlock = 10 ether;
+    uint256 public constant mfiStakeTranche = 1;
+
+    uint256 public maintenanceStakePerBlock = 15 ether;
     mapping(address => address) public nextMaintenanceStaker;
     mapping(address => mapping(address => bool)) public maintenanceDelegateTo;
     address public currentMaintenanceStaker;
@@ -32,7 +34,6 @@ contract Admin is RoleAware {
         address _roles
     ) RoleAware(_roles) {
         MFI = _MFI;
-        maintenanceStakePerBlock = 1 ether;
         lockedMFI = _lockedMFI;
 
         // for initialization purposes and to ensure availability of service
@@ -66,7 +67,7 @@ contract Admin is RoleAware {
         totalStakes += amount;
 
         IncentiveDistribution(incentiveDistributor()).addToClaimAmount(
-            1,
+            mfiStakeTranche,
             holder,
             amount
         );
@@ -88,7 +89,7 @@ contract Admin is RoleAware {
         Fund(fund()).withdraw(MFI, recipient, amount);
 
         IncentiveDistribution(incentiveDistributor()).subtractFromClaimAmount(
-            1,
+            mfiStakeTranche,
             holder,
             amount
         );
@@ -171,15 +172,11 @@ contract Admin is RoleAware {
             (block.number - startBlock) * maintenanceStakePerBlock >=
             currentStake
         ) {
-            if (maintenanceStakePerBlock > currentStake) {
-                // skip
-                staker = nextMaintenanceStaker[staker];
-                currentStake = getMaintenanceStakerStake(staker);
-            } else {
+            if (currentStake >= maintenanceStakePerBlock) {
                 startBlock += currentStake / maintenanceStakePerBlock;
-                staker = nextMaintenanceStaker[staker];
-                currentStake = getMaintenanceStakerStake(staker);
             }
+            staker = nextMaintenanceStaker[staker];
+            currentStake = getMaintenanceStakerStake(staker);
         }
     }
 

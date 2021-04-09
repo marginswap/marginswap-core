@@ -32,10 +32,7 @@ contract Fund is RoleAware {
         address depositToken,
         uint256 depositAmount
     ) external {
-        require(
-            isFundTransferer(msg.sender),
-            "Contract not authorized to deposit for user"
-        );
+        require(isFundTransferer(msg.sender), "Unauthorized deposit");
         IERC20(depositToken).safeTransferFrom(
             sender,
             address(this),
@@ -54,16 +51,13 @@ contract Fund is RoleAware {
         address recipient,
         uint256 withdrawalAmount
     ) external {
-        require(
-            isFundTransferer(msg.sender),
-            "Contract not authorized to withdraw"
-        );
+        require(isFundTransferer(msg.sender), "Unauthorized withdraw");
         IERC20(withdrawalToken).safeTransfer(recipient, withdrawalAmount);
     }
 
     // withdrawers role
     function withdrawETH(address recipient, uint256 withdrawalAmount) external {
-        require(isFundTransferer(msg.sender), "Not authorized to withdraw");
+        require(isFundTransferer(msg.sender), "Unauthorized withdraw");
         IWETH(WETH).withdraw(withdrawalAmount);
         Address.sendValue(payable(recipient), withdrawalAmount);
     }

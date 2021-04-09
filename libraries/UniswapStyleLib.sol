@@ -3,8 +3,8 @@ pragma solidity >=0.5.0;
 import "@uniswap/v2-core/contracts/interfaces/IUniswapV2Pair.sol";
 
 library UniswapStyleLib {
-    
-    address constant UNISWAP_FACTORY  = 0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f;
+    address constant UNISWAP_FACTORY =
+        0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f;
     address constant SUSHI_FACTORY = 0xC0AEe478e3658e2610c5F7A4A2E1777cE9e4f2Ac;
 
     // returns sorted token addresses, used to handle return values from pairs sorted in this order
@@ -41,7 +41,7 @@ library UniswapStyleLib {
         uint256 reserveIn,
         uint256 reserveOut
     ) internal pure returns (uint256 amountOut) {
-        require(amountIn > 0, "UniswapV2Library: INSUFFICIENT_INPUT_AMOUNT");
+        require(amountIn > 0, "INSUFFICIENT_INPUT_AMOUNT");
         require(
             reserveIn > 0 && reserveOut > 0,
             "UniswapV2Library: INSUFFICIENT_LIQUIDITY"
@@ -58,7 +58,7 @@ library UniswapStyleLib {
         uint256 reserveIn,
         uint256 reserveOut
     ) internal pure returns (uint256 amountIn) {
-        require(amountOut > 0, "UniswapV2Library: INSUFFICIENT_OUTPUT_AMOUNT");
+        require(amountOut > 0, "INSUFFICIENT_OUTPUT_AMOUNT");
         require(
             reserveIn > 0 && reserveOut > 0,
             "UniswapV2Library: INSUFFICIENT_LIQUIDITY"
@@ -75,18 +75,21 @@ library UniswapStyleLib {
         bytes32 amms,
         address[] memory tokens
     ) internal view returns (uint256[] memory amounts, address[] memory pairs) {
-        require(tokens.length >= 2, "UniswapStyleLib: token path is too short");
+        require(tokens.length >= 2, "token path too short");
 
         amounts = new uint256[](tokens.length);
         amounts[0] = amountIn;
 
-        pairs = new address[](tokens.length -1);
+        pairs = new address[](tokens.length - 1);
 
         for (uint256 i; i < tokens.length - 1; i++) {
             address inToken = tokens[i];
-            address outToken = tokens[i+1];
+            address outToken = tokens[i + 1];
 
-            address pair = amms[i] == 0 ? pairForUni(inToken, outToken) : pairForSushi(inToken, outToken);
+            address pair =
+                amms[i] == 0
+                    ? pairForUni(inToken, outToken)
+                    : pairForSushi(inToken, outToken);
             pairs[i] = pair;
 
             (uint256 reserveIn, uint256 reserveOut) =
@@ -101,46 +104,72 @@ library UniswapStyleLib {
         uint256 amountOut,
         bytes32 amms,
         address[] memory tokens
-                          ) internal view returns (uint256[] memory amounts, address[] memory pairs) {
-
-        require(tokens.length >= 2, "UniswapStyleLib: token path is too short");
+    ) internal view returns (uint256[] memory amounts, address[] memory pairs) {
+        require(tokens.length >= 2, "token path too short");
 
         amounts = new uint256[](tokens.length);
         amounts[amounts.length - 1] = amountOut;
 
-        pairs = new address[](tokens.length -1);
+        pairs = new address[](tokens.length - 1);
 
         for (uint256 i = tokens.length - 1; i > 0; i--) {
-
-            address inToken = tokens[i - 1] ;
+            address inToken = tokens[i - 1];
             address outToken = tokens[i];
 
-            address pair = amms[i - 1] == 0 ? pairForUni(inToken, outToken) : pairForSushi(inToken, outToken);
+            address pair =
+                amms[i - 1] == 0
+                    ? pairForUni(inToken, outToken)
+                    : pairForSushi(inToken, outToken);
             pairs[i - 1] = pair;
 
-            (uint256 reserveIn, uint256 reserveOut) = getReserves(pair, inToken, outToken);
+            (uint256 reserveIn, uint256 reserveOut) =
+                getReserves(pair, inToken, outToken);
             amounts[i - 1] = getAmountIn(amounts[i], reserveIn, reserveOut);
         }
     }
 
     // calculates the CREATE2 address for a pair without making any external calls
-    function pairForUni(address tokenA, address tokenB) internal pure returns (address pair) {
+    function pairForUni(address tokenA, address tokenB)
+        internal
+        pure
+        returns (address pair)
+    {
         (address token0, address token1) = sortTokens(tokenA, tokenB);
-        pair = address(uint160(uint256(keccak256(abi.encodePacked(
-                hex'ff',
-                UNISWAP_FACTORY,
-                keccak256(abi.encodePacked(token0, token1)),
-                hex'96e8ac4277198ff8b6f785478aa9a39f403cb768dd02cbee326c3e7da348845f' // init code hash
-                                                                  )))));
+        pair = address(
+            uint160(
+                uint256(
+                    keccak256(
+                        abi.encodePacked(
+                            hex"ff",
+                            UNISWAP_FACTORY,
+                            keccak256(abi.encodePacked(token0, token1)),
+                            hex"96e8ac4277198ff8b6f785478aa9a39f403cb768dd02cbee326c3e7da348845f" // init code hash
+                        )
+                    )
+                )
+            )
+        );
     }
 
-    function pairForSushi(address tokenA, address tokenB) internal pure returns (address pair) {
+    function pairForSushi(address tokenA, address tokenB)
+        internal
+        pure
+        returns (address pair)
+    {
         (address token0, address token1) = sortTokens(tokenA, tokenB);
-        pair = address(uint160(uint256(keccak256(abi.encodePacked(
-                hex'ff',
-                SUSHI_FACTORY,
-                keccak256(abi.encodePacked(token0, token1)),
-                hex'e18a34eb0e04b04f7a0ac29a6e80748dca96319b42c54d679cb821dca90c6303' // init code hash
-                                                                  )))));
+        pair = address(
+            uint160(
+                uint256(
+                    keccak256(
+                        abi.encodePacked(
+                            hex"ff",
+                            SUSHI_FACTORY,
+                            keccak256(abi.encodePacked(token0, token1)),
+                            hex"e18a34eb0e04b04f7a0ac29a6e80748dca96319b42c54d679cb821dca90c6303" // init code hash
+                        )
+                    )
+                )
+            )
+        );
     }
 }

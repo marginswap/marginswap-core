@@ -90,8 +90,9 @@ abstract contract HourlyBondSubscriptionLending is BaseLending {
             return
                 bond.amount +
                 applyInterest(bond.amount, cumulativeYield, yieldQuotientFP);
+        } else {
+            return bond.amount;
         }
-        return bond.amount + 0;
     }
 
     function _withdrawHourlyBond(

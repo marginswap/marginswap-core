@@ -15,11 +15,7 @@ contract CrossMarginTrading is CrossMarginLiquidation, IMarginTrading {
     constructor(address _peg, address _roles)
         RoleAware(_roles)
         PriceAware(_peg)
-    {
-        liquidationThresholdPercent = 110;
-        coolingOffPeriod = 20;
-        leveragePercent = 300;
-    }
+    {}
 
     /// @dev admin function to set the token cap
     function setTokenCap(address token, uint256 cap)
@@ -35,7 +31,10 @@ contract CrossMarginTrading is CrossMarginLiquidation, IMarginTrading {
     }
 
     /// @dev admin function to set leverage
-    function setLeverage(uint256 _leveragePercent) external onlyOwnerExec {
+    function setLeveragePercent(uint256 _leveragePercent)
+        external
+        onlyOwnerExec
+    {
         leveragePercent = _leveragePercent;
     }
 
@@ -53,10 +52,7 @@ contract CrossMarginTrading is CrossMarginLiquidation, IMarginTrading {
         address token,
         uint256 depositAmount
     ) external override returns (uint256 extinguishableDebt) {
-        require(
-            isMarginTrader(msg.sender),
-            "Calling contract not authorized to deposit"
-        );
+        require(isMarginTrader(msg.sender), "Calling contr. not authorized");
 
         CrossMarginAccount storage account = marginAccounts[trader];
         account.lastDepositBlock = block.number;
@@ -82,7 +78,7 @@ contract CrossMarginTrading is CrossMarginLiquidation, IMarginTrading {
         totalLong[token] += addedHolding;
         require(
             tokenCaps[token] >= totalLong[token],
-            "Exceeding global exposure cap to token -- try again later"
+            "Exceeds global token cap"
         );
     }
 
@@ -92,10 +88,7 @@ contract CrossMarginTrading is CrossMarginLiquidation, IMarginTrading {
         address borrowToken,
         uint256 borrowAmount
     ) external override {
-        require(
-            isMarginTrader(msg.sender),
-            "Calling contract not authorized to deposit"
-        );
+        require(isMarginTrader(msg.sender), "Calling contr. not authorized");
         CrossMarginAccount storage account = marginAccounts[trader];
         _registerBorrow(account, borrowToken, borrowAmount);
     }
@@ -110,7 +103,7 @@ contract CrossMarginTrading is CrossMarginLiquidation, IMarginTrading {
         require(
             tokenCaps[borrowToken] >= totalShort[borrowToken] &&
                 tokenCaps[borrowToken] >= totalLong[borrowToken],
-            "Exceeding global exposure cap to token -- try again later"
+            "Exceeds global token cap"
         );
 
         borrow(account, borrowToken, borrowAmount);
@@ -122,10 +115,7 @@ contract CrossMarginTrading is CrossMarginLiquidation, IMarginTrading {
         address withdrawToken,
         uint256 withdrawAmount
     ) external override {
-        require(
-            isMarginTrader(msg.sender),
-            "Calling contract not authorized to deposit"
-        );
+        require(isMarginTrader(msg.sender), "Calling contr not authorized");
         CrossMarginAccount storage account = marginAccounts[trader];
         _registerWithdrawal(account, withdrawToken, withdrawAmount);
     }
@@ -137,7 +127,7 @@ contract CrossMarginTrading is CrossMarginLiquidation, IMarginTrading {
     ) internal {
         require(
             block.number > account.lastDepositBlock + coolingOffPeriod,
-            "To prevent attacks you must wait until your cooling off period is over to withdraw"
+            "No withdrawal soon after deposit"
         );
 
         totalLong[withdrawToken] -= withdrawAmount;
@@ -145,10 +135,7 @@ contract CrossMarginTrading is CrossMarginLiquidation, IMarginTrading {
         account.holdings[withdrawToken] =
             account.holdings[withdrawToken] -
             withdrawAmount;
-        require(
-            positiveBalance(account),
-            "Account balance is too low to withdraw"
-        );
+        require(positiveBalance(account), "Insufficient balance");
     }
 
     /// @dev overcollateralized borrowing on a cross margin account, called by router
@@ -159,10 +146,7 @@ contract CrossMarginTrading is CrossMarginLiquidation, IMarginTrading {
         address borrowToken,
         uint256 withdrawAmount
     ) external override {
-        require(
-            isMarginTrader(msg.sender),
-            "Calling contract not authorized to deposit"
-        );
+        require(isMarginTrader(msg.sender), "Calling contr. not authorized");
 
         CrossMarginAccount storage account = marginAccounts[trader];
 
@@ -185,10 +169,7 @@ contract CrossMarginTrading is CrossMarginLiquidation, IMarginTrading {
         override
         returns (uint256 extinguishableDebt, uint256 borrowAmount)
     {
-        require(
-            isMarginTrader(msg.sender),
-            "Calling contract is not an authorized margin trader agent"
-        );
+        require(isMarginTrader(msg.sender), "Calling contr. not an authorized");
 
         CrossMarginAccount storage account = marginAccounts[trader];
 
@@ -201,7 +182,7 @@ contract CrossMarginTrading is CrossMarginLiquidation, IMarginTrading {
         totalLong[tokenTo] += outAmount - extinguishableDebt;
         require(
             tokenCaps[tokenTo] >= totalLong[tokenTo],
-            "Exceeding global exposure cap to token -- try again later"
+            "Exceeds global token cap"
         );
 
         uint256 sellAmount = inAmount;
@@ -213,25 +194,25 @@ contract CrossMarginTrading is CrossMarginLiquidation, IMarginTrading {
             totalShort[tokenFrom] += borrowAmount;
             require(
                 tokenCaps[tokenFrom] >= totalShort[tokenFrom],
-                "Exceeding global exposure cap to token -- try again later"
+                "Exceeds global token cap"
             );
 
             borrow(account, tokenFrom, borrowAmount);
         }
-        adjustAmounts(account, tokenFrom, tokenTo, sellAmount, outAmount);
+        adjustAmounts(
+            account,
+            tokenFrom,
+            tokenTo,
+            sellAmount,
+            outAmount - extinguishableDebt
+        );
     }
 
     /// @dev can get called by router to register the dissolution of an account
     function registerLiquidation(address trader) external override {
-        require(
-            isMarginTrader(msg.sender),
-            "Calling contract is not an authorized margin trader agent"
-        );
+        require(isMarginTrader(msg.sender), "Calling contr. not authorized");
         CrossMarginAccount storage account = marginAccounts[trader];
-        require(
-            loanInPeg(account) == 0,
-            "Can't liquidate currently borrowing account"
-        );
+        require(loanInPeg(account) == 0, "Can't liquidate: borrowing");
 
         deleteAccount(account);
     }

@@ -150,6 +150,6 @@ contract RoleAware {
     }
 
     function isStakePenalizer(address contr) internal view returns (bool) {
-        return roles.getRole(STAKE_PENALIZER, contr);
+        return roleCache[contr][STAKE_PENALIZER];
     }
 }

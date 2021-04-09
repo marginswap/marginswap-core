@@ -12,43 +12,8 @@ import "./BaseRouter.sol";
 
 /// @title Top level transaction controller
 contract MarginRouter is RoleAware, IncentivizedHolder, BaseRouter {
-    /// emitted when a trader depoits on cross margin
-    event CrossDeposit(
-        address trader,
-        address depositToken,
-        uint256 depositAmount
-    );
-    /// emitted whenever a trade happens
-    event CrossTrade(
-        address trader,
-        address inToken,
-        uint256 inTokenAmount,
-        uint256 inTokenBorrow,
-        address outToken,
-        uint256 outTokenAmount,
-        uint256 outTokenExtinguish
-    );
-    /// emitted when a trader withdraws funds
-    event CrossWithdraw(
-        address trader,
-        address withdrawToken,
-        uint256 withdrawAmount
-    );
-    /// emitted upon sucessfully borrowing
-    event CrossBorrow(
-        address trader,
-        address borrowToken,
-        uint256 borrowAmount
-    );
+    event AccountUpdated(address indexed trader);
 
-    /// emmited on deposit-borrow-withdraw
-    event CrossOvercollateralizedBorrow(
-        address trader,
-        address depositToken,
-        uint256 depositAmount,
-        address borrowToken,
-        uint256 withdrawAmount
-    );
     uint256 public constant mswapFeesPer10k = 10;
     address public immutable WETH;
 
@@ -76,7 +41,7 @@ contract MarginRouter is RoleAware, IncentivizedHolder, BaseRouter {
             Lending(lending()).payOff(depositToken, extinguishAmount);
             withdrawClaim(msg.sender, depositToken, extinguishAmount);
         }
-        emit CrossDeposit(msg.sender, depositToken, depositAmount);
+        emit AccountUpdated(msg.sender);
     }
 
     /// @notice deposit wrapped ehtereum into cross margin account
@@ -92,7 +57,7 @@ contract MarginRouter is RoleAware, IncentivizedHolder, BaseRouter {
             Lending(lending()).payOff(WETH, extinguishAmount);
             withdrawClaim(msg.sender, WETH, extinguishAmount);
         }
-        emit CrossDeposit(msg.sender, WETH, msg.value);
+        emit AccountUpdated(msg.sender);
     }
 
     /// @notice withdraw deposits/earnings from cross margin account
@@ -105,7 +70,7 @@ contract MarginRouter is RoleAware, IncentivizedHolder, BaseRouter {
             withdrawAmount
         );
         Fund(fund()).withdraw(withdrawToken, msg.sender, withdrawAmount);
-        emit CrossWithdraw(msg.sender, withdrawToken, withdrawAmount);
+        emit AccountUpdated(msg.sender);
     }
 
     /// @notice withdraw ethereum from cross margin account
@@ -116,6 +81,7 @@ contract MarginRouter is RoleAware, IncentivizedHolder, BaseRouter {
             withdrawAmount
         );
         Fund(fund()).withdrawETH(msg.sender, withdrawAmount);
+        emit AccountUpdated(msg.sender);
     }
 
     /// @notice borrow into cross margin trading account
@@ -128,7 +94,7 @@ contract MarginRouter is RoleAware, IncentivizedHolder, BaseRouter {
         );
 
         stakeClaim(msg.sender, borrowToken, borrowAmount);
-        emit CrossBorrow(msg.sender, borrowToken, borrowAmount);
+        emit AccountUpdated(msg.sender);
     }
 
     /// @notice convenience function to perform overcollateralized borrowing
@@ -154,13 +120,7 @@ contract MarginRouter is RoleAware, IncentivizedHolder, BaseRouter {
 
         Fund(fund()).withdraw(borrowToken, msg.sender, withdrawAmount);
         stakeClaim(msg.sender, borrowToken, withdrawAmount);
-        emit CrossOvercollateralizedBorrow(
-            msg.sender,
-            depositToken,
-            depositAmount,
-            borrowToken,
-            withdrawAmount
-        );
+        emit AccountUpdated(msg.sender);
     }
 
     /// @notice close an account that is no longer borrowing and return gains
@@ -178,6 +138,8 @@ contract MarginRouter is RoleAware, IncentivizedHolder, BaseRouter {
                 holdingAmounts[i]
             );
         }
+
+        emit AccountUpdated(msg.sender);
     }
 
     /// @notice entry point for swapping tokens held in cross margin account
@@ -263,15 +225,7 @@ contract MarginRouter is RoleAware, IncentivizedHolder, BaseRouter {
             stakeClaim(trader, inToken, borrowAmount);
         }
 
-        emit CrossTrade(
-            trader,
-            inToken,
-            inAmount,
-            borrowAmount,
-            outToken,
-            outAmount,
-            extinguishAmount
-        );
+        emit AccountUpdated(trader);
     }
 
     /////////////
@@ -320,7 +274,6 @@ contract MarginRouter is RoleAware, IncentivizedHolder, BaseRouter {
         address[] memory pairs,
         address[] calldata tokens
     ) internal {
-        // TODO minimum trade?
         require(
             amounts[0] <= amountInMax,
             "MarginRouter: EXCESSIVE_INPUT_AMOUNT"

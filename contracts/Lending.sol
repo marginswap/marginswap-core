@@ -8,13 +8,9 @@ import "./IncentivizedHolder.sol";
 
 // TODO activate bonds for lending
 
-// TODO disburse token if isolated bond issuer
-// and if isolated issuer, allow for haircuts
-
 /// @title Manage lending for a variety of bond issuers
 contract Lending is
     RoleAware,
-    BaseLending,
     HourlyBondSubscriptionLending,
     BondLending,
     IncentivizedHolder
@@ -130,20 +126,14 @@ contract Lending is
 
     /// Set miniumum runtime
     function setMinRuntime(uint256 runtime) external onlyOwnerExec {
-        require(runtime > 1 hours, "Min runtime needs to be at least 1 hour");
-        require(
-            maxRuntime > runtime,
-            "Min runtime must be smaller than max runtime"
-        );
+        require(runtime > 1 hours, "Min runtime > 1 hour");
+        require(maxRuntime > runtime, "Runtime too long");
         minRuntime = runtime;
     }
 
     /// Set maximum runtime
     function setMaxRuntime(uint256 runtime) external onlyOwnerExec {
-        require(
-            runtime > minRuntime,
-            "Max runtime must be greater than min runtime"
-        );
+        require(runtime > minRuntime, "Max > min runtime");
         maxRuntime = runtime;
     }
 
@@ -176,10 +166,7 @@ contract Lending is
                 );
             }
         } else {
-            require(
-                weights.length == bondMetas.length,
-                "Weights don't match buckets"
-            );
+            require(weights.length == bondMetas.length, "Weights don't match");
             for (uint256 i; weights.length > i; i++) {
                 bondMetas[i].runtimeWeight = weights[i];
             }
@@ -192,7 +179,7 @@ contract Lending is
         address issuer,
         uint256 yieldQuotientFP
     ) external returns (uint256 balanceWithInterest, uint256 accumulatorFP) {
-        require(isBorrower(msg.sender), "Not an approved borrower");
+        require(isBorrower(msg.sender), "Not approved call");
 
         YieldAccumulator storage yA = borrowYieldAccumulators[issuer];
         updateBorrowYieldAccu(yA);
@@ -225,20 +212,20 @@ contract Lending is
 
     /// @dev gets called by router to register if a trader borrows issuers
     function registerBorrow(address issuer, uint256 amount) external {
-        require(isBorrower(msg.sender), "Not an approved borrower");
-        require(activeIssuers[issuer], "Not an approved issuer");
+        require(isBorrower(msg.sender), "Not approved borrower");
+        require(activeIssuers[issuer], "Not approved issuer");
 
         LendingMetadata storage meta = lendingMeta[issuer];
         meta.totalBorrowed += amount;
         require(
             meta.totalLending >= meta.totalBorrowed,
-            "Insufficient capital to lend, try again later!"
+            "Insufficient lending"
         );
     }
 
     /// @dev gets called by router if loan is extinguished
     function payOff(address issuer, uint256 amount) external {
-        require(isBorrower(msg.sender), "Not an approved borrower");
+        require(isBorrower(msg.sender), "Not approved borrower");
         lendingMeta[issuer].totalBorrowed -= amount;
     }
 
@@ -328,7 +315,7 @@ contract Lending is
     function buyHourlyBondSubscription(address issuer, uint256 amount)
         external
     {
-        require(activeIssuers[issuer], "Not an approved issuer");
+        require(activeIssuers[issuer], "Not approved issuer");
 
         LendingMetadata storage meta = lendingMeta[issuer];
         if (lendingTarget(meta) >= meta.totalLending + amount) {
@@ -347,7 +334,7 @@ contract Lending is
         uint256 amount,
         uint256 minReturn
     ) external returns (uint256 bondIndex) {
-        require(activeIssuers[issuer], "Not an approved issuer");
+        require(activeIssuers[issuer], "Not approved issuer");
 
         LendingMetadata storage meta = lendingMeta[issuer];
         if (
@@ -363,7 +350,6 @@ contract Lending is
                 minReturn
             );
             if (bondIndex > 0) {
-                Fund(fund()).depositFor(msg.sender, issuer, amount);
                 bondIds[msg.sender].push(bondIndex);
 
                 collectToken(issuer, msg.sender, amount);
@@ -375,7 +361,7 @@ contract Lending is
     /// @dev send back funds of bond after maturity
     function withdrawBond(uint256 bondId) external {
         Bond storage bond = bonds[bondId];
-        require(msg.sender == bond.holder, "Not holder of bond");
+        require(msg.sender == bond.holder, "Not bond holder");
         require(
             block.timestamp > bond.maturityTimestamp,
             "bond is still immature"
@@ -395,7 +381,7 @@ contract Lending is
     {
         require(
             borrowYieldAccumulators[issuer].accumulatorFP == 0,
-            "trying to re-initialize yield accumulator"
+            "don't re-initialize"
         );
 
         borrowYieldAccumulators[issuer].accumulatorFP = FP32;
