@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: BUSL-1.1
 pragma solidity ^0.8.0;
 
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "./RoleAware.sol";
 import "./Fund.sol";
 
@@ -33,6 +32,8 @@ contract IncentiveDistribution is RoleAware {
         currentDailyDistribution =
             startingDailyDistributionWithoutDecimals *
             (1 ether);
+
+        lastUpdatedDay = block.timestamp % (1 days);
     }
 
     // how much is going to be distributed, contracts every day
@@ -75,7 +76,7 @@ contract IncentiveDistribution is RoleAware {
     {
         require(
             trancheMetadata[tranche].rewardShare > 0,
-            "Tranche is not initialized, please initialize first"
+            "Tranche not initialized"
         );
         _setTrancheShare(tranche, share);
     }
