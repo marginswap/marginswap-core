@@ -27,10 +27,10 @@ struct CrossMarginAccount {
 
 abstract contract CrossMarginAccounts is RoleAware, PriceAware {
     /// @dev gets used in calculating how much accounts can borrow
-    uint256 public leveragePercent;
+    uint256 public leveragePercent = 300;
 
     /// @dev percentage of assets held per assets borrowed at which to liquidate
-    uint256 public liquidationThresholdPercent;
+    uint256 public liquidationThresholdPercent = 115;
 
     /// @dev record of all cross margin accounts
     mapping(address => CrossMarginAccount) internal marginAccounts;
@@ -40,7 +40,7 @@ abstract contract CrossMarginAccounts is RoleAware, PriceAware {
     mapping(address => uint256) public totalShort;
     /// @dev tracks total of long positions per token
     mapping(address => uint256) public totalLong;
-    uint256 public coolingOffPeriod;
+    uint256 public coolingOffPeriod = 20;
 
     /// @dev add an asset to be held by account
     function addHolding(

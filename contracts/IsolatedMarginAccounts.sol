@@ -21,7 +21,7 @@ abstract contract IsolatedMarginAccounts is RoleAware {
     address[] public liquidationTokens;
 
     /// @dev percentage of assets held per assets borrowed at which to liquidate
-    uint256 public liquidationThresholdPercent;
+    uint256 public liquidationThresholdPercent = 115;
 
     mapping(address => IsolatedMarginAccount) public marginAccounts;
     uint256 public coolingOffPeriod = 20;

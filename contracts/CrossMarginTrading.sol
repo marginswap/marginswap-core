@@ -16,9 +16,6 @@ contract CrossMarginTrading is CrossMarginLiquidation, IMarginTrading {
         RoleAware(_roles)
         PriceAware(_peg)
     {
-        liquidationThresholdPercent = 110;
-        coolingOffPeriod = 20;
-        leveragePercent = 300;
     }
 
     /// @dev admin function to set the token cap
