@@ -19,7 +19,7 @@ contract Admin is RoleAware {
 
     uint256 public constant mfiStakeTranche = 1;
 
-    uint256 public maintenanceStakePerBlock = 10 ether;
+    uint256 public maintenanceStakePerBlock = 15 ether;
     mapping(address => address) public nextMaintenanceStaker;
     mapping(address => mapping(address => bool)) public maintenanceDelegateTo;
     address public currentMaintenanceStaker;
@@ -34,7 +34,6 @@ contract Admin is RoleAware {
         address _roles
     ) RoleAware(_roles) {
         MFI = _MFI;
-        maintenanceStakePerBlock = 1 ether;
         lockedMFI = _lockedMFI;
 
         // for initialization purposes and to ensure availability of service

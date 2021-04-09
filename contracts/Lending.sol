@@ -14,7 +14,6 @@ import "./IncentivizedHolder.sol";
 /// @title Manage lending for a variety of bond issuers
 contract Lending is
     RoleAware,
-    BaseLending,
     HourlyBondSubscriptionLending,
     BondLending,
     IncentivizedHolder
