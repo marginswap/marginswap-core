@@ -15,6 +15,11 @@ struct TokenPrice {
     bytes32 inverseAmms;
 }
 
+struct VolatilitySetting {
+    uint256 priceUpdateWindow;
+    uint256 updateRatePermil;
+}
+
 /// @title The protocol features several mechanisms to prevent vulnerability to
 /// price manipulation:
 /// 1) global exposure caps on all tokens which need to be raised gradually
@@ -29,10 +34,13 @@ abstract contract PriceAware is RoleAware {
     uint256 constant pegDecimals = 6;
     uint256 constant REFERENCE_PEG_AMOUNT = 100 * (10**pegDecimals);
     address public immutable peg;
+
     mapping(address => TokenPrice) public tokenPrices;
     /// update window in blocks
-    uint16 public priceUpdateWindow = 20;
+
+    uint256 public priceUpdateWindow = 20;
     uint256 public UPDATE_RATE_PERMIL = 50;
+    VolatilitySetting[] public volatilitySettings;
 
     constructor(address _peg) {
         peg = _peg;
@@ -41,6 +49,20 @@ abstract contract PriceAware is RoleAware {
     /// Set window for price updates
     function setPriceUpdateWindow(uint16 window) external onlyOwnerExec {
         priceUpdateWindow = window;
+    }
+
+    /// Add a new volatility setting
+    function addVolatilitySetting(uint256 _priceUpdateWindow, uint256 _updateRatePermil) external onlyOwnerExec {
+        volatilitySettings.push(VolatilitySetting({priceUpdateWindow:_priceUpdateWindow, updateRatePermil: _updateRatePermil}));
+    }
+
+    /// Choose a volatitlity setting
+    function chooseVolatilitySetting(uint256 index) external onlyOwnerExecDisabler {
+        VolatilitySetting storage vs = volatilitySettings[index];
+        if (vs.updateRatePermil > 0) {
+            UPDATE_RATE_PERMIL = vs.updateRatePermil;
+            priceUpdateWindow = vs.priceUpdateWindow;
+        }
     }
 
     /// Set rate for updates
