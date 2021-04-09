@@ -41,7 +41,8 @@ contract IsolatedMarginTrading is IsolatedMarginLiquidation {
     function registerPosition(
         address trader,
         uint256 borrowed,
-        uint256 holdingsAdded
+        uint256 holdingsAdded,
+        bool deposited
     ) external {
         require(
             isMarginTrader(msg.sender),
@@ -52,6 +53,10 @@ contract IsolatedMarginTrading is IsolatedMarginLiquidation {
 
         account.holding += holdingsAdded;
         borrow(account, borrowed);
+
+        if (deposited) {
+            account.lastDepositBlock = block.number;
+        }
     }
 
     /// @dev gets called by router to affirm unwinding of position
@@ -62,10 +67,14 @@ contract IsolatedMarginTrading is IsolatedMarginLiquidation {
     ) external {
         require(
             isMarginTrader(msg.sender),
-            "Calling contract not authorized to deposit"
+            "Calling contract not authorized to withdraw"
         );
 
         IsolatedMarginAccount storage account = marginAccounts[trader];
+        require(
+            block.number > account.lastDepositBlock + coolingOffPeriod,
+            "To prevent attacks you must wait until your cooling off period is over to withdraw"
+        );
 
         account.holding -= holdingsSold;
         extinguishDebt(account, extinguished);
@@ -82,6 +91,10 @@ contract IsolatedMarginTrading is IsolatedMarginLiquidation {
         );
 
         IsolatedMarginAccount storage account = marginAccounts[trader];
+        require(
+            block.number > account.lastDepositBlock + coolingOffPeriod,
+            "To prevent attacks you must wait until your cooling off period is over to withdraw"
+        );
 
         require(account.borrowed == 0, "Can't close account that's borrowing");
 

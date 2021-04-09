@@ -29,7 +29,6 @@ abstract contract BondLending is BaseLending {
     any excess left over is the weight of hourly bonds
     */
     uint256 public constant WEIGHT_TOTAL_10k = 10_000;
-    uint256 public borrowingMarkupFP;
 
     struct BondBucketMetadata {
         uint256 runtimeWeight;

@@ -20,10 +20,6 @@ abstract contract IsolatedMarginAccounts is RoleAware {
     bytes32 public amms;
     address[] public liquidationTokens;
 
-    /// update window in blocks
-    uint16 public priceUpdateWindow = 8;
-    uint256 public UPDATE_RATE_PERMIL = 80;
-
     /// @dev percentage of assets held per assets borrowed at which to liquidate
     uint256 public liquidationThresholdPercent;
 
