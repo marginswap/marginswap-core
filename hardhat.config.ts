@@ -137,7 +137,8 @@ export default {
       blockGasLimit: 12000000,
       forking: {
         url: infuraUrl('mainnet')
-      }
+      },
+      accounts: [{ privateKey, balance: '68173248000000000000' }]
     },
     mainnet: {
       url: infuraUrl('mainnet'),
