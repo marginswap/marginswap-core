@@ -23,7 +23,7 @@ rates individually per bucket, based on supply and demand.
 abstract contract BondLending is BaseLending {
     uint256 public minRuntime = 30 days;
     uint256 public maxRuntime = 365 days;
-    uint256 public diffMaxMinRuntime;
+    uint256 public diffMaxMinRuntime = maxRuntime - minRuntime;
     /** 
     @dev this is the numerator under runtimeWeights.
     any excess left over is the weight of hourly bonds
