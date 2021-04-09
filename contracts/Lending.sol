@@ -359,7 +359,6 @@ contract Lending is
                 minReturn
             );
             if (bondIndex > 0) {
-                Fund(fund()).depositFor(msg.sender, issuer, amount);
                 bondIds[msg.sender].push(bondIndex);
 
                 collectToken(issuer, msg.sender, amount);
