@@ -258,15 +258,12 @@ abstract contract CrossMarginLiquidation is CrossMarginAccounts {
         // this may be a bit imprecise, since individual shortfalls may be obscured
         // by overall returns and the maintainer cut is taken out of the net total,
         // but it gives us the general picture
+        uint256 costWithCut = (peg2targetCost * (100 + MAINTAINER_CUT_PERCENT)) / 100;
         if (
-            (peg2targetCost * (100 + MAINTAINER_CUT_PERCENT)) / 100 >
+            costWithCut >
             sale2pegAmount
         ) {
-            emit LiquidationShortfall(
-                (peg2targetCost * (100 + MAINTAINER_CUT_PERCENT)) /
-                    100 -
-                    sale2pegAmount
-            );
+            emit LiquidationShortfall(costWithCut - sale2pegAmount);
         }
 
         address loser = address(0);
