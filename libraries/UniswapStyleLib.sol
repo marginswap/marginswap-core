@@ -41,7 +41,7 @@ library UniswapStyleLib {
         uint256 reserveIn,
         uint256 reserveOut
     ) internal pure returns (uint256 amountOut) {
-        require(amountIn > 0, "UniswapV2Library: INSUFFICIENT_INPUT_AMOUNT");
+        require(amountIn > 0, "INSUFFICIENT_INPUT_AMOUNT");
         require(
             reserveIn > 0 && reserveOut > 0,
             "UniswapV2Library: INSUFFICIENT_LIQUIDITY"
@@ -58,7 +58,7 @@ library UniswapStyleLib {
         uint256 reserveIn,
         uint256 reserveOut
     ) internal pure returns (uint256 amountIn) {
-        require(amountOut > 0, "UniswapV2Library: INSUFFICIENT_OUTPUT_AMOUNT");
+        require(amountOut > 0, "INSUFFICIENT_OUTPUT_AMOUNT");
         require(
             reserveIn > 0 && reserveOut > 0,
             "UniswapV2Library: INSUFFICIENT_LIQUIDITY"
@@ -75,7 +75,7 @@ library UniswapStyleLib {
         bytes32 amms,
         address[] memory tokens
     ) internal view returns (uint256[] memory amounts, address[] memory pairs) {
-        require(tokens.length >= 2, "UniswapStyleLib: token path is too short");
+        require(tokens.length >= 2, "token path too short");
 
         amounts = new uint256[](tokens.length);
         amounts[0] = amountIn;
@@ -103,7 +103,7 @@ library UniswapStyleLib {
         address[] memory tokens
                           ) internal view returns (uint256[] memory amounts, address[] memory pairs) {
 
-        require(tokens.length >= 2, "UniswapStyleLib: token path is too short");
+        require(tokens.length >= 2, "token path too short");
 
         amounts = new uint256[](tokens.length);
         amounts[amounts.length - 1] = amountOut;

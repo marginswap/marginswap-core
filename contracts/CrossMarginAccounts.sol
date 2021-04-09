@@ -81,7 +81,7 @@ abstract contract CrossMarginAccounts is RoleAware, PriceAware {
 
         addHolding(account, borrowToken, borrowAmount);
 
-        require(positiveBalance(account), "Can't borrow: insufficient balance");
+        require(positiveBalance(account), "Insufficient balance");
     }
 
     /// @dev checks whether account is in the black, deposit + earnings relative to borrowed
