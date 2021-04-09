@@ -302,7 +302,7 @@ abstract contract CrossMarginLiquidation is CrossMarginAccounts {
             }
 
             // send back trader money
-            if (holdingsValue >= maintainerCut4Account + borrowValue) {
+            if (holdingsValue > maintainerCut4Account + borrowValue) {
                 // send remaining funds back to trader
                 Fund(fund()).withdraw(
                     PriceAware.peg,
