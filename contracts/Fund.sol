@@ -32,10 +32,7 @@ contract Fund is RoleAware {
         address depositToken,
         uint256 depositAmount
     ) external {
-        require(
-            isFundTransferer(msg.sender),
-            "Unauthorized deposit"
-        );
+        require(isFundTransferer(msg.sender), "Unauthorized deposit");
         IERC20(depositToken).safeTransferFrom(
             sender,
             address(this),
@@ -54,10 +51,7 @@ contract Fund is RoleAware {
         address recipient,
         uint256 withdrawalAmount
     ) external {
-        require(
-            isFundTransferer(msg.sender),
-            "Unauthorized withdraw"
-        );
+        require(isFundTransferer(msg.sender), "Unauthorized withdraw");
         IERC20(withdrawalToken).safeTransfer(recipient, withdrawalAmount);
     }
 

@@ -70,7 +70,7 @@ contract MarginRouter is RoleAware, IncentivizedHolder, BaseRouter {
             withdrawAmount
         );
         Fund(fund()).withdraw(withdrawToken, msg.sender, withdrawAmount);
-                emit AccountUpdated(msg.sender);
+        emit AccountUpdated(msg.sender);
     }
 
     /// @notice withdraw ethereum from cross margin account
@@ -274,7 +274,6 @@ contract MarginRouter is RoleAware, IncentivizedHolder, BaseRouter {
         address[] memory pairs,
         address[] calldata tokens
     ) internal {
-
         require(
             amounts[0] <= amountInMax,
             "MarginRouter: EXCESSIVE_INPUT_AMOUNT"

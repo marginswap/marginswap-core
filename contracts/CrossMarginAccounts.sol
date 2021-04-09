@@ -170,14 +170,11 @@ abstract contract CrossMarginAccounts is RoleAware, PriceAware {
     }
 
     /// @dev total of assets of account, expressed in reference currency
-    function holdingsInPeg(
-        CrossMarginAccount storage account
-    ) internal returns (uint256) {
-        return
-            sumTokensInPeg(
-                account.holdingTokens,
-                account.holdings
-            );
+    function holdingsInPeg(CrossMarginAccount storage account)
+        internal
+        returns (uint256)
+    {
+        return sumTokensInPeg(account.holdingTokens, account.holdings);
     }
 
     /// @dev check whether an account can/should be liquidated
@@ -201,10 +198,7 @@ abstract contract CrossMarginAccounts is RoleAware, PriceAware {
         uint256 len = tokens.length;
         for (uint256 tokenId; tokenId < len; tokenId++) {
             address token = tokens[tokenId];
-            totalPeg += PriceAware.getCurrentPriceInPeg(
-                token,
-                amounts[token]
-            );
+            totalPeg += PriceAware.getCurrentPriceInPeg(token, amounts[token]);
         }
     }
 
@@ -264,11 +258,7 @@ abstract contract CrossMarginAccounts is RoleAware, PriceAware {
             Lending(lending()).viewAccumulatedBorrowingYieldFP(token);
         // 1 * FP / FP = 1
         uint256 amountInToken = (amount * yieldFP) / yieldQuotientsFP[token];
-        return
-            PriceAware.getCurrentPriceInPeg(
-                token,
-                amountInToken
-            );
+        return PriceAware.getCurrentPriceInPeg(token, amountInToken);
     }
 
     /// @dev calculate yield for token amount and convert to reference currency

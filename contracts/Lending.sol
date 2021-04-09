@@ -127,19 +127,13 @@ contract Lending is
     /// Set miniumum runtime
     function setMinRuntime(uint256 runtime) external onlyOwnerExec {
         require(runtime > 1 hours, "Min runtime > 1 hour");
-        require(
-            maxRuntime > runtime,
-            "Runtime too long"
-        );
+        require(maxRuntime > runtime, "Runtime too long");
         minRuntime = runtime;
     }
 
     /// Set maximum runtime
     function setMaxRuntime(uint256 runtime) external onlyOwnerExec {
-        require(
-            runtime > minRuntime,
-            "Max > min runtime"
-        );
+        require(runtime > minRuntime, "Max > min runtime");
         maxRuntime = runtime;
     }
 
@@ -172,10 +166,7 @@ contract Lending is
                 );
             }
         } else {
-            require(
-                weights.length == bondMetas.length,
-                "Weights don't match"
-            );
+            require(weights.length == bondMetas.length, "Weights don't match");
             for (uint256 i; weights.length > i; i++) {
                 bondMetas[i].runtimeWeight = weights[i];
             }

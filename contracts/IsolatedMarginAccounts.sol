@@ -84,9 +84,10 @@ abstract contract IsolatedMarginAccounts is RoleAware {
     }
 
     /// @dev calculate loan in reference currency
-    function loanInPeg(
-        IsolatedMarginAccount storage account
-    ) internal returns (uint256) {
+    function loanInPeg(IsolatedMarginAccount storage account)
+        internal
+        returns (uint256)
+    {
         return
             PriceAware(price()).getCurrentPriceInPeg(
                 borrowToken,
@@ -95,9 +96,10 @@ abstract contract IsolatedMarginAccounts is RoleAware {
     }
 
     /// @dev calculate loan in reference currency
-    function holdingInPeg(
-        IsolatedMarginAccount storage account
-    ) internal returns (uint256) {
+    function holdingInPeg(IsolatedMarginAccount storage account)
+        internal
+        returns (uint256)
+    {
         return
             PriceAware(price()).getCurrentPriceInPeg(
                 holdingToken,

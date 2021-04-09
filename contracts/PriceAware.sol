@@ -27,7 +27,7 @@ struct TokenPrice {
 ///    of front-running and other price manipulation.
 abstract contract PriceAware is RoleAware {
     uint256 constant pegDecimals = 6;
-    uint256 constant REFERENCE_PEG_AMOUNT = 100 * (10 ** pegDecimals);
+    uint256 constant REFERENCE_PEG_AMOUNT = 100 * (10**pegDecimals);
     address public immutable peg;
     mapping(address => TokenPrice) public tokenPrices;
     /// update window in blocks
@@ -49,22 +49,27 @@ abstract contract PriceAware is RoleAware {
     }
 
     /// Get current price of token in peg
-    function getCurrentPriceInPeg(
-        address token,
-        uint256 inAmount
-    ) public returns (uint256) {
+    function getCurrentPriceInPeg(address token, uint256 inAmount)
+        public
+        returns (uint256)
+    {
         if (token == peg) {
             return inAmount;
         } else {
             TokenPrice storage tokenPrice = tokenPrices[token];
 
-            if (block.number - tokenPrice.blockLastUpdated > priceUpdateWindow
-                || tokenPrice.tokenPerRefAmount == 0) {
+            if (
+                block.number - tokenPrice.blockLastUpdated >
+                priceUpdateWindow ||
+                tokenPrice.tokenPerRefAmount == 0
+            ) {
                 // update the currently cached price
                 getPriceFromAMM(tokenPrice);
             }
 
-            return (inAmount * REFERENCE_PEG_AMOUNT) / (tokenPrice.tokenPerRefAmount + 1);
+            return
+                (inAmount * REFERENCE_PEG_AMOUNT) /
+                (tokenPrice.tokenPerRefAmount + 1);
         }
     }
 
@@ -78,15 +83,14 @@ abstract contract PriceAware is RoleAware {
             return inAmount;
         } else {
             TokenPrice storage tokenPrice = tokenPrices[token];
-            return (inAmount * REFERENCE_PEG_AMOUNT) / (tokenPrice.tokenPerRefAmount + 1);
+            return
+                (inAmount * REFERENCE_PEG_AMOUNT) /
+                (tokenPrice.tokenPerRefAmount + 1);
         }
     }
 
     /// @dev retrieves the price from the AMM
-    function getPriceFromAMM(TokenPrice storage tokenPrice)
-        internal
-        virtual
-    {
+    function getPriceFromAMM(TokenPrice storage tokenPrice) internal virtual {
         (uint256[] memory pathAmounts, ) =
             UniswapStyleLib.getAmountsIn(
                 REFERENCE_PEG_AMOUNT,
@@ -96,7 +100,11 @@ abstract contract PriceAware is RoleAware {
         _setPriceVal(tokenPrice, pathAmounts[0], UPDATE_RATE_PERMIL);
     }
 
-    function _setPriceVal(TokenPrice storage tokenPrice, uint256 updatePerRefAmount, uint256 weightPerMil) internal {
+    function _setPriceVal(
+        TokenPrice storage tokenPrice,
+        uint256 updatePerRefAmount,
+        uint256 weightPerMil
+    ) internal {
         tokenPrice.tokenPerRefAmount =
             (tokenPrice.tokenPerRefAmount *
                 (1000 - weightPerMil) +
@@ -137,7 +145,11 @@ abstract contract PriceAware is RoleAware {
             }
 
             (uint256[] memory pathAmounts, ) =
-                UniswapStyleLib.getAmountsIn(REFERENCE_PEG_AMOUNT, amms, tokens);
+                UniswapStyleLib.getAmountsIn(
+                    REFERENCE_PEG_AMOUNT,
+                    amms,
+                    tokens
+                );
             uint256 inAmount = pathAmounts[0];
 
             _setPriceVal(tokenPrice, inAmount, 1000);

@@ -224,7 +224,6 @@ contract IncentiveDistribution is RoleAware {
         external
         returns (uint256 withdrawAmount)
     {
-
         updateDayTotals();
 
         withdrawAmount = accruedReward[msg.sender];

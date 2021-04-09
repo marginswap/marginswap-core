@@ -84,11 +84,7 @@ abstract contract CrossMarginLiquidation is CrossMarginAccounts {
             if (belowMaintenanceThreshold(account)) {
                 tradersToLiquidate.push(traderAddress);
                 uint256 len = account.holdingTokens.length;
-                for (
-                    uint256 sellIdx = 0;
-                    len > sellIdx;
-                    sellIdx++
-                ) {
+                for (uint256 sellIdx = 0; len > sellIdx; sellIdx++) {
                     address token = account.holdingTokens[sellIdx];
                     Liquidation storage liquidation = liquidationAmounts[token];
 
@@ -103,11 +99,7 @@ abstract contract CrossMarginLiquidation is CrossMarginAccounts {
                 }
 
                 len = account.borrowTokens.length;
-                for (
-                    uint256 buyIdx = 0;
-                    len > buyIdx;
-                    buyIdx++
-                ) {
+                for (uint256 buyIdx = 0; len > buyIdx; buyIdx++) {
                     address token = account.borrowTokens[buyIdx];
                     Liquidation storage liquidation = liquidationAmounts[token];
 
@@ -210,11 +202,7 @@ abstract contract CrossMarginLiquidation is CrossMarginAccounts {
 
     function liquidateToPeg() internal returns (uint256 pegAmount) {
         uint256 len = sellTokens.length;
-        for (
-            uint256 tokenIndex = 0;
-            len > tokenIndex;
-            tokenIndex++
-        ) {
+        for (uint256 tokenIndex = 0; len > tokenIndex; tokenIndex++) {
             address token = sellTokens[tokenIndex];
             Liquidation storage liq = liquidationAmounts[token];
             if (liq.sell > liq.buy) {
@@ -258,11 +246,9 @@ abstract contract CrossMarginLiquidation is CrossMarginAccounts {
         // this may be a bit imprecise, since individual shortfalls may be obscured
         // by overall returns and the maintainer cut is taken out of the net total,
         // but it gives us the general picture
-        uint256 costWithCut = (peg2targetCost * (100 + MAINTAINER_CUT_PERCENT)) / 100;
-        if (
-            costWithCut >
-            sale2pegAmount
-        ) {
+        uint256 costWithCut =
+            (peg2targetCost * (100 + MAINTAINER_CUT_PERCENT)) / 100;
+        if (costWithCut > sale2pegAmount) {
             emit LiquidationShortfall(costWithCut - sale2pegAmount);
         }
 
