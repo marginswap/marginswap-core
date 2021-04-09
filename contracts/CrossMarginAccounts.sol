@@ -50,6 +50,7 @@ abstract contract CrossMarginAccounts is RoleAware, PriceAware {
     ) internal {
         if (!hasHoldingToken(account, token)) {
             account.holdingTokens.push(token);
+            account.holdsToken[token] = true;
         }
 
         account.holdings[token] += depositAmount;
