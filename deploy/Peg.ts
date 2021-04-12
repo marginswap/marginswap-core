@@ -10,7 +10,7 @@ const deploy: DeployFunction = async function ({
   network
 }: HardhatRuntimeEnvironment) {
   const { deploy, save } = deployments;
-  const { deployer, usdt, weth } = await getNamedAccounts();
+  const { usdt, dai } = await getNamedAccounts();
 
   if (network.name == 'mainnet') {
     save('Peg', {
@@ -20,7 +20,7 @@ const deploy: DeployFunction = async function ({
   } else if (network.live) {
     save('Peg', {
       abi: ERC20PresetMinterPauser.abi,
-      address: weth
+      address: dai
     });
   } else {
     save('Peg', {

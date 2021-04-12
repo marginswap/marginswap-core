@@ -14,8 +14,8 @@ const tokensPerNetwork = {
   kovan: {
     //    USDT: USDT_ADDRESS,
     DAI: '0x4f96fe3b7a6cf9725f59d353f723c1bdb64ca6aa',
-    WETH: '0xd0a1e359811322d97991e03f863a0c30c2cf029c'
-    //    UNI: "0x1f9840a85d5af5bf1d1762f925bdaddc4201f984",
+    WETH: '0xd0a1e359811322d97991e03f863a0c30c2cf029c',
+    UNI: '0x1f9840a85d5af5bf1d1762f925bdaddc4201f984'
     //    MKR: "0xac94ea989f6955c67200dd67f0101e1865a560ea",
   },
   mainnet: {
@@ -45,25 +45,25 @@ const tokenParams: { [tokenName: string]: TokenInitRecord } = {
     exposureCap: 100000000,
     lendingBuffer: 10000,
     incentiveWeight: 5,
-    liquidationTokenPath: ['DAI', 'WETH', 'USDT']
+    liquidationTokenPath: ['DAI', 'WETH']
   },
   WETH: {
     exposureCap: 10000,
     lendingBuffer: 100,
     incentiveWeight: 5,
-    liquidationTokenPath: ['WETH', 'USDT']
+    liquidationTokenPath: ['WETH']
   },
   UNI: {
     exposureCap: 100000,
     lendingBuffer: 400,
     incentiveWeight: 5,
-    liquidationTokenPath: ['UNI', 'WETH', 'USDT']
+    liquidationTokenPath: ['UNI', 'WETH']
   },
   MKR: {
     exposureCap: 500,
     lendingBuffer: 80,
     incentiveWeight: 5,
-    liquidationTokenPath: ['MKR', 'WETH', 'USDT']
+    liquidationTokenPath: ['MKR', 'WETH']
   },
   USDT: {
     // TODO: take decimals out of exposure cap
@@ -123,12 +123,7 @@ const deploy: DeployFunction = async function ({
 
   const liquidationTokens = tokenNames.map(name => {
     const tokenPath = tokenParams[name].liquidationTokenPath;
-    if (network.name === 'mainnet' || !network.live) {
-      // mainnet or forked mainnet
-      return tokenPath ? tokenPath.map(tName => tokens[tName]) : [tokens[name], weth, peg];
-    } else {
-      return [tokens[name], peg];
-    }
+    return tokenPath ? [...tokenPath.map(tName => tokens[tName]), peg] : [tokens[name], weth, peg];
   });
 
   const liquidationAmms = tokenNames.map(name =>
