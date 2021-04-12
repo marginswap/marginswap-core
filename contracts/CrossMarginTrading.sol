@@ -188,7 +188,6 @@ contract CrossMarginTrading is CrossMarginLiquidation, IMarginTrading {
             borrowAmount = inAmount - sellAmount;
         }
 
-
         if (inAmount > borrowAmount) {
             totalLong[tokenFrom] -= inAmount - borrowAmount;
         }
@@ -196,8 +195,8 @@ contract CrossMarginTrading is CrossMarginLiquidation, IMarginTrading {
             totalLong[tokenTo] += outAmount - extinguishableDebt;
         }
         require(
-          tokenCaps[tokenTo] >= totalLong[tokenTo],
-          "Exceeds global token cap"
+            tokenCaps[tokenTo] >= totalLong[tokenTo],
+            "Exceeds global token cap"
         );
 
         adjustAmounts(
@@ -225,6 +224,16 @@ contract CrossMarginTrading is CrossMarginLiquidation, IMarginTrading {
         require(loanInPeg(account) == 0, "Can't liquidate: borrowing");
 
         deleteAccount(account);
+    }
+
+    /// @dev currently holding in this token
+    function viewBalanceInToken(address trader, address token)
+        external
+        view
+        returns (uint256)
+    {
+        CrossMarginAccount storage account = marginAccounts[trader];
+        return account.holdings[token];
     }
 
     /// @dev view function to display account held assets state

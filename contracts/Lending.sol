@@ -381,10 +381,7 @@ contract Lending is
         onlyOwnerExecActivator
     {
         YieldAccumulator storage yA = borrowYieldAccumulators[issuer];
-        require(
-            yA.accumulatorFP == 0,
-            "don't re-initialize"
-        );
+        require(yA.accumulatorFP == 0, "don't re-initialize");
 
         yA.accumulatorFP = FP32;
         yA.lastUpdated = block.timestamp;

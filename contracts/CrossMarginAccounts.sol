@@ -40,7 +40,7 @@ abstract contract CrossMarginAccounts is RoleAware, PriceAware {
     mapping(address => uint256) public totalShort;
     /// @dev tracks total of long positions per token
     mapping(address => uint256) public totalLong;
-    uint256 public coolingOffPeriod = 20;
+    uint256 public coolingOffPeriod = 10;
 
     /// @dev add an asset to be held by account
     function addHolding(

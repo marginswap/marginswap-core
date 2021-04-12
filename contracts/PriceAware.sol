@@ -52,12 +52,23 @@ abstract contract PriceAware is RoleAware {
     }
 
     /// Add a new volatility setting
-    function addVolatilitySetting(uint256 _priceUpdateWindow, uint256 _updateRatePermil) external onlyOwnerExec {
-        volatilitySettings.push(VolatilitySetting({priceUpdateWindow:_priceUpdateWindow, updateRatePermil: _updateRatePermil}));
+    function addVolatilitySetting(
+        uint256 _priceUpdateWindow,
+        uint256 _updateRatePermil
+    ) external onlyOwnerExec {
+        volatilitySettings.push(
+            VolatilitySetting({
+                priceUpdateWindow: _priceUpdateWindow,
+                updateRatePermil: _updateRatePermil
+            })
+        );
     }
 
     /// Choose a volatitlity setting
-    function chooseVolatilitySetting(uint256 index) external onlyOwnerExecDisabler {
+    function chooseVolatilitySetting(uint256 index)
+        external
+        onlyOwnerExecDisabler
+    {
         VolatilitySetting storage vs = volatilitySettings[index];
         if (vs.updateRatePermil > 0) {
             UPDATE_RATE_PERMIL = vs.updateRatePermil;
