@@ -40,7 +40,7 @@ abstract contract BaseLending {
     /// update the yield for an asset based on recent supply and demand
     function updatedYieldFP(
         // previous yield
-        uint256 _yieldFP,
+        uint256 yieldFP,
         // timestamp
         uint256 lastUpdated,
         uint256 totalLendingInBucket,
@@ -48,8 +48,7 @@ abstract contract BaseLending {
         uint256 buyingSpeed,
         uint256 withdrawingSpeed,
         uint256 bucketMaxYield
-    ) internal view returns (uint256 yieldFP) {
-        yieldFP = _yieldFP;
+    ) internal view returns (uint256) {
         uint256 timeDiff = block.timestamp - lastUpdated;
         uint256 yieldDiff = timeDiff * yieldChangePerSecondFP;
 
@@ -64,6 +63,8 @@ abstract contract BaseLending {
                 yieldFP = bucketMaxYield;
             }
         }
+
+        return max(FP32, yieldFP);
     }
 
     function updateSpeed(
@@ -90,6 +91,15 @@ abstract contract BaseLending {
             return b;
         } else {
             return a;
+        }
+    }
+
+    /// @dev maximum
+    function max(uint256 a, uint256 b) internal pure returns (uint256) {
+        if (a > b) {
+            return a;
+        } else {
+            return b;
         }
     }
 

@@ -56,10 +56,12 @@ abstract contract HourlyBondSubscriptionLending is BaseLending {
     {
         uint256 yieldQuotientFP = bond.yieldQuotientFP;
         if (yieldQuotientFP > 0) {
+
             YieldAccumulator storage yA =
                 getUpdatedHourlyYield(issuer, hourlyBondMetadata[issuer]);
 
             uint256 oldAmount = bond.amount;
+
             bond.amount = applyInterest(
                 bond.amount,
                 yA.accumulatorFP,
@@ -124,12 +126,11 @@ abstract contract HourlyBondSubscriptionLending is BaseLending {
     ) internal view returns (uint256 accumulatorFP) {
         uint256 secondsDelta = timeDelta % (1 hours);
         // linearly interpolate interest for seconds
-        // accumulator * hourly_yield == seconds_per_hour * accumulator * hourly_yield / seconds_per_hour
         // FP * FP * 1 / (FP * 1) = FP
         accumulatorFP =
-            (yieldAccumulator.accumulatorFP *
-                yieldAccumulator.hourlyYieldFP *
-                secondsDelta) /
+            yieldAccumulator.accumulatorFP + yieldAccumulator.accumulatorFP *
+             (yieldAccumulator.hourlyYieldFP - FP32) *
+                secondsDelta /
             (FP32 * 1 hours);
 
         uint256 hoursDelta = timeDelta / (1 hours);
