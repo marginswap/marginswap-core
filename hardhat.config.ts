@@ -189,6 +189,12 @@ export default {
       1: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
       42: '0xd0a1e359811322d97991e03f863a0c30c2cf029c'
     },
+    dai: {
+      1: '0x6b175474e89094c44da98b954eedeac495271d0f',
+      31337: '0x6b175474e89094c44da98b954eedeac495271d0f',
+      42: '0x4f96fe3b7a6cf9725f59d353f723c1bdb64ca6aa',
+      default: '0x6b175474e89094c44da98b954eedeac495271d0f'
+    },
     usdt: {
       default: '0xdAC17F958D2ee523a2206206994597C13D831ec7'
     }
