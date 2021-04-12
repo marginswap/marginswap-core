@@ -143,7 +143,7 @@ contract MarginRouter is RoleAware, IncentivizedHolder, BaseRouter {
     }
 
     /// @notice entry point for swapping tokens held in cross margin account
-    function crossSwapExactTokensForTokens(
+    function swapExactTokensForTokens(
         uint256 amountIn,
         uint256 amountOutMin,
         bytes32 amms,
@@ -173,7 +173,7 @@ contract MarginRouter is RoleAware, IncentivizedHolder, BaseRouter {
     }
 
     /// @notice entry point for swapping tokens held in cross margin account
-    function crossSwapTokensForExactTokens(
+    function swapTokensForExactTokens(
         uint256 amountOut,
         uint256 amountInMax,
         bytes32 amms,

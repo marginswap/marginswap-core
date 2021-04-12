@@ -90,6 +90,7 @@ contract CrossMarginTrading is CrossMarginLiquidation, IMarginTrading {
     ) external override {
         require(isMarginTrader(msg.sender), "Calling contr. not authorized");
         CrossMarginAccount storage account = marginAccounts[trader];
+        addHolding(account, borrowToken, borrowAmount);
         _registerBorrow(account, borrowToken, borrowAmount);
     }
 
@@ -178,27 +179,27 @@ contract CrossMarginTrading is CrossMarginLiquidation, IMarginTrading {
             extinguishDebt(account, tokenTo, extinguishableDebt);
             totalShort[tokenTo] -= extinguishableDebt;
         }
-        totalLong[tokenFrom] -= inAmount;
-        totalLong[tokenTo] += outAmount - extinguishableDebt;
-        require(
-            tokenCaps[tokenTo] >= totalLong[tokenTo],
-            "Exceeds global token cap"
-        );
 
         uint256 sellAmount = inAmount;
-        if (inAmount > account.holdings[tokenFrom]) {
-            sellAmount = account.holdings[tokenFrom];
+        uint256 fromHoldings = account.holdings[tokenFrom];
+        if (inAmount > fromHoldings) {
+            sellAmount = fromHoldings;
             /// won't overflow
             borrowAmount = inAmount - sellAmount;
-
-            totalShort[tokenFrom] += borrowAmount;
-            require(
-                tokenCaps[tokenFrom] >= totalShort[tokenFrom],
-                "Exceeds global token cap"
-            );
-
-            borrow(account, tokenFrom, borrowAmount);
         }
+
+
+        if (inAmount > borrowAmount) {
+            totalLong[tokenFrom] -= inAmount - borrowAmount;
+        }
+        if (outAmount > extinguishableDebt) {
+            totalLong[tokenTo] += outAmount - extinguishableDebt;
+        }
+        require(
+          tokenCaps[tokenTo] >= totalLong[tokenTo],
+          "Exceeds global token cap"
+        );
+
         adjustAmounts(
             account,
             tokenFrom,
@@ -206,6 +207,15 @@ contract CrossMarginTrading is CrossMarginLiquidation, IMarginTrading {
             sellAmount,
             outAmount - extinguishableDebt
         );
+
+        if (borrowAmount > 0) {
+            totalShort[tokenFrom] += borrowAmount;
+            require(
+                tokenCaps[tokenFrom] >= totalShort[tokenFrom],
+                "Exceeds global token cap"
+            );
+            borrow(account, tokenFrom, borrowAmount);
+        }
     }
 
     /// @dev can get called by router to register the dissolution of an account

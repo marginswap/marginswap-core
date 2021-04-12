@@ -88,7 +88,6 @@ abstract contract HourlyBondSubscriptionLending is BaseLending {
 
         if (yieldQuotientFP > 0) {
             return
-                bond.amount +
                 applyInterest(bond.amount, cumulativeYield, yieldQuotientFP);
         } else {
             return bond.amount;

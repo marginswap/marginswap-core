@@ -20,7 +20,7 @@ contract TokenAdmin is RoleAware {
     mapping(address => uint8) public tokenBorrowingTranches;
     uint8 public nextTrancheIndex = 20;
 
-    uint256 public initHourlyYieldAPRPercent = 10;
+    uint256 public initHourlyYieldAPRPercent = 1;
 
     constructor(
         uint256 lendingTargetPortion,

@@ -84,10 +84,11 @@ contract Lending is
         HourlyBondMetadata storage bondMeta = hourlyBondMetadata[issuer];
 
         if (bondMeta.yieldAccumulator.accumulatorFP == 0) {
+            uint256 yieldFP = FP32 + (FP32 * aprPercent) / 100 / (24 * 365);
             bondMeta.yieldAccumulator = YieldAccumulator({
                 accumulatorFP: FP32,
                 lastUpdated: block.timestamp,
-                hourlyYieldFP: FP32 + (FP32 * aprPercent) / 100 / (24 * 365)
+                hourlyYieldFP: yieldFP
             });
             bondMeta.buyingSpeed = 1;
             bondMeta.withdrawingSpeed = 1;
@@ -379,12 +380,15 @@ contract Lending is
         external
         onlyOwnerExecActivator
     {
+        YieldAccumulator storage yA = borrowYieldAccumulators[issuer];
         require(
-            borrowYieldAccumulators[issuer].accumulatorFP == 0,
+            yA.accumulatorFP == 0,
             "don't re-initialize"
         );
 
-        borrowYieldAccumulators[issuer].accumulatorFP = FP32;
+        yA.accumulatorFP = FP32;
+        yA.lastUpdated = block.timestamp;
+        yA.hourlyYieldFP = FP32 + FP32 / (365 * 24);
     }
 
     function setBorrowingFactorPercent(uint256 borrowingFactor)

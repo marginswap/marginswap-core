@@ -102,11 +102,12 @@ async function exportAddresses(args, hre: HardhatRuntimeEnvironment) {
       return [name, deployRecord.address];
     }
   );
-  addresses[hre.network.name === 'localhost' ? 'unknown' : hre.network.name] = Object.fromEntries(networkAddresses);
+  addresses[await hre.getChainId()] = Object.fromEntries(networkAddresses);
   const stringRepresentation = JSON.stringify(addresses, null, 2);
 
   await fs.promises.writeFile(addressesPath, stringRepresentation);
-  console.log(`Wrote ${addressesPath}`);
+  console.log(`Wrote ${addressesPath}. New state:`);
+  console.log(addresses);
 }
 
 task('export-addresses', 'Export deployment addresses to JSON file', exportAddresses);
