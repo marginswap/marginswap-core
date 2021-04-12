@@ -80,8 +80,6 @@ abstract contract CrossMarginAccounts is RoleAware, PriceAware {
             account.borrowed[borrowToken] = oldBorrowed + borrowAmount;
         }
 
-        addHolding(account, borrowToken, borrowAmount);
-
         require(positiveBalance(account), "Insufficient balance");
     }
 
