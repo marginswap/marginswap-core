@@ -1,5 +1,5 @@
 {
-  "address": "0xdac17f958d2ee523a2206206994597c13d831ec7",
+  "address": "0xdAC17F958D2ee523a2206206994597C13D831ec7",
   "abi": [
     {
       "inputs": [
@@ -555,6 +555,25 @@
       "name": "revokeRole",
       "outputs": [],
       "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes4",
+          "name": "interfaceId",
+          "type": "bytes4"
+        }
+      ],
+      "name": "supportsInterface",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
       "type": "function"
     },
     {
