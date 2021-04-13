@@ -65,7 +65,7 @@ library UniswapStyleLib {
         );
         uint256 numerator = reserveIn * amountOut * 1_000;
 
-        uint256 denominator = (reserveOut - amountOut) - 997;
+        uint256 denominator = (reserveOut - amountOut) * 997;
         amountIn = (numerator / denominator) + 1;
     }
 
