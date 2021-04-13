@@ -163,7 +163,7 @@ export default {
       optimizer: {
         enabled: true,
         // TODO
-        runs: 30000
+        runs: 3000
       }
     }
   },
@@ -194,6 +194,9 @@ export default {
       31337: '0x6b175474e89094c44da98b954eedeac495271d0f',
       42: '0x4f96fe3b7a6cf9725f59d353f723c1bdb64ca6aa',
       default: '0x6b175474e89094c44da98b954eedeac495271d0f'
+    },
+    usdc: {
+      default: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48'
     },
     usdt: {
       default: '0xdAC17F958D2ee523a2206206994597C13D831ec7'

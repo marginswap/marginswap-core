@@ -10,7 +10,7 @@ const deploy: DeployFunction = async function ({
   network
 }: HardhatRuntimeEnvironment) {
   const { deploy, save } = deployments;
-  const { usdt, dai } = await getNamedAccounts();
+  const { usdt, dai, usdc } = await getNamedAccounts();
 
   if (network.name == 'mainnet') {
     save('Peg', {
