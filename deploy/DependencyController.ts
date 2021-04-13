@@ -81,7 +81,8 @@ const deploy: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     from: deployer,
     args: [Roles.address],
     log: true,
-    skipIfAlreadyDeployed: true
+    skipIfAlreadyDeployed: true,
+    deterministicDeployment: true
   });
 
   const roles = await ethers.getContractAt('Roles', Roles.address);

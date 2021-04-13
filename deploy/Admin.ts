@@ -17,7 +17,8 @@ const deploy: DeployFunction = async function ({
     from: deployer,
     args: [mfiAddress, lockedMfi, lockedMfiDelegate, Roles.address],
     log: true,
-    skipIfAlreadyDeployed: true
+    skipIfAlreadyDeployed: true,
+    deterministicDeployment: true
   });
 
   if (Admin.newlyDeployed) {

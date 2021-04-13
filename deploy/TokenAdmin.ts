@@ -18,7 +18,8 @@ const deploy: DeployFunction = async function ({
     from: deployer,
     args: [lendingTargetPortion, borrowingTargetPortion, Roles.address],
     log: true,
-    skipIfAlreadyDeployed: true
+    skipIfAlreadyDeployed: true,
+    deterministicDeployment: true
   });
 };
 deploy.tags = ['TokenAdmin', 'local'];

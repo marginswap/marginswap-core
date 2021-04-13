@@ -25,7 +25,8 @@ const deploy: DeployFunction = async function ({
     from: deployer,
     args: [roles.address, liquidityToken, nowSeconds],
     log: true,
-    skipIfAlreadyDeployed: true
+    skipIfAlreadyDeployed: true,
+    deterministicDeployment: true
   });
 
   if (liquidityMiningReward.newlyDeployed) {

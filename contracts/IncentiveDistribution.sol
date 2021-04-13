@@ -133,6 +133,10 @@ contract IncentiveDistribution is RoleAware {
         }
     }
 
+    function setDailyDistribution(uint256 dailyDistribution) external onlyOwnerExec {
+        currentDailyDistribution = dailyDistribution;
+    }
+
     /// Decrease amount of claim
     function subtractFromClaimAmount(
         uint256 tranche,
