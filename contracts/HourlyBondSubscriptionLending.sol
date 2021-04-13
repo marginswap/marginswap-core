@@ -22,7 +22,7 @@ abstract contract HourlyBondSubscriptionLending is BaseLending {
 
     mapping(address => HourlyBondMetadata) hourlyBondMetadata;
 
-    uint256 public withdrawalWindow = 10 minutes;
+    uint256 public withdrawalWindow = 15 minutes;
     // issuer => holder => bond record
     mapping(address => mapping(address => HourlyBond))
         public hourlyBondAccounts;
@@ -56,7 +56,6 @@ abstract contract HourlyBondSubscriptionLending is BaseLending {
     {
         uint256 yieldQuotientFP = bond.yieldQuotientFP;
         if (yieldQuotientFP > 0) {
-
             YieldAccumulator storage yA =
                 getUpdatedHourlyYield(issuer, hourlyBondMetadata[issuer]);
 
@@ -128,9 +127,10 @@ abstract contract HourlyBondSubscriptionLending is BaseLending {
         // linearly interpolate interest for seconds
         // FP * FP * 1 / (FP * 1) = FP
         accumulatorFP =
-            yieldAccumulator.accumulatorFP + yieldAccumulator.accumulatorFP *
-             (yieldAccumulator.hourlyYieldFP - FP32) *
-                secondsDelta /
+            yieldAccumulator.accumulatorFP +
+            (yieldAccumulator.accumulatorFP *
+                (yieldAccumulator.hourlyYieldFP - FP32) *
+                secondsDelta) /
             (FP32 * 1 hours);
 
         uint256 hoursDelta = timeDelta / (1 hours);
