@@ -22,7 +22,8 @@ const deploy: DeployFunction = async function ({
     from: deployer,
     args: [WETH, roles.address],
     log: true,
-    skipIfAlreadyDeployed: true
+    skipIfAlreadyDeployed: true,
+    deterministicDeployment: true
   });
 };
 deploy.tags = ['Fund'];

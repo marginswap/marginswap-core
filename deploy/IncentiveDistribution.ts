@@ -18,7 +18,8 @@ const deploy: DeployFunction = async function ({
     from: deployer,
     args: [MFI_ADDRESS, 4000, roles.address],
     log: true,
-    skipIfAlreadyDeployed: true
+    skipIfAlreadyDeployed: true,
+    deterministicDeployment: true
   });
 };
 

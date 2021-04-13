@@ -16,7 +16,8 @@ const deploy: DeployFunction = async function ({
     from: deployer,
     args: [Roles.address],
     log: true,
-    skipIfAlreadyDeployed: true
+    skipIfAlreadyDeployed: true,
+    deterministicDeployment: true
   });
 };
 deploy.tags = ['Lending', 'local'];

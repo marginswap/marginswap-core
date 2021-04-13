@@ -25,16 +25,17 @@ const deploy: DeployFunction = async function ({
     from: deployer,
     args: [roles.address, liquidityToken, nowSeconds],
     log: true,
-    skipIfAlreadyDeployed: true
+    skipIfAlreadyDeployed: true,
+    deterministicDeployment: true
   });
 
-  if (liquidityMiningReward.newlyDeployed) {
-    const tx = await incentiveDistribution.initTranche(
-      0, // tranche id
-      200 // share of pie in permil
-    );
-    console.log(`incentiveDistribution.initTranche: ${tx.hash}`);
-  }
+  // if (liquidityMiningReward.newlyDeployed) {
+  //   const tx = await incentiveDistribution.initTranche(
+  //     0, // tranche id
+  //     200 // share of pie in permil
+  //   );
+  //   console.log(`incentiveDistribution.initTranche: ${tx.hash}`);
+  // }
 };
 
 deploy.tags = ['LiquidityMiningReward', 'local'];
