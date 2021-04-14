@@ -7,8 +7,8 @@ import "../libraries/UniswapStyleLib.sol";
 
 /// Stores how many of token you could get for 1k of peg
 struct TokenPrice {
-    uint256 blockLastUpdated;
-    uint256 tokenPerRefAmount;
+    uint256 lastUpdated;
+    uint256 priceFP;
     address[] liquidationTokens;
     bytes32 amms;
     address[] inverseLiquidationTokens;
@@ -18,6 +18,13 @@ struct TokenPrice {
 struct VolatilitySetting {
     uint256 priceUpdateWindow;
     uint256 updateRatePermil;
+    uint256 voluntaryUpdateWindow;
+}
+
+struct PairPrice {
+    uint256 cumulative;
+    uint256 lastUpdated;
+    uint256 priceFP;
 }
 
 /// @title The protocol features several mechanisms to prevent vulnerability to
@@ -31,15 +38,18 @@ struct VolatilitySetting {
 /// 3) Liquidators may not call from a contract address, to prevent extreme forms of
 ///    of front-running and other price manipulation.
 abstract contract PriceAware is RoleAware {
-    uint256 constant pegDecimals = 6;
-    uint256 constant REFERENCE_PEG_AMOUNT = 100 * (10**pegDecimals);
+    uint256 constant FP64 = 2**64;
     address public immutable peg;
 
     mapping(address => TokenPrice) public tokenPrices;
+    mapping(address => mapping(address => PairPrice)) public pairPrices;
     /// update window in blocks
 
-    uint256 public priceUpdateWindow = 20;
-    uint256 public UPDATE_RATE_PERMIL = 50;
+    // TODO
+    uint256 public priceUpdateWindow = 40 minutes;
+    uint256 public voluntaryUpdateWindow = 5 minutes;
+
+    uint256 public UPDATE_RATE_PERMIL = 400;
     VolatilitySetting[] public volatilitySettings;
 
     constructor(address _peg) {
@@ -47,19 +57,25 @@ abstract contract PriceAware is RoleAware {
     }
 
     /// Set window for price updates
-    function setPriceUpdateWindow(uint16 window) external onlyOwnerExec {
+    function setPriceUpdateWindow(uint16 window, uint256 voluntaryWindow)
+        external
+        onlyOwnerExec
+    {
         priceUpdateWindow = window;
+        voluntaryUpdateWindow = voluntaryWindow;
     }
 
     /// Add a new volatility setting
     function addVolatilitySetting(
         uint256 _priceUpdateWindow,
-        uint256 _updateRatePermil
+        uint256 _updateRatePermil,
+        uint256 _voluntaryUpdateWindow
     ) external onlyOwnerExec {
         volatilitySettings.push(
             VolatilitySetting({
                 priceUpdateWindow: _priceUpdateWindow,
-                updateRatePermil: _updateRatePermil
+                updateRatePermil: _updateRatePermil,
+                voluntaryUpdateWindow: _voluntaryUpdateWindow
             })
         );
     }
@@ -73,6 +89,7 @@ abstract contract PriceAware is RoleAware {
         if (vs.updateRatePermil > 0) {
             UPDATE_RATE_PERMIL = vs.updateRatePermil;
             priceUpdateWindow = vs.priceUpdateWindow;
+            voluntaryUpdateWindow = vs.voluntaryUpdateWindow;
         }
     }
 
@@ -81,28 +98,39 @@ abstract contract PriceAware is RoleAware {
         UPDATE_RATE_PERMIL = rate;
     }
 
-    /// Get current price of token in peg
     function getCurrentPriceInPeg(address token, uint256 inAmount)
-        public
+        internal
         returns (uint256)
     {
+        return getCurrentPriceInPeg(token, inAmount, false);
+    }
+
+    function getCurrentPriceInPeg(
+        address token,
+        uint256 inAmount,
+        bool voluntary
+    ) public returns (uint256 priceInPeg) {
         if (token == peg) {
             return inAmount;
         } else {
             TokenPrice storage tokenPrice = tokenPrices[token];
 
+            uint256 timeDelta = block.timestamp - tokenPrice.lastUpdated;
             if (
-                block.number - tokenPrice.blockLastUpdated >
-                priceUpdateWindow ||
-                tokenPrice.tokenPerRefAmount == 0
+                timeDelta > priceUpdateWindow ||
+                tokenPrice.priceFP == 0 ||
+                (voluntary && timeDelta > voluntaryUpdateWindow)
             ) {
                 // update the currently cached price
-                getPriceFromAMM(tokenPrice);
+                uint256 priceUpdateFP;
+                priceUpdateFP = getPriceByPairs(
+                    tokenPrice.liquidationTokens,
+                    tokenPrice.amms
+                );
+                _setPriceVal(tokenPrice, priceUpdateFP, UPDATE_RATE_PERMIL);
             }
 
-            return
-                (inAmount * REFERENCE_PEG_AMOUNT) /
-                (tokenPrice.tokenPerRefAmount + 1);
+            priceInPeg = (inAmount * tokenPrice.priceFP) / FP64;
         }
     }
 
@@ -110,40 +138,31 @@ abstract contract PriceAware is RoleAware {
     function viewCurrentPriceInPeg(address token, uint256 inAmount)
         public
         view
-        returns (uint256)
+        returns (uint256 priceInPeg)
     {
         if (token == peg) {
             return inAmount;
         } else {
             TokenPrice storage tokenPrice = tokenPrices[token];
-            return
-                (inAmount * REFERENCE_PEG_AMOUNT) /
-                (tokenPrice.tokenPerRefAmount + 1);
-        }
-    }
+            uint256 priceFP = tokenPrice.priceFP;
 
-    /// @dev retrieves the price from the AMM
-    function getPriceFromAMM(TokenPrice storage tokenPrice) internal virtual {
-        (uint256[] memory pathAmounts, ) =
-            UniswapStyleLib.getAmountsIn(
-                REFERENCE_PEG_AMOUNT,
-                tokenPrice.amms,
-                tokenPrice.liquidationTokens
-            );
-        _setPriceVal(tokenPrice, pathAmounts[0], UPDATE_RATE_PERMIL);
+            priceInPeg = (inAmount * priceFP) / FP64;
+        }
     }
 
     function _setPriceVal(
         TokenPrice storage tokenPrice,
-        uint256 updatePerRefAmount,
+        uint256 updateFP,
         uint256 weightPerMil
     ) internal {
-        tokenPrice.tokenPerRefAmount =
-            (tokenPrice.tokenPerRefAmount *
+        tokenPrice.priceFP =
+            (tokenPrice.priceFP *
                 (1000 - weightPerMil) +
-                updatePerRefAmount *
+                updateFP *
                 weightPerMil) /
             1000;
+
+        tokenPrice.lastUpdated = block.timestamp;
     }
 
     /// add path from token to current liquidation peg
@@ -164,8 +183,11 @@ abstract contract PriceAware is RoleAware {
             bytes32 inverseAmms;
 
             for (uint256 i = 0; tokens.length - 1 > i; i++) {
+                initPairPrice(tokens[i], tokens[i + 1], amms[i]);
+
                 bytes32 shifted =
                     bytes32(amms[i]) >> ((tokens.length - 2 - i) * 8);
+
                 inverseAmms = inverseAmms | shifted;
             }
 
@@ -177,15 +199,8 @@ abstract contract PriceAware is RoleAware {
                 ];
             }
 
-            (uint256[] memory pathAmounts, ) =
-                UniswapStyleLib.getAmountsIn(
-                    REFERENCE_PEG_AMOUNT,
-                    amms,
-                    tokens
-                );
-            uint256 inAmount = pathAmounts[0];
-
-            _setPriceVal(tokenPrice, inAmount, 1000);
+            tokenPrice.priceFP = getPriceByPairs(tokens, amms);
+            tokenPrice.lastUpdated = block.timestamp;
         }
     }
 
@@ -229,5 +244,82 @@ abstract contract PriceAware is RoleAware {
 
             return amounts[0];
         }
+    }
+
+    function getPriceByPairs(address[] memory tokens, bytes32 amms)
+        internal
+        returns (uint256 priceFP)
+    {
+        priceFP = FP64;
+        for (uint256 i; i < tokens.length - 1; i++) {
+            address inToken = tokens[i];
+            address outToken = tokens[i + 1];
+
+            address pair =
+                amms[i] == 0
+                    ? UniswapStyleLib.pairForUni(inToken, outToken)
+                    : UniswapStyleLib.pairForSushi(inToken, outToken);
+
+            PairPrice storage pairPrice = pairPrices[pair][inToken];
+
+            uint256 timeDelta = block.timestamp - pairPrice.lastUpdated;
+
+            if (timeDelta > voluntaryUpdateWindow) {
+                // we are in business
+                (address token0, ) =
+                    UniswapStyleLib.sortTokens(inToken, outToken);
+
+                uint256 cumulative =
+                    inToken == token0
+                        ? IUniswapV2Pair(pair).price0CumulativeLast()
+                        : IUniswapV2Pair(pair).price1CumulativeLast();
+
+                if (pairPrice.cumulative == cumulative) {
+                    // nothing happened
+                    priceFP = (priceFP * pairPrice.priceFP) / FP64;
+                } else {
+                    // something did happen
+                    uint256 pairPriceFP =
+                        (FP64 * (cumulative - pairPrice.cumulative)) /
+                            timeDelta;
+                    pairPrice.priceFP = pairPriceFP;
+
+                    priceFP = (priceFP * pairPriceFP) / FP64;
+
+                    pairPrice.cumulative = cumulative;
+                }
+
+                pairPrice.lastUpdated = block.timestamp;
+            } else {
+                priceFP = (priceFP * pairPrice.priceFP) / FP64;
+            }
+        }
+    }
+
+    function initPairPrice(
+        address inToken,
+        address outToken,
+        bytes1 amm
+    ) internal {
+        address pair =
+            amm == 0
+                ? UniswapStyleLib.pairForUni(inToken, outToken)
+                : UniswapStyleLib.pairForSushi(inToken, outToken);
+
+        (uint112 reserve0, uint112 reserve1, ) =
+            IUniswapV2Pair(pair).getReserves();
+
+        PairPrice storage pairPrice = pairPrices[pair][inToken];
+        (address token0, ) = UniswapStyleLib.sortTokens(inToken, outToken);
+
+        if (inToken == token0) {
+            pairPrice.priceFP = (FP64 * reserve1) / reserve0;
+            pairPrice.cumulative = IUniswapV2Pair(pair).price0CumulativeLast();
+        } else {
+            pairPrice.priceFP = (FP64 * reserve0) / reserve1;
+            pairPrice.cumulative = IUniswapV2Pair(pair).price1CumulativeLast();
+        }
+
+        pairPrice.lastUpdated = block.timestamp;
     }
 }

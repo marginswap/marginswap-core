@@ -91,7 +91,8 @@ abstract contract IsolatedMarginAccounts is RoleAware {
         return
             PriceAware(price()).getCurrentPriceInPeg(
                 borrowToken,
-                account.borrowed
+                account.borrowed,
+                false
             );
     }
 
@@ -103,7 +104,8 @@ abstract contract IsolatedMarginAccounts is RoleAware {
         return
             PriceAware(price()).getCurrentPriceInPeg(
                 holdingToken,
-                account.holding
+                account.holding,
+                false
             );
     }
 

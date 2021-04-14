@@ -163,7 +163,7 @@ export default {
       optimizer: {
         enabled: true,
         // TODO
-        runs: 3000
+        runs: 20000
       }
     }
   },
