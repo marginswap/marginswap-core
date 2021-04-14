@@ -3,6 +3,7 @@ pragma solidity >=0.5.0;
 import "@uniswap/v2-core/contracts/interfaces/IUniswapV2Pair.sol";
 
 library UniswapStyleLib {
+    uint256 constant FP24 = 2**16;
     address constant UNISWAP_FACTORY =
         0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f;
     address constant SUSHI_FACTORY = 0xC0AEe478e3658e2610c5F7A4A2E1777cE9e4f2Ac;
