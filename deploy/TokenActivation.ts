@@ -163,7 +163,7 @@ const deploy: DeployFunction = async function ({
   const tokenAddresses = Object.values(tokens);
 
   const argLists = [
-    await prepArgs(tokenNames.slice(0, 5), tokenAddresses.slice(0,5), deployments, tokens, peg, weth),
+    await prepArgs(tokenNames.slice(0), tokenAddresses.slice(0), deployments, tokens, peg, weth)
     //await prepArgs(tokenNames.slice(5, 10), tokenAddresses.slice(5,10), deployments, tokens, peg, weth),
     //await prepArgs(tokenNames.slice(10), tokenAddresses.slice(10), deployments, tokens, peg, weth)
   ];
