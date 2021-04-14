@@ -18,6 +18,7 @@ struct TokenPrice {
 struct VolatilitySetting {
     uint256 priceUpdateWindow;
     uint256 updateRatePermil;
+    uint256 voluntaryUpdateWindow;
 }
 
 struct PairPrice {
@@ -45,7 +46,7 @@ abstract contract PriceAware is RoleAware {
     /// update window in blocks
 
     // TODO
-    uint256 public priceUpdateWindow = 20 minutes;
+    uint256 public priceUpdateWindow = 40 minutes;
     uint256 public voluntaryUpdateWindow = 5 minutes;
 
     uint256 public UPDATE_RATE_PERMIL = 400;
@@ -67,12 +68,14 @@ abstract contract PriceAware is RoleAware {
     /// Add a new volatility setting
     function addVolatilitySetting(
         uint256 _priceUpdateWindow,
-        uint256 _updateRatePermil
+        uint256 _updateRatePermil,
+        uint256 _voluntaryUpdateWindow
     ) external onlyOwnerExec {
         volatilitySettings.push(
             VolatilitySetting({
                 priceUpdateWindow: _priceUpdateWindow,
-                updateRatePermil: _updateRatePermil
+                updateRatePermil: _updateRatePermil,
+                voluntaryUpdateWindow: _voluntaryUpdateWindow
             })
         );
     }
@@ -86,6 +89,7 @@ abstract contract PriceAware is RoleAware {
         if (vs.updateRatePermil > 0) {
             UPDATE_RATE_PERMIL = vs.updateRatePermil;
             priceUpdateWindow = vs.priceUpdateWindow;
+            voluntaryUpdateWindow = vs.voluntaryUpdateWindow;
         }
     }
 
@@ -260,7 +264,7 @@ abstract contract PriceAware is RoleAware {
 
             uint256 timeDelta = block.timestamp - pairPrice.lastUpdated;
 
-            if (timeDelta > priceUpdateWindow) {
+            if (timeDelta > voluntaryUpdateWindow) {
                 // we are in business
                 (address token0, ) =
                     UniswapStyleLib.sortTokens(inToken, outToken);
