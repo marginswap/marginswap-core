@@ -10,7 +10,7 @@ const UNI_FACTORY_ADDRESS = '0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f';
 
 const UNI_INIT_CODE_HASH = '0x96e8ac4277198ff8b6f785478aa9a39f403cb768dd02cbee326c3e7da348845f';
 
-const tokensPerNetwork: Record<string, Record<string, string>> = {
+export const tokensPerNetwork: Record<string, Record<string, string>> = {
   kovan: {
     //    USDT: USDT_ADDRESS,
     DAI: '0x4f96fe3b7a6cf9725f59d353f723c1bdb64ca6aa',
@@ -34,12 +34,12 @@ const tokensPerNetwork: Record<string, Record<string, string>> = {
   local: {}
 };
 
-enum AMMs {
+export enum AMMs {
   UNISWAP,
   SUSHISWAP
 }
 
-type TokenInitRecord = {
+export type TokenInitRecord = {
   exposureCap: number;
   lendingBuffer: number;
   incentiveWeight: number;
@@ -47,7 +47,7 @@ type TokenInitRecord = {
   decimals: number;
   ammPath?: AMMs[];
 };
-const tokenParams: { [tokenName: string]: TokenInitRecord } = {
+export const tokenParams: { [tokenName: string]: TokenInitRecord } = {
   DAI: {
     exposureCap: 10000000,
     lendingBuffer: 10000,
@@ -137,7 +137,7 @@ const tokenParams: { [tokenName: string]: TokenInitRecord } = {
   }
 };
 
-function encodeAMMPath(ammPath: AMMs[]) {
+export function encodeAMMPath(ammPath: AMMs[]) {
   const encoded = ethers.utils.hexlify(ammPath.map((amm: AMMs) => (amm == AMMs.UNISWAP ? 0 : 1)));
   return `${encoded}${'0'.repeat(64 + 2 - encoded.length)}`;
 }
@@ -163,7 +163,7 @@ const deploy: DeployFunction = async function ({
   const tokenAddresses = Object.values(tokens);
 
   const argLists = [
-    await prepArgs(tokenNames.slice(0), tokenAddresses.slice(0), deployments, tokens, peg, weth)
+    await prepArgs(tokenNames.slice(0,5), tokenAddresses.slice(0,5), deployments, tokens, peg, weth)
     //await prepArgs(tokenNames.slice(5, 10), tokenAddresses.slice(5,10), deployments, tokens, peg, weth),
     //await prepArgs(tokenNames.slice(10), tokenAddresses.slice(10), deployments, tokens, peg, weth)
   ];

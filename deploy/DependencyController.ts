@@ -2,7 +2,7 @@ import { HardhatRuntimeEnvironment } from 'hardhat/types';
 import { DeployFunction } from 'hardhat-deploy/types';
 import { ethers, network } from 'hardhat';
 
-type ManagedContract = {
+export type ManagedContract = {
   contractName: string;
   charactersPlayed: number[];
   rolesPlayed: number[];
@@ -102,7 +102,7 @@ deploy.tags = ['DependencyController', 'local'];
 deploy.dependencies = managedContracts.map(mc => mc.contractName);
 export default deploy;
 
-async function manage(hre: HardhatRuntimeEnvironment, dcAddress: string, mC: ManagedContract) {
+export async function manage(hre: HardhatRuntimeEnvironment, dcAddress: string, mC: ManagedContract) {
   const contract = await hre.deployments
     .get(mC.contractName)
     .then(C => ethers.getContractAt(mC.contractName, C.address));
