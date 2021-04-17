@@ -188,18 +188,18 @@ const deploy: DeployFunction = async function ({
   //const TREASURY = '0x16F3Fc1E4BA9d70f47387b902fa5d21020b5C6B5';
   // if we are impersonating, steal some crypto
   if (!network.live) {
-    await network.provider.request({
-      method: 'hardhat_impersonateAccount',
-      params: [TREASURY]
-    });
+    // await network.provider.request({
+    //   method: 'hardhat_impersonateAccount',
+    //   params: [TREASURY]
+    // });
 
-    const signer = await ethers.provider.getSigner(TREASURY);
-    let tx = await signer.sendTransaction({ to: deployer, value: ethers.utils.parseEther('10') });
-    console.log(`Sending eth from treasury to ${deployer}:`);
+    // const signer = await ethers.provider.getSigner(TREASURY);
+    // let tx = await signer.sendTransaction({ to: deployer, value: ethers.utils.parseEther('10') });
+    // console.log(`Sending eth from treasury to ${deployer}:`);
 
-    const dai = await ethers.getContractAt(ERC20PresetMinterPauser.abi, tokens['DAI']);
-    tx = await dai.connect(signer).transfer(deployer, ethers.utils.parseEther('200'));
-    console.log(`Sending dai from treasury to ${deployer}:`);
+    // const dai = await ethers.getContractAt(ERC20PresetMinterPauser.abi, tokens['DAI']);
+    // tx = await dai.connect(signer).transfer(deployer, ethers.utils.parseEther('200'));
+    // console.log(`Sending dai from treasury to ${deployer}:`);
 
     // const usdt = await ethers.getContractAt(ERC20PresetMinterPauser.abi, tokens['USDT']);
     // tx = await usdt.connect(signer).transfer(deployer, ethers.utils.parseEther('50'));
@@ -220,7 +220,7 @@ async function prepArgs(tokenNames: string[], tokenAddresses: string[], deployme
   const lendingBuffers = tokenNames.map(name => {
     return ethers.utils.parseUnits(`${tokenParams[name].lendingBuffer}`, tokenParams[name].decimals);
   });
-  const incentiveWeights = tokenNames.map(name => tokenParams[name].incentiveWeight);
+  //const incentiveWeights = tokenNames.map(name => tokenParams[name].incentiveWeight);
 
   const liquidationTokens = tokenNames.map(name => {
     const tokenPath = tokenParams[name].liquidationTokenPath;
@@ -239,7 +239,7 @@ async function prepArgs(tokenNames: string[], tokenAddresses: string[], deployme
     tokenAddresses,
     exposureCaps,
     lendingBuffers,
-    incentiveWeights,
+    //incentiveWeights,
     liquidationAmms,
     liquidationTokens
   ];
