@@ -318,14 +318,11 @@ contract Lending is
     {
         require(activeIssuers[issuer], "Not approved issuer");
 
-        LendingMetadata storage meta = lendingMeta[issuer];
-        if (lendingTarget(meta) >= meta.totalLending + amount) {
-            collectToken(issuer, msg.sender, amount);
+        collectToken(issuer, msg.sender, amount);
 
-            super._makeHourlyBond(issuer, msg.sender, amount);
+        super._makeHourlyBond(issuer, msg.sender, amount);
 
-            stakeClaim(msg.sender, issuer, amount);
-        }
+        stakeClaim(msg.sender, issuer, amount);
     }
 
     /// @dev buy fixed term bond that does not renew
