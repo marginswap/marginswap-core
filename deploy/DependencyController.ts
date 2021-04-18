@@ -63,11 +63,6 @@ const managedContracts: ManagedContract[] = [
     contractName: 'MarginRouter',
     charactersPlayed: [ROUTER],
     rolesPlayed: [WITHDRAWER, MARGIN_TRADER, BORROWER, INCENTIVE_REPORTER]
-  },
-  {
-    contractName: 'TokenAdmin',
-    charactersPlayed: [TOKEN_ADMIN],
-    rolesPlayed: [TOKEN_ACTIVATOR]
   }
 ];
 

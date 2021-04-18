@@ -139,7 +139,7 @@ export default {
       forking: {
         url: infuraUrl('mainnet')
       },
-      accounts: [{ privateKey, balance: '68173248000000000000' }]
+      accounts: [{ privateKey, balance: '10000168008000000000000' }]
     },
     mainnet: {
       url: infuraUrl('mainnet'),

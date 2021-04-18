@@ -16,7 +16,7 @@ const deploy: DeployFunction = async function ({
 
   const deployRecord = await deploy('IncentiveDistribution', {
     from: deployer,
-    args: [MFI_ADDRESS, 4000, roles.address],
+    args: [MFI_ADDRESS, roles.address],
     log: true,
     skipIfAlreadyDeployed: true
   });

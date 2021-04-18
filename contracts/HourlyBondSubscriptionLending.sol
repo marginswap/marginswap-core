@@ -22,12 +22,18 @@ abstract contract HourlyBondSubscriptionLending is BaseLending {
 
     mapping(address => HourlyBondMetadata) hourlyBondMetadata;
 
-    uint256 public withdrawalWindow = 15 minutes;
+    uint256 constant RATE_UPDATE_WINDOW = 20 minutes;
+    uint256 public withdrawalWindow = 20 minutes;
     // issuer => holder => bond record
     mapping(address => mapping(address => HourlyBond))
         public hourlyBondAccounts;
 
     uint256 public borrowingFactorPercent = 200;
+
+    uint256 constant borrowMinAPR = 6;
+    uint256 constant hoursPerYear = (365 days / (1 hours));
+    uint256 constant borrowMinHourlyYield =
+        FP32 + (borrowMinAPR * FP32) / 100 / hoursPerYear;
 
     function _makeHourlyBond(
         address issuer,
@@ -158,7 +164,7 @@ abstract contract HourlyBondSubscriptionLending is BaseLending {
         YieldAccumulator storage borrowAccumulator =
             borrowYieldAccumulators[issuer];
 
-        if (timeDelta > (5 minutes)) {
+        if (timeDelta > RATE_UPDATE_WINDOW) {
             accumulator.accumulatorFP = calcCumulativeYieldFP(
                 accumulator,
                 timeDelta
@@ -185,10 +191,10 @@ abstract contract HourlyBondSubscriptionLending is BaseLending {
 
         updateBorrowYieldAccu(borrowAccumulator);
 
-        borrowAccumulator.hourlyYieldFP =
-            1 +
-            (borrowingFactorPercent * accumulator.hourlyYieldFP) /
-            100;
+        borrowAccumulator.hourlyYieldFP = max(
+            borrowMinHourlyYield,
+            (borrowingFactorPercent * accumulator.hourlyYieldFP) / 100
+        );
     }
 
     function updateBorrowYieldAccu(YieldAccumulator storage borrowAccumulator)
@@ -196,7 +202,7 @@ abstract contract HourlyBondSubscriptionLending is BaseLending {
     {
         uint256 timeDelta = block.timestamp - borrowAccumulator.lastUpdated;
 
-        if (timeDelta > (5 minutes)) {
+        if (timeDelta > RATE_UPDATE_WINDOW) {
             borrowAccumulator.accumulatorFP = calcCumulativeYieldFP(
                 borrowAccumulator,
                 timeDelta
@@ -220,7 +226,7 @@ abstract contract HourlyBondSubscriptionLending is BaseLending {
         uint256 timestamp
     ) internal view returns (uint256) {
         uint256 timeDelta = (timestamp - yA.lastUpdated);
-        if (timeDelta > 5 minutes) {
+        if (timeDelta > RATE_UPDATE_WINDOW) {
             return calcCumulativeYieldFP(yA, timeDelta);
         } else {
             return yA.accumulatorFP;

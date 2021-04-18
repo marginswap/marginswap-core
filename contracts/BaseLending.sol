@@ -52,13 +52,23 @@ abstract contract BaseLending {
         uint256 timeDiff = block.timestamp - lastUpdated;
         uint256 yieldDiff = timeDiff * yieldChangePerSecondFP;
 
+        if (totalLendingInBucket >= bucketTarget) {
+            yieldDiff *= (totalLendingInBucket - bucketTarget) / bucketTarget;
+        } else {
+            yieldDiff *= (bucketTarget - totalLendingInBucket) / bucketTarget;
+        }
+
         if (
-            totalLendingInBucket >= bucketTarget ||
-            buyingSpeed >= withdrawingSpeed
+            totalLendingInBucket >= bucketTarget &&
+            buyingSpeed * 100 >= withdrawingSpeed * 95
         ) {
             yieldFP -= min(yieldFP, yieldDiff);
-        } else {
+        } else if (
+            bucketTarget > totalLendingInBucket &&
+            withdrawingSpeed * 100 > buyingSpeed * 95
+        ) {
             yieldFP += yieldDiff;
+
             if (yieldFP > bucketMaxYield) {
                 yieldFP = bucketMaxYield;
             }

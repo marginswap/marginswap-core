@@ -38,7 +38,8 @@ struct PairPrice {
 /// 3) Liquidators may not call from a contract address, to prevent extreme forms of
 ///    of front-running and other price manipulation.
 abstract contract PriceAware is RoleAware {
-    uint256 constant FP64 = 2**64;
+    uint256 constant FP112 = 2**112;
+
     address public immutable peg;
 
     mapping(address => TokenPrice) public tokenPrices;
@@ -130,7 +131,7 @@ abstract contract PriceAware is RoleAware {
                 _setPriceVal(tokenPrice, priceUpdateFP, UPDATE_RATE_PERMIL);
             }
 
-            priceInPeg = (inAmount * tokenPrice.priceFP) / FP64;
+            priceInPeg = (inAmount * tokenPrice.priceFP) / FP112;
         }
     }
 
@@ -146,7 +147,7 @@ abstract contract PriceAware is RoleAware {
             TokenPrice storage tokenPrice = tokenPrices[token];
             uint256 priceFP = tokenPrice.priceFP;
 
-            priceInPeg = (inAmount * priceFP) / FP64;
+            priceInPeg = (inAmount * priceFP) / FP112;
         }
     }
 
@@ -250,7 +251,7 @@ abstract contract PriceAware is RoleAware {
         internal
         returns (uint256 priceFP)
     {
-        priceFP = FP64;
+        priceFP = FP112;
         for (uint256 i; i < tokens.length - 1; i++) {
             address inToken = tokens[i];
             address outToken = tokens[i + 1];
@@ -276,22 +277,21 @@ abstract contract PriceAware is RoleAware {
 
                 if (pairPrice.cumulative == cumulative) {
                     // nothing happened
-                    priceFP = (priceFP * pairPrice.priceFP) / FP64;
+                    priceFP = priceFP * pairPrice.priceFP / FP112;
                 } else {
                     // something did happen
                     uint256 pairPriceFP =
-                        (FP64 * (cumulative - pairPrice.cumulative)) /
-                            timeDelta;
+                        (cumulative - pairPrice.cumulative) / timeDelta;
                     pairPrice.priceFP = pairPriceFP;
 
-                    priceFP = (priceFP * pairPriceFP) / FP64;
+                    priceFP = priceFP * pairPriceFP / FP112;
 
                     pairPrice.cumulative = cumulative;
                 }
 
                 pairPrice.lastUpdated = block.timestamp;
             } else {
-                priceFP = (priceFP * pairPrice.priceFP) / FP64;
+                priceFP = priceFP * pairPrice.priceFP / FP112;
             }
         }
     }
@@ -313,10 +313,10 @@ abstract contract PriceAware is RoleAware {
         (address token0, ) = UniswapStyleLib.sortTokens(inToken, outToken);
 
         if (inToken == token0) {
-            pairPrice.priceFP = (FP64 * reserve1) / reserve0;
+            pairPrice.priceFP = (FP112 * reserve1) / reserve0;
             pairPrice.cumulative = IUniswapV2Pair(pair).price0CumulativeLast();
         } else {
-            pairPrice.priceFP = (FP64 * reserve0) / reserve1;
+            pairPrice.priceFP = (FP112 * reserve0) / reserve1;
             pairPrice.cumulative = IUniswapV2Pair(pair).price1CumulativeLast();
         }
 

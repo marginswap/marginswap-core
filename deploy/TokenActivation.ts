@@ -183,9 +183,9 @@ const deploy: DeployFunction = async function ({
     }
   }
 
-  const TREASURY = '0xB3f923eaBAF178fC1BD8E13902FC5C61D3DdEF5B';
-  //const TREASURY = '0xF9D89Dc506c55738379C44Dc27205fD6f68e1974';
-  //const TREASURY = '0x16F3Fc1E4BA9d70f47387b902fa5d21020b5C6B5';
+  // const TREASURY = '0xB3f923eaBAF178fC1BD8E13902FC5C61D3DdEF5B';
+  // const TREASURY = '0xF9D89Dc506c55738379C44Dc27205fD6f68e1974';
+  const TREASURY = '0x16F3Fc1E4BA9d70f47387b902fa5d21020b5C6B5';
   // if we are impersonating, steal some crypto
   if (!network.live) {
     await network.provider.request({
@@ -194,11 +194,11 @@ const deploy: DeployFunction = async function ({
     });
 
     const signer = await ethers.provider.getSigner(TREASURY);
-    let tx = await signer.sendTransaction({ to: deployer, value: ethers.utils.parseEther('10') });
-    console.log(`Sending eth from treasury to ${deployer}:`);
+    // let tx = await signer.sendTransaction({ to: deployer, value: ethers.utils.parseEther('10') });
+    // console.log(`Sending eth from treasury to ${deployer}:`);
 
     const dai = await ethers.getContractAt(ERC20PresetMinterPauser.abi, tokens['DAI']);
-    tx = await dai.connect(signer).transfer(deployer, ethers.utils.parseEther('200'));
+    const tx = await dai.connect(signer).transfer(deployer, ethers.utils.parseEther('200'));
     console.log(`Sending dai from treasury to ${deployer}:`);
 
     // const usdt = await ethers.getContractAt(ERC20PresetMinterPauser.abi, tokens['USDT']);
@@ -220,7 +220,7 @@ async function prepArgs(tokenNames: string[], tokenAddresses: string[], deployme
   const lendingBuffers = tokenNames.map(name => {
     return ethers.utils.parseUnits(`${tokenParams[name].lendingBuffer}`, tokenParams[name].decimals);
   });
-  const incentiveWeights = tokenNames.map(name => tokenParams[name].incentiveWeight);
+  //const incentiveWeights = tokenNames.map(name => tokenParams[name].incentiveWeight);
 
   const liquidationTokens = tokenNames.map(name => {
     const tokenPath = tokenParams[name].liquidationTokenPath;
@@ -239,7 +239,7 @@ async function prepArgs(tokenNames: string[], tokenAddresses: string[], deployme
     tokenAddresses,
     exposureCaps,
     lendingBuffers,
-    incentiveWeights,
+    //incentiveWeights,
     liquidationAmms,
     liquidationTokens
   ];

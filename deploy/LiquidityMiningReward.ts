@@ -27,14 +27,6 @@ const deploy: DeployFunction = async function ({
     log: true,
     skipIfAlreadyDeployed: true
   });
-
-  if (liquidityMiningReward.newlyDeployed) {
-    const tx = await incentiveDistribution.initTranche(
-      0, // tranche id
-      200 // share of pie in permil
-    );
-    console.log(`incentiveDistribution.initTranche: ${tx.hash}`);
-  }
 };
 
 deploy.tags = ['LiquidityMiningReward', 'local'];
