@@ -311,6 +311,6 @@ contract CrossMarginTrading is CrossMarginLiquidation, IMarginTrading {
         uint256 holdings =
             viewTokensInPeg(account.holdingTokens, account.holdings);
 
-        return 100 * holdings >= liquidationThresholdPercent * loan;
+        return liquidationThresholdPercent * loan >= 100 * holdings;
     }
 }
