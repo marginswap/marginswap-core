@@ -153,6 +153,17 @@ abstract contract HourlyBondSubscriptionLending is BaseLending {
     }
 
     /// @dev updates yield accumulators for both borrowing and lending
+    /// issuer address represents a token
+    function updateHourlyYield(address issuer)
+        public
+        returns (uint256 hourlyYield)
+    {
+        return
+            getUpdatedHourlyYield(issuer, hourlyBondMetadata[issuer])
+                .hourlyYieldFP;
+    }
+
+    /// @dev updates yield accumulators for both borrowing and lending
     function getUpdatedHourlyYield(
         address issuer,
         HourlyBondMetadata storage bondMeta
