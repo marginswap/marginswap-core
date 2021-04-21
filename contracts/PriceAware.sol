@@ -277,21 +277,21 @@ abstract contract PriceAware is RoleAware {
 
                 if (pairPrice.cumulative == cumulative) {
                     // nothing happened
-                    priceFP = priceFP * pairPrice.priceFP / FP112;
+                    priceFP = (priceFP * pairPrice.priceFP) / FP112;
                 } else {
                     // something did happen
                     uint256 pairPriceFP =
                         (cumulative - pairPrice.cumulative) / timeDelta;
                     pairPrice.priceFP = pairPriceFP;
 
-                    priceFP = priceFP * pairPriceFP / FP112;
+                    priceFP = (priceFP * pairPriceFP) / FP112;
 
                     pairPrice.cumulative = cumulative;
                 }
 
                 pairPrice.lastUpdated = block.timestamp;
             } else {
-                priceFP = priceFP * pairPrice.priceFP / FP112;
+                priceFP = (priceFP * pairPrice.priceFP) / FP112;
             }
         }
     }

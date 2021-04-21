@@ -7,6 +7,13 @@ abstract contract BaseLending {
     uint256 constant FP32 = 2**32;
     uint256 constant ACCUMULATOR_INIT = 10**18;
 
+    uint256 constant hoursPerYear = 365 days / (1 hours);
+    uint256 constant CHANGE_POINT = 70;
+    uint256 public normalRatePerPercent =
+        (FP32 * 15) / hoursPerYear / CHANGE_POINT;
+    uint256 public highRatePerPercent =
+        (FP32 * (75 - 15)) / hoursPerYear / (100 - CHANGE_POINT);
+
     struct YieldAccumulator {
         uint256 accumulatorFP;
         uint256 lastUpdated;
@@ -16,16 +23,12 @@ abstract contract BaseLending {
     struct LendingMetadata {
         uint256 totalLending;
         uint256 totalBorrowed;
-        uint256 lendingBuffer;
         uint256 lendingCap;
     }
     mapping(address => LendingMetadata) public lendingMeta;
 
     /// @dev accumulate interest per issuer (like compound indices)
     mapping(address => YieldAccumulator) public borrowYieldAccumulators;
-
-    uint256 public maxHourlyYieldFP;
-    uint256 public yieldChangePerSecondFP;
 
     /// @dev simple formula for calculating interest relative to accumulator
     function applyInterest(
@@ -37,62 +40,21 @@ abstract contract BaseLending {
         return (balance * accumulatorFP) / yieldQuotientFP;
     }
 
-    /// update the yield for an asset based on recent supply and demand
-    function updatedYieldFP(
-        // previous yield
-        uint256 yieldFP,
-        // timestamp
-        uint256 lastUpdated,
-        uint256 totalLendingInBucket,
-        uint256 bucketTarget,
-        uint256 buyingSpeed,
-        uint256 withdrawingSpeed,
-        uint256 bucketMaxYield
-    ) internal view returns (uint256) {
-        uint256 timeDiff = block.timestamp - lastUpdated;
-        uint256 yieldDiff = timeDiff * yieldChangePerSecondFP;
-
-        if (totalLendingInBucket >= bucketTarget) {
-            yieldDiff *= (totalLendingInBucket - bucketTarget) / bucketTarget;
+    function currentLendingRateFP(uint256 totalLending, uint256 totalBorrowing)
+        internal
+        view
+        returns (uint256)
+    {
+        uint256 utilizationPercent = (100 * totalBorrowing) / totalLending;
+        if (utilizationPercent < CHANGE_POINT) {
+            return utilizationPercent * normalRatePerPercent;
         } else {
-            yieldDiff *= (bucketTarget - totalLendingInBucket) / bucketTarget;
+            return
+                CHANGE_POINT *
+                normalRatePerPercent +
+                (utilizationPercent - CHANGE_POINT) *
+                highRatePerPercent;
         }
-
-        if (
-            totalLendingInBucket >= bucketTarget &&
-            buyingSpeed * 100 >= withdrawingSpeed * 95
-        ) {
-            yieldFP -= min(yieldFP, yieldDiff);
-        } else if (
-            bucketTarget > totalLendingInBucket &&
-            withdrawingSpeed * 100 > buyingSpeed * 95
-        ) {
-            yieldFP += yieldDiff;
-
-            if (yieldFP > bucketMaxYield) {
-                yieldFP = bucketMaxYield;
-            }
-        }
-
-        return max(FP32, yieldFP);
-    }
-
-    function updateSpeed(
-        uint256 speed,
-        uint256 lastAction,
-        uint256 amount,
-        uint256 runtime
-    ) internal view returns (uint256 newSpeed, uint256 newLastAction) {
-        uint256 timeDiff = block.timestamp - lastAction;
-        uint256 updateAmount = (amount * runtime) / (timeDiff + 1);
-
-        uint256 oldSpeedWeight = (runtime + 120 minutes) / 3;
-        uint256 updateWeight = timeDiff + 1;
-        // scale adjustment relative to runtime
-        newSpeed =
-            (speed * oldSpeedWeight + updateAmount * updateWeight) /
-            (oldSpeedWeight + updateWeight);
-        newLastAction = block.timestamp;
     }
 
     /// @dev minimum
@@ -118,20 +80,6 @@ abstract contract BaseLending {
         address holder,
         uint256 amount
     ) internal virtual;
-
-    function lendingTarget(LendingMetadata storage meta)
-        internal
-        view
-        returns (uint256)
-    {
-        return min(meta.lendingCap, meta.totalBorrowed + meta.lendingBuffer);
-    }
-
-    /// View lending target
-    function viewLendingTarget(address issuer) external view returns (uint256) {
-        LendingMetadata storage meta = lendingMeta[issuer];
-        return lendingTarget(meta);
-    }
 
     /// Available tokens to this issuance
     function issuanceBalance(address issuance)
