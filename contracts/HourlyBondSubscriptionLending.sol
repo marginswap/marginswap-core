@@ -50,7 +50,8 @@ abstract contract HourlyBondSubscriptionLending is BaseLending {
             YieldAccumulator storage yA =
                 getUpdatedHourlyYield(
                     issuer,
-                    hourlyBondYieldAccumulators[issuer]
+                    hourlyBondYieldAccumulators[issuer],
+                    RATE_UPDATE_WINDOW
                 );
 
             uint256 oldAmount = bond.amount;
@@ -139,22 +140,27 @@ abstract contract HourlyBondSubscriptionLending is BaseLending {
         returns (uint256 hourlyYield)
     {
         return
-            getUpdatedHourlyYield(issuer, hourlyBondYieldAccumulators[issuer])
+            getUpdatedHourlyYield(
+                issuer,
+                hourlyBondYieldAccumulators[issuer],
+                RATE_UPDATE_WINDOW
+            )
                 .hourlyYieldFP;
     }
 
     /// @dev updates yield accumulators for both borrowing and lending
     function getUpdatedHourlyYield(
         address issuer,
-        YieldAccumulator storage accumulator
+        YieldAccumulator storage accumulator,
+        uint256 window
     ) internal returns (YieldAccumulator storage) {
         uint256 lastUpdated = accumulator.lastUpdated;
         uint256 timeDelta = (block.timestamp - lastUpdated);
 
-        YieldAccumulator storage borrowAccumulator =
-            borrowYieldAccumulators[issuer];
+        if (timeDelta > window) {
+            YieldAccumulator storage borrowAccumulator =
+                borrowYieldAccumulators[issuer];
 
-        if (timeDelta > RATE_UPDATE_WINDOW) {
             accumulator.accumulatorFP = calcCumulativeYieldFP(
                 accumulator,
                 timeDelta
@@ -167,14 +173,14 @@ abstract contract HourlyBondSubscriptionLending is BaseLending {
                 meta.totalBorrowed
             );
             accumulator.lastUpdated = block.timestamp;
+
+            updateBorrowYieldAccu(borrowAccumulator);
+
+            borrowAccumulator.hourlyYieldFP = max(
+                borrowMinHourlyYield,
+                (borrowingFactorPercent * accumulator.hourlyYieldFP) / 100
+            );
         }
-
-        updateBorrowYieldAccu(borrowAccumulator);
-
-        borrowAccumulator.hourlyYieldFP = max(
-            borrowMinHourlyYield,
-            (borrowingFactorPercent * accumulator.hourlyYieldFP) / 100
-        );
 
         return accumulator;
     }

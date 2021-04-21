@@ -23,6 +23,8 @@ contract Lending is
     /// map of available issuers
     mapping(address => bool) public activeIssuers;
 
+    uint256 constant BORROW_RATE_UPDATE_WINDOW = 60 minutes;
+
     constructor(address _roles) RoleAware(_roles) {}
 
     /// Make a issuer available for protocol
@@ -74,7 +76,11 @@ contract Lending is
             });
         } else {
             YieldAccumulator storage yA =
-                getUpdatedHourlyYield(issuer, yieldAccumulator);
+                getUpdatedHourlyYield(
+                    issuer,
+                    yieldAccumulator,
+                    RATE_UPDATE_WINDOW
+                );
             yA.hourlyYieldFP = (FP32 * (100 + aprPercent)) / 100 / (24 * 365);
         }
     }
@@ -120,6 +126,12 @@ contract Lending is
     function registerBorrow(address issuer, uint256 amount) external {
         require(isBorrower(msg.sender), "Not approved borrower");
         require(activeIssuers[issuer], "Not approved issuer");
+
+        getUpdatedHourlyYield(
+            issuer,
+            hourlyBondYieldAccumulators[issuer],
+            BORROW_RATE_UPDATE_WINDOW
+        );
 
         LendingMetadata storage meta = lendingMeta[issuer];
         meta.totalBorrowed += amount;
