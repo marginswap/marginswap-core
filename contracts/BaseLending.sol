@@ -43,13 +43,14 @@ abstract contract BaseLending {
     function currentLendingRateFP(uint256 totalLending, uint256 totalBorrowing)
         internal
         view
-        returns (uint256)
+        returns (uint256 rate)
     {
+        rate = FP32;
         uint256 utilizationPercent = (100 * totalBorrowing) / totalLending;
         if (utilizationPercent < CHANGE_POINT) {
-            return utilizationPercent * normalRatePerPercent;
+            rate += utilizationPercent * normalRatePerPercent;
         } else {
-            return
+            rate +=
                 CHANGE_POINT *
                 normalRatePerPercent +
                 (utilizationPercent - CHANGE_POINT) *
