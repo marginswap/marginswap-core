@@ -132,10 +132,14 @@ contract Admin is RoleAware {
     function getUpdatedCurrentStaker() public returns (address) {
         uint256 currentStake =
             getMaintenanceStakerStake(currentMaintenanceStaker);
-        while (
-            (block.number - currentMaintenanceStakerStartBlock) *
-                maintenanceStakePerBlock >=
-            currentStake
+
+        for (
+            uint256 i;
+            2 > i &&
+                (block.number - currentMaintenanceStakerStartBlock) *
+                    maintenanceStakePerBlock >=
+                currentStake;
+            i++
         ) {
             if (maintenanceStakePerBlock > currentStake) {
                 // delete current from daisy chain
@@ -157,6 +161,15 @@ contract Admin is RoleAware {
             }
             currentStake = getMaintenanceStakerStake(currentMaintenanceStaker);
         }
+
+        uint256 blockDiff = block.number - currentMaintenanceStakerStartBlock;
+        uint256 currentBlocks = currentStake / maintenanceStakePerBlock;
+        if (blockDiff > currentBlocks) {
+            currentMaintenanceStakerStartBlock =
+                block.number -
+                currentBlocks +
+                1;
+        }
         return currentMaintenanceStaker;
     }
 
@@ -168,15 +181,24 @@ contract Admin is RoleAware {
         staker = currentMaintenanceStaker;
         uint256 currentStake = getMaintenanceStakerStake(staker);
         startBlock = currentMaintenanceStakerStartBlock;
-        while (
-            (block.number - startBlock) * maintenanceStakePerBlock >=
-            currentStake
+        for (
+            uint256 i;
+            2 > i &&
+                (block.number - startBlock) * maintenanceStakePerBlock >=
+                currentStake;
+            i++
         ) {
             if (currentStake >= maintenanceStakePerBlock) {
                 startBlock += currentStake / maintenanceStakePerBlock;
             }
             staker = nextMaintenanceStaker[staker];
             currentStake = getMaintenanceStakerStake(staker);
+        }
+
+        uint256 blockDiff = block.number - startBlock;
+        uint256 currentBlocks = currentStake / maintenanceStakePerBlock;
+        if (blockDiff > currentBlocks) {
+            startBlock = block.number - currentBlocks + 1;
         }
     }
 
