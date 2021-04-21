@@ -238,7 +238,7 @@ async function prepArgs(tokenNames: string[], tokenAddresses: string[], deployme
     roles.address,
     tokenAddresses,
     exposureCaps,
-    lendingBuffers,
+    //lendingBuffers,
     //incentiveWeights,
     liquidationAmms,
     liquidationTokens

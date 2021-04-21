@@ -3,7 +3,6 @@ pragma solidity ^0.8.0;
 
 import "./Fund.sol";
 import "./HourlyBondSubscriptionLending.sol";
-import "./BondLending.sol";
 import "./IncentivizedHolder.sol";
 
 // TODO activate bonds for lending
@@ -12,12 +11,8 @@ import "./IncentivizedHolder.sol";
 contract Lending is
     RoleAware,
     HourlyBondSubscriptionLending,
-    BondLending,
     IncentivizedHolder
 {
-    /// @dev IDs for all bonds held by an address
-    mapping(address => uint256[]) public bondIds;
-
     /// mapping issuers to tokens
     /// (in crossmargin, the issuers are tokens  themselves)
     mapping(address => address) public issuerTokens;
@@ -28,13 +23,7 @@ contract Lending is
     /// map of available issuers
     mapping(address => bool) public activeIssuers;
 
-    constructor(address _roles) RoleAware(_roles) {
-        uint256 APR = 899;
-        maxHourlyYieldFP = (FP32 * APR) / 100 / (24 * 365);
-
-        uint256 aprChangePerMil = 3;
-        yieldChangePerSecondFP = (FP32 * aprChangePerMil) / 1000;
-    }
+    constructor(address _roles) RoleAware(_roles) {}
 
     /// Make a issuer available for protocol
     function activateIssuer(address issuer) external {
@@ -63,14 +52,6 @@ contract Lending is
         lendingMeta[issuer].lendingCap = cap;
     }
 
-    /// Set lending buffer
-    function setLendingBuffer(address issuer, uint256 buffer)
-        external
-        onlyOwnerExecActivator
-    {
-        lendingMeta[issuer].lendingBuffer = buffer;
-    }
-
     /// Set withdrawal window
     function setWithdrawalWindow(uint256 window) external onlyOwnerExec {
         withdrawalWindow = window;
@@ -81,96 +62,20 @@ contract Lending is
         external
         onlyOwnerExecActivator
     {
-        HourlyBondMetadata storage bondMeta = hourlyBondMetadata[issuer];
+        YieldAccumulator storage yieldAccumulator =
+            hourlyBondYieldAccumulators[issuer];
 
-        if (bondMeta.yieldAccumulator.accumulatorFP == 0) {
+        if (yieldAccumulator.accumulatorFP == 0) {
             uint256 yieldFP = FP32 + (FP32 * aprPercent) / 100 / (24 * 365);
-            bondMeta.yieldAccumulator = YieldAccumulator({
+            hourlyBondYieldAccumulators[issuer] = YieldAccumulator({
                 accumulatorFP: FP32,
                 lastUpdated: block.timestamp,
                 hourlyYieldFP: yieldFP
             });
-            bondMeta.buyingSpeed = 1;
-            bondMeta.withdrawingSpeed = 1;
-            bondMeta.lastBought = block.timestamp;
-            bondMeta.lastWithdrawn = block.timestamp;
         } else {
             YieldAccumulator storage yA =
-                getUpdatedHourlyYield(issuer, bondMeta);
+                getUpdatedHourlyYield(issuer, yieldAccumulator);
             yA.hourlyYieldFP = (FP32 * (100 + aprPercent)) / 100 / (24 * 365);
-        }
-    }
-
-    /// Set maximum hourly yield in floating point
-    function setMaxHourlyYieldFP(uint256 maxYieldFP) external onlyOwnerExec {
-        maxHourlyYieldFP = maxYieldFP;
-    }
-
-    /// Set yield change per second in floating point
-    function setYieldChangePerSecondFP(uint256 changePerSecondFP)
-        external
-        onlyOwnerExec
-    {
-        yieldChangePerSecondFP = changePerSecondFP;
-    }
-
-    /// Set runtime yields in floating point
-    function setRuntimeYieldsFP(address issuer, uint256[] memory yieldsFP)
-        external
-        onlyOwnerExec
-    {
-        BondBucketMetadata[] storage bondMetas = bondBucketMetadata[issuer];
-        for (uint256 i; bondMetas.length > i; i++) {
-            bondMetas[i].runtimeYieldFP = yieldsFP[i];
-        }
-    }
-
-    /// Set miniumum runtime
-    function setMinRuntime(uint256 runtime) external onlyOwnerExec {
-        require(runtime > 1 hours, "Min runtime > 1 hour");
-        require(maxRuntime > runtime, "Runtime too long");
-        minRuntime = runtime;
-    }
-
-    /// Set maximum runtime
-    function setMaxRuntime(uint256 runtime) external onlyOwnerExec {
-        require(runtime > minRuntime, "Max > min runtime");
-        maxRuntime = runtime;
-    }
-
-    /// Set runtime weights in floating point
-    function setRuntimeWeights(address issuer, uint256[] memory weights)
-        external
-        onlyOwnerExecActivator
-    {
-        BondBucketMetadata[] storage bondMetas = bondBucketMetadata[issuer];
-
-        if (bondMetas.length == 0) {
-            // we are initializing
-
-            uint256 hourlyYieldFP = (110 * FP32) / 100 / (24 * 365);
-            uint256 bucketSize = diffMaxMinRuntime / weights.length;
-
-            for (uint256 i; weights.length > i; i++) {
-                uint256 runtime = minRuntime + bucketSize * i;
-                bondMetas.push(
-                    BondBucketMetadata({
-                        runtimeYieldFP: (hourlyYieldFP * runtime) / (1 hours),
-                        lastBought: block.timestamp,
-                        lastWithdrawn: block.timestamp,
-                        yieldLastUpdated: block.timestamp,
-                        buyingSpeed: 1,
-                        withdrawingSpeed: 1,
-                        runtimeWeight: weights[i],
-                        totalLending: 0
-                    })
-                );
-            }
-        } else {
-            require(weights.length == bondMetas.length, "Weights don't match");
-            for (uint256 i; weights.length > i; i++) {
-                bondMetas[i].runtimeWeight = weights[i];
-            }
         }
     }
 
@@ -224,6 +129,8 @@ contract Lending is
         );
     }
 
+    /// TODO registerLend
+
     /// @dev gets called by router if loan is extinguished
     function payOff(address issuer, uint256 amount) external {
         require(isBorrower(msg.sender), "Not approved borrower");
@@ -268,7 +175,7 @@ contract Lending is
         view
         returns (uint256)
     {
-        return viewAPRPer10k(hourlyBondMetadata[issuer].yieldAccumulator);
+        return viewAPRPer10k(hourlyBondYieldAccumulators[issuer]);
     }
 
     /// @dev In a liquidity crunch make a fallback bond until liquidity is good again
@@ -323,54 +230,6 @@ contract Lending is
         super._makeHourlyBond(issuer, msg.sender, amount);
 
         stakeClaim(msg.sender, issuer, amount);
-    }
-
-    /// @dev buy fixed term bond that does not renew
-    function buyBond(
-        address issuer,
-        uint256 runtime,
-        uint256 amount,
-        uint256 minReturn
-    ) external returns (uint256 bondIndex) {
-        require(activeIssuers[issuer], "Not approved issuer");
-
-        LendingMetadata storage meta = lendingMeta[issuer];
-        if (
-            lendingTarget(meta) >= meta.totalLending + amount &&
-            maxRuntime >= runtime &&
-            runtime >= minRuntime
-        ) {
-            bondIndex = super._makeBond(
-                msg.sender,
-                issuer,
-                runtime,
-                amount,
-                minReturn
-            );
-            if (bondIndex > 0) {
-                bondIds[msg.sender].push(bondIndex);
-
-                collectToken(issuer, msg.sender, amount);
-                stakeClaim(msg.sender, issuer, amount);
-            }
-        }
-    }
-
-    /// @dev send back funds of bond after maturity
-    function withdrawBond(uint256 bondId) external {
-        Bond storage bond = bonds[bondId];
-        require(msg.sender == bond.holder, "Not bond holder");
-        require(
-            block.timestamp > bond.maturityTimestamp,
-            "bond is still immature"
-        );
-        // in case of a shortfall, governance can step in to provide
-        // additonal compensation beyond the usual incentive which
-        // gets withdrawn here
-        withdrawClaim(msg.sender, bond.issuer, bond.originalPrice);
-
-        uint256 withdrawAmount = super._withdrawBond(bondId, bond);
-        disburse(bond.issuer, msg.sender, withdrawAmount);
     }
 
     function initBorrowYieldAccumulator(address issuer)
