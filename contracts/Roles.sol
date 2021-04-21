@@ -16,6 +16,7 @@ uint256 constant AUTHORIZED_FUND_TRADER = 7;
 uint256 constant INCENTIVE_REPORTER = 8;
 uint256 constant TOKEN_ACTIVATOR = 9;
 uint256 constant STAKE_PENALIZER = 10;
+uint256 constant LENDER = 11;
 
 uint256 constant FUND = 101;
 uint256 constant LENDING = 102;

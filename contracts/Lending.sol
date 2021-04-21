@@ -59,6 +59,14 @@ contract Lending is
         withdrawalWindow = window;
     }
 
+    function setNormalRatePerPercent(uint256 rate) external onlyOwnerExec {
+        normalRatePerPercent = rate;
+    }
+
+    function setHighRatePerPercent(uint256 rate) external onlyOwnerExec {
+        highRatePerPercent = rate;
+    }
+
     /// Set hourly yield APR for issuer
     function setHourlyYieldAPR(address issuer, uint256 aprPercent)
         external
@@ -127,21 +135,48 @@ contract Lending is
         require(isBorrower(msg.sender), "Not approved borrower");
         require(activeIssuers[issuer], "Not approved issuer");
 
+        LendingMetadata storage meta = lendingMeta[issuer];
+        meta.totalBorrowed += amount;
+
         getUpdatedHourlyYield(
             issuer,
             hourlyBondYieldAccumulators[issuer],
             BORROW_RATE_UPDATE_WINDOW
         );
 
-        LendingMetadata storage meta = lendingMeta[issuer];
-        meta.totalBorrowed += amount;
         require(
             meta.totalLending >= meta.totalBorrowed,
             "Insufficient lending"
         );
     }
 
-    /// TODO registerLend
+    /// @dev gets called when external sources provide lending
+    function registerLend(address issuer, uint256 amount) external {
+        require(isLender(msg.sender), "Not an approved lender");
+        require(activeIssuers[issuer], "Not approved issuer");
+        LendingMetadata storage meta = lendingMeta[issuer];
+        meta.totalLending += amount;
+
+        getUpdatedHourlyYield(
+            issuer,
+            hourlyBondYieldAccumulators[issuer],
+            RATE_UPDATE_WINDOW
+        );
+    }
+
+    /// @dev gets called when external sources pay withdraw their bobnd
+    function registerWithdrawal(address issuer, uint256 amount) external {
+        require(isLender(msg.sender), "Not an approved lender");
+        require(activeIssuers[issuer], "Not approved issuer");
+        LendingMetadata storage meta = lendingMeta[issuer];
+        meta.totalLending -= amount;
+
+        getUpdatedHourlyYield(
+            issuer,
+            hourlyBondYieldAccumulators[issuer],
+            RATE_UPDATE_WINDOW
+        );
+    }
 
     /// @dev gets called by router if loan is extinguished
     function payOff(address issuer, uint256 amount) external {
