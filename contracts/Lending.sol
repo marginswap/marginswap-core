@@ -23,6 +23,8 @@ contract Lending is
     /// map of available issuers
     mapping(address => bool) public activeIssuers;
 
+    uint256 constant BORROW_RATE_UPDATE_WINDOW = 60 minutes;
+
     constructor(address _roles) RoleAware(_roles) {}
 
     /// Make a issuer available for protocol
@@ -57,6 +59,14 @@ contract Lending is
         withdrawalWindow = window;
     }
 
+    function setNormalRatePerPercent(uint256 rate) external onlyOwnerExec {
+        normalRatePerPercent = rate;
+    }
+
+    function setHighRatePerPercent(uint256 rate) external onlyOwnerExec {
+        highRatePerPercent = rate;
+    }
+
     /// Set hourly yield APR for issuer
     function setHourlyYieldAPR(address issuer, uint256 aprPercent)
         external
@@ -74,7 +84,11 @@ contract Lending is
             });
         } else {
             YieldAccumulator storage yA =
-                getUpdatedHourlyYield(issuer, yieldAccumulator);
+                getUpdatedHourlyYield(
+                    issuer,
+                    yieldAccumulator,
+                    RATE_UPDATE_WINDOW
+                );
             yA.hourlyYieldFP = (FP32 * (100 + aprPercent)) / 100 / (24 * 365);
         }
     }
@@ -123,13 +137,46 @@ contract Lending is
 
         LendingMetadata storage meta = lendingMeta[issuer];
         meta.totalBorrowed += amount;
+
+        getUpdatedHourlyYield(
+            issuer,
+            hourlyBondYieldAccumulators[issuer],
+            BORROW_RATE_UPDATE_WINDOW
+        );
+
         require(
             meta.totalLending >= meta.totalBorrowed,
             "Insufficient lending"
         );
     }
 
-    /// TODO registerLend
+    /// @dev gets called when external sources provide lending
+    function registerLend(address issuer, uint256 amount) external {
+        require(isLender(msg.sender), "Not an approved lender");
+        require(activeIssuers[issuer], "Not approved issuer");
+        LendingMetadata storage meta = lendingMeta[issuer];
+        meta.totalLending += amount;
+
+        getUpdatedHourlyYield(
+            issuer,
+            hourlyBondYieldAccumulators[issuer],
+            RATE_UPDATE_WINDOW
+        );
+    }
+
+    /// @dev gets called when external sources pay withdraw their bobnd
+    function registerWithdrawal(address issuer, uint256 amount) external {
+        require(isLender(msg.sender), "Not an approved lender");
+        require(activeIssuers[issuer], "Not approved issuer");
+        LendingMetadata storage meta = lendingMeta[issuer];
+        meta.totalLending -= amount;
+
+        getUpdatedHourlyYield(
+            issuer,
+            hourlyBondYieldAccumulators[issuer],
+            RATE_UPDATE_WINDOW
+        );
+    }
 
     /// @dev gets called by router if loan is extinguished
     function payOff(address issuer, uint256 amount) external {

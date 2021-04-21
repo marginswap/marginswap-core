@@ -152,4 +152,8 @@ contract RoleAware {
     function isStakePenalizer(address contr) internal view returns (bool) {
         return roleCache[contr][STAKE_PENALIZER];
     }
+
+    function isLender(address contr) internal view returns (bool) {
+        return roleCache[contr][LENDER];
+    }
 }
