@@ -54,7 +54,7 @@ abstract contract BaseLending {
                 CHANGE_POINT *
                 normalRatePerPercent +
                 (utilizationPercent - CHANGE_POINT) *
-                 highRatePerPercent;
+                highRatePerPercent;
         }
     }
 

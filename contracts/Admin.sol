@@ -132,17 +132,17 @@ contract Admin is RoleAware {
     function getUpdatedCurrentStaker() public returns (address) {
         uint256 currentStake =
             getMaintenanceStakerStake(currentMaintenanceStaker);
-        if(
-                (block.number - currentMaintenanceStakerStartBlock) *
-                    maintenanceStakePerBlock >=
-                currentStake
+        if (
+            (block.number - currentMaintenanceStakerStartBlock) *
+                maintenanceStakePerBlock >=
+            currentStake
         ) {
             currentMaintenanceStakerStartBlock = block.number;
 
             prevMaintenanceStaker = currentMaintenanceStaker;
             currentMaintenanceStaker = nextMaintenanceStaker[
-                    currentMaintenanceStaker
-                ];
+                currentMaintenanceStaker
+            ];
             currentStake = getMaintenanceStakerStake(currentMaintenanceStaker);
 
             if (maintenanceStakePerBlock > currentStake) {
@@ -153,7 +153,9 @@ contract Admin is RoleAware {
                 nextMaintenanceStaker[currentMaintenanceStaker] = address(0);
 
                 currentMaintenanceStaker = nextOne;
-                currentStake = getMaintenanceStakerStake(currentMaintenanceStaker);
+                currentStake = getMaintenanceStakerStake(
+                    currentMaintenanceStaker
+                );
             }
         }
 
@@ -169,8 +171,8 @@ contract Admin is RoleAware {
         uint256 currentStake = getMaintenanceStakerStake(staker);
         startBlock = currentMaintenanceStakerStartBlock;
         if (
-                (block.number - startBlock) * maintenanceStakePerBlock >=
-                currentStake
+            (block.number - startBlock) * maintenanceStakePerBlock >=
+            currentStake
         ) {
             staker = nextMaintenanceStaker[staker];
             currentStake = getMaintenanceStakerStake(staker);
