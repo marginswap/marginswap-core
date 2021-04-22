@@ -16,6 +16,7 @@ abstract contract HourlyBondSubscriptionLending is BaseLending {
 
     uint256 constant RATE_UPDATE_WINDOW = 20 minutes;
     uint256 public withdrawalWindow = 20 minutes;
+    uint256 constant MAX_HOUR_UPDATE = 4;
     // issuer => holder => bond record
     mapping(address => mapping(address => HourlyBond))
         public hourlyBondAccounts;
@@ -122,13 +123,21 @@ abstract contract HourlyBondSubscriptionLending is BaseLending {
 
         uint256 hoursDelta = timeDelta / (1 hours);
         if (hoursDelta > 0) {
-            // This loop should hardly ever 1 or more unless something bad happened
-            // In which case it costs gas but there isn't overflow
-            for (uint256 i = 0; hoursDelta > i; i++) {
+            uint256 accumulatorBeforeFP = accumulatorFP;
+            for (uint256 i = 0; hoursDelta > i && MAX_HOUR_UPDATE > i; i++) {
                 // FP48 * FP48 / FP48 = FP48
                 accumulatorFP =
                     (accumulatorFP * yieldAccumulator.hourlyYieldFP) /
                     FP48;
+            }
+
+            // a lot of time has passed
+            if (hoursDelta > MAX_HOUR_UPDATE) {
+                // apply interest in non-compounding way
+                accumulatorFP +=
+                    ((accumulatorFP - accumulatorBeforeFP) *
+                        (hoursDelta - MAX_HOUR_UPDATE)) /
+                    MAX_HOUR_UPDATE;
             }
         }
     }
