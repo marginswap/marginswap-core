@@ -76,9 +76,9 @@ contract Lending is
             hourlyBondYieldAccumulators[issuer];
 
         if (yieldAccumulator.accumulatorFP == 0) {
-            uint256 yieldFP = FP32 + (FP32 * aprPercent) / 100 / (24 * 365);
+            uint256 yieldFP = FP48 + (FP48 * aprPercent) / 100 / (24 * 365);
             hourlyBondYieldAccumulators[issuer] = YieldAccumulator({
-                accumulatorFP: FP32,
+                accumulatorFP: FP48,
                 lastUpdated: block.timestamp,
                 hourlyYieldFP: yieldFP
             });
@@ -89,7 +89,7 @@ contract Lending is
                     yieldAccumulator,
                     RATE_UPDATE_WINDOW
                 );
-            yA.hourlyYieldFP = (FP32 * (100 + aprPercent)) / 100 / (24 * 365);
+            yA.hourlyYieldFP = (FP48 * (100 + aprPercent)) / 100 / (24 * 365);
         }
     }
 
@@ -202,9 +202,9 @@ contract Lending is
         uint256 hourlyYieldFP = yA.hourlyYieldFP;
 
         uint256 aprFP =
-            ((hourlyYieldFP * 10_000 - FP32 * 10_000) * 365 days) / (1 hours);
+            ((hourlyYieldFP * 10_000 - FP48 * 10_000) * 365 days) / (1 hours);
 
-        return aprFP / FP32;
+        return aprFP / FP48;
     }
 
     /// @dev get current borrowing interest per 10k for a token / issuer
@@ -286,9 +286,9 @@ contract Lending is
         YieldAccumulator storage yA = borrowYieldAccumulators[issuer];
         require(yA.accumulatorFP == 0, "don't re-initialize");
 
-        yA.accumulatorFP = FP32;
+        yA.accumulatorFP = FP48;
         yA.lastUpdated = block.timestamp;
-        yA.hourlyYieldFP = FP32 + FP32 / (365 * 24);
+        yA.hourlyYieldFP = FP48 + FP48 / (365 * 24);
     }
 
     function setBorrowingFactorPercent(uint256 borrowingFactor)
