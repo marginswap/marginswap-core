@@ -40,8 +40,8 @@ const managedContracts: ManagedContract[] = [
   },
   {
     contractName: 'CrossMarginTrading',
-    charactersPlayed: [MARGIN_TRADING, BORROWER, PRICE_CONTROLLER],
-    rolesPlayed: [WITHDRAWER, AUTHORIZED_FUND_TRADER, STAKE_PENALIZER]
+    charactersPlayed: [MARGIN_TRADING, PRICE_CONTROLLER],
+    rolesPlayed: [WITHDRAWER, AUTHORIZED_FUND_TRADER, BORROWER, STAKE_PENALIZER]
   },
   { contractName: 'Fund', charactersPlayed: [FUND], rolesPlayed: [] },
   {
