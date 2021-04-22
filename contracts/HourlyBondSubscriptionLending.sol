@@ -24,7 +24,7 @@ abstract contract HourlyBondSubscriptionLending is BaseLending {
 
     uint256 constant borrowMinAPR = 6;
     uint256 constant borrowMinHourlyYield =
-        FP32 + (borrowMinAPR * FP32) / 100 / hoursPerYear;
+        FP48 + (borrowMinAPR * FP48) / 100 / hoursPerYear;
 
     function _makeHourlyBond(
         address issuer,
@@ -116,19 +116,19 @@ abstract contract HourlyBondSubscriptionLending is BaseLending {
         accumulatorFP =
             yieldAccumulator.accumulatorFP +
             (yieldAccumulator.accumulatorFP *
-                (yieldAccumulator.hourlyYieldFP - FP32) *
+                (yieldAccumulator.hourlyYieldFP - FP48) *
                 secondsDelta) /
-            (FP32 * 1 hours);
+            (FP48 * 1 hours);
 
         uint256 hoursDelta = timeDelta / (1 hours);
         if (hoursDelta > 0) {
             // This loop should hardly ever 1 or more unless something bad happened
             // In which case it costs gas but there isn't overflow
             for (uint256 i = 0; hoursDelta > i; i++) {
-                // FP32 * FP32 / FP32 = FP32
+                // FP48 * FP48 / FP48 = FP48
                 accumulatorFP =
                     (accumulatorFP * yieldAccumulator.hourlyYieldFP) /
-                    FP32;
+                    FP48;
             }
         }
     }

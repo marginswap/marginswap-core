@@ -4,15 +4,15 @@ import "./RoleAware.sol";
 
 /// @title Base lending behavior
 abstract contract BaseLending {
-    uint256 constant FP32 = 2**32;
+    uint256 constant FP48 = 2**48;
     uint256 constant ACCUMULATOR_INIT = 10**18;
 
     uint256 constant hoursPerYear = 365 days / (1 hours);
-    uint256 constant CHANGE_POINT = 70;
+    uint256 constant CHANGE_POINT = 79;
     uint256 public normalRatePerPercent =
-        (FP32 * 15) / hoursPerYear / CHANGE_POINT;
+        (FP48 * 15) / hoursPerYear / CHANGE_POINT / 100;
     uint256 public highRatePerPercent =
-        (FP32 * (75 - 15)) / hoursPerYear / (100 - CHANGE_POINT);
+        (FP48 * (194 - 15)) / hoursPerYear / (100 - CHANGE_POINT) / 100;
 
     struct YieldAccumulator {
         uint256 accumulatorFP;
@@ -45,7 +45,7 @@ abstract contract BaseLending {
         view
         returns (uint256 rate)
     {
-        rate = FP32;
+        rate = FP48;
         uint256 utilizationPercent = (100 * totalBorrowing) / totalLending;
         if (utilizationPercent < CHANGE_POINT) {
             rate += utilizationPercent * normalRatePerPercent;
@@ -54,7 +54,7 @@ abstract contract BaseLending {
                 CHANGE_POINT *
                 normalRatePerPercent +
                 (utilizationPercent - CHANGE_POINT) *
-                highRatePerPercent;
+                 highRatePerPercent;
         }
     }
 
