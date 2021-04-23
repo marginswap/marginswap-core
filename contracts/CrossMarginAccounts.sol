@@ -113,10 +113,6 @@ abstract contract CrossMarginAccounts is RoleAware, PriceAware {
         uint256 newBorrowAmount = borrowAmount - extinguishAmount;
         account.borrowed[debtToken] = newBorrowAmount;
 
-        account.holdings[debtToken] =
-            account.holdings[debtToken] -
-            extinguishAmount;
-
         if (newBorrowAmount > 0) {
             account.borrowedYieldQuotientsFP[debtToken] = newYieldQuot;
         } else {
