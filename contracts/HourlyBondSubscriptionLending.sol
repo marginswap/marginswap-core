@@ -187,7 +187,10 @@ abstract contract HourlyBondSubscriptionLending is BaseLending {
 
             borrowAccumulator.hourlyYieldFP = max(
                 borrowMinHourlyYield,
-                (borrowingFactorPercent * accumulator.hourlyYieldFP) / 100
+                FP48 +
+                    (borrowingFactorPercent *
+                        (accumulator.hourlyYieldFP - FP48)) /
+                    100
             );
         }
 
