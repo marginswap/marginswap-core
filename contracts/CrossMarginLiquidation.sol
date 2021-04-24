@@ -31,8 +31,7 @@ abstract contract CrossMarginLiquidation is CrossMarginAccounts {
     }
 
     mapping(address => Liquidation) liquidationAmounts;
-    address[] internal sellTokens;
-    address[] internal buyTokens;
+    address[] internal liquidationTokens;
     address[] internal tradersToLiquidate;
 
     mapping(address => uint256) public maintenanceFailures;
@@ -71,8 +70,7 @@ abstract contract CrossMarginLiquidation is CrossMarginAccounts {
         address[] memory liquidationCandidates,
         bool isAuthorized
     ) internal returns (uint256 attackReturns) {
-        sellTokens = new address[](0);
-        buyTokens = new address[](0);
+        liquidationTokens = new address[](0);
         tradersToLiquidate = new address[](0);
 
         for (
@@ -82,6 +80,7 @@ abstract contract CrossMarginLiquidation is CrossMarginAccounts {
         ) {
             address traderAddress = liquidationCandidates[traderIndex];
             CrossMarginAccount storage account = marginAccounts[traderAddress];
+
             if (belowMaintenanceThreshold(account)) {
                 tradersToLiquidate.push(traderAddress);
                 uint256 len = account.holdingTokens.length;
@@ -93,7 +92,7 @@ abstract contract CrossMarginLiquidation is CrossMarginAccounts {
                         liquidation.sell = account.holdings[token];
                         liquidation.buy = 0;
                         liquidation.blockNum = block.number;
-                        sellTokens.push(token);
+                        liquidationTokens.push(token);
                     } else {
                         liquidation.sell += account.holdings[token];
                     }
@@ -117,7 +116,7 @@ abstract contract CrossMarginLiquidation is CrossMarginAccounts {
                         liquidation.sell = 0;
                         liquidation.buy = loanAmount;
                         liquidation.blockNum = block.number;
-                        buyTokens.push(token);
+                        liquidationTokens.push(token);
                     } else {
                         liquidation.buy += loanAmount;
                     }
@@ -186,9 +185,9 @@ abstract contract CrossMarginLiquidation is CrossMarginAccounts {
     }
 
     function liquidateFromPeg() internal returns (uint256 pegAmount) {
-        uint256 len = buyTokens.length;
+        uint256 len = liquidationTokens.length;
         for (uint256 tokenIdx = 0; len > tokenIdx; tokenIdx++) {
-            address buyToken = buyTokens[tokenIdx];
+            address buyToken = liquidationTokens[tokenIdx];
             Liquidation storage liq = liquidationAmounts[buyToken];
             if (liq.buy > liq.sell) {
                 pegAmount += PriceAware.liquidateFromPeg(
@@ -198,13 +197,12 @@ abstract contract CrossMarginLiquidation is CrossMarginAccounts {
                 delete liquidationAmounts[buyToken];
             }
         }
-        delete buyTokens;
     }
 
     function liquidateToPeg() internal returns (uint256 pegAmount) {
-        uint256 len = sellTokens.length;
+        uint256 len = liquidationTokens.length;
         for (uint256 tokenIndex = 0; len > tokenIndex; tokenIndex++) {
-            address token = sellTokens[tokenIndex];
+            address token = liquidationTokens[tokenIndex];
             Liquidation storage liq = liquidationAmounts[token];
             if (liq.sell > liq.buy) {
                 uint256 sellAmount = liq.sell - liq.buy;
@@ -212,7 +210,6 @@ abstract contract CrossMarginLiquidation is CrossMarginAccounts {
                 delete liquidationAmounts[token];
             }
         }
-        delete sellTokens;
     }
 
     function maintainerIsFailing() internal view returns (bool) {
@@ -243,6 +240,7 @@ abstract contract CrossMarginLiquidation is CrossMarginAccounts {
 
         uint256 sale2pegAmount = liquidateToPeg();
         uint256 peg2targetCost = liquidateFromPeg();
+        delete liquidationTokens;
 
         // this may be a bit imprecise, since individual shortfalls may be obscured
         // by overall returns and the maintainer cut is taken out of the net total,
@@ -251,7 +249,9 @@ abstract contract CrossMarginLiquidation is CrossMarginAccounts {
             (peg2targetCost * (100 + MAINTAINER_CUT_PERCENT)) / 100;
         if (costWithCut > sale2pegAmount) {
             emit LiquidationShortfall(costWithCut - sale2pegAmount);
-            canTakeNow = canTakeNow && IERC20(peg).balanceOf(fund()) > costWithCut;
+            canTakeNow =
+                canTakeNow &&
+                IERC20(peg).balanceOf(fund()) > costWithCut;
         }
 
         address loser = address(0);
@@ -273,6 +273,7 @@ abstract contract CrossMarginLiquidation is CrossMarginAccounts {
 
             uint256 holdingsValue = holdingsInPeg(account);
             uint256 borrowValue = loanInPeg(account);
+
             // 5% of value borrowed
             uint256 maintainerCut4Account =
                 (borrowValue * MAINTAINER_CUT_PERCENT) / 100;
@@ -292,12 +293,16 @@ abstract contract CrossMarginLiquidation is CrossMarginAccounts {
             }
 
             // send back trader money
-            if (holdingsValue > maintainerCut4Account + borrowValue) {
+
+            // include 1% for protocol
+            uint256 forfeited =
+                maintainerCut4Account + (borrowValue * 101) / 100;
+            if (holdingsValue > forfeited) {
                 // send remaining funds back to trader
                 Fund(fund()).withdraw(
                     PriceAware.peg,
                     traderAddress,
-                    holdingsValue - borrowValue - maintainerCut4Account
+                    holdingsValue - forfeited
                 );
             }
 
