@@ -76,12 +76,6 @@ abstract contract BaseLending {
         }
     }
 
-    function _makeFallbackBond(
-        address issuer,
-        address holder,
-        uint256 amount
-    ) internal virtual;
-
     /// Available tokens to this issuance
     function issuanceBalance(address issuance)
         internal
