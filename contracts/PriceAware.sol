@@ -263,7 +263,8 @@ abstract contract PriceAware is RoleAware {
 
             PairPrice storage pairPrice = pairPrices[pair][inToken];
 
-            uint256 timeDelta = block.timestamp - pairPrice.lastUpdated;
+            (, , uint256 pairLastUpdated) = IUniswapV2Pair(pair).getReserves();
+            uint256 timeDelta = pairLastUpdated - pairPrice.lastUpdated;
 
             if (timeDelta > voluntaryUpdateWindow) {
                 // we are in business
@@ -275,21 +276,13 @@ abstract contract PriceAware is RoleAware {
                         ? IUniswapV2Pair(pair).price0CumulativeLast()
                         : IUniswapV2Pair(pair).price1CumulativeLast();
 
-                if (pairPrice.cumulative == cumulative) {
-                    // nothing happened
-                    priceFP = (priceFP * pairPrice.priceFP) / FP112;
-                } else {
-                    // something did happen
-                    uint256 pairPriceFP =
-                        (cumulative - pairPrice.cumulative) / timeDelta;
-                    pairPrice.priceFP = pairPriceFP;
+                uint256 pairPriceFP =
+                    (cumulative - pairPrice.cumulative) / timeDelta;
+                priceFP = (priceFP * pairPriceFP) / FP112;
 
-                    priceFP = (priceFP * pairPriceFP) / FP112;
-
-                    pairPrice.cumulative = cumulative;
-                }
-
-                pairPrice.lastUpdated = block.timestamp;
+                pairPrice.priceFP = pairPriceFP;
+                pairPrice.cumulative = cumulative;
+                pairPrice.lastUpdated = pairLastUpdated;
             } else {
                 priceFP = (priceFP * pairPrice.priceFP) / FP112;
             }
@@ -306,7 +299,7 @@ abstract contract PriceAware is RoleAware {
                 ? UniswapStyleLib.pairForUni(inToken, outToken)
                 : UniswapStyleLib.pairForSushi(inToken, outToken);
 
-        (uint112 reserve0, uint112 reserve1, ) =
+        (uint112 reserve0, uint112 reserve1, uint256 pairLastUpdated) =
             IUniswapV2Pair(pair).getReserves();
 
         PairPrice storage pairPrice = pairPrices[pair][inToken];
@@ -321,5 +314,7 @@ abstract contract PriceAware is RoleAware {
         }
 
         pairPrice.lastUpdated = block.timestamp;
+
+        pairPrice.lastUpdated = pairLastUpdated;
     }
 }
