@@ -38,7 +38,9 @@ abstract contract HourlyBondSubscriptionLending is BaseLending {
         YieldAccumulator storage yieldAccumulator =
             hourlyBondYieldAccumulators[issuer];
         bond.yieldQuotientFP = yieldAccumulator.accumulatorFP;
-        bond.moduloHour = block.timestamp % (1 hours);
+        if (bond.amount == 0) {
+            bond.moduloHour = block.timestamp % (1 hours);
+        }
         bond.amount += amount;
         lendingMeta[issuer].totalLending += amount;
     }

@@ -226,11 +226,12 @@ contract Lending is
     }
 
     /// @dev In a liquidity crunch make a fallback bond until liquidity is good again
-    function _makeFallbackBond(
+    function makeFallbackBond(
         address issuer,
         address holder,
         uint256 amount
-    ) internal override {
+    ) external {
+        require(isLender(msg.sender), "Not an approved lender");
         _makeHourlyBond(issuer, holder, amount);
     }
 
