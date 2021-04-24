@@ -2,6 +2,7 @@
 pragma solidity ^0.8.0;
 
 import "./CrossMarginAccounts.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 /** 
 @title Handles liquidation of accounts below maintenance threshold
@@ -250,6 +251,7 @@ abstract contract CrossMarginLiquidation is CrossMarginAccounts {
             (peg2targetCost * (100 + MAINTAINER_CUT_PERCENT)) / 100;
         if (costWithCut > sale2pegAmount) {
             emit LiquidationShortfall(costWithCut - sale2pegAmount);
+            canTakeNow = canTakeNow && IERC20(peg).balanceOf(fund()) > costWithCut;
         }
 
         address loser = address(0);
