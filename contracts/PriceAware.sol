@@ -299,22 +299,27 @@ abstract contract PriceAware is RoleAware {
                 ? UniswapStyleLib.pairForUni(inToken, outToken)
                 : UniswapStyleLib.pairForSushi(inToken, outToken);
 
-        (uint112 reserve0, uint112 reserve1, uint256 pairLastUpdated) =
-            IUniswapV2Pair(pair).getReserves();
-
         PairPrice storage pairPrice = pairPrices[pair][inToken];
-        (address token0, ) = UniswapStyleLib.sortTokens(inToken, outToken);
 
-        if (inToken == token0) {
-            pairPrice.priceFP = (FP112 * reserve1) / reserve0;
-            pairPrice.cumulative = IUniswapV2Pair(pair).price0CumulativeLast();
-        } else {
-            pairPrice.priceFP = (FP112 * reserve0) / reserve1;
-            pairPrice.cumulative = IUniswapV2Pair(pair).price1CumulativeLast();
+        if (pairPrice.lastUpdated == 0) {
+            (uint112 reserve0, uint112 reserve1, uint256 pairLastUpdated) =
+                IUniswapV2Pair(pair).getReserves();
+
+            (address token0, ) = UniswapStyleLib.sortTokens(inToken, outToken);
+
+            if (inToken == token0) {
+                pairPrice.priceFP = (FP112 * reserve1) / reserve0;
+                pairPrice.cumulative = IUniswapV2Pair(pair)
+                    .price0CumulativeLast();
+            } else {
+                pairPrice.priceFP = (FP112 * reserve0) / reserve1;
+                pairPrice.cumulative = IUniswapV2Pair(pair)
+                    .price1CumulativeLast();
+            }
+
+            pairPrice.lastUpdated = block.timestamp;
+
+            pairPrice.lastUpdated = pairLastUpdated;
         }
-
-        pairPrice.lastUpdated = block.timestamp;
-
-        pairPrice.lastUpdated = pairLastUpdated;
     }
 }
