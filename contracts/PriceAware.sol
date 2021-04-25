@@ -47,7 +47,7 @@ abstract contract PriceAware is RoleAware {
     /// update window in blocks
 
     // TODO
-    uint256 public priceUpdateWindow = 40 minutes;
+    uint256 public priceUpdateWindow = 20 minutes;
     uint256 public voluntaryUpdateWindow = 5 minutes;
 
     uint256 public UPDATE_RATE_PERMIL = 400;
