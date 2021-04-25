@@ -45,11 +45,6 @@ const managedContracts: ManagedContract[] = [
   },
   { contractName: 'Fund', charactersPlayed: [FUND], rolesPlayed: [] },
   {
-    contractName: 'IncentiveDistribution',
-    charactersPlayed: [INCENTIVE_DISTRIBUTION],
-    rolesPlayed: []
-  },
-  {
     contractName: 'Lending',
     charactersPlayed: [LENDING],
     rolesPlayed: [WITHDRAWER, INCENTIVE_REPORTER]

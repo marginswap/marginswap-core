@@ -2,10 +2,10 @@
 pragma solidity ^0.8.0;
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
-import "./IncentiveDistribution.sol";
 import "./RoleAware.sol";
 import "./Fund.sol";
 import "./CrossMarginTrading.sol";
+import "../libraries/IncentiveReporter.sol";
 
 /** 
 @title Here we support staking for MFI incentives as well as
@@ -66,11 +66,7 @@ contract Admin is RoleAware {
         stakes[holder] += amount;
         totalStakes += amount;
 
-        IncentiveDistribution(incentiveDistributor()).addToClaimAmount(
-            mfiStakeTranche,
-            holder,
-            amount
-        );
+        IncentiveReporter.addToClaimAmount(MFI, holder, amount);
     }
 
     /// Deposit a stake for sender
@@ -88,11 +84,7 @@ contract Admin is RoleAware {
         totalStakes -= amount;
         Fund(fund()).withdraw(MFI, recipient, amount);
 
-        IncentiveDistribution(incentiveDistributor()).subtractFromClaimAmount(
-            mfiStakeTranche,
-            holder,
-            amount
-        );
+        IncentiveReporter.subtractFromClaimAmount(MFI, holder, amount);
     }
 
     /// Withdraw stake for sender

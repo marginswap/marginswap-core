@@ -3,16 +3,12 @@ pragma solidity ^0.8.0;
 
 import "./Fund.sol";
 import "./HourlyBondSubscriptionLending.sol";
-import "./IncentivizedHolder.sol";
+import "../libraries/IncentiveReporter.sol";
 
 // TODO activate bonds for lending
 
 /// @title Manage lending for a variety of bond issuers
-contract Lending is
-    RoleAware,
-    HourlyBondSubscriptionLending,
-    IncentivizedHolder
-{
+contract Lending is RoleAware, HourlyBondSubscriptionLending {
     /// mapping issuers to tokens
     /// (in crossmargin, the issuers are tokens  themselves)
     mapping(address => address) public issuerTokens;
@@ -248,7 +244,7 @@ contract Lending is
 
         disburse(issuer, msg.sender, amount);
 
-        withdrawClaim(msg.sender, issuer, amount);
+        IncentiveReporter.subtractFromClaimAmount(issuer, msg.sender, amount);
     }
 
     /// Shut down hourly bond account for `issuer`
@@ -264,7 +260,7 @@ contract Lending is
 
         delete hourlyBondAccounts[issuer][msg.sender];
 
-        withdrawClaim(msg.sender, issuer, amount);
+        IncentiveReporter.subtractFromClaimAmount(issuer, msg.sender, amount);
     }
 
     /// @dev buy hourly bond subscription
@@ -277,7 +273,7 @@ contract Lending is
 
         super._makeHourlyBond(issuer, msg.sender, amount);
 
-        stakeClaim(msg.sender, issuer, amount);
+        IncentiveReporter.addToClaimAmount(issuer, msg.sender, amount);
     }
 
     function initBorrowYieldAccumulator(address issuer)
