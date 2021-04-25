@@ -289,7 +289,7 @@ contract Lending is
 
         yA.accumulatorFP = FP48;
         yA.lastUpdated = block.timestamp;
-        yA.hourlyYieldFP = FP48 + FP48 / (365 * 24);
+        yA.hourlyYieldFP = FP48 + (FP48 * borrowMinAPR) / 100 / (365 * 24);
     }
 
     function setBorrowingFactorPercent(uint256 borrowingFactor)
