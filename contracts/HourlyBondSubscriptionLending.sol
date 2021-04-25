@@ -14,7 +14,7 @@ struct HourlyBond {
 abstract contract HourlyBondSubscriptionLending is BaseLending {
     mapping(address => YieldAccumulator) hourlyBondYieldAccumulators;
 
-    uint256 constant RATE_UPDATE_WINDOW = 20 minutes;
+    uint256 constant RATE_UPDATE_WINDOW = 10 minutes;
     uint256 public withdrawalWindow = 20 minutes;
     uint256 constant MAX_HOUR_UPDATE = 4;
     // issuer => holder => bond record
