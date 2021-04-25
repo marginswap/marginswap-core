@@ -5,7 +5,6 @@ import "../Executor.sol";
 
 import "../CrossMarginTrading.sol";
 import "../MarginRouter.sol";
-import "../IncentiveDistribution.sol";
 
 contract TokenActivation is Executor {
     address[] public tokens;

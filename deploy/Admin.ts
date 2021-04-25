@@ -21,5 +21,5 @@ const deploy: DeployFunction = async function ({
   });
 };
 deploy.tags = ['Admin', 'local'];
-deploy.dependencies = ['Roles', 'IncentiveDistribution'];
+deploy.dependencies = ['Roles'];
 export default deploy;

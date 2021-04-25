@@ -3,7 +3,8 @@ pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "./IncentiveDistribution.sol";
+import "../libraries/IncentiveReporter.sol";
+import "./RoleAware.sol";
 
 /// @title Manaage rewards for liquidity mining
 contract LiquidityMiningReward is RoleAware {
@@ -32,13 +33,13 @@ contract LiquidityMiningReward is RoleAware {
 
         stakeToken.safeTransferFrom(msg.sender, address(this), amount);
 
-        IncentiveDistribution(incentiveDistributor()).addToClaimAmount(
-            0,
+        stakeAmounts[msg.sender] += amount;
+
+        IncentiveReporter.addToClaimAmount(
+            address(stakeToken),
             msg.sender,
             amount
         );
-
-        stakeAmounts[msg.sender] += amount;
     }
 
     /// Withdraw stake tokens
@@ -47,14 +48,13 @@ contract LiquidityMiningReward is RoleAware {
         require(stakeAmount >= amount, "Not enough stake to withdraw");
 
         stakeAmounts[msg.sender] = stakeAmount - amount;
+        stakeToken.safeTransfer(msg.sender, amount);
 
-        IncentiveDistribution(incentiveDistributor()).subtractFromClaimAmount(
-            0,
+        IncentiveReporter.subtractFromClaimAmount(
+            address(stakeToken),
             msg.sender,
             amount
         );
-
-        stakeToken.safeTransfer(msg.sender, amount);
     }
 }
 

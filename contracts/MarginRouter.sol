@@ -1,17 +1,15 @@
 // SPDX-License-Identifier: BUSL-1.1
 pragma solidity ^0.8.0;
 
-import "@uniswap/v2-core/contracts/interfaces/IUniswapV2Factory.sol";
-
 import "./RoleAware.sol";
 import "../interfaces/IMarginTrading.sol";
 import "./Lending.sol";
 import "./Admin.sol";
-import "./IncentivizedHolder.sol";
 import "./BaseRouter.sol";
+import "../libraries/IncentiveReporter.sol";
 
 /// @title Top level transaction controller
-contract MarginRouter is RoleAware, IncentivizedHolder, BaseRouter {
+contract MarginRouter is RoleAware, BaseRouter {
     event AccountUpdated(address indexed trader);
 
     uint256 public constant mswapFeesPer10k = 10;
@@ -39,7 +37,11 @@ contract MarginRouter is RoleAware, IncentivizedHolder, BaseRouter {
             );
         if (extinguishAmount > 0) {
             Lending(lending()).payOff(depositToken, extinguishAmount);
-            withdrawClaim(msg.sender, depositToken, extinguishAmount);
+            IncentiveReporter.subtractFromClaimAmount(
+                depositToken,
+                msg.sender,
+                extinguishAmount
+            );
         }
         emit AccountUpdated(msg.sender);
     }
@@ -55,7 +57,11 @@ contract MarginRouter is RoleAware, IncentivizedHolder, BaseRouter {
             );
         if (extinguishAmount > 0) {
             Lending(lending()).payOff(WETH, extinguishAmount);
-            withdrawClaim(msg.sender, WETH, extinguishAmount);
+            IncentiveReporter.subtractFromClaimAmount(
+                WETH,
+                msg.sender,
+                extinguishAmount
+            );
         }
         emit AccountUpdated(msg.sender);
     }
@@ -93,7 +99,11 @@ contract MarginRouter is RoleAware, IncentivizedHolder, BaseRouter {
             borrowAmount
         );
 
-        stakeClaim(msg.sender, borrowToken, borrowAmount);
+        IncentiveReporter.addToClaimAmount(
+            borrowToken,
+            msg.sender,
+            borrowAmount
+        );
         emit AccountUpdated(msg.sender);
     }
 
@@ -119,7 +129,11 @@ contract MarginRouter is RoleAware, IncentivizedHolder, BaseRouter {
         );
 
         Fund(fund()).withdraw(borrowToken, msg.sender, withdrawAmount);
-        stakeClaim(msg.sender, borrowToken, withdrawAmount);
+        IncentiveReporter.addToClaimAmount(
+            borrowToken,
+            msg.sender,
+            withdrawAmount
+        );
         emit AccountUpdated(msg.sender);
     }
 
@@ -218,11 +232,15 @@ contract MarginRouter is RoleAware, IncentivizedHolder, BaseRouter {
             );
         if (extinguishAmount > 0) {
             Lending(lending()).payOff(outToken, extinguishAmount);
-            withdrawClaim(trader, outToken, extinguishAmount);
+            IncentiveReporter.subtractFromClaimAmount(
+                outToken,
+                trader,
+                extinguishAmount
+            );
         }
         if (borrowAmount > 0) {
             Lending(lending()).registerBorrow(inToken, borrowAmount);
-            stakeClaim(trader, inToken, borrowAmount);
+            IncentiveReporter.addToClaimAmount(inToken, trader, borrowAmount);
         }
 
         emit AccountUpdated(trader);

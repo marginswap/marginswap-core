@@ -14,10 +14,6 @@ const deploy: DeployFunction = async function ({
   const { deploy } = deployments;
   const { deployer, liquidityToken } = await getNamedAccounts();
 
-  const incentiveDistribution = await deployments
-    .get('IncentiveDistribution')
-    .then(IncentiveDistribution => ethers.getContractAt('IncentiveDistribution', IncentiveDistribution.address));
-
   const roles = await deployments.get('Roles').then(Roles => ethers.getContractAt('Roles', Roles.address));
   const nowSeconds = Math.floor(new Date().getTime() / 1000);
 
@@ -30,5 +26,5 @@ const deploy: DeployFunction = async function ({
 };
 
 deploy.tags = ['LiquidityMiningReward', 'local'];
-deploy.dependencies = ['Roles', 'IncentiveDistribution'];
+deploy.dependencies = ['Roles'];
 export default deploy;
