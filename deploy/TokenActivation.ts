@@ -31,7 +31,13 @@ export const tokensPerNetwork: Record<string, Record<string, string>> = {
     SUSHI: '0x6b3595068778dd592e39a122f4f5a5cf09c90fe2',
     ALCX: '0xdbdb4d16eda451d0503b854cf79d55697f90c8df'
   },
-  local: {}
+  local: {
+    DAI: '0x6b175474e89094c44da98b954eedeac495271d0f',
+    WETH: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
+    USDT: '0xdAC17F958D2ee523a2206206994597C13D831ec7',
+    ALCX: '0xdbdb4d16eda451d0503b854cf79d55697f90c8df',
+    UNI: '0x1f9840a85d5af5bf1d1762f925bdaddc4201f984',
+  }
 };
 
 export enum AMMs {
@@ -158,14 +164,14 @@ const deploy: DeployFunction = async function ({
   const networkName = network.live ? network.name : 'local';
   const peg = (await deployments.get('Peg')).address;
 
-  const tokens = network.live ? tokensPerNetwork[networkName] : tokensPerNetwork['mainnet'];
+  const tokens = network.live ? tokensPerNetwork[networkName] : tokensPerNetwork['local'];
   const tokenNames = Object.keys(tokens);
   const tokenAddresses = Object.values(tokens);
 
   const argLists = [
     await prepArgs(tokenNames.slice(0,5), tokenAddresses.slice(0,5), deployments, tokens, peg, weth)
-    //await prepArgs(tokenNames.slice(5, 10), tokenAddresses.slice(5,10), deployments, tokens, peg, weth),
-    //await prepArgs(tokenNames.slice(10), tokenAddresses.slice(10), deployments, tokens, peg, weth)
+    // await prepArgs(tokenNames.slice(5, 8), tokenAddresses.slice(5, 8), deployments, tokens, peg, weth),
+    //await prepArgs(tokenNames.slice(8), tokenAddresses.slice(8), deployments, tokens, peg, weth)
   ];
   for (const args of argLists) {
     const TokenActivation = await deploy('TokenActivation', {
@@ -197,11 +203,11 @@ const deploy: DeployFunction = async function ({
     // let tx = await signer.sendTransaction({ to: deployer, value: ethers.utils.parseEther('10') });
     // console.log(`Sending eth from treasury to ${deployer}:`);
 
-    const dai = await ethers.getContractAt(ERC20PresetMinterPauser.abi, tokens['DAI']);
-    const tx = await dai.connect(signer).transfer(deployer, ethers.utils.parseEther('200'));
-    console.log(`Sending dai from treasury to ${deployer}:`);
+    // const dai = await ethers.getContractAt(ERC20PresetMinterPauser.abi, tokens['DAI']);
+    // const tx = await dai.connect(signer).transfer(deployer, ethers.utils.parseEther('200'));
+    // console.log(`Sending dai from treasury to ${deployer}:`);
 
-    // const usdt = await ethers.getContractAt(ERC20PresetMinterPauser.abi, tokens['USDT']);
+    // // const usdt = await ethers.getContractAt(ERC20PresetMinterPauser.abi, tokens['USDT']);
     // tx = await usdt.connect(signer).transfer(deployer, ethers.utils.parseEther('50'));
     // console.log(`Sending usdt from treasury to ${deployer}:`);
     // console.log(tx);
