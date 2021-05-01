@@ -39,8 +39,8 @@ struct PairPrice {
 ///    of front-running and other price manipulation.
 abstract contract PriceAware is RoleAware {
     uint256 constant FP112 = 2**112;
-    uint256 constant FP8 = 2 ** 8;
-    uint256 constant FP96 = 2 ** (112 - 2 * 8);
+    uint256 constant FP8 = 2**8;
+    uint256 constant FP96 = 2**(112 - 2 * 8);
 
     address public immutable peg;
 
@@ -292,7 +292,7 @@ abstract contract PriceAware is RoleAware {
     }
 
     function scaleMul(uint256 a, uint256 b) internal pure returns (uint256) {
-        return (a / FP8) * (b / FP8) / FP96;
+        return ((a / FP8) * (b / FP8)) / FP96;
     }
 
     function initPairPrice(
