@@ -36,8 +36,6 @@ abstract contract CrossMarginAccounts is RoleAware, PriceAware {
     mapping(address => CrossMarginAccount) internal marginAccounts;
     /// @dev total token caps
     mapping(address => uint256) public tokenCaps;
-    /// @dev tracks total of short positions per token
-    mapping(address => uint256) public totalShort;
     /// @dev tracks total of long positions per token
     mapping(address => uint256) public totalLong;
     uint256 public coolingOffPeriod = 10;
@@ -285,7 +283,6 @@ abstract contract CrossMarginAccounts is RoleAware, PriceAware {
         uint256 len = account.borrowTokens.length;
         for (uint256 borrowIdx; len > borrowIdx; borrowIdx++) {
             address borrowToken = account.borrowTokens[borrowIdx];
-            totalShort[borrowToken] -= account.borrowed[borrowToken];
             account.borrowed[borrowToken] = 0;
             account.borrowedYieldQuotientsFP[borrowToken] = 0;
         }
