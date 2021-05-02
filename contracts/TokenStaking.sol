@@ -1,0 +1,97 @@
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+
+contract TokenStaking {
+    using SafeERC20 for IERC20;
+
+    struct StakeAccount {
+        uint256 stakeAmount;
+        uint256 stakeWeight;
+        uint256 cumulativeStart;
+        uint256 lockEnd;
+    }
+    IERC20 public immutable stakeToken;
+    /// Margenswap (MFI) token address
+    IERC20 public immutable MFI;
+
+    mapping(address => StakeAccount) public stakeAccounts;
+
+    uint256 public cumulativeReward;
+    uint256 public lastCumulativeUpdateBlock;
+    uint256 public totalCurrentWeights;
+    uint256 public totalCurrentRewardPerBlock;
+
+    constructor(address _MFI, address _stakeToken) {
+        MFI = IERC20(_MFI);
+        stakeToken = IERC20(_stakeToken);
+    }
+
+    // TODO: function to load up with MFI
+    
+    function stake(uint256 amount, uint256 duration) external {        
+        stakeToken.safeTransferFrom(msg.sender, address(this), amount);
+
+        StakeAccount storage account = stakeAccounts[msg.sender];
+        uint256 extantAmount = account.stakeAmount;
+
+        if (extantAmount > 0) {
+            _withdrawReward(msg.sender, account);
+        }
+
+        account.stakeAmount = extantAmount + amount;
+        account.stakeWeight += duration * amount;
+        totalCurrentWeights += duration * amount;
+        account.cumulativeStart = updateCumulativeReward();
+
+        account.lockEnd = max(block.timestamp + duration, account.lockEnd);
+    }
+
+    function withdrawStake(uint256 amount) external {
+        StakeAccount storage account = stakeAccounts[msg.sender];
+        require(block.timestamp >= account.lockEnd, "Stake is still locked");
+        _withdrawReward(msg.sender, account);
+        account.stakeAmount -= amount;
+        account.cumulativeStart = updateCumulativeReward();
+        account.stakeWeight = account.stakeWeight / amount;
+    }
+
+    function viewUpdatedCumulativeReward() public view returns (uint256) {
+        return cumulativeReward + (block.number - lastCumulativeUpdateBlock) * totalCurrentRewardPerBlock;
+    }
+
+    function updateCumulativeReward() public returns (uint256) {
+        if (block.number > lastCumulativeUpdateBlock) {
+            cumulativeReward = viewUpdatedCumulativeReward();
+            lastCumulativeUpdateBlock = block.number;
+        }
+        return cumulativeReward;
+    }
+
+    function _viewRewardAmount(StakeAccount storage account) internal view returns (uint256) {
+        uint256 totalReward = viewUpdatedCumulativeReward();
+        return (totalReward - account.cumulativeStart) * account.stakeWeight / totalCurrentWeights;
+    }
+
+    function _withdrawReward(address recipient, StakeAccount storage account) internal {
+        require(account.cumulativeStart > 0, "Account not active");
+        uint256 reward = _viewRewardAmount(account);
+        MFI.safeTransfer(recipient, reward);
+    }
+
+    function withdrawReward() external {
+        StakeAccount storage account = stakeAccounts[msg.sender];
+        _withdrawReward(msg.sender, account);
+        account.cumulativeStart = cumulativeReward;
+    }
+
+    
+    /// @dev maximum
+    function max(uint256 a, uint256 b) internal pure returns (uint256) {
+        if (a > b) {
+            return a;
+        } else {
+            return b;
+        }
+    }
+
+}
