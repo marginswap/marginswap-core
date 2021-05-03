@@ -333,7 +333,7 @@ contract Lending is RoleAware, HourlyBondSubscriptionLending {
         address source,
         uint256 amount
     ) internal {
-        Fund(fund()).depositFor(source, issuer, amount);
+        Fund(fund()).depositFor(source, issuerTokens[issuer], amount);
     }
 
     function haircut(uint256 amount) external {
