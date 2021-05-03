@@ -1,9 +1,9 @@
-import "./RoleAware.sol";
+import "../RoleAware.sol";
 
-import "./Lending.sol";
+import "../Lending.sol";
 
-import "./BaseRouter.sol";
-import "../libraries/IncentiveReporter.sol";
+import "../BaseRouter.sol";
+import "../../libraries/IncentiveReporter.sol";
 
 import "./IsolatedMarginTrading.sol";
 
