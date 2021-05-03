@@ -2,7 +2,7 @@
 pragma solidity ^0.8.0;
 
 import "./IsolatedMarginAccounts.sol";
-import "./Admin.sol";
+import "../Admin.sol";
 
 /** 
 @title Handles liquidation of accounts below maintenance threshold
