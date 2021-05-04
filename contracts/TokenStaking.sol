@@ -1,5 +1,6 @@
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import "./Roles.sol";
 
 contract TokenStaking {
     using SafeERC20 for IERC20;
@@ -13,6 +14,7 @@ contract TokenStaking {
     IERC20 public immutable stakeToken;
     /// Margenswap (MFI) token address
     IERC20 public immutable MFI;
+    Roles roles;
 
     mapping(address => StakeAccount) public stakeAccounts;
 
@@ -21,12 +23,18 @@ contract TokenStaking {
     uint256 public totalCurrentWeights;
     uint256 public totalCurrentRewardPerBlock;
 
-    constructor(address _MFI, address _stakeToken) {
+    constructor(address _MFI, address _stakeToken, address _roles) {
         MFI = IERC20(_MFI);
         stakeToken = IERC20(_stakeToken);
+        roles = Roles(_roles);
     }
 
     // TODO: function to load up with MFI
+
+    function setTotalRewardPerBlock(uint256 rewardPerBlock) external {
+        require(msg.sender == roles.owner(), "Not authorized");
+        totalCurrentRewardPerBlock = rewardPerBlock;
+    }
     
     function stake(uint256 amount, uint256 duration) external {        
         stakeToken.safeTransferFrom(msg.sender, address(this), amount);
@@ -39,8 +47,9 @@ contract TokenStaking {
         }
 
         account.stakeAmount = extantAmount + amount;
-        account.stakeWeight += duration * amount;
-        totalCurrentWeights += duration * amount;
+        uint256 w = duration >= 90 days ? 3 : (duration >= 30 days ?  2 : (duration >= 1 weeks ? 1 : 0));
+        account.stakeWeight += w * amount;
+        totalCurrentWeights += w * amount;
         account.cumulativeStart = updateCumulativeReward();
 
         account.lockEnd = max(block.timestamp + duration, account.lockEnd);
@@ -74,7 +83,8 @@ contract TokenStaking {
 
     function _withdrawReward(address recipient, StakeAccount storage account) internal {
         require(account.cumulativeStart > 0, "Account not active");
-        uint256 reward = _viewRewardAmount(account);
+        uint256 reward = min(_viewRewardAmount(account), MFI.balanceOf(address(this)));
+        
         MFI.safeTransfer(recipient, reward);
     }
 
@@ -84,6 +94,14 @@ contract TokenStaking {
         account.cumulativeStart = cumulativeReward;
     }
 
+    /// @dev minimum
+    function min(uint256 a, uint256 b) internal pure returns (uint256) {
+        if (a > b) {
+            return b;
+        } else {
+            return a;
+        }
+    }
     
     /// @dev maximum
     function max(uint256 a, uint256 b) internal pure returns (uint256) {
