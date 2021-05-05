@@ -1,7 +1,6 @@
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
 import { DeployFunction } from 'hardhat-deploy/types';
 import { ethers } from 'hardhat';
-import ERC20PresetMinterPauser from '@openzeppelin/contracts/build/contracts/ERC20PresetMinterPauser.json';
 
 const MFI_ADDRESS = '0xAa4e3edb11AFa93c41db59842b29de64b72E355B';
 const TOKEN_ACTIVATOR = 9;

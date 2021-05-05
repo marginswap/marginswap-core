@@ -48,7 +48,7 @@ contract Admin is RoleAware {
         nextMaintenanceStaker[_lockedMFI] = _lockedMFI;
         currentMaintenanceStaker = _lockedMFI;
         prevMaintenanceStaker = _lockedMFI;
-        maintenanceDelegateTo[_lockedMFI][lockedMFIDelegate];
+        maintenanceDelegateTo[_lockedMFI][lockedMFIDelegate] = true;
         currentMaintenanceStakerStartBlock = block.number;
     }
 
@@ -67,11 +67,6 @@ contract Admin is RoleAware {
         totalStakes += amount;
 
         IncentiveReporter.addToClaimAmount(MFI, holder, amount);
-    }
-
-    /// Deposit a stake for sender
-    function depositStake(uint256 amount) external {
-        _stake(msg.sender, amount);
     }
 
     function _withdrawStake(
