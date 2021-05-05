@@ -23,7 +23,11 @@ abstract contract TokenStaking {
     uint256 public totalCurrentWeights;
     uint256 public totalCurrentRewardPerBlock;
 
-    constructor(address _MFI, address _stakeToken, address _roles) {
+    constructor(
+        address _MFI,
+        address _stakeToken,
+        address _roles
+    ) {
         MFI = IERC20(_MFI);
         stakeToken = IERC20(_stakeToken);
         roles = Roles(_roles);
@@ -35,8 +39,8 @@ abstract contract TokenStaking {
         require(msg.sender == roles.owner(), "Not authorized");
         totalCurrentRewardPerBlock = rewardPerBlock;
     }
-    
-    function stake(uint256 amount, uint256 duration) external {        
+
+    function stake(uint256 amount, uint256 duration) external {
         stakeToken.safeTransferFrom(msg.sender, address(this), amount);
 
         StakeAccount storage account = stakeAccounts[msg.sender];
@@ -47,7 +51,10 @@ abstract contract TokenStaking {
         }
 
         account.stakeAmount = extantAmount + amount;
-        uint256 w = duration >= 90 days ? 3 : (duration >= 30 days ?  2 : (duration >= 1 weeks ? 1 : 0));
+        uint256 w =
+            duration >= 90 days
+                ? 3
+                : (duration >= 30 days ? 2 : (duration >= 1 weeks ? 1 : 0));
         account.stakeWeight += w * amount;
         totalCurrentWeights += w * amount;
         account.cumulativeStart = updateCumulativeReward();
@@ -65,7 +72,10 @@ abstract contract TokenStaking {
     }
 
     function viewUpdatedCumulativeReward() public view returns (uint256) {
-        return cumulativeReward + (block.number - lastCumulativeUpdateBlock) * totalCurrentRewardPerBlock;
+        return
+            cumulativeReward +
+            (block.number - lastCumulativeUpdateBlock) *
+            totalCurrentRewardPerBlock;
     }
 
     function updateCumulativeReward() public returns (uint256) {
@@ -76,15 +86,28 @@ abstract contract TokenStaking {
         return cumulativeReward;
     }
 
-    function _viewRewardAmount(StakeAccount storage account) internal view returns (uint256) {
+    function _viewRewardAmount(StakeAccount storage account)
+        internal
+        view
+        returns (uint256)
+    {
         uint256 totalReward = viewUpdatedCumulativeReward();
-        return (totalReward - account.cumulativeStart) * account.stakeWeight / totalCurrentWeights;
+        return
+            ((totalReward - account.cumulativeStart) * account.stakeWeight) /
+            totalCurrentWeights;
     }
 
-    function _withdrawReward(address recipient, StakeAccount storage account) internal {
+    function viewRewardAmount(address account) external view returns (uint256) {
+        return _viewRewardAmount(stakeAccounts[account]);
+    }
+
+    function _withdrawReward(address recipient, StakeAccount storage account)
+        internal
+    {
         require(account.cumulativeStart > 0, "Account not active");
-        uint256 reward = min(_viewRewardAmount(account), MFI.balanceOf(address(this)));
-        
+        uint256 reward =
+            min(_viewRewardAmount(account), MFI.balanceOf(address(this)));
+
         MFI.safeTransfer(recipient, reward);
     }
 
@@ -102,7 +125,7 @@ abstract contract TokenStaking {
             return a;
         }
     }
-    
+
     /// @dev maximum
     function max(uint256 a, uint256 b) internal pure returns (uint256) {
         if (a > b) {
@@ -111,5 +134,4 @@ abstract contract TokenStaking {
             return b;
         }
     }
-
 }

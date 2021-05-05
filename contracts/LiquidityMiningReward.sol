@@ -5,7 +5,11 @@ import "./TokenStaking.sol";
 
 /// @title Manaage rewards for liquidity mining
 contract LiquidityMiningReward is TokenStaking {
-    constructor(address _MFI, address LiquidityToken, address _roles) TokenStaking(_MFI, LiquidityToken, _roles) {}
+    constructor(
+        address _MFI,
+        address LiquidityToken,
+        address _roles
+    ) TokenStaking(_MFI, LiquidityToken, _roles) {}
 }
 
 // USDC - MFI pair token
