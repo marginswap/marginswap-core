@@ -50,11 +50,6 @@ const managedContracts: ManagedContract[] = [
     rolesPlayed: [WITHDRAWER, INCENTIVE_REPORTER]
   },
   {
-    contractName: 'LiquidityMiningReward',
-    charactersPlayed: [],
-    rolesPlayed: [INCENTIVE_REPORTER]
-  },
-  {
     contractName: 'MarginRouter',
     charactersPlayed: [ROUTER],
     rolesPlayed: [WITHDRAWER, MARGIN_TRADER, BORROWER, INCENTIVE_REPORTER]

@@ -12,18 +12,18 @@ const deploy: DeployFunction = async function ({
   network
 }: HardhatRuntimeEnvironment) {
   const { deploy } = deployments;
-  const { deployer, liquidityToken, mfiAddress } = await getNamedAccounts();
+  const { deployer, mfiAddress } = await getNamedAccounts();
 
   const roles = await deployments.get('Roles').then(Roles => ethers.getContractAt('Roles', Roles.address));
 
-  const liquidityMiningReward = await deploy('LiquidityMiningReward', {
+  const liquidityMiningReward = await deploy('MFIStaking', {
     from: deployer,
-    args: [mfiAddress, liquidityToken, roles.address],
+    args: [mfiAddress, roles.address],
     log: true,
     skipIfAlreadyDeployed: true
   });
 };
 
-deploy.tags = ['LiquidityMiningReward', 'local'];
+deploy.tags = ['MFIStaking', 'local'];
 deploy.dependencies = ['Roles'];
 export default deploy;
