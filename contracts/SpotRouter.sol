@@ -20,6 +20,10 @@ contract SpotRouter is BaseRouter {
         WETH = _WETH;
     }
 
+    receive() external payable {
+        assert(msg.sender == WETH); // only accept ETH via fallback from the WETH contract
+    }
+
     function swapExactTokensForTokens(
         uint256 amountIn,
         uint256 amountOutMin,
@@ -117,7 +121,6 @@ contract SpotRouter is BaseRouter {
         );
 
         IERC20(tokens[0]).safeTransferFrom(msg.sender, pairs[0], amounts[0]);
-
         _swap(amounts, pairs, tokens, address(this));
         IWETH(WETH).withdraw(amounts[amounts.length - 1]);
         Address.sendValue(payable(to), amounts[amounts.length - 1]);
@@ -145,6 +148,7 @@ contract SpotRouter is BaseRouter {
             "SpotRouter: INSUFFICIENT_OUTPUT_AMOUNT"
         );
 
+        IERC20(tokens[0]).safeTransferFrom(msg.sender, pairs[0], amounts[0]);
         _swap(amounts, pairs, tokens, address(this));
 
         IWETH(WETH).withdraw(amounts[amounts.length - 1]);
