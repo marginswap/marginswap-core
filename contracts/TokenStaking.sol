@@ -66,9 +66,11 @@ abstract contract TokenStaking {
         StakeAccount storage account = stakeAccounts[msg.sender];
         require(block.timestamp >= account.lockEnd, "Stake is still locked");
         _withdrawReward(msg.sender, account);
+        uint256 weightDiff = amount * account.stakeWeight / account.stakeAmount;
+        account.stakeWeight -= weightDiff;
+        totalCurrentWeights -= weightDiff;
         account.stakeAmount -= amount;
         account.cumulativeStart = updateCumulativeReward();
-        account.stakeWeight = account.stakeWeight / amount;
     }
 
     function viewUpdatedCumulativeReward() public view returns (uint256) {
