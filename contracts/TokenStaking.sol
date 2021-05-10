@@ -97,7 +97,7 @@ abstract contract TokenStaking {
         uint256 totalReward = viewUpdatedCumulativeReward();
         return
             ((totalReward - account.cumulativeStart) * account.stakeWeight) /
-            totalCurrentWeights;
+            (totalCurrentWeights + 1);
     }
 
     function viewRewardAmount(address account) external view returns (uint256) {
