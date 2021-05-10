@@ -198,7 +198,7 @@ const deploy: DeployFunction = async function ({
       params: [TREASURY]
     });
 
-    const signer = await ethers.provider.getSigner(TREASURY);
+    let signer = await ethers.provider.getSigner(TREASURY);
     // let tx = await signer.sendTransaction({ to: deployer, value: ethers.utils.parseEther('10') });
     // console.log(`Sending eth from treasury to ${deployer}:`);
 
@@ -209,6 +209,18 @@ const deploy: DeployFunction = async function ({
     // // const usdt = await ethers.getContractAt(ERC20PresetMinterPauser.abi, tokens['USDT']);
     // tx = await usdt.connect(signer).transfer(deployer, ethers.utils.parseEther('50'));
     // console.log(`Sending usdt from treasury to ${deployer}:`);
+    // console.log(tx);
+
+
+    // const problem = "0x07c2af75788814BA7e5225b2F5c951eD161cB589"; 
+    // await network.provider.request({
+    //   method: 'hardhat_impersonateAccount',
+    //   params: [problem]
+    // });
+
+    // signer = await ethers.provider.getSigner(problem);
+    // const router = await (await ethers.getContractAt('MarginRouter', "0xb80d5989F2ecB199603740197Ce9223b239547E0")).connect(signer);
+    // let tx = await router.crossDeposit('0x6b3595068778dd592e39a122f4f5a5cf09c90fe2', ethers.utils.parseEther('186'));
     // console.log(tx);
   }
 };

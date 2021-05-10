@@ -16,7 +16,20 @@ contract SpotRouter is BaseRouter {
     using SafeERC20 for IERC20;
     address public immutable WETH;
 
-    constructor(address _WETH) {
+    constructor(
+        address _WETH,
+        address _amm1Factory,
+        address _amm2Factory,
+        bytes32 _amm1InitHash,
+        bytes32 _amm2InitHash
+    )
+        UniswapStyleLib(
+            _amm1Factory,
+            _amm2Factory,
+            _amm1InitHash,
+            _amm2InitHash
+        )
+    {
         WETH = _WETH;
     }
 
@@ -33,7 +46,7 @@ contract SpotRouter is BaseRouter {
         uint256 deadline
     ) external ensure(deadline) returns (uint256[] memory amounts) {
         address[] memory pairs;
-        (amounts, pairs) = UniswapStyleLib.getAmountsOut(
+        (amounts, pairs) = UniswapStyleLib._getAmountsOut(
             amountIn,
             amms,
             tokens
@@ -57,7 +70,7 @@ contract SpotRouter is BaseRouter {
         uint256 deadline
     ) external ensure(deadline) returns (uint256[] memory amounts) {
         address[] memory pairs;
-        (amounts, pairs) = UniswapStyleLib.getAmountsIn(
+        (amounts, pairs) = UniswapStyleLib._getAmountsIn(
             amountOut,
             amms,
             tokens
@@ -82,7 +95,7 @@ contract SpotRouter is BaseRouter {
         require(tokens[0] == WETH, "SpotRouter: INVALID_PATH");
 
         address[] memory pairs;
-        (amounts, pairs) = UniswapStyleLib.getAmountsOut(
+        (amounts, pairs) = UniswapStyleLib._getAmountsOut(
             msg.value,
             amms,
             tokens
@@ -109,7 +122,7 @@ contract SpotRouter is BaseRouter {
         require(tokens[tokens.length - 1] == WETH, "SpotRouter: INVALID_PATH");
 
         address[] memory pairs;
-        (amounts, pairs) = UniswapStyleLib.getAmountsIn(
+        (amounts, pairs) = UniswapStyleLib._getAmountsIn(
             amountOut,
             amms,
             tokens
@@ -137,7 +150,7 @@ contract SpotRouter is BaseRouter {
         require(tokens[tokens.length - 1] == WETH, "SpotRouter: INVALID_PATH");
 
         address[] memory pairs;
-        (amounts, pairs) = UniswapStyleLib.getAmountsOut(
+        (amounts, pairs) = UniswapStyleLib._getAmountsOut(
             amountIn,
             amms,
             tokens
@@ -165,7 +178,7 @@ contract SpotRouter is BaseRouter {
         require(tokens[0] == WETH, "SpotRouter: INVALID_PATH");
 
         address[] memory pairs;
-        (amounts, pairs) = UniswapStyleLib.getAmountsIn(
+        (amounts, pairs) = UniswapStyleLib._getAmountsIn(
             amountOut,
             amms,
             tokens
@@ -187,7 +200,7 @@ contract SpotRouter is BaseRouter {
         bytes32 amms,
         address[] calldata tokens
     ) external view returns (uint256[] memory amounts) {
-        (amounts, ) = UniswapStyleLib.getAmountsOut(inAmount, amms, tokens);
+        (amounts, ) = UniswapStyleLib._getAmountsOut(inAmount, amms, tokens);
     }
 
     function getAmountsIn(
@@ -195,6 +208,6 @@ contract SpotRouter is BaseRouter {
         bytes32 amms,
         address[] calldata tokens
     ) external view returns (uint256[] memory amounts) {
-        (amounts, ) = UniswapStyleLib.getAmountsIn(outAmount, amms, tokens);
+        (amounts, ) = UniswapStyleLib._getAmountsIn(outAmount, amms, tokens);
     }
 }

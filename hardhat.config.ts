@@ -138,6 +138,7 @@ export default {
       blockGasLimit: 12000000,
       forking: {
         url: infuraUrl('mainnet')
+//        url: 'https://api.avax.network/ext/bc/C/rpc'
       },
       accounts: [{ privateKey, balance: '10000168008000000000000' }]
     },
@@ -200,6 +201,17 @@ export default {
     },
     usdt: {
       default: '0xdAC17F958D2ee523a2206206994597C13D831ec7'
-    }
+    },
+    amm1Factory: {
+      1: "0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f",
+      31337: "0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f",
+      42: "0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f",
+
+    },
+    amm2Factory: {
+      1: "0xC0AEe478e3658e2610c5F7A4A2E1777cE9e4f2Ac",
+      31337: "0xC0AEe478e3658e2610c5F7A4A2E1777cE9e4f2Ac",
+      42: "0xC0AEe478e3658e2610c5F7A4A2E1777cE9e4f2Ac"
+    },
   }
 };

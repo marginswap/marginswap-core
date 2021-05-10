@@ -12,9 +12,22 @@ import "./CrossMarginLiquidation.sol";
 // except for view functions of course
 
 contract CrossMarginTrading is CrossMarginLiquidation, IMarginTrading {
-    constructor(address _peg, address _roles)
+    constructor(
+        address _peg,
+        address _amm1Factory,
+        address _amm2Factory,
+        bytes32 _amm1InitHash,
+        bytes32 _amm2InitHash,
+        address _roles
+    )
         RoleAware(_roles)
         PriceAware(_peg)
+        UniswapStyleLib(
+            _amm1Factory,
+            _amm2Factory,
+            _amm1InitHash,
+            _amm2InitHash
+        )
     {}
 
     /// @dev admin function to set the token cap
