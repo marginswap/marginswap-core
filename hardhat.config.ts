@@ -138,7 +138,7 @@ export default {
       blockGasLimit: 12000000,
       forking: {
         url: infuraUrl('mainnet')
-//        url: 'https://api.avax.network/ext/bc/C/rpc'
+        // url: 'https://api.avax.network/ext/bc/C/rpc'
       },
       accounts: [{ privateKey, balance: '10000168008000000000000' }]
     },
@@ -155,6 +155,10 @@ export default {
     },
     ropsten: {
       url: infuraUrl('ropsten'),
+      accounts: [privateKey]
+    },
+    avalanche: {
+      url: 'https://api.avax.network/ext/bc/C/rpc',
       accounts: [privateKey]
     }
   },
@@ -185,10 +189,11 @@ export default {
     lockedMfiDelegate: {
       default: MAIN_DEPLOYER
     },
-    weth: {
-      31337: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
+    baseCurrency: {
+      31337: '0xB31f66AA3C1e785363F0875A1B74E27b85FD66c7',
       1: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
-      42: '0xd0a1e359811322d97991e03f863a0c30c2cf029c'
+      42: '0xd0a1e359811322d97991e03f863a0c30c2cf029c',
+      '0xa86a': '0xB31f66AA3C1e785363F0875A1B74E27b85FD66c7',
     },
     dai: {
       1: '0x6b175474e89094c44da98b954eedeac495271d0f',
@@ -200,18 +205,22 @@ export default {
       default: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48'
     },
     usdt: {
-      default: '0xdAC17F958D2ee523a2206206994597C13D831ec7'
+      default: '0xdAC17F958D2ee523a2206206994597C13D831ec7',
+      //31337: '0xde3A24028580884448a5397872046a019649b084',
+      '0xa86a': '0xde3A24028580884448a5397872046a019649b084'
     },
     amm1Factory: {
-      1: "0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f",
-      31337: "0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f",
+      default: "0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f",
+      //31337: "0xefa94DE7a4656D787667C749f7E1223D71E9FD88",
       42: "0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f",
+      '0xa86a': "0xefa94DE7a4656D787667C749f7E1223D71E9FD88",
 
     },
     amm2Factory: {
-      1: "0xC0AEe478e3658e2610c5F7A4A2E1777cE9e4f2Ac",
-      31337: "0xC0AEe478e3658e2610c5F7A4A2E1777cE9e4f2Ac",
-      42: "0xC0AEe478e3658e2610c5F7A4A2E1777cE9e4f2Ac"
+      default: "0xC0AEe478e3658e2610c5F7A4A2E1777cE9e4f2Ac",
+      //31337: "0xBB6e8C136ca537874a6808dBFC5DaebEd9a57554",
+      42: "0xC0AEe478e3658e2610c5F7A4A2E1777cE9e4f2Ac",
+      '0xa86a': "0xBB6e8C136ca537874a6808dBFC5DaebEd9a57554",
     },
   }
 };
