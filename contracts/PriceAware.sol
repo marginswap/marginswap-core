@@ -37,7 +37,7 @@ struct PairPrice {
 ///    they must be resilient against extreme manipulation
 /// 3) Liquidators may not call from a contract address, to prevent extreme forms of
 ///    of front-running and other price manipulation.
-abstract contract PriceAware is RoleAware {
+abstract contract PriceAware is RoleAware, UniswapStyleLib {
     uint256 constant FP112 = 2**112;
     uint256 constant FP8 = 2**8;
     uint256 constant FP96 = 2**(112 - 2 * 8);
@@ -260,8 +260,8 @@ abstract contract PriceAware is RoleAware {
 
             address pair =
                 amms[i] == 0
-                    ? UniswapStyleLib.pairForUni(inToken, outToken)
-                    : UniswapStyleLib.pairForSushi(inToken, outToken);
+                    ? UniswapStyleLib.pairForAMM1(inToken, outToken)
+                    : UniswapStyleLib.pairForAMM2(inToken, outToken);
 
             PairPrice storage pairPrice = pairPrices[pair][inToken];
 
@@ -302,8 +302,8 @@ abstract contract PriceAware is RoleAware {
     ) internal {
         address pair =
             amm == 0
-                ? UniswapStyleLib.pairForUni(inToken, outToken)
-                : UniswapStyleLib.pairForSushi(inToken, outToken);
+                ? UniswapStyleLib.pairForAMM1(inToken, outToken)
+                : UniswapStyleLib.pairForAMM2(inToken, outToken);
 
         PairPrice storage pairPrice = pairPrices[pair][inToken];
 

@@ -4,7 +4,7 @@ pragma solidity ^0.8.0;
 import "./Fund.sol";
 import "../libraries/UniswapStyleLib.sol";
 
-abstract contract BaseRouter {
+abstract contract BaseRouter is UniswapStyleLib {
     modifier ensure(uint256 deadline) {
         require(deadline >= block.timestamp, "Trade has expired");
         _;

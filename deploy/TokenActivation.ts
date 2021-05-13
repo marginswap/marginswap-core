@@ -1,6 +1,6 @@
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
 import { DeployFunction } from 'hardhat-deploy/types';
-import { ethers } from 'hardhat';
+import { ethers, hardhatArguments } from 'hardhat';
 
 const MFI_ADDRESS = '0xAa4e3edb11AFa93c41db59842b29de64b72E355B';
 const TOKEN_ACTIVATOR = 9;
@@ -8,6 +8,13 @@ const TOKEN_ACTIVATOR = 9;
 const UNI_FACTORY_ADDRESS = '0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f';
 
 const UNI_INIT_CODE_HASH = '0x96e8ac4277198ff8b6f785478aa9a39f403cb768dd02cbee326c3e7da348845f';
+
+const baseCurrency = {
+  kovan: 'WETH',
+  mainnet: 'WETH',
+  avalanche: 'WAVAX',
+  local: 'WETH'
+}
 
 export const tokensPerNetwork: Record<string, Record<string, string>> = {
   kovan: {
@@ -30,12 +37,19 @@ export const tokensPerNetwork: Record<string, Record<string, string>> = {
     SUSHI: '0x6b3595068778dd592e39a122f4f5a5cf09c90fe2',
     ALCX: '0xdbdb4d16eda451d0503b854cf79d55697f90c8df'
   },
-  local: {
+  localhost: {
     DAI: '0x6b175474e89094c44da98b954eedeac495271d0f',
     WETH: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
     USDT: '0xdAC17F958D2ee523a2206206994597C13D831ec7',
     ALCX: '0xdbdb4d16eda451d0503b854cf79d55697f90c8df',
     UNI: '0x1f9840a85d5af5bf1d1762f925bdaddc4201f984',
+  },
+  avalanche: {
+    WAVAX: '0xB31f66AA3C1e785363F0875A1B74E27b85FD66c7',
+    ETH: '0xf20d962a6c8f70c731bd838a3a388D7d48fA6e15',
+    PNG: '0x60781C2586D68229fde47564546784ab3fACA982',
+    WBTC: '0x408D4cD0ADb7ceBd1F1A1C33A0Ba2098E1295bAB',
+    USDT: '0xde3A24028580884448a5397872046a019649b084'
   }
 };
 
@@ -57,35 +71,35 @@ export const tokenParams: { [tokenName: string]: TokenInitRecord } = {
     exposureCap: 10000000,
     lendingBuffer: 10000,
     incentiveWeight: 3,
-    liquidationTokenPath: ['DAI', 'WETH'],
+    liquidationTokenPath: ['DAI', 'BASE'],
     decimals: 18
   },
   WETH: {
     exposureCap: 100000,
     lendingBuffer: 500,
     incentiveWeight: 3,
-    liquidationTokenPath: ['WETH'],
+    liquidationTokenPath: ['BASE'],
     decimals: 18
   },
   UNI: {
     exposureCap: 100000,
     lendingBuffer: 500,
     incentiveWeight: 5,
-    liquidationTokenPath: ['UNI', 'WETH'],
+    liquidationTokenPath: ['UNI', 'BASE'],
     decimals: 18
   },
   MKR: {
     exposureCap: 2000,
     lendingBuffer: 80,
     incentiveWeight: 5,
-    liquidationTokenPath: ['MKR', 'WETH'],
+    liquidationTokenPath: ['MKR', 'BASE'],
     decimals: 18
   },
   USDT: {
     exposureCap: 100000000,
     lendingBuffer: 10000,
     incentiveWeight: 3,
-    liquidationTokenPath: ['USDT', 'WETH'],
+    liquidationTokenPath: ['USDT', 'BASE'],
     decimals: 6
   },
   BOND: {
@@ -99,7 +113,7 @@ export const tokenParams: { [tokenName: string]: TokenInitRecord } = {
     exposureCap: 200000,
     lendingBuffer: 100,
     incentiveWeight: 1,
-    liquidationTokenPath: ['LINK', 'WETH'],
+    liquidationTokenPath: ['LINK', 'BASE'],
     decimals: 18,
     ammPath: [AMMs.SUSHISWAP, AMMs.UNISWAP]
   },
@@ -107,21 +121,21 @@ export const tokenParams: { [tokenName: string]: TokenInitRecord } = {
     exposureCap: 100000000,
     lendingBuffer: 10000,
     incentiveWeight: 3,
-    liquidationTokenPath: ['USDC', 'WETH'],
+    liquidationTokenPath: ['USDC', 'BASE'],
     decimals: 6
   },
   WBTC: {
     exposureCap: 2000,
     lendingBuffer: 20,
     incentiveWeight: 3,
-    liquidationTokenPath: ['WBTC', 'WETH'],
+    liquidationTokenPath: ['WBTC', 'BASE'],
     decimals: 8
   },
   SUSHI: {
     exposureCap: 300000,
     lendingBuffer: 4000,
     incentiveWeight: 1,
-    liquidationTokenPath: ['SUSHI', 'WETH'],
+    liquidationTokenPath: ['SUSHI', 'BASE'],
     decimals: 18,
     ammPath: [AMMs.SUSHISWAP, AMMs.SUSHISWAP, AMMs.SUSHISWAP]
   },
@@ -129,9 +143,30 @@ export const tokenParams: { [tokenName: string]: TokenInitRecord } = {
     exposureCap: 10000,
     lendingBuffer: 100,
     incentiveWeight: 2,
-    liquidationTokenPath: ['ALCX', 'WETH'],
+    liquidationTokenPath: ['ALCX', 'BASE'],
     decimals: 18,
     ammPath: [AMMs.SUSHISWAP, AMMs.SUSHISWAP, AMMs.SUSHISWAP]
+  },
+  WAVAX: {
+    exposureCap: 1000000,
+    lendingBuffer: 10000,
+    incentiveWeight: 3,
+    liquidationTokenPath: ['BASE'],
+    decimals: 18
+  },
+  ETH: {
+    exposureCap: 100000,
+    lendingBuffer: 500,
+    incentiveWeight: 3,
+    liquidationTokenPath: ['ETH', 'BASE'],
+    decimals: 18
+  },
+  PNG: {
+    exposureCap: 1000000,
+    lendingBuffer: 1,
+    incentiveWeight: 3,
+    liquidationTokenPath: ['PNG', 'BASE'],
+    decimals: 18
   },
 
   LOCALPEG: {
@@ -155,22 +190,23 @@ const deploy: DeployFunction = async function ({
   network
 }: HardhatRuntimeEnvironment) {
   const { deploy } = deployments;
-  const { deployer, weth } = await getNamedAccounts();
+  const { deployer, baseCurrency } = await getNamedAccounts();
 
   const DC = await deployments.get('DependencyController');
   const dc = await ethers.getContractAt('DependencyController', DC.address);
 
-  const networkName = network.live ? network.name : 'local';
+  const networkName = network.name;
+  console.log(`networkName: ${networkName}`);
   const peg = (await deployments.get('Peg')).address;
 
-  const tokens = network.live ? tokensPerNetwork[networkName] : tokensPerNetwork['local'];
+  const tokens = tokensPerNetwork[networkName];
   const tokenNames = Object.keys(tokens);
   const tokenAddresses = Object.values(tokens);
 
   const argLists = [
-    await prepArgs(tokenNames.slice(0,5), tokenAddresses.slice(0,5), deployments, tokens, peg, weth)
-    // await prepArgs(tokenNames.slice(5, 8), tokenAddresses.slice(5, 8), deployments, tokens, peg, weth),
-    //await prepArgs(tokenNames.slice(8), tokenAddresses.slice(8), deployments, tokens, peg, weth)
+    await prepArgs(tokenNames.slice(0,5), tokenAddresses.slice(0,5), deployments, tokens, peg, baseCurrency)
+    // await prepArgs(tokenNames.slice(5, 8), tokenAddresses.slice(5, 8), deployments, tokens, peg, baseCurrency),
+    //await prepArgs(tokenNames.slice(8), tokenAddresses.slice(8), deployments, tokens, peg, baseCurrency)
   ];
   for (const args of argLists) {
     const TokenActivation = await deploy('TokenActivation', {
@@ -198,7 +234,7 @@ const deploy: DeployFunction = async function ({
       params: [TREASURY]
     });
 
-    const signer = await ethers.provider.getSigner(TREASURY);
+    let signer = await ethers.provider.getSigner(TREASURY);
     // let tx = await signer.sendTransaction({ to: deployer, value: ethers.utils.parseEther('10') });
     // console.log(`Sending eth from treasury to ${deployer}:`);
 
@@ -210,6 +246,18 @@ const deploy: DeployFunction = async function ({
     // tx = await usdt.connect(signer).transfer(deployer, ethers.utils.parseEther('50'));
     // console.log(`Sending usdt from treasury to ${deployer}:`);
     // console.log(tx);
+
+
+    // const problem = "0x07c2af75788814BA7e5225b2F5c951eD161cB589"; 
+    // await network.provider.request({
+    //   method: 'hardhat_impersonateAccount',
+    //   params: [problem]
+    // });
+
+    // signer = await ethers.provider.getSigner(problem);
+    // const router = await (await ethers.getContractAt('MarginRouter', "0xb80d5989F2ecB199603740197Ce9223b239547E0")).connect(signer);
+    // let tx = await router.crossDeposit('0x6b3595068778dd592e39a122f4f5a5cf09c90fe2', ethers.utils.parseEther('186'));
+    // console.log(tx);
   }
 };
 
@@ -217,7 +265,7 @@ deploy.tags = ['TokenActivation', 'local'];
 deploy.dependencies = ['DependencyController'];
 export default deploy;
 
-async function prepArgs(tokenNames: string[], tokenAddresses: string[], deployments, tokens, peg, weth) {
+async function prepArgs(tokenNames: string[], tokenAddresses: string[], deployments, tokens, peg, baseCurrency) {
   const exposureCaps = tokenNames.map(name => {
     return ethers.utils.parseUnits(`${tokenParams[name].exposureCap}`, tokenParams[name].decimals);
   });
@@ -229,7 +277,7 @@ async function prepArgs(tokenNames: string[], tokenAddresses: string[], deployme
 
   const liquidationTokens = tokenNames.map(name => {
     const tokenPath = tokenParams[name].liquidationTokenPath;
-    return tokenPath ? [...tokenPath.map(tName => tokens[tName]), peg] : [tokens[name], weth, peg];
+    return tokenPath ? [...tokenPath.map(tName => tName == 'BASE' ? baseCurrency : tokens[tName]), peg] : [tokens[name], baseCurrency, peg];
   });
 
   const liquidationAmms = tokenNames.map(name =>

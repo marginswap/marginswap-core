@@ -13,7 +13,7 @@ contract IsolatedMarginRouter is RoleAware, BaseRouter {
     uint256 public constant mswapFeesPer10k = 10;
     address public immutable WETH;
 
-    constructor(address _WETH, address _roles) RoleAware(_roles) {
+    constructor(address _WETH,  address _amm1Factory, address _amm2Factory, bytes32 _amm1InitHash, bytes32 _amm2InitHash, address _roles)  UniswapStyleLib(_amm1Factory, _amm2Factory, _amm1InitHash, _amm2InitHash) RoleAware(_roles) {
         WETH = _WETH;
     }
 
@@ -36,7 +36,7 @@ contract IsolatedMarginRouter is RoleAware, BaseRouter {
         uint256 fees = takeFeesFromInput(amountIn);
 
         address[] memory pairs;
-        (amounts, pairs) = UniswapStyleLib.getAmountsOut(
+        (amounts, pairs) = UniswapStyleLib._getAmountsOut(
             amountIn - fees,
             amms,
             tokens
@@ -71,7 +71,7 @@ contract IsolatedMarginRouter is RoleAware, BaseRouter {
         require(tokens[0] == IsolatedMarginTrading(_isolatedPair).borrowToken() && tokens[tokens.length -1] == IsolatedMarginTrading(_isolatedPair).holdingToken(),
                 "Path does not match isolated pair");
         address[] memory pairs;
-        (amounts, pairs) = UniswapStyleLib.getAmountsIn(
+        (amounts, pairs) = UniswapStyleLib._getAmountsIn(
             amountOut + takeFeesFromOutput(amountOut),
             amms,
             tokens
@@ -112,7 +112,7 @@ contract IsolatedMarginRouter is RoleAware, BaseRouter {
         uint256 fees = takeFeesFromInput(amountIn);
 
         address[] memory pairs;
-        (amounts, pairs) = UniswapStyleLib.getAmountsOut(
+        (amounts, pairs) = UniswapStyleLib._getAmountsOut(
             amountIn - fees,
             amms,
             tokens
@@ -147,7 +147,7 @@ contract IsolatedMarginRouter is RoleAware, BaseRouter {
         require(tokens[tokens.length -1] == IsolatedMarginTrading(_isolatedPair).borrowToken() && tokens[0] == IsolatedMarginTrading(_isolatedPair).holdingToken(),
                 "Path does not match isolated pair");
         address[] memory pairs;
-        (amounts, pairs) = UniswapStyleLib.getAmountsIn(
+        (amounts, pairs) = UniswapStyleLib._getAmountsIn(
             amountOut + takeFeesFromOutput(amountOut),
             amms,
             tokens
