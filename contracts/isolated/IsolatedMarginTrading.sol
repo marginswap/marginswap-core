@@ -4,11 +4,15 @@ pragma solidity ^0.8.0;
 import "./IsolatedMarginLiquidation.sol";
 
 contract IsolatedMarginTrading is IsolatedMarginLiquidation {
-    constructor(address[] memory _liquidationTokens, bytes32 _amms, address _roles) RoleAware(_roles) {
+    constructor(
+        address[] memory _liquidationTokens,
+        bytes32 _amms,
+        address _roles
+    ) RoleAware(_roles) {
         liquidationTokens = _liquidationTokens;
         amms = _amms;
 
-        borrowToken = _liquidationTokens[_liquidationTokens.length -1];
+        borrowToken = _liquidationTokens[_liquidationTokens.length - 1];
         holdingToken = _liquidationTokens[0];
     }
 

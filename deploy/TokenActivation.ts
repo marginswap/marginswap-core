@@ -14,7 +14,7 @@ const baseCurrency = {
   mainnet: 'WETH',
   avalanche: 'WAVAX',
   local: 'WETH'
-}
+};
 
 export const tokensPerNetwork: Record<string, Record<string, string>> = {
   kovan: {
@@ -42,7 +42,7 @@ export const tokensPerNetwork: Record<string, Record<string, string>> = {
     WETH: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
     USDT: '0xdAC17F958D2ee523a2206206994597C13D831ec7',
     ALCX: '0xdbdb4d16eda451d0503b854cf79d55697f90c8df',
-    UNI: '0x1f9840a85d5af5bf1d1762f925bdaddc4201f984',
+    UNI: '0x1f9840a85d5af5bf1d1762f925bdaddc4201f984'
   },
   avalanche: {
     WAVAX: '0xB31f66AA3C1e785363F0875A1B74E27b85FD66c7',
@@ -204,7 +204,7 @@ const deploy: DeployFunction = async function ({
   const tokenAddresses = Object.values(tokens);
 
   const argLists = [
-    await prepArgs(tokenNames.slice(0,5), tokenAddresses.slice(0,5), deployments, tokens, peg, baseCurrency)
+    await prepArgs(tokenNames.slice(0, 5), tokenAddresses.slice(0, 5), deployments, tokens, peg, baseCurrency)
     // await prepArgs(tokenNames.slice(5, 8), tokenAddresses.slice(5, 8), deployments, tokens, peg, baseCurrency),
     //await prepArgs(tokenNames.slice(8), tokenAddresses.slice(8), deployments, tokens, peg, baseCurrency)
   ];
@@ -234,7 +234,7 @@ const deploy: DeployFunction = async function ({
       params: [TREASURY]
     });
 
-    let signer = await ethers.provider.getSigner(TREASURY);
+    const signer = await ethers.provider.getSigner(TREASURY);
     // let tx = await signer.sendTransaction({ to: deployer, value: ethers.utils.parseEther('10') });
     // console.log(`Sending eth from treasury to ${deployer}:`);
 
@@ -247,8 +247,7 @@ const deploy: DeployFunction = async function ({
     // console.log(`Sending usdt from treasury to ${deployer}:`);
     // console.log(tx);
 
-
-    // const problem = "0x07c2af75788814BA7e5225b2F5c951eD161cB589"; 
+    // const problem = "0x07c2af75788814BA7e5225b2F5c951eD161cB589";
     // await network.provider.request({
     //   method: 'hardhat_impersonateAccount',
     //   params: [problem]
@@ -277,7 +276,9 @@ async function prepArgs(tokenNames: string[], tokenAddresses: string[], deployme
 
   const liquidationTokens = tokenNames.map(name => {
     const tokenPath = tokenParams[name].liquidationTokenPath;
-    return tokenPath ? [...tokenPath.map(tName => tName == 'BASE' ? baseCurrency : tokens[tName]), peg] : [tokens[name], baseCurrency, peg];
+    return tokenPath
+      ? [...tokenPath.map(tName => (tName == 'BASE' ? baseCurrency : tokens[tName])), peg]
+      : [tokens[name], baseCurrency, peg];
   });
 
   const liquidationAmms = tokenNames.map(name =>

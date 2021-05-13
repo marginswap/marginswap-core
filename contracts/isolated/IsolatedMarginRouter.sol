@@ -13,7 +13,22 @@ contract IsolatedMarginRouter is RoleAware, BaseRouter {
     uint256 public constant mswapFeesPer10k = 10;
     address public immutable WETH;
 
-    constructor(address _WETH,  address _amm1Factory, address _amm2Factory, bytes32 _amm1InitHash, bytes32 _amm2InitHash, address _roles)  UniswapStyleLib(_amm1Factory, _amm2Factory, _amm1InitHash, _amm2InitHash) RoleAware(_roles) {
+    constructor(
+        address _WETH,
+        address _amm1Factory,
+        address _amm2Factory,
+        bytes32 _amm1InitHash,
+        bytes32 _amm2InitHash,
+        address _roles
+    )
+        UniswapStyleLib(
+            _amm1Factory,
+            _amm2Factory,
+            _amm1InitHash,
+            _amm2InitHash
+        )
+        RoleAware(_roles)
+    {
         WETH = _WETH;
     }
 
@@ -28,9 +43,12 @@ contract IsolatedMarginRouter is RoleAware, BaseRouter {
         uint256 depositTo,
         uint256 deadline
     ) external ensure(deadline) returns (uint256[] memory amounts) {
-
-        require(tokens[0] == IsolatedMarginTrading(_isolatedPair).borrowToken() && tokens[tokens.length -1] == IsolatedMarginTrading(_isolatedPair).holdingToken(),
-                "Path does not match isolated pair");
+        require(
+            tokens[0] == IsolatedMarginTrading(_isolatedPair).borrowToken() &&
+                tokens[tokens.length - 1] ==
+                IsolatedMarginTrading(_isolatedPair).holdingToken(),
+            "Path does not match isolated pair"
+        );
 
         // calc fees
         uint256 fees = takeFeesFromInput(amountIn);
@@ -42,7 +60,13 @@ contract IsolatedMarginRouter is RoleAware, BaseRouter {
             tokens
         );
 
-        getDeposits(msg.sender, tokens[0], tokens[tokens.length -1], depositFrom, depositTo);
+        getDeposits(
+            msg.sender,
+            tokens[0],
+            tokens[tokens.length - 1],
+            depositFrom,
+            depositTo
+        );
 
         // checks that trader is within allowed lending bounds
         registerPosition(
@@ -68,8 +92,12 @@ contract IsolatedMarginRouter is RoleAware, BaseRouter {
         uint256 depositTo,
         uint256 deadline
     ) external ensure(deadline) returns (uint256[] memory amounts) {
-        require(tokens[0] == IsolatedMarginTrading(_isolatedPair).borrowToken() && tokens[tokens.length -1] == IsolatedMarginTrading(_isolatedPair).holdingToken(),
-                "Path does not match isolated pair");
+        require(
+            tokens[0] == IsolatedMarginTrading(_isolatedPair).borrowToken() &&
+                tokens[tokens.length - 1] ==
+                IsolatedMarginTrading(_isolatedPair).holdingToken(),
+            "Path does not match isolated pair"
+        );
         address[] memory pairs;
         (amounts, pairs) = UniswapStyleLib._getAmountsIn(
             amountOut + takeFeesFromOutput(amountOut),
@@ -77,7 +105,13 @@ contract IsolatedMarginRouter is RoleAware, BaseRouter {
             tokens
         );
 
-        getDeposits(msg.sender, tokens[0], tokens[tokens.length -1], depositFrom, depositTo);
+        getDeposits(
+            msg.sender,
+            tokens[0],
+            tokens[tokens.length - 1],
+            depositFrom,
+            depositTo
+        );
 
         // checks that trader is within allowed lending bounds
         registerPosition(
@@ -92,7 +126,6 @@ contract IsolatedMarginRouter is RoleAware, BaseRouter {
         _fundSwapT4ExactT(amounts, amountInMax, pairs, tokens);
     }
 
-    
     /// @notice entry point for swapping tokens out of isolated pair
     function swapExactTokensForTokensUnwind(
         uint256 amountIn,
@@ -104,9 +137,13 @@ contract IsolatedMarginRouter is RoleAware, BaseRouter {
         uint256 withdrawTo,
         uint256 deadline
     ) external ensure(deadline) returns (uint256[] memory amounts) {
-
-        require(tokens[tokens.length -1] == IsolatedMarginTrading(_isolatedPair).borrowToken() && tokens[0] == IsolatedMarginTrading(_isolatedPair).holdingToken(),
-                "Path does not match isolated pair");
+        require(
+            tokens[tokens.length - 1] ==
+                IsolatedMarginTrading(_isolatedPair).borrowToken() &&
+                tokens[0] ==
+                IsolatedMarginTrading(_isolatedPair).holdingToken(),
+            "Path does not match isolated pair"
+        );
 
         // calc fees
         uint256 fees = takeFeesFromInput(amountIn);
@@ -128,7 +165,13 @@ contract IsolatedMarginRouter is RoleAware, BaseRouter {
             withdrawTo
         );
 
-        getWithdrawals(msg.sender, tokens[0], tokens[tokens.length -1], withdrawFrom, withdrawTo);
+        getWithdrawals(
+            msg.sender,
+            tokens[0],
+            tokens[tokens.length - 1],
+            withdrawFrom,
+            withdrawTo
+        );
 
         _fundSwapExactT4T(amounts, amountOutMin, pairs, tokens);
     }
@@ -144,8 +187,13 @@ contract IsolatedMarginRouter is RoleAware, BaseRouter {
         uint256 withdrawTo,
         uint256 deadline
     ) external ensure(deadline) returns (uint256[] memory amounts) {
-        require(tokens[tokens.length -1] == IsolatedMarginTrading(_isolatedPair).borrowToken() && tokens[0] == IsolatedMarginTrading(_isolatedPair).holdingToken(),
-                "Path does not match isolated pair");
+        require(
+            tokens[tokens.length - 1] ==
+                IsolatedMarginTrading(_isolatedPair).borrowToken() &&
+                tokens[0] ==
+                IsolatedMarginTrading(_isolatedPair).holdingToken(),
+            "Path does not match isolated pair"
+        );
         address[] memory pairs;
         (amounts, pairs) = UniswapStyleLib._getAmountsIn(
             amountOut + takeFeesFromOutput(amountOut),
@@ -163,32 +211,65 @@ contract IsolatedMarginRouter is RoleAware, BaseRouter {
             withdrawTo
         );
 
-        getWithdrawals(msg.sender, tokens[0], tokens[tokens.length -1], withdrawFrom, withdrawTo);
+        getWithdrawals(
+            msg.sender,
+            tokens[0],
+            tokens[tokens.length - 1],
+            withdrawFrom,
+            withdrawTo
+        );
 
         _fundSwapT4ExactT(amounts, amountInMax, pairs, tokens);
     }
 
-    function registerPosition(address trader, IsolatedMarginTrading isolatedPair, uint256 inAmount, uint256 outAmount, uint256 depositFrom, uint256 depositTo) internal {
+    function registerPosition(
+        address trader,
+        IsolatedMarginTrading isolatedPair,
+        uint256 inAmount,
+        uint256 outAmount,
+        uint256 depositFrom,
+        uint256 depositTo
+    ) internal {
         uint256 borrowAmount = inAmount - depositFrom;
 
-        isolatedPair.registerPosition(trader, borrowAmount, outAmount + depositTo, depositFrom > 0 || depositTo > 0);
+        isolatedPair.registerPosition(
+            trader,
+            borrowAmount,
+            outAmount + depositTo,
+            depositFrom > 0 || depositTo > 0
+        );
 
         Lending(lending()).registerBorrow(address(isolatedPair), borrowAmount);
-        
     }
 
-    function registerUnwind(address trader, IsolatedMarginTrading isolatedPair, uint256 inAmount, uint256 outAmount, uint256 withdrawFrom, uint256 withdrawTo) internal {
+    function registerUnwind(
+        address trader,
+        IsolatedMarginTrading isolatedPair,
+        uint256 inAmount,
+        uint256 outAmount,
+        uint256 withdrawFrom,
+        uint256 withdrawTo
+    ) internal {
         uint256 extinguishAmount = outAmount - withdrawTo;
 
-        isolatedPair.registerUnwind(trader, extinguishAmount, inAmount - withdrawFrom);
+        isolatedPair.registerUnwind(
+            trader,
+            extinguishAmount,
+            inAmount - withdrawFrom
+        );
 
         Lending(lending()).payOff(address(isolatedPair), extinguishAmount);
     }
 
-    function getDeposits(address trader, address fromToken,  address toToken, uint256 depositFrom, uint256 depositTo) internal {
-            
+    function getDeposits(
+        address trader,
+        address fromToken,
+        address toToken,
+        uint256 depositFrom,
+        uint256 depositTo
+    ) internal {
         if (depositFrom > 0) {
-            Fund(fund()).depositFor(trader, fromToken, depositFrom); 
+            Fund(fund()).depositFor(trader, fromToken, depositFrom);
         }
 
         if (depositTo > 0) {
@@ -196,7 +277,13 @@ contract IsolatedMarginRouter is RoleAware, BaseRouter {
         }
     }
 
-    function getWithdrawals(address trader, address fromToken, address toToken, uint256 withdrawalFrom, uint256 withdrawalTo) internal {
+    function getWithdrawals(
+        address trader,
+        address fromToken,
+        address toToken,
+        uint256 withdrawalFrom,
+        uint256 withdrawalTo
+    ) internal {
         if (withdrawalFrom > 0) {
             Fund(fund()).withdraw(fromToken, trader, withdrawalFrom);
         }
@@ -204,7 +291,7 @@ contract IsolatedMarginRouter is RoleAware, BaseRouter {
             Fund(fund()).withdraw(toToken, trader, withdrawalTo);
         }
     }
-    
+
     /// @dev internal helper swapping exact token for token on AMM
     function _fundSwapExactT4T(
         uint256[] memory amounts,
@@ -220,7 +307,6 @@ contract IsolatedMarginRouter is RoleAware, BaseRouter {
         _swap(amounts, pairs, tokens, fund());
     }
 
-    
     // @dev internal helper swapping exact token for token on on AMM
     function _fundSwapT4ExactT(
         uint256[] memory amounts,

@@ -16,7 +16,6 @@ const deploy: DeployFunction = async function ({
   const Roles = await deployments.get('Roles');
   const peg = await deployments.get('Peg');
 
-
   const amm1InitHash = amm1InitHashes[await getChainId()];
   const amm2InitHash = amm2InitHashes[await getChainId()];
 
