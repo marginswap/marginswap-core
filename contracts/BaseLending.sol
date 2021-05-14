@@ -12,7 +12,7 @@ abstract contract BaseLending {
     uint256 public normalRatePerPercent =
         (FP48 * 12) / hoursPerYear / CHANGE_POINT / 100;
     uint256 public highRatePerPercent =
-        (FP48 * (170 - 12)) / hoursPerYear / (100 - CHANGE_POINT) / 100;
+        (FP48 * (135 - 12)) / hoursPerYear / (100 - CHANGE_POINT) / 100;
 
     struct YieldAccumulator {
         uint256 accumulatorFP;
