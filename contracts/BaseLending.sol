@@ -8,11 +8,11 @@ abstract contract BaseLending {
     uint256 constant ACCUMULATOR_INIT = 10**18;
 
     uint256 constant hoursPerYear = 365 days / (1 hours);
-    uint256 constant CHANGE_POINT = 79;
+    uint256 constant CHANGE_POINT = 82;
     uint256 public normalRatePerPercent =
-        (FP48 * 15) / hoursPerYear / CHANGE_POINT / 100;
+        (FP48 * 12) / hoursPerYear / CHANGE_POINT / 100;
     uint256 public highRatePerPercent =
-        (FP48 * (194 - 15)) / hoursPerYear / (100 - CHANGE_POINT) / 100;
+        (FP48 * (135 - 12)) / hoursPerYear / (100 - CHANGE_POINT) / 100;
 
     struct YieldAccumulator {
         uint256 accumulatorFP;
