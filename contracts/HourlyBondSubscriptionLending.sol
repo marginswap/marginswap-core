@@ -49,14 +49,15 @@ abstract contract HourlyBondSubscriptionLending is BaseLending {
         internal
     {
         uint256 yieldQuotientFP = bond.yieldQuotientFP;
-        if (yieldQuotientFP > 0) {
-            YieldAccumulator storage yA =
-                getUpdatedHourlyYield(
-                    issuer,
-                    hourlyBondYieldAccumulators[issuer],
-                    RATE_UPDATE_WINDOW
-                );
 
+        YieldAccumulator storage yA =
+            getUpdatedHourlyYield(
+                issuer,
+                hourlyBondYieldAccumulators[issuer],
+                RATE_UPDATE_WINDOW
+            );
+
+        if (yieldQuotientFP > 0) {
             uint256 oldAmount = bond.amount;
 
             bond.amount = applyInterest(
