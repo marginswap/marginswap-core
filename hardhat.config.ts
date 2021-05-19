@@ -122,7 +122,8 @@ task('print-network', 'Print network name', async (args, hre) => console.log(hre
 const homedir = require('os').homedir();
 const privateKey = fs.readFileSync(`${homedir}/.marginswap-secret`).toString().trim();
 function infuraUrl(networkName: string) {
-  return `https://${networkName}.infura.io/v3/ae52aea5aa2b41e287d72e10b1175491`;
+  return `https://eth-${networkName}.alchemyapi.io/v2/AcIJPH41nagmF3o1sPArEns8erN9N691`;
+//  return `https://${networkName}.infura.io/v3/ae52aea5aa2b41e287d72e10b1175491`;
 }
 
 /**
@@ -194,7 +195,7 @@ export default {
       //31337: '0xB31f66AA3C1e785363F0875A1B74E27b85FD66c7',
       1: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
       42: '0xd0a1e359811322d97991e03f863a0c30c2cf029c',
-      '0xa86a': '0xB31f66AA3C1e785363F0875A1B74E27b85FD66c7'
+      '43114': '0xB31f66AA3C1e785363F0875A1B74E27b85FD66c7'
     },
     dai: {
       1: '0x6b175474e89094c44da98b954eedeac495271d0f',
@@ -208,19 +209,19 @@ export default {
     usdt: {
       default: '0xdAC17F958D2ee523a2206206994597C13D831ec7',
       //31337: '0xde3A24028580884448a5397872046a019649b084',
-      '0xa86a': '0xde3A24028580884448a5397872046a019649b084'
+      '43114': '0xde3A24028580884448a5397872046a019649b084'
     },
     amm1Factory: {
       default: '0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f',
       //31337: "0xefa94DE7a4656D787667C749f7E1223D71E9FD88",
       42: '0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f',
-      '0xa86a': '0xefa94DE7a4656D787667C749f7E1223D71E9FD88'
+      '43114': '0xefa94DE7a4656D787667C749f7E1223D71E9FD88'
     },
     amm2Factory: {
       default: '0xC0AEe478e3658e2610c5F7A4A2E1777cE9e4f2Ac',
       //31337: "0xBB6e8C136ca537874a6808dBFC5DaebEd9a57554",
       42: '0xC0AEe478e3658e2610c5F7A4A2E1777cE9e4f2Ac',
-      '0xa86a': '0xBB6e8C136ca537874a6808dBFC5DaebEd9a57554'
+      '43114': '0xBB6e8C136ca537874a6808dBFC5DaebEd9a57554'
     }
   }
 };

@@ -1,14 +1,13 @@
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
 import { DeployFunction } from 'hardhat-deploy/types';
 import { hexlify } from 'ethers/lib/utils';
-import { ethers } from 'hardhat';
 
 export const amm1InitHashes = {
   '1': hexlify('0x96e8ac4277198ff8b6f785478aa9a39f403cb768dd02cbee326c3e7da348845f'),
   //'31337': hexlify("0x40231f6b438bce0797c9ada29b718a87ea0a5cea3fe9a771abdd76bd41a3e545"),
   '31337': hexlify('0x96e8ac4277198ff8b6f785478aa9a39f403cb768dd02cbee326c3e7da348845f'),
   '42': hexlify('0x96e8ac4277198ff8b6f785478aa9a39f403cb768dd02cbee326c3e7da348845f'),
-  '0xa86a': hexlify('0x40231f6b438bce0797c9ada29b718a87ea0a5cea3fe9a771abdd76bd41a3e545')
+  '43114': hexlify('0x40231f6b438bce0797c9ada29b718a87ea0a5cea3fe9a771abdd76bd41a3e545')
 };
 
 export const amm2InitHashes = {
@@ -16,7 +15,7 @@ export const amm2InitHashes = {
   //'31337': hexlify("0x81dbf51ab39dc634785936a3b34def28bf8007e6dfa30d4284c4b8547cb47a51"),
   '31337': hexlify('0xe18a34eb0e04b04f7a0ac29a6e80748dca96319b42c54d679cb821dca90c6303'),
   '42': hexlify('0xe18a34eb0e04b04f7a0ac29a6e80748dca96319b42c54d679cb821dca90c6303'),
-  '0xa86a': hexlify('0x81dbf51ab39dc634785936a3b34def28bf8007e6dfa30d4284c4b8547cb47a51')
+  '43114': hexlify('0x81dbf51ab39dc634785936a3b34def28bf8007e6dfa30d4284c4b8547cb47a51')
 };
 
 const deploy: DeployFunction = async function ({
