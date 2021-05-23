@@ -12,12 +12,12 @@ const deploy: DeployFunction = async function ({
   const { deploy, save } = deployments;
   const { usdt, dai, usdc } = await getNamedAccounts();
 
-  if (network.name == 'mainnet') {
+  if (network.name === 'mainnet') {
     save('Peg', {
       abi: ERC20PresetMinterPauser.abi,
       address: usdt
     });
-  } else if (network.live) {
+  } else if (network.name === 'kovan') {
     save('Peg', {
       abi: ERC20PresetMinterPauser.abi,
       address: dai

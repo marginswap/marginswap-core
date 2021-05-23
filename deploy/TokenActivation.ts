@@ -1,6 +1,8 @@
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
 import { DeployFunction } from 'hardhat-deploy/types';
 import { ethers, hardhatArguments } from 'hardhat';
+import { DeploymentsExtension } from 'hardhat-deploy/dist/types';
+import { BigNumber } from '@ethersproject/bignumber';
 
 const MFI_ADDRESS = '0xAa4e3edb11AFa93c41db59842b29de64b72E355B';
 const TOKEN_ACTIVATOR = 9;
@@ -151,7 +153,7 @@ export const tokenParams: { [tokenName: string]: TokenInitRecord } = {
     exposureCap: 1000000,
     lendingBuffer: 10000,
     incentiveWeight: 3,
-    liquidationTokenPath: ['BASE'],
+    liquidationTokenPath: ['WAVAX'],
     decimals: 18
   },
   ETH: {
@@ -208,6 +210,7 @@ const deploy: DeployFunction = async function ({
     // await prepArgs(tokenNames.slice(5, 8), tokenAddresses.slice(5, 8), deployments, tokens, peg, baseCurrency),
     //await prepArgs(tokenNames.slice(8), tokenAddresses.slice(8), deployments, tokens, peg, baseCurrency)
   ];
+
   for (const args of argLists) {
     const TokenActivation = await deploy('TokenActivation', {
       from: deployer,
@@ -219,7 +222,7 @@ const deploy: DeployFunction = async function ({
     // run if it hasn't self-destructed yet
     if ((await ethers.provider.getCode(TokenActivation.address)) !== '0x') {
       console.log(`Executing token activation ${TokenActivation.address} via dependency controller ${dc.address}`);
-      const tx = await dc.executeAsOwner(TokenActivation.address);
+      const tx = await dc.executeAsOwner(TokenActivation.address, { gasLimit: 5000000 });
       console.log(`ran ${TokenActivation.address} as owner, tx: ${tx.hash}`);
     }
   }
@@ -264,15 +267,17 @@ deploy.tags = ['TokenActivation', 'local'];
 deploy.dependencies = ['DependencyController'];
 export default deploy;
 
-async function prepArgs(tokenNames: string[], tokenAddresses: string[], deployments, tokens, peg, baseCurrency) {
+async function prepArgs(
+  tokenNames: string[],
+  tokenAddresses: string[],
+  deployments,
+  tokens,
+  peg,
+  baseCurrency
+): Promise<[string, string[], BigNumber[], string[], any[][]]> {
   const exposureCaps = tokenNames.map(name => {
     return ethers.utils.parseUnits(`${tokenParams[name].exposureCap}`, tokenParams[name].decimals);
   });
-
-  const lendingBuffers = tokenNames.map(name => {
-    return ethers.utils.parseUnits(`${tokenParams[name].lendingBuffer}`, tokenParams[name].decimals);
-  });
-  //const incentiveWeights = tokenNames.map(name => tokenParams[name].incentiveWeight);
 
   const liquidationTokens = tokenNames.map(name => {
     const tokenPath = tokenParams[name].liquidationTokenPath;
@@ -288,7 +293,7 @@ async function prepArgs(tokenNames: string[], tokenAddresses: string[], deployme
   const Roles = await deployments.get('Roles');
   const roles = await ethers.getContractAt('Roles', Roles.address);
 
-  const args = [
+  const args: [string, string[], BigNumber[], string[], any[][]] = [
     roles.address,
     tokenAddresses,
     exposureCaps,
@@ -298,4 +303,42 @@ async function prepArgs(tokenNames: string[], tokenAddresses: string[], deployme
     liquidationTokens
   ];
   return args;
+}
+
+async function byHand(
+  deployments: DeploymentsExtension,
+  _: string,
+  tokens: string[],
+  exposureCaps: BigNumber[],
+  liquidationAmms: string[],
+  liquidationTokens: string[][]
+) {
+  const Lending = await ethers.getContractAt('Lending', (await deployments.get('Lending')).address);
+  console.log(Lending);
+  const cmt = await ethers.getContractAt('CrossMarginTrading', (await deployments.get('CrossMarginTrading')).address);
+
+  for (let i = 0; tokens.length > i; i++) {
+    const token = tokens[i];
+    const exposureCap = exposureCaps[i];
+    const ammPath = liquidationAmms[i];
+    const liquidationTokenPath = liquidationTokens[i];
+
+    // let tx = await Lending['activateIssuer(address)'](token);
+    // console.log(`activateIssuer for ${token}: ${tx.hash}`);
+
+    // tx = await cmt.setTokenCap(token, exposureCap);
+    // console.log(`setTokenCap for ${token}: ${tx.hash}`);
+
+    // let tx = await Lending.setLendingCap(token, exposureCap, {gasLimit: 500000});
+    // console.log(`setLendingCap for ${token}: ${tx.hash}`);
+
+    // tx = await Lending.setHourlyYieldAPR(token, '0');
+    // console.log(`Init hourly yield apr for ${token}: ${tx.hash}`);
+
+    // tx = await Lending.initBorrowYieldAccumulator(token, {gasLimit: 5000000});
+    // console.log(`initBorrowYieldAccu for ${token}: ${tx.hash}`);
+
+    const tx = await cmt.setLiquidationPath(ammPath, liquidationTokenPath, { gasLimit: 5000000 });
+    console.log(`setLiquidationPath for ${token}: ${tx.hash}`);
+  }
 }
