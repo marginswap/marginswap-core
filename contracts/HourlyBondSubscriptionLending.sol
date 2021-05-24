@@ -33,6 +33,7 @@ abstract contract HourlyBondSubscriptionLending is BaseLending {
         uint256 amount
     ) internal {
         HourlyBond storage bond = hourlyBondAccounts[issuer][holder];
+        lendingMeta[issuer].totalLending += amount;
         updateHourlyBondAmount(issuer, bond);
 
         YieldAccumulator storage yieldAccumulator =
@@ -42,7 +43,6 @@ abstract contract HourlyBondSubscriptionLending is BaseLending {
             bond.moduloHour = block.timestamp % (1 hours);
         }
         bond.amount += amount;
-        lendingMeta[issuer].totalLending += amount;
     }
 
     function updateHourlyBondAmount(address issuer, HourlyBond storage bond)
@@ -98,6 +98,8 @@ abstract contract HourlyBondSubscriptionLending is BaseLending {
         HourlyBond storage bond,
         uint256 amount
     ) internal {
+        lendingMeta[issuer].totalLending -= amount;
+        updateHourlyBondAmount(issuer, bond);
         // how far the current hour has advanced (relative to acccount hourly clock)
         uint256 currentOffset = (block.timestamp - bond.moduloHour) % (1 hours);
 
@@ -107,7 +109,6 @@ abstract contract HourlyBondSubscriptionLending is BaseLending {
         );
 
         bond.amount -= amount;
-        lendingMeta[issuer].totalLending -= amount;
     }
 
     function calcCumulativeYieldFP(

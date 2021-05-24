@@ -9,7 +9,8 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "lint": "eslint --ext .ts --fix deploy/ ; eslint --ext .ts --fix hardhat.config.ts ; prettier --write contracts/**/*.sol",
-    "dev": "hardhat node"
+    "dev": "hardhat node",
+    "solmerge": "sol-merger --export-plugin SPDXLicenseRemovePlugin \"./contracts/*.sol\" ./flattened"
   },
   "repository": {
     "type": "git",
@@ -26,7 +27,9 @@
     "@nomiclabs/hardhat-solhint": "^2.0.0",
     "@openzeppelin/contracts": "^4.0.0-beta.0",
     "@truffle/hdwallet-provider": "1.2.1",
-    "@uniswap/v2-core": "^1.0.1"
+    "@uniswap/v2-core": "^1.0.1",
+    "hardhat-ethernal": "^0.3.2",
+    "sol-merger": "^3.1.0"
   },
   "devDependencies": {
     "@ethersproject/address": "^5.1.0",

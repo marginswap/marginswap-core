@@ -9,6 +9,7 @@ import * as types from 'hardhat/internal/core/params/argumentTypes';
 import { Deployment } from 'hardhat-deploy/dist/types';
 import 'hardhat-contract-sizer';
 import '@nomiclabs/hardhat-solhint';
+import ethernal from 'hardhat-ethernal';
 
 import { TASK_NODE, TASK_TEST, TASK_NODE_GET_PROVIDER, TASK_NODE_SERVER_READY } from 'hardhat/builtin-tasks/task-names';
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
@@ -123,7 +124,7 @@ const homedir = require('os').homedir();
 const privateKey = fs.readFileSync(`${homedir}/.marginswap-secret`).toString().trim();
 function infuraUrl(networkName: string) {
   return `https://eth-${networkName}.alchemyapi.io/v2/AcIJPH41nagmF3o1sPArEns8erN9N691`;
-//  return `https://${networkName}.infura.io/v3/ae52aea5aa2b41e287d72e10b1175491`;
+  //  return `https://${networkName}.infura.io/v3/ae52aea5aa2b41e287d72e10b1175491`;
 }
 
 /**
@@ -141,6 +142,10 @@ export default {
         url: infuraUrl('mainnet')
         // url: 'https://api.avax.network/ext/bc/C/rpc'
       },
+      // mining: {
+      //   auto: false,
+      //   interval: 20000
+      // },
       accounts: [{ privateKey, balance: '10000168008000000000000' }]
     },
     mainnet: {

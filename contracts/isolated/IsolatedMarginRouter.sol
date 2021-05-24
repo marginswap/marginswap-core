@@ -9,7 +9,13 @@ import "./IsolatedMarginTrading.sol";
 
 contract IsolatedMarginRouter is RoleAware, BaseRouter {
     event IsolatedAccountUpdated(address indexed trader, address isolatedPair);
-    event IsolatedMarginTrade(address indexed trader, address fromToken, address toToken, uint256 fromAmount, uint256 toAmount);
+    event IsolatedMarginTrade(
+        address indexed trader,
+        address fromToken,
+        address toToken,
+        uint256 fromAmount,
+        uint256 toAmount
+    );
 
     uint256 public constant mswapFeesPer10k = 10;
     address public immutable WETH;
@@ -81,7 +87,13 @@ contract IsolatedMarginRouter is RoleAware, BaseRouter {
 
         _fundSwapExactT4T(amounts, amountOutMin, pairs, tokens);
         emit IsolatedAccountUpdated(msg.sender, _isolatedPair);
-        emit IsolatedMarginTrade(msg.sender, tokens[0], tokens[tokens.length -1], amounts[0], amounts[amounts.length - 1]);
+        emit IsolatedMarginTrade(
+            msg.sender,
+            tokens[0],
+            tokens[tokens.length - 1],
+            amounts[0],
+            amounts[amounts.length - 1]
+        );
     }
 
     /// @notice entry point for swapping tokens into isolated pair
@@ -128,7 +140,13 @@ contract IsolatedMarginRouter is RoleAware, BaseRouter {
 
         _fundSwapT4ExactT(amounts, amountInMax, pairs, tokens);
         emit IsolatedAccountUpdated(msg.sender, _isolatedPair);
-        emit IsolatedMarginTrade(msg.sender, tokens[0], tokens[tokens.length -1], amounts[0], amounts[amounts.length - 1]);
+        emit IsolatedMarginTrade(
+            msg.sender,
+            tokens[0],
+            tokens[tokens.length - 1],
+            amounts[0],
+            amounts[amounts.length - 1]
+        );
     }
 
     /// @notice entry point for swapping tokens out of isolated pair
@@ -180,7 +198,13 @@ contract IsolatedMarginRouter is RoleAware, BaseRouter {
 
         _fundSwapExactT4T(amounts, amountOutMin, pairs, tokens);
         emit IsolatedAccountUpdated(msg.sender, _isolatedPair);
-        emit IsolatedMarginTrade(msg.sender, tokens[0], tokens[tokens.length -1], amounts[0], amounts[amounts.length - 1]);
+        emit IsolatedMarginTrade(
+            msg.sender,
+            tokens[0],
+            tokens[tokens.length - 1],
+            amounts[0],
+            amounts[amounts.length - 1]
+        );
     }
 
     /// @notice entry point for swapping tokens out of isolated pair
@@ -228,8 +252,13 @@ contract IsolatedMarginRouter is RoleAware, BaseRouter {
 
         _fundSwapT4ExactT(amounts, amountInMax, pairs, tokens);
         emit IsolatedAccountUpdated(msg.sender, _isolatedPair);
-        emit IsolatedMarginTrade(msg.sender, tokens[0], tokens[tokens.length -1], amounts[0], amounts[amounts.length - 1]);
-
+        emit IsolatedMarginTrade(
+            msg.sender,
+            tokens[0],
+            tokens[tokens.length - 1],
+            amounts[0],
+            amounts[amounts.length - 1]
+        );
     }
 
     function registerPosition(
