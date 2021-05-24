@@ -4,6 +4,8 @@ import { ethers, hardhatArguments } from 'hardhat';
 import { DeploymentsExtension } from 'hardhat-deploy/dist/types';
 import { BigNumber } from '@ethersproject/bignumber';
 
+// import ERC20PresetMinterPauser from '@openzeppelin/contracts/build/contracts/ERC20PresetMinterPauser.json';
+
 const MFI_ADDRESS = '0xAa4e3edb11AFa93c41db59842b29de64b72E355B';
 const TOKEN_ACTIVATOR = 9;
 
@@ -263,6 +265,46 @@ const deploy: DeployFunction = async function ({
     // let tx = await router.crossDeposit('0x6b3595068778dd592e39a122f4f5a5cf09c90fe2', ethers.utils.parseEther('186'));
     // console.log(tx);
   }
+
+  // WAVAX: '0xB31f66AA3C1e785363F0875A1B74E27b85FD66c7',
+  // ETH: '0xf20d962a6c8f70c731bd838a3a388D7d48fA6e15',
+  // PNG: '0x60781C2586D68229fde47564546784ab3fACA982',
+  // WBTC: '0x408D4cD0ADb7ceBd1F1A1C33A0Ba2098E1295bAB',
+  // USDT: '0xde3A24028580884448a5397872046a019649b084'
+
+  // const addresses = {
+  //   "Admin": "0xBc4f35f44fFC68786B485Bd60a4B40cF4d3C3E03",
+  //   "CrossMarginTrading": "0x64184c48f2cD779DAb3167a0f6AC10ab258f6ca3",
+  //   "DependencyController": "0x4F080c404ac75986c95959a3AEc98Ac32403770D",
+  //   "Fund": "0x669EA215966e75f0db563dE2298d0CED65ED5d3F",
+  //   "Lending": "0xe6fe59966cBaf23726cb6513d410877FEC9ca4CF",
+  //   "LiquidityMiningReward": "0x237B0b367d919Cafa95F9cdcce79D7DE0Bd98E6e",
+  //   "MFIStaking": "0x167db869D99A717E14518B94d252fdC6DEaaCdF1",
+  //   "MarginRouter": "0xc4d34d713a41017f523F3b74b801c7D5B9955c16",
+  //   "Peg": "0xde3A24028580884448a5397872046a019649b084",
+  //   "Roles": "0xb8a63dBb2C5B775067444EaEF60722806524F7FD",
+  //   "SpotRouter": "0x9d2abbaFDFC8D851669dF5D671Bc967427897223",
+  //   "TokenActivation": "0xDfA2df4f6f6A402931000A3823fccF9b926FDB3E"
+  // };
+  // const router = await ethers.getContractAt('SpotRouter', addresses['SpotRouter']);
+  // const currentTime = Math.floor(Date.now() / 1000);
+  // let tx = await router.swapExactETHForTokens(
+  //   10000000,
+  //   encodeAMMPath([AMMs.UNISWAP]),
+  //   ['0xB31f66AA3C1e785363F0875A1B74E27b85FD66c7',  '0x60781C2586D68229fde47564546784ab3fACA982'],
+  //   deployer,
+  //   currentTime + 60 * 60,
+  //   {value: `10${'0'.repeat(18)}`}
+  // );
+  // console.log(`sending png: ${tx.hash}`);
+
+  // const fund = addresses['Fund'];
+  // tx = await (await ethers.getContractAt(ERC20PresetMinterPauser.abi, '0x60781C2586D68229fde47564546784ab3fACA982')).approve(fund, `10000${'0'.repeat(18)}`);
+  // console.log(`approve PNG: ${tx.hash}`);
+
+  // const lending = await ethers.getContractAt('Lending', addresses['Lending']);
+  // tx = await lending.buyHourlyBondSubscription('0x60781C2586D68229fde47564546784ab3fACA982', `10${'0'.repeat(18)}`);
+  // console.log(`hourly bond subscription: ${tx.hash}`);
 };
 
 deploy.tags = ['TokenActivation', 'local'];
