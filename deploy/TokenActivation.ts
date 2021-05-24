@@ -211,7 +211,7 @@ const deploy: DeployFunction = async function ({
     //await prepArgs(tokenNames.slice(8), tokenAddresses.slice(8), deployments, tokens, peg, baseCurrency)
   ];
 
-  // byHand(deployments, ...argLists[0]);
+  // await byHand(deployments, ...argLists[0]);
 
   for (const args of argLists) {
     const TokenActivation = await deploy('TokenActivation', {
@@ -316,7 +316,6 @@ async function byHand(
   liquidationTokens: string[][]
 ) {
   const Lending = await ethers.getContractAt('Lending', (await deployments.get('Lending')).address);
-  console.log(Lending);
   const cmt = await ethers.getContractAt('CrossMarginTrading', (await deployments.get('CrossMarginTrading')).address);
 
   for (let i = 0; tokens.length > i; i++) {
