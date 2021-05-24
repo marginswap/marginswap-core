@@ -46,7 +46,7 @@ abstract contract BaseLending {
         returns (uint256 rate)
     {
         rate = FP48;
-        uint256 utilizationPercent = (100 * totalBorrowing) / totalLending;
+        uint256 utilizationPercent = totalLending > 0 ? (100 * totalBorrowing) / totalLending : 0;
         if (utilizationPercent < CHANGE_POINT) {
             rate += utilizationPercent * normalRatePerPercent;
         } else {

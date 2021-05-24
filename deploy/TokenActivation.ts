@@ -211,6 +211,8 @@ const deploy: DeployFunction = async function ({
     //await prepArgs(tokenNames.slice(8), tokenAddresses.slice(8), deployments, tokens, peg, baseCurrency)
   ];
 
+  // byHand(deployments, ...argLists[0]);
+
   for (const args of argLists) {
     const TokenActivation = await deploy('TokenActivation', {
       from: deployer,
@@ -323,22 +325,22 @@ async function byHand(
     const ammPath = liquidationAmms[i];
     const liquidationTokenPath = liquidationTokens[i];
 
-    // let tx = await Lending['activateIssuer(address)'](token);
-    // console.log(`activateIssuer for ${token}: ${tx.hash}`);
+    let tx = await Lending['activateIssuer(address)'](token);
+    console.log(`activateIssuer for ${token}: ${tx.hash}`);
 
     // tx = await cmt.setTokenCap(token, exposureCap);
     // console.log(`setTokenCap for ${token}: ${tx.hash}`);
 
-    // let tx = await Lending.setLendingCap(token, exposureCap, {gasLimit: 500000});
-    // console.log(`setLendingCap for ${token}: ${tx.hash}`);
+    tx = await Lending.setLendingCap(token, exposureCap, {gasLimit: 500000});
+    console.log(`setLendingCap for ${token}: ${tx.hash}`);
 
-    // tx = await Lending.setHourlyYieldAPR(token, '0');
-    // console.log(`Init hourly yield apr for ${token}: ${tx.hash}`);
+    tx = await Lending.setHourlyYieldAPR(token, '0');
+    console.log(`Init hourly yield apr for ${token}: ${tx.hash}`);
 
-    // tx = await Lending.initBorrowYieldAccumulator(token, {gasLimit: 5000000});
-    // console.log(`initBorrowYieldAccu for ${token}: ${tx.hash}`);
+    tx = await Lending.initBorrowYieldAccumulator(token, {gasLimit: 5000000});
+    console.log(`initBorrowYieldAccu for ${token}: ${tx.hash}`);
 
-    const tx = await cmt.setLiquidationPath(ammPath, liquidationTokenPath, { gasLimit: 5000000 });
-    console.log(`setLiquidationPath for ${token}: ${tx.hash}`);
+    // const tx = await cmt.setLiquidationPath(ammPath, liquidationTokenPath, { gasLimit: 5000000 });
+    // console.log(`setLiquidationPath for ${token}: ${tx.hash}`);
   }
 }

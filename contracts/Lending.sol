@@ -234,8 +234,6 @@ contract Lending is RoleAware, HourlyBondSubscriptionLending {
     /// @dev withdraw an hour bond
     function withdrawHourlyBond(address issuer, uint256 amount) external {
         HourlyBond storage bond = hourlyBondAccounts[issuer][msg.sender];
-        // apply all interest
-        updateHourlyBondAmount(issuer, bond);
         super._withdrawHourlyBond(issuer, bond, amount);
 
         if (bond.amount == 0) {
@@ -250,8 +248,6 @@ contract Lending is RoleAware, HourlyBondSubscriptionLending {
     /// Shut down hourly bond account for `issuer`
     function closeHourlyBondAccount(address issuer) external {
         HourlyBond storage bond = hourlyBondAccounts[issuer][msg.sender];
-        // apply all interest
-        updateHourlyBondAmount(issuer, bond);
 
         uint256 amount = bond.amount;
         super._withdrawHourlyBond(issuer, bond, amount);
