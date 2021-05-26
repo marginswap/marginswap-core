@@ -113,6 +113,7 @@ contract MarginRouter is RoleAware, BaseRouter {
             borrowToken,
             borrowAmount
         );
+        Lending(lending()).updateHourlyYield(borrowToken);
 
         IncentiveReporter.addToClaimAmount(
             borrowToken,
@@ -142,6 +143,7 @@ contract MarginRouter is RoleAware, BaseRouter {
             borrowToken,
             withdrawAmount
         );
+        Lending(lending()).updateHourlyYield(borrowToken);
 
         Fund(fund()).withdraw(borrowToken, msg.sender, withdrawAmount);
         IncentiveReporter.addToClaimAmount(
@@ -247,6 +249,7 @@ contract MarginRouter is RoleAware, BaseRouter {
             );
         if (extinguishAmount > 0) {
             Lending(lending()).payOff(outToken, extinguishAmount);
+            Lending(lending()).updateHourlyYield(outToken);
             IncentiveReporter.subtractFromClaimAmount(
                 outToken,
                 trader,
@@ -255,6 +258,7 @@ contract MarginRouter is RoleAware, BaseRouter {
         }
         if (borrowAmount > 0) {
             Lending(lending()).registerBorrow(inToken, borrowAmount);
+            Lending(lending()).updateHourlyYield(inToken);
             IncentiveReporter.addToClaimAmount(inToken, trader, borrowAmount);
         }
 
