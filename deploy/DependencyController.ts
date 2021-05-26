@@ -96,7 +96,7 @@ export async function manage(hre: HardhatRuntimeEnvironment, dcAddress: string, 
 
   const alreadyManaged = await dC.allManagedContracts();
   if (!alreadyManaged.includes(contract.address)) {
-    const tx = await dC.manageContract(contract.address, mC.charactersPlayed, mC.rolesPlayed, { gasLimit: 5500000 });
+    const tx = await dC.manageContract(contract.address, mC.charactersPlayed, mC.rolesPlayed);
     console.log(`dependencyController.manageContract(${mC.contractName}, ...) tx: ${tx.hash}`);
   }
 }
