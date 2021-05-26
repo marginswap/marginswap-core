@@ -279,6 +279,7 @@ contract IsolatedMarginRouter is RoleAware, BaseRouter {
         );
 
         Lending(lending()).registerBorrow(address(isolatedPair), borrowAmount);
+        Lending(lending()).updateHourlyYield(address(isolatedPair));
     }
 
     function registerUnwind(
@@ -298,6 +299,7 @@ contract IsolatedMarginRouter is RoleAware, BaseRouter {
         );
 
         Lending(lending()).payOff(address(isolatedPair), extinguishAmount);
+        Lending(lending()).updateHourlyYield(address(isolatedPair));
     }
 
     function getDeposits(
