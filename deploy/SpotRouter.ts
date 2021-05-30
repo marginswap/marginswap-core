@@ -18,6 +18,10 @@ export const amm2InitHashes = {
   '43114': hexlify('0x81dbf51ab39dc634785936a3b34def28bf8007e6dfa30d4284c4b8547cb47a51')
 };
 
+export const amm3InitHashes = {
+ 43114: hexlify('e18a34eb0e04b04f7a0ac29a6e80748dca96319b42c54d679cb821dca90c6303'),
+}
+
 const deploy: DeployFunction = async function ({
   getNamedAccounts,
   deployments,
