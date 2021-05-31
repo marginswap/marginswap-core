@@ -6,17 +6,22 @@ import "hardhat/console.sol";
 abstract contract UniswapStyleLib {
     address public immutable amm1Factory;
     address public immutable amm2Factory;
+    address public immutable amm3Factory;
     bytes32 public amm1InitHash;
     bytes32 public amm2InitHash;
+    bytes32 public amm3InitHash;
 
     constructor(
         address _amm1Factory,
         address _amm2Factory,
+        address _amm3Factory,
         bytes32 _amm1InitHash,
-        bytes32 _amm2InitHash
+        bytes32 _amm2InitHash,
+        bytes32 _amm3InitHash
     ) {
         amm1Factory = _amm1Factory;
         amm2Factory = _amm2Factory;
+        amm3Factory = _amm3Factory;
         amm1InitHash = _amm1InitHash;
         amm2InitHash = _amm2InitHash;
     }
@@ -103,7 +108,9 @@ abstract contract UniswapStyleLib {
             address pair =
                 amms[i] == 0
                     ? pairForAMM1(inToken, outToken)
-                    : pairForAMM2(inToken, outToken);
+                    : (amms[i] == 1
+                       ? pairForAMM2(inToken, outToken)
+                       : pairForAMM3(inToken, outToken));
             pairs[i] = pair;
 
             (uint256 reserveIn, uint256 reserveOut) =
@@ -133,7 +140,9 @@ abstract contract UniswapStyleLib {
             address pair =
                 amms[i - 1] == 0
                     ? pairForAMM1(inToken, outToken)
-                    : pairForAMM2(inToken, outToken);
+                    : (amms[i -1 ] == 1
+                       ? pairForAMM2(inToken, outToken)
+                       : pairForAMM3(inToken, outToken));
             pairs[i - 1] = pair;
 
             (uint256 reserveIn, uint256 reserveOut) =
@@ -180,6 +189,28 @@ abstract contract UniswapStyleLib {
                             amm2Factory,
                             keccak256(abi.encodePacked(token0, token1)),
                             amm2InitHash
+                        )
+                    )
+                )
+            )
+        );
+    }
+
+    function pairForAMM3(address tokenA, address tokenB)
+        internal
+        view
+        returns (address pair)
+    {
+        (address token0, address token1) = sortTokens(tokenA, tokenB);
+        pair = address(
+            uint160(
+                uint256(
+                    keccak256(
+                        abi.encodePacked(
+                            hex"ff",
+                            amm3Factory,
+                            keccak256(abi.encodePacked(token0, token1)),
+                            amm3InitHash
                         )
                     )
                 )
