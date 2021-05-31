@@ -8,7 +8,7 @@ export const amm1InitHashes = {
   '31337': hexlify('0x96e8ac4277198ff8b6f785478aa9a39f403cb768dd02cbee326c3e7da348845f'),
   '42': hexlify('0x96e8ac4277198ff8b6f785478aa9a39f403cb768dd02cbee326c3e7da348845f'),
   '43114': hexlify('0x40231f6b438bce0797c9ada29b718a87ea0a5cea3fe9a771abdd76bd41a3e545'),
-  137: hexlify('96e8ac4277198ff8b6f785478aa9a39f403cb768dd02cbee326c3e7da348845f'),
+  137: hexlify('0x96e8ac4277198ff8b6f785478aa9a39f403cb768dd02cbee326c3e7da348845f'),
 };
 
 export const amm2InitHashes = {
