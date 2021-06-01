@@ -34,12 +34,13 @@ const deploy: DeployFunction = async function ({
 }: HardhatRuntimeEnvironment) {
   const { deploy } = deployments;
 
-  const { deployer, baseCurrency, amm1Factory, amm2Factory } = await getNamedAccounts();
+  const { deployer, baseCurrency, amm1Factory, amm2Factory, amm3Factory } = await getNamedAccounts();
 
   const amm1InitHash = amm1InitHashes[await getChainId()];
   const amm2InitHash = amm2InitHashes[await getChainId()];
+  const amm3InitHash = amm3InitHashes[await getChainId()];
 
-  const args = [baseCurrency, amm1Factory, amm2Factory, amm1InitHash, amm2InitHash];
+  const args = [baseCurrency, amm1Factory, amm2Factory, amm3Factory, amm1InitHash, amm2InitHash, amm3InitHash];
   const SpotRouter = await deploy('SpotRouter', {
     from: deployer,
     args,
