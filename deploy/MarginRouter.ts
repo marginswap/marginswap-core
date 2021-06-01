@@ -1,6 +1,6 @@
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
 import { DeployFunction } from 'hardhat-deploy/types';
-import { amm1InitHashes, amm2InitHashes } from './SpotRouter';
+import { amm1InitHashes, amm2InitHashes, amm3InitHashes } from './SpotRouter';
 
 const deploy: DeployFunction = async function ({
   getNamedAccounts,
