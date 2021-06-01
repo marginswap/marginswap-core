@@ -24,6 +24,7 @@ abstract contract UniswapStyleLib {
         amm3Factory = _amm3Factory;
         amm1InitHash = _amm1InitHash;
         amm2InitHash = _amm2InitHash;
+        amm3InitHash = _amm3InitHash;
     }
 
     // returns sorted token addresses, used to handle return values from pairs sorted in this order
@@ -108,7 +109,7 @@ abstract contract UniswapStyleLib {
             address pair =
                 amms[i] == 0
                     ? pairForAMM1(inToken, outToken)
-                    : (amms[i] == 1
+                    : (amms[i] == 0x01
                        ? pairForAMM2(inToken, outToken)
                        : pairForAMM3(inToken, outToken));
             pairs[i] = pair;
@@ -140,7 +141,7 @@ abstract contract UniswapStyleLib {
             address pair =
                 amms[i - 1] == 0
                     ? pairForAMM1(inToken, outToken)
-                    : (amms[i -1 ] == 1
+                    : (amms[i -1 ] == 0x01
                        ? pairForAMM2(inToken, outToken)
                        : pairForAMM3(inToken, outToken));
             pairs[i - 1] = pair;

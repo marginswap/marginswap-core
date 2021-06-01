@@ -372,13 +372,13 @@ async function byHand(
     // tx = await cmt.setTokenCap(token, exposureCap);
     // console.log(`setTokenCap for ${token}: ${tx.hash}`);
 
-    tx = await Lending.setLendingCap(token, exposureCap, {gasLimit: 500000});
+    tx = await Lending.setLendingCap(token, exposureCap, { gasLimit: 500000 });
     console.log(`setLendingCap for ${token}: ${tx.hash}`);
 
     tx = await Lending.setHourlyYieldAPR(token, '0');
     console.log(`Init hourly yield apr for ${token}: ${tx.hash}`);
 
-    tx = await Lending.initBorrowYieldAccumulator(token, {gasLimit: 5000000});
+    tx = await Lending.initBorrowYieldAccumulator(token, { gasLimit: 5000000 });
     console.log(`initBorrowYieldAccu for ${token}: ${tx.hash}`);
 
     // const tx = await cmt.setLiquidationPath(ammPath, liquidationTokenPath, { gasLimit: 5000000 });

@@ -22,7 +22,7 @@ contract MarginRouter is RoleAware, BaseRouter {
         address _amm3Factory,
         bytes32 _amm1InitHash,
         bytes32 _amm2InitHash,
-        bytes32 _amm3InitHash
+        bytes32 _amm3InitHash,
         address _roles
     )
         UniswapStyleLib(

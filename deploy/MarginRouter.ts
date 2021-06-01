@@ -19,7 +19,16 @@ const deploy: DeployFunction = async function ({
 
   await deploy('MarginRouter', {
     from: deployer,
-    args: [baseCurrency, amm1Factory, amm2Factory, amm3Factory, amm1InitHash, amm2InitHash, amm3InitHash, Roles.address],
+    args: [
+      baseCurrency,
+      amm1Factory,
+      amm2Factory,
+      amm3Factory,
+      amm1InitHash,
+      amm2InitHash,
+      amm3InitHash,
+      Roles.address
+    ],
     log: true,
     skipIfAlreadyDeployed: true
   });
