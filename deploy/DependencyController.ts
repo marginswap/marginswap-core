@@ -72,7 +72,7 @@ const deploy: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const roles = await ethers.getContractAt('Roles', Roles.address);
 
   if ((await roles.mainCharacters(DEPENDENCY_CONTROLLER)) != DependencyController.address) {
-    const givingRole = await roles.setMainCharacter(DEPENDENCY_CONTROLLER, DependencyController.address);
+    const givingRole = await roles.setMainCharacter(DEPENDENCY_CONTROLLER, DependencyController.address, {gasLimit: 4000000});
     console.log(`Giving dependency controller role: ${givingRole.hash}`);
   }
 
