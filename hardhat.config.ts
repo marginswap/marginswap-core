@@ -168,8 +168,9 @@ export default {
       accounts: [privateKey]
     },
     matic: {
-      url: 'https://rpc-mumbai.maticvigil.com',
-      accounts: [privateKey]
+      url: "https://rpc-mainnet.maticvigil.com",
+      accounts: [privateKey],
+      gasPrice: 1000000000
     }
   },
   solidity: {
