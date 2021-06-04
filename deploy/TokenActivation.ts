@@ -192,7 +192,7 @@ export const tokenParams: { [tokenName: string]: TokenInitRecord } = {
     exposureCap: 1000000,
     lendingBuffer: 1,
     incentiveWeight: 3,
-    liquidationTokenPath: ['PNG', 'BASE'],
+    liquidationTokenPath: ['AAVE', 'BASE'],
     decimals: 18
   },
   LOCALPEG: {
