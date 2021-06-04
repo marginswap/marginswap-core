@@ -4,8 +4,6 @@ import { ethers, hardhatArguments } from 'hardhat';
 import { DeploymentsExtension } from 'hardhat-deploy/dist/types';
 import { BigNumber } from '@ethersproject/bignumber';
 
-// import ERC20PresetMinterPauser from '@openzeppelin/contracts/build/contracts/ERC20PresetMinterPauser.json';
-
 const MFI_ADDRESS = '0xAa4e3edb11AFa93c41db59842b29de64b72E355B';
 const TOKEN_ACTIVATOR = 9;
 
@@ -17,7 +15,8 @@ const baseCurrency = {
   kovan: 'WETH',
   mainnet: 'WETH',
   avalanche: 'WAVAX',
-  matic: 'ETH'
+  localhost: 'WETH',
+  matic: 'WETH'
 };
 
 export const tokensPerNetwork: Record<string, Record<string, string>> = {
@@ -59,7 +58,7 @@ export const tokensPerNetwork: Record<string, Record<string, string>> = {
     USDC: "0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174",
     WBTC: "0x1BFD67037B42Cf73acF2047067bd4F2C47D9BfD6",
     DAI: "0x8f3Cf7ad23Cd3CaDbD9735AFf958023239c6A063",
-    ETH: "0x7ceB23fD6bC0adD59E62ac25578270cFf1b9f619",
+    WETH: "0x7ceB23fD6bC0adD59E62ac25578270cFf1b9f619",
     WMATIC: "0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270",
     USDT: "0xc2132D05D31c914a87C6611C10748AEb04B58e8F",
     LINK: "0x53E0bca35eC356BD5ddDFebbD1Fc0fD03FaBad39",
