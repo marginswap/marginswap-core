@@ -17,8 +17,7 @@ const baseCurrency = {
   kovan: 'WETH',
   mainnet: 'WETH',
   avalanche: 'WAVAX',
-  local: 'WETH',
-  matic: 'WMATIC'
+  matic: 'ETH'
 };
 
 export const tokensPerNetwork: Record<string, Record<string, string>> = {
@@ -130,7 +129,7 @@ export const tokenParams: { [tokenName: string]: TokenInitRecord } = {
     incentiveWeight: 1,
     liquidationTokenPath: ['LINK', 'BASE'],
     decimals: 18,
-    ammPath: [AMMs.SUSHISWAP, AMMs.UNISWAP]
+    ammPath: [AMMs.UNISWAP, AMMs.UNISWAP]
   },
   USDC: {
     exposureCap: 100000000,
@@ -218,7 +217,7 @@ const deploy: DeployFunction = async function ({
   network
 }: HardhatRuntimeEnvironment) {
   const { deploy } = deployments;
-  const { deployer, baseCurrency } = await getNamedAccounts();
+  const { deployer } = await getNamedAccounts();
 
   const DC = await deployments.get('DependencyController');
   const dc = await ethers.getContractAt('DependencyController', DC.address);
@@ -232,7 +231,7 @@ const deploy: DeployFunction = async function ({
   const tokenAddresses = Object.values(tokens);
 
   const argLists = [
-    await prepArgs(tokenNames.slice(0, 5), tokenAddresses.slice(0, 5), deployments, tokens, peg, baseCurrency)
+    await prepArgs(tokenNames.slice(0, 5), tokenAddresses.slice(0, 5), deployments, tokens, peg, baseCurrency[networkName])
     // await prepArgs(tokenNames.slice(5, 8), tokenAddresses.slice(5, 8), deployments, tokens, peg, baseCurrency),
     //await prepArgs(tokenNames.slice(8), tokenAddresses.slice(8), deployments, tokens, peg, baseCurrency)
   ];
@@ -341,7 +340,7 @@ async function prepArgs(
   deployments,
   tokens,
   peg,
-  baseCurrency
+  baseCurrencyName
 ): Promise<[string, string[], BigNumber[], string[], any[][]]> {
   const exposureCaps = tokenNames.map(name => {
     return ethers.utils.parseUnits(`${tokenParams[name].exposureCap}`, tokenParams[name].decimals);
@@ -350,7 +349,7 @@ async function prepArgs(
   const liquidationTokens = tokenNames.map(name => {
     const tokenPath = tokenParams[name].liquidationTokenPath;
     return tokenPath
-      ? [...tokenPath.map(tName => (tName == 'BASE' ? baseCurrency : tokens[tName])), peg]
+      ? [...tokenPath.map(tName => (tName == 'BASE' ? tokens[baseCurrencyName] : tokens[tName])), peg]
       : [tokens[name], baseCurrency, peg];
   });
 
