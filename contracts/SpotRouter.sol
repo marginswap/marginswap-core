@@ -20,14 +20,18 @@ contract SpotRouter is BaseRouter {
         address _WETH,
         address _amm1Factory,
         address _amm2Factory,
+        address _amm3Factory,
         bytes32 _amm1InitHash,
-        bytes32 _amm2InitHash
+        bytes32 _amm2InitHash,
+        bytes32 _amm3InitHash
     )
         UniswapStyleLib(
             _amm1Factory,
             _amm2Factory,
+            _amm3Factory,
             _amm1InitHash,
-            _amm2InitHash
+            _amm2InitHash,
+            _amm3InitHash
         )
     {
         WETH = _WETH;
