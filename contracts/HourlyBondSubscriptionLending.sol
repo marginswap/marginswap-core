@@ -36,9 +36,6 @@ abstract contract HourlyBondSubscriptionLending is BaseLending {
         lendingMeta[issuer].totalLending += amount;
         updateHourlyBondAmount(issuer, bond);
 
-        YieldAccumulator storage yieldAccumulator =
-            hourlyBondYieldAccumulators[issuer];
-        bond.yieldQuotientFP = yieldAccumulator.accumulatorFP;
         if (bond.amount == 0) {
             bond.moduloHour = block.timestamp % (1 hours);
         }
@@ -69,6 +66,7 @@ abstract contract HourlyBondSubscriptionLending is BaseLending {
             uint256 deltaAmount = bond.amount - oldAmount;
             lendingMeta[issuer].totalLending += deltaAmount;
         }
+        bond.yieldQuotientFP = yA.accumulatorFP;
     }
 
     // Retrieves bond balance for issuer and holder
