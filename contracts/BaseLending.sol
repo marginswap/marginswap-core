@@ -24,6 +24,10 @@ abstract contract BaseLending {
         uint256 totalLending;
         uint256 totalBorrowed;
         uint256 lendingCap;
+        uint256 cumulIncentiveAllocationFP;
+        uint256 incentiveLastUpdated;
+        uint256 incentiveEnd;
+        uint256 incentiveTarget;
     }
     mapping(address => LendingMetadata) public lendingMeta;
 
@@ -46,7 +50,8 @@ abstract contract BaseLending {
         returns (uint256 rate)
     {
         rate = FP48;
-        uint256 utilizationPercent = totalLending > 0 ? (100 * totalBorrowing) / totalLending : 0;
+        uint256 utilizationPercent =
+            totalLending > 0 ? (100 * totalBorrowing) / totalLending : 0;
         if (utilizationPercent < CHANGE_POINT) {
             rate += utilizationPercent * normalRatePerPercent;
         } else {
