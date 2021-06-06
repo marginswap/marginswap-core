@@ -247,21 +247,20 @@ abstract contract HourlyBondSubscriptionLending is BaseLending {
     }
 
     function updateIncentiveAllocation(LendingMetadata storage meta) internal {
-        if (meta.incentiveTarget > 0 && meta.incentiveEnd >= block.timestamp) {
-            uint256 timeDelta = block.timestamp - meta.incentiveLastUpdated;
-            if (timeDelta > 0) {
-                uint256 targetDelta =
-                    min(
-                        meta.incentiveTarget,
-                        (timeDelta * meta.incentiveTarget) /
-                            (meta.incentiveEnd - meta.incentiveLastUpdated)
-                    );
-                meta.incentiveTarget -= targetDelta;
-                meta.cumulIncentiveAllocationFP +=
-                    (targetDelta * FP48) /
-                    meta.totalLending;
-                meta.incentiveLastUpdated = block.timestamp;
-            }
+        uint256 endTime = min(meta.incentiveEnd, block.timestamp);
+        if (meta.incentiveTarget > 0 && endTime > meta.incentiveLastUpdated) {
+            uint256 timeDelta = endTime - meta.incentiveLastUpdated;
+            uint256 targetDelta =
+                min(
+                    meta.incentiveTarget,
+                    (timeDelta * meta.incentiveTarget) /
+                        (meta.incentiveEnd - meta.incentiveLastUpdated)
+                );
+            meta.incentiveTarget -= targetDelta;
+            meta.cumulIncentiveAllocationFP +=
+                (targetDelta * FP48) /
+                meta.totalLending;
+            meta.incentiveLastUpdated = block.timestamp;
         }
     }
 
