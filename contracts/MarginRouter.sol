@@ -10,7 +10,13 @@ import "../libraries/IncentiveReporter.sol";
 /// @title Top level transaction controller
 contract MarginRouter is RoleAware, BaseRouter {
     event AccountUpdated(address indexed trader);
-    event MarginTrade(address indexed trader, address fromToken, address toToken, uint256 fromAmount, uint256 toAmount);
+    event MarginTrade(
+        address indexed trader,
+        address fromToken,
+        address toToken,
+        uint256 fromAmount,
+        uint256 toAmount
+    );
 
     uint256 public constant mswapFeesPer10k = 10;
     address public immutable WETH;

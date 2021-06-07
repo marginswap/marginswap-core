@@ -9,12 +9,12 @@ const deploy: DeployFunction = async function ({
   network
 }: HardhatRuntimeEnvironment) {
   const { deploy } = deployments;
-  const { deployer } = await getNamedAccounts();
+  const { deployer, mfiAddress } = await getNamedAccounts();
   const Roles = await deployments.get('Roles');
 
   await deploy('Lending', {
     from: deployer,
-    args: [Roles.address],
+    args: [mfiAddress,Roles.address],
     log: true,
     skipIfAlreadyDeployed: true
   });
