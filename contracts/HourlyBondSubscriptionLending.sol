@@ -246,6 +246,18 @@ abstract contract HourlyBondSubscriptionLending is BaseLending {
         }
     }
 
+    function viewYearlyIncentivePer10k(address token) external view returns (uint256) {
+        LendingMetadata storage meta = lendingMeta[token];
+        if (meta.incentiveEnd < block.timestamp) {
+            return 0;
+        } else {
+            uint256 timeDelta = meta.incentiveEnd - meta.incentiveLastUpdated;
+
+            // scale to 1 year
+            return 10_000 * (365 days) * meta.incentiveTarget / (1 + meta.totalLending * timeDelta);
+        }
+    }
+
     function updateIncentiveAllocation(LendingMetadata storage meta) internal {
         uint256 endTime = min(meta.incentiveEnd, block.timestamp);
         if (meta.incentiveTarget > 0 && endTime > meta.incentiveLastUpdated) {
