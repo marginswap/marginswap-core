@@ -24,9 +24,9 @@ abstract contract HourlyBondSubscriptionLending is BaseLending {
 
     uint256 public borrowingFactorPercent = 200;
 
-    uint256 constant borrowMinAPR = 6;
+    uint256 constant borrowMinAPR = 25;
     uint256 constant borrowMinHourlyYield =
-        FP48 + (borrowMinAPR * FP48) / 100 / hoursPerYear;
+        FP48 + (borrowMinAPR * FP48) / 1000 / hoursPerYear;
 
     function _makeHourlyBond(
         address issuer,
@@ -243,6 +243,27 @@ abstract contract HourlyBondSubscriptionLending is BaseLending {
             return calcCumulativeYieldFP(yA, timeDelta);
         } else {
             return yA.accumulatorFP;
+        }
+    }
+
+    function viewYearlyIncentivePer10k(address token)
+        external
+        view
+        returns (uint256)
+    {
+        LendingMetadata storage meta = lendingMeta[token];
+        if (
+            meta.incentiveEnd < block.timestamp ||
+            meta.incentiveLastUpdated > meta.incentiveEnd
+        ) {
+            return 0;
+        } else {
+            uint256 timeDelta = meta.incentiveEnd - meta.incentiveLastUpdated;
+
+            // scale to 1 year
+            return
+                (10_000 * (365 days) * meta.incentiveTarget) /
+                (1 + meta.totalLending * timeDelta);
         }
     }
 
