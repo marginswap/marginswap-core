@@ -24,9 +24,9 @@ abstract contract HourlyBondSubscriptionLending is BaseLending {
 
     uint256 public borrowingFactorPercent = 200;
 
-    uint256 constant borrowMinAPR = 6;
+    uint256 constant borrowMinAPR = 25;
     uint256 constant borrowMinHourlyYield =
-        FP48 + (borrowMinAPR * FP48) / 100 / hoursPerYear;
+        FP48 + (borrowMinAPR * FP48) / 1000 / hoursPerYear;
 
     function _makeHourlyBond(
         address issuer,
