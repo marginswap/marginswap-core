@@ -252,7 +252,10 @@ abstract contract HourlyBondSubscriptionLending is BaseLending {
         returns (uint256)
     {
         LendingMetadata storage meta = lendingMeta[token];
-        if (meta.incentiveEnd < block.timestamp) {
+        if (
+            meta.incentiveEnd < block.timestamp ||
+            meta.incentiveLastUpdated > meta.incentiveEnd
+        ) {
             return 0;
         } else {
             uint256 timeDelta = meta.incentiveEnd - meta.incentiveLastUpdated;
