@@ -246,7 +246,11 @@ abstract contract HourlyBondSubscriptionLending is BaseLending {
         }
     }
 
-    function viewYearlyIncentivePer10k(address token) external view returns (uint256) {
+    function viewYearlyIncentivePer10k(address token)
+        external
+        view
+        returns (uint256)
+    {
         LendingMetadata storage meta = lendingMeta[token];
         if (meta.incentiveEnd < block.timestamp) {
             return 0;
@@ -254,7 +258,9 @@ abstract contract HourlyBondSubscriptionLending is BaseLending {
             uint256 timeDelta = meta.incentiveEnd - meta.incentiveLastUpdated;
 
             // scale to 1 year
-            return 10_000 * (365 days) * meta.incentiveTarget / (1 + meta.totalLending * timeDelta);
+            return
+                (10_000 * (365 days) * meta.incentiveTarget) /
+                (1 + meta.totalLending * timeDelta);
         }
     }
 

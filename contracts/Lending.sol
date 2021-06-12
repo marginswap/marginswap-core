@@ -368,6 +368,10 @@ contract Lending is RoleAware, HourlyBondSubscriptionLending {
     function withdrawIncentive(address token) external {
         LendingMetadata storage meta = lendingMeta[token];
         updateIncentiveAllocation(meta);
-        disburseIncentive(hourlyBondAccounts[token][msg.sender], meta, msg.sender);
+        disburseIncentive(
+            hourlyBondAccounts[token][msg.sender],
+            meta,
+            msg.sender
+        );
     }
 }
