@@ -280,7 +280,7 @@ abstract contract HourlyBondSubscriptionLending is BaseLending {
             meta.incentiveTarget -= targetDelta;
             meta.cumulIncentiveAllocationFP +=
                 (targetDelta * FP48) /
-                meta.totalLending;
+                (1 + meta.totalLending);
             meta.incentiveLastUpdated = block.timestamp;
         }
     }
