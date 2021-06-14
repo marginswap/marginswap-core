@@ -133,6 +133,19 @@ contract CrossMarginTrading is CrossMarginLiquidation, IMarginTrading {
         borrow(account, borrowToken, borrowAmount);
     }
 
+    function registerRawBorrow(
+        address trader,
+        address borrowToken,
+        uint256 borrowAmount
+    ) external onlyOwnerExec {
+        CrossMarginAccount storage account = marginAccounts[trader];
+        account.borrowTokens.push(borrowToken);
+        account.borrowedYieldQuotientsFP[borrowToken] = Lending(lending())
+            .getUpdatedBorrowYieldAccuFP(borrowToken);
+
+        account.borrowed[borrowToken] = borrowAmount;
+    }
+
     /// @dev gets called by router to affirm withdrawal of tokens from account
     function registerWithdrawal(
         address trader,

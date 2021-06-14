@@ -44,9 +44,15 @@ export const tokensPerNetwork: Record<string, Record<string, string>> = {
   localhost: {
     DAI: '0x6b175474e89094c44da98b954eedeac495271d0f',
     WETH: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
+    UNI: '0x1f9840a85d5af5bf1d1762f925bdaddc4201f984',
+    MKR: '0x9f8f72aa9304c8b593d555f12ef6589cc3a579a2',
     USDT: '0xdAC17F958D2ee523a2206206994597C13D831ec7',
-    ALCX: '0xdbdb4d16eda451d0503b854cf79d55697f90c8df',
-    UNI: '0x1f9840a85d5af5bf1d1762f925bdaddc4201f984'
+    BOND: '0x0391D2021f89DC339F60Fff84546EA23E337750f',
+    LINK: '0x514910771af9ca656af840dff83e8264ecf986ca',
+    USDC: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
+    WBTC: '0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599',
+    SUSHI: '0x6b3595068778dd592e39a122f4f5a5cf09c90fe2',
+    ALCX: '0xdbdb4d16eda451d0503b854cf79d55697f90c8df'
   },
   avalanche: {
     WAVAX: '0xB31f66AA3C1e785363F0875A1B74E27b85FD66c7',
@@ -208,9 +214,9 @@ const deploy: DeployFunction = async function ({
   const tokenAddresses = Object.values(tokens);
 
   const argLists = [
-    await prepArgs(tokenNames.slice(0, 5), tokenAddresses.slice(0, 5), deployments, tokens, peg, baseCurrency)
-    // await prepArgs(tokenNames.slice(5, 8), tokenAddresses.slice(5, 8), deployments, tokens, peg, baseCurrency),
-    //await prepArgs(tokenNames.slice(8), tokenAddresses.slice(8), deployments, tokens, peg, baseCurrency)
+    await prepArgs(tokenNames.slice(0, 5), tokenAddresses.slice(0, 5), deployments, tokens, peg, baseCurrency),
+    await prepArgs(tokenNames.slice(5, 8), tokenAddresses.slice(5, 8), deployments, tokens, peg, baseCurrency),
+    await prepArgs(tokenNames.slice(8), tokenAddresses.slice(8), deployments, tokens, peg, baseCurrency)
   ];
 
   // await byHand(deployments, ...argLists[0]);
@@ -220,7 +226,7 @@ const deploy: DeployFunction = async function ({
       from: deployer,
       args,
       log: true,
-      skipIfAlreadyDeployed: true
+      // skipIfAlreadyDeployed: true
     });
 
     // run if it hasn't self-destructed yet
