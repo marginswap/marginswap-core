@@ -192,7 +192,7 @@ export default {
       3: ROPSTEN_LIQUI_TOKEN
     },
     mfiAddress: {
-      
+      1: MFI_ADDRESS,
       42: MFI_ADDRESS,
       31337: MFI_ADDRESS,
       137: '0x7Bc429a2fA7d71C4693424FDcaB5a2521b9FD343'
