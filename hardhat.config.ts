@@ -178,7 +178,7 @@ export default {
       optimizer: {
         enabled: true,
         // TODO
-        runs: 20000
+        runs: 5000
       }
     }
   },
