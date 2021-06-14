@@ -168,8 +168,9 @@ export default {
       accounts: [privateKey]
     },
     matic: {
-      url: 'https://rpc-mumbai.maticvigil.com',
-      accounts: [privateKey]
+      url: "https://rpc-mainnet.maticvigil.com",
+      accounts: [privateKey],
+      gasPrice: 1000000000
     }
   },
   solidity: {
@@ -191,7 +192,11 @@ export default {
       3: ROPSTEN_LIQUI_TOKEN
     },
     mfiAddress: {
-      default: MFI_ADDRESS
+      43114: MAIN_DEPLOYER,
+      1: MFI_ADDRESS,
+      42: MFI_ADDRESS,
+      31337: MFI_ADDRESS,
+      137: '0x7Bc429a2fA7d71C4693424FDcaB5a2521b9FD343'
     },
     lockedMfi: {
       default: LOCKED_MFI
@@ -217,7 +222,8 @@ export default {
       default: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48'
     },
     usdt: {
-      default: '0xdAC17F958D2ee523a2206206994597C13D831ec7',
+      1: '0xdAC17F958D2ee523a2206206994597C13D831ec7',
+      31337: '0xdAC17F958D2ee523a2206206994597C13D831ec7',
       //31337: '0xde3A24028580884448a5397872046a019649b084',
       '43114': '0xde3A24028580884448a5397872046a019649b084',
       137: '0xc2132D05D31c914a87C6611C10748AEb04B58e8F'
