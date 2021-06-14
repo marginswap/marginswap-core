@@ -285,7 +285,7 @@ contract Lending is RoleAware, HourlyBondSubscriptionLending {
 
         yA.accumulatorFP = FP48;
         yA.lastUpdated = block.timestamp;
-        yA.hourlyYieldFP = FP48 + (FP48 * borrowMinAPR) / 100 / (365 * 24);
+        yA.hourlyYieldFP = FP48 + (FP48 * borrowMinAPR) / 1000 / (365 * 24);
     }
 
     function setBorrowingFactorPercent(uint256 borrowingFactor)
@@ -363,5 +363,15 @@ contract Lending is RoleAware, HourlyBondSubscriptionLending {
             Fund(fund()).withdraw(MFI, holder, disburseAmount);
             bond.incentiveAllocationStart += allocationDelta;
         }
+    }
+
+    function withdrawIncentive(address token) external {
+        LendingMetadata storage meta = lendingMeta[token];
+        updateIncentiveAllocation(meta);
+        disburseIncentive(
+            hourlyBondAccounts[token][msg.sender],
+            meta,
+            msg.sender
+        );
     }
 }
