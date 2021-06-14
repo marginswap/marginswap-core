@@ -236,12 +236,19 @@ const deploy: DeployFunction = async function ({
   const tokenAddresses = Object.values(tokens);
 
   const argLists = [
-    await prepArgs(tokenNames.slice(0, 5), tokenAddresses.slice(0, 5), deployments, tokens, peg, baseCurrency[networkName]),
-    await prepArgs(tokenNames.slice(5, 8), tokenAddresses.slice(5, 8), deployments, tokens, peg, baseCurrency[networkName]),
-    await prepArgs(tokenNames.slice(8), tokenAddresses.slice(8), deployments, tokens, peg, baseCurrency[networkName])
+    await prepArgs(tokenNames.slice(0, 5), tokenAddresses.slice(0, 5), deployments, tokens, peg, baseCurrency[networkName])
   ];
 
-  // await byHand(deployments, ...argLists[0]);
+  if (tokenNames.length > 5) {
+    argLists.push(
+      await prepArgs(tokenNames.slice(5, 8), tokenAddresses.slice(5, 8), deployments, tokens, peg, baseCurrency[networkName])
+    );
+    if (tokenNames.length > 8) {
+      argLists.push(
+        await prepArgs(tokenNames.slice(8), tokenAddresses.slice(8), deployments, tokens, peg, baseCurrency[networkName])
+      );
+    }
+  }
 
   let skipIfAlreadyDeployed = true;
   for (const args of argLists) {
