@@ -25,8 +25,8 @@ const deploy: DeployFunction = async function ({
   const Roles = await deployments.get('Roles');
   const roles = await ethers.getContractAt('Roles', Roles.address);
 
-  // const chainId = network.config.chainId!.toString();
-  const chainId = '1';
+  const chainId = network.config.chainId!.toString();
+  // const chainId = '1';
 
   const args = [
     contractAddresses[chainId].CrossMarginTrading,
