@@ -192,6 +192,7 @@ export default {
       3: ROPSTEN_LIQUI_TOKEN
     },
     mfiAddress: {
+      43114: MAIN_DEPLOYER,
       1: MFI_ADDRESS,
       42: MFI_ADDRESS,
       31337: MFI_ADDRESS,
