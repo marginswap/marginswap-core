@@ -221,13 +221,20 @@ const deploy: DeployFunction = async function ({
 
   // await byHand(deployments, ...argLists[0]);
 
+  let skipIfAlreadyDeployed = true;
   for (const args of argLists) {
+
     const TokenActivation = await deploy('TokenActivation', {
       from: deployer,
       args,
       log: true,
-      // skipIfAlreadyDeployed: true
+      skipIfAlreadyDeployed
     });
+
+    if (TokenActivation.newlyDeployed) {
+      // we are deploying a new raft of token activations
+      skipIfAlreadyDeployed = false;
+    }
 
     // run if it hasn't self-destructed yet
     if ((await ethers.provider.getCode(TokenActivation.address)) !== '0x') {
