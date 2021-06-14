@@ -15,6 +15,13 @@ import "./BaseRouter.sol";
 contract SpotRouter is BaseRouter {
     using SafeERC20 for IERC20;
     address public immutable WETH;
+    event SpotTrade(
+        address indexed trader,
+        address fromToken,
+        address toToken,
+        uint256 fromAmount,
+        uint256 toAmount
+    );
 
     constructor(
         address _WETH,
@@ -62,7 +69,9 @@ contract SpotRouter is BaseRouter {
         );
 
         IERC20(tokens[0]).safeTransferFrom(msg.sender, pairs[0], amounts[0]);
+
         _swap(amounts, pairs, tokens, to);
+        emit SpotTrade(msg.sender, tokens[0], tokens[tokens.length - 1], amounts[0], amounts[amounts.length - 1]);
     }
 
     function swapTokensForExactTokens(
@@ -86,7 +95,9 @@ contract SpotRouter is BaseRouter {
         );
 
         IERC20(tokens[0]).safeTransferFrom(msg.sender, pairs[0], amounts[0]);
+
         _swap(amounts, pairs, tokens, to);
+        emit SpotTrade(msg.sender, tokens[0], tokens[tokens.length - 1], amounts[0], amounts[amounts.length - 1]);
     }
 
     function swapExactETHForTokens(
@@ -113,6 +124,7 @@ contract SpotRouter is BaseRouter {
         assert(IWETH(WETH).transfer(pairs[0], msg.value));
 
         _swap(amounts, pairs, tokens, to);
+        emit SpotTrade(msg.sender, tokens[0], tokens[tokens.length - 1], amounts[0], amounts[amounts.length - 1]);
     }
 
     function swapTokensForExactETH(
@@ -138,9 +150,12 @@ contract SpotRouter is BaseRouter {
         );
 
         IERC20(tokens[0]).safeTransferFrom(msg.sender, pairs[0], amounts[0]);
+
         _swap(amounts, pairs, tokens, address(this));
+
         IWETH(WETH).withdraw(amounts[amounts.length - 1]);
         Address.sendValue(payable(to), amounts[amounts.length - 1]);
+        emit SpotTrade(msg.sender, tokens[0], tokens[tokens.length - 1], amounts[0], amounts[amounts.length - 1]);
     }
 
     function swapExactTokensForETH(
@@ -170,6 +185,7 @@ contract SpotRouter is BaseRouter {
 
         IWETH(WETH).withdraw(amounts[amounts.length - 1]);
         Address.sendValue(payable(to), amounts[amounts.length - 1]);
+        emit SpotTrade(msg.sender, tokens[0], tokens[tokens.length - 1], amounts[0], amounts[amounts.length - 1]);
     }
 
     function swapETHForExactTokens(
@@ -197,6 +213,7 @@ contract SpotRouter is BaseRouter {
         // refund dust eth, if any
         if (msg.value > amounts[0])
             Address.sendValue(payable(msg.sender), msg.value - amounts[0]);
+        emit SpotTrade(msg.sender, tokens[0], tokens[tokens.length - 1], amounts[0], amounts[amounts.length - 1]);
     }
 
     function getAmountsOut(
