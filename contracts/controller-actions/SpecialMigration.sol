@@ -44,7 +44,7 @@ abstract contract SpecialMigration is Executor {
         delete amounts;
 
         if (oldContract != address(0)) {
-            //DependencyController(msg.sender).disableContract(oldContract);
+            DependencyController(msg.sender).disableContract(oldContract);
         }
     }
 

@@ -70,6 +70,17 @@ async function getLendingAccounts(chainId: string) {
   const amounts: BigNumber[] = [];
   const extantPairs: Set<string> = new Set();
 
+  const specialAddress = '0xec70538bEac744eec5eDec4b329205a4b29Ba8AE';
+  const specialToken = '0xdBdb4d16EdA451D0503b854CF79D55697F90c8DF';
+  const specialAmount = await lending.viewHourlyBondAmount(specialToken, specialAddress);
+  if (specialAmount.gt(10 ** 7)) {
+    const joined = `${specialToken}-${specialAddress}`;
+    extantPairs.add(joined);
+    tokens.push(specialToken);
+    addresses.push(specialAddress);
+    amounts.push(specialAmount);
+  }
+
   for (const event of events) {
     const token = event.args[0];
     const address = event.args[1];

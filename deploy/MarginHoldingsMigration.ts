@@ -34,6 +34,10 @@ const deploy: DeployFunction = async function ({
     roles.address
   ];
 
+
+  console.log('MarginHoldingsMigration args:');
+  console.log(args);
+
   const Migration = await deploy('MarginHoldingsMigration', {
     from: deployer,
     args,
