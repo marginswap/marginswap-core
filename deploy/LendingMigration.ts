@@ -87,7 +87,7 @@ async function getLendingAccounts(chainId: string) {
 
     const joined = `${token}-${address}`;
     const amount = await lending.viewHourlyBondAmount(token, address);
-    if (!extantPairs.has(joined) && amount.gt(10 ** 7)) {
+    if (!extantPairs.has(joined) && amount.gt(10 ** 6)) {
       extantPairs.add(joined);
 
       tokens.push(token);

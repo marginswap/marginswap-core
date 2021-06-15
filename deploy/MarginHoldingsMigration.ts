@@ -7,7 +7,12 @@ import CrossMarginTrading from '@marginswap/core-abi/artifacts/contracts/CrossMa
 import { Seq } from 'immutable';
 import { BigNumber } from '@ethersproject/bignumber';
 
-const MIN_HOLDINGS = 30 * 10 ** 6;
+const MIN_HOLDINGS = {
+  137: 10000,
+  43114: 10 ** 6,
+  1: 20 * 10 **6,
+  31337: 100 * 10 ** 6
+};
 
 const deploy: DeployFunction = async function ({
   getNamedAccounts,
@@ -98,7 +103,7 @@ export async function getMarginAddresses(chainId: string) {
   const result: string[] = [];
   for (const account of addresses) {
     const holdings = await cmt.viewHoldingsInPeg(account);
-    if (holdings.gt(MIN_HOLDINGS)) {
+    if (holdings.gt(MIN_HOLDINGS[chainId])) {
       result.push(account);
     }
   }

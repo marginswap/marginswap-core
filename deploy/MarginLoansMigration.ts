@@ -7,8 +7,6 @@ import CrossMarginTrading from '@marginswap/core-abi/artifacts/contracts/CrossMa
 import { BigNumber } from '@ethersproject/bignumber';
 import {getMarginAddresses} from './MarginHoldingsMigration';
 
-const MIN_HOLDINGS = 30 * 10 ** 6;
-
 const deploy: DeployFunction = async function ({
   getNamedAccounts,
   deployments,
