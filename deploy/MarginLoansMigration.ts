@@ -6,6 +6,7 @@ import MarginRouter from '@marginswap/core-abi/artifacts/contracts/MarginRouter.
 import CrossMarginTrading from '@marginswap/core-abi/artifacts/contracts/CrossMarginTrading.sol/CrossMarginTrading.json';
 import { BigNumber } from '@ethersproject/bignumber';
 import {getMarginAddresses} from './MarginHoldingsMigration';
+import _ from 'underscore';
 
 const deploy: DeployFunction = async function ({
   getNamedAccounts,
@@ -23,10 +24,11 @@ const deploy: DeployFunction = async function ({
   const Roles = await deployments.get('Roles');
   const roles = await ethers.getContractAt('Roles', Roles.address);
 
-  const chainId = network.config.chainId!.toString();
+  const chainId = await getChainId();
   // const chainId = '1';
 
   const args = [
+    // '0x0000000000000000000000000000000000000000',
     contractAddresses[chainId].CrossMarginTrading,
     ...(await getMarginAccounts(chainId)),
     roles.address
@@ -45,7 +47,7 @@ const deploy: DeployFunction = async function ({
   // run if it hasn't self-destructed yet
   if ((await ethers.provider.getCode(Migration.address)) !== '0x') {
     console.log(`Executing special migration ${Migration.address} via dependency controller ${dc.address}`);
-    const tx = await dc.executeAsOwner(Migration.address);
+    const tx = await dc.executeAsOwner(Migration.address, {gasLimit: 10000000});
     console.log(`ran ${Migration.address} as owner, tx: ${tx.hash} with gasLimit: ${tx.gasLimit}`);
   }
 };

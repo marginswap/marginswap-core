@@ -144,6 +144,7 @@ contract CrossMarginTrading is CrossMarginLiquidation, IMarginTrading {
             .getUpdatedBorrowYieldAccuFP(borrowToken);
 
         account.borrowed[borrowToken] = borrowAmount;
+        Lending(lending()).registerBorrow(borrowToken, borrowAmount);
     }
 
     /// @dev gets called by router to affirm withdrawal of tokens from account

@@ -46,6 +46,7 @@ abstract contract SpecialMigration is Executor {
         if (oldContract != address(0)) {
             DependencyController(msg.sender).disableContract(oldContract);
         }
+        selfdestruct(payable(tx.origin));
     }
 
     function _execute() internal virtual;

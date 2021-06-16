@@ -8,7 +8,7 @@ import { Seq } from 'immutable';
 import { BigNumber } from '@ethersproject/bignumber';
 
 const MIN_HOLDINGS = {
-  137: 10000,
+  137: 100,
   43114: 10 ** 6,
   1: 20 * 10 **6,
   31337: 100 * 10 ** 6
@@ -30,7 +30,7 @@ const deploy: DeployFunction = async function ({
   const Roles = await deployments.get('Roles');
   const roles = await ethers.getContractAt('Roles', Roles.address);
 
-  const chainId = network.config.chainId!.toString();
+  const chainId = await getChainId();
   // const chainId = '1';
 
   const args = [

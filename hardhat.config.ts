@@ -168,9 +168,11 @@ export default {
       accounts: [privateKey]
     },
     matic: {
-      url: "https://rpc-mainnet.maticvigil.com",
+      // url: 'https://rpc-mainnet.maticvigil.com/v1/b0858bc7aa27b1333df19546c12718235bd11785',
+      url: 'https://sparkling-icy-breeze.matic.quiknode.pro/53a1956ec39dddb5ab61f857eed385722d8349bc/',
+      // url: 'https://matic-mainnet-full-rpc.bwarelabs.com',
       accounts: [privateKey],
-      gasPrice: 1000000000
+      // gasPrice: 1000000000
     }
   },
   solidity: {
