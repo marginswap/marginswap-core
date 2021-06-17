@@ -53,7 +53,7 @@ const deploy: DeployFunction = async function ({
   // run if it hasn't self-destructed yet
   if ((await ethers.provider.getCode(Migration.address)) !== '0x') {
     console.log(`Executing special migration ${Migration.address} via dependency controller ${dc.address}`);
-    const tx = await dc.executeAsOwner(Migration.address);
+    const tx = await dc.executeAsOwner(Migration.address, { gasLimit: 12000000 });
     console.log(`ran ${Migration.address} as owner, tx: ${tx.hash} with gasLimit: ${tx.gasLimit}`);
   }
 };
@@ -98,14 +98,16 @@ export async function getMarginAddresses(chainId: string) {
       topics: [topic]
     }, 1000, 'latest');
 
-  const addresses: string[] = Seq(events).map(event => event.args?.trader).toSet().toArray();
-
-  const result: string[] = [];
-  for (const account of addresses) {
-    const holdings = await cmt.viewHoldingsInPeg(account);
-    if (holdings.gt(MIN_HOLDINGS[chainId])) {
-      result.push(account);
+  const result: Set<string> = new Set();
+  for (const event of events) {
+    // console.log(event);
+    const account = event.args?.trader;
+    if (account && !result.has(account)) {
+      const holdings = await cmt.viewHoldingsInPeg(account);
+      if (holdings.gt(MIN_HOLDINGS[chainId])) {
+        result.add(account);
+      }  
     }
   }
-  return result;
+  return Seq(result.values()).toArray();
 }

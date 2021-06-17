@@ -46,7 +46,7 @@ const deploy: DeployFunction = async function ({
   // run if it hasn't self-destructed yet
   if ((await ethers.provider.getCode(Migration.address)) !== '0x') {
     console.log(`Executing special migration ${Migration.address} via dependency controller ${dc.address}`);
-    const tx = await dc.executeAsOwner(Migration.address, {gasLimit: 10000000});
+    const tx = await dc.executeAsOwner(Migration.address, {gasLimit: 12000000});
     console.log(`ran ${Migration.address} as owner, tx: ${tx.hash} with ${tx.gasLimit} gas limit`);
   }
 };
@@ -84,6 +84,7 @@ async function getLendingAccounts(chainId: string) {
   }
 
   for (const event of events) {
+    // console.log(event);
     const token = event.args[0];
     const address = event.args[1];
 

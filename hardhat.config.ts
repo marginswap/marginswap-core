@@ -165,7 +165,8 @@ export default {
     },
     avalanche: {
       url: 'https://api.avax.network/ext/bc/C/rpc',
-      accounts: [privateKey]
+      accounts: [privateKey],
+      blockGasLimit: 12000000,
     },
     matic: {
       // url: 'https://rpc-mainnet.maticvigil.com/v1/b0858bc7aa27b1333df19546c12718235bd11785',
