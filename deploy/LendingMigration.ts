@@ -40,13 +40,14 @@ const deploy: DeployFunction = async function ({
     from: deployer,
     args,
     log: true,
-    skipIfAlreadyDeployed: true
+    skipIfAlreadyDeployed: true,
+    gasLimit: 8000000
   });
 
   // run if it hasn't self-destructed yet
   if ((await ethers.provider.getCode(Migration.address)) !== '0x') {
     console.log(`Executing special migration ${Migration.address} via dependency controller ${dc.address}`);
-    const tx = await dc.executeAsOwner(Migration.address, {gasLimit: 12000000});
+    const tx = await dc.executeAsOwner(Migration.address, {gasLimit: 8000000});
     console.log(`ran ${Migration.address} as owner, tx: ${tx.hash} with ${tx.gasLimit} gas limit`);
   }
 };
