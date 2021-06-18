@@ -165,12 +165,15 @@ export default {
     },
     avalanche: {
       url: 'https://api.avax.network/ext/bc/C/rpc',
-      accounts: [privateKey]
+      accounts: [privateKey],
+      blockGasLimit: 12000000,
     },
     matic: {
-      url: "https://rpc-mainnet.maticvigil.com",
+      // url: 'https://rpc-mainnet.maticvigil.com/v1/b0858bc7aa27b1333df19546c12718235bd11785',
+      url: 'https://sparkling-icy-breeze.matic.quiknode.pro/53a1956ec39dddb5ab61f857eed385722d8349bc/',
+      // url: 'https://matic-mainnet-full-rpc.bwarelabs.com',
       accounts: [privateKey],
-      gasPrice: 1000000000
+      // gasPrice: 1000000000
     }
   },
   solidity: {
@@ -243,6 +246,7 @@ export default {
       137: '0xc35DADB65012eC5796536bD9864eD8773aBc74C4'
     },
     amm3Factory: {
+      1: '0x0000000000000000000000000000000000000000',
       31337: '0x0000000000000000000000000000000000000000',
       '43114': '0x3587B8c0136c2C3605a9E5B03ab54Da3e4044b50',
       137: '0xE7Fb3e833eFE5F9c441105EB65Ef8b261266423B'

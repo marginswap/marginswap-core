@@ -1388,10 +1388,10 @@
   resolved "https://registry.yarnpkg.com/@ledgerhq/logs/-/logs-5.48.0.tgz#e3628e3d48819ce74f116d6128a5f7324843bcca"
   integrity sha512-ItOEw1BDsN7q43/uku44izA9y5f6va79KrO5SeYNcojAa3gLn6u02ADLzdHJtuvGEf9DBwCTRPlJmlT7kIaFPQ==
 
-"@marginswap/core-abi@^1.2.11":
-  version "1.2.13"
-  resolved "https://registry.yarnpkg.com/@marginswap/core-abi/-/core-abi-1.2.13.tgz#d48c4ccf459b77176dc9a8e3ebb0842474524550"
-  integrity sha512-AYpS+caDcBOoREL4KVzK62Nt0uZFSoThLCfokjzbLCQwbPR/xRI4N7OlJRqAYiHd4l0XeSc6tPghjDAR1qxW3Q==
+"@marginswap/core-abi@1.2.11":
+  version "1.2.11"
+  resolved "https://registry.yarnpkg.com/@marginswap/core-abi/-/core-abi-1.2.11.tgz#eb07c629734a7929c9c883c0a24a74495739f159"
+  integrity sha512-sYiW5aXX2axJ6WYl2jg5Mvci9GWRqxxC1CCshE6M4ybOoXAjVY59I7nmPETxgrlfFCAv0GgKW63TyrgcrF16Ug==
 
 "@nodelib/fs.scandir@2.1.4":
   version "2.1.4"

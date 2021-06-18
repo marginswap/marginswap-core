@@ -268,7 +268,7 @@ const deploy: DeployFunction = async function ({
     // run if it hasn't self-destructed yet
     if ((await ethers.provider.getCode(TokenActivation.address)) !== '0x') {
       console.log(`Executing token activation ${TokenActivation.address} via dependency controller ${dc.address}`);
-      const tx = await dc.executeAsOwner(TokenActivation.address, { gasLimit: 5000000 });
+      const tx = await dc.executeAsOwner(TokenActivation.address, { gasLimit: 8000000 });
       console.log(`ran ${TokenActivation.address} as owner, tx: ${tx.hash}`);
     }
   }
