@@ -3,6 +3,7 @@ pragma solidity ^0.8.0;
 
 import "./CrossMarginAccounts.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "./Admin.sol";
 
 /** 
 @title Handles liquidation of accounts below maintenance threshold
@@ -155,7 +156,7 @@ abstract contract CrossMarginLiquidation is CrossMarginAccounts {
             Admin a = Admin(admin());
             uint256 penalty =
                 (a.maintenanceStakePerBlock() * attackerCut) /
-                    avgLiquidationPerCall;
+                    (1 + avgLiquidationPerCall);
             a.penalizeMaintenanceStake(
                 liqAttackRecord.loser,
                 penalty,

@@ -21,7 +21,11 @@ contract Lending is RoleAware, HourlyBondSubscriptionLending {
 
     uint256 constant BORROW_RATE_UPDATE_WINDOW = 60 minutes;
 
-    constructor(address _roles) RoleAware(_roles) {}
+    address public immutable MFI;
+
+    constructor(address _MFI, address _roles) RoleAware(_roles) {
+        MFI = _MFI;
+    }
 
     /// Make a issuer available for protocol
     function activateIssuer(address issuer) external {
@@ -151,7 +155,7 @@ contract Lending is RoleAware, HourlyBondSubscriptionLending {
         require(isLender(msg.sender), "Not an approved lender");
         require(activeIssuers[issuer], "Not approved issuer");
         LendingMetadata storage meta = lendingMeta[issuer];
-        meta.totalLending += amount;
+        addToTotalLending(meta, amount);
 
         getUpdatedHourlyYield(
             issuer,
@@ -165,7 +169,7 @@ contract Lending is RoleAware, HourlyBondSubscriptionLending {
         require(isLender(msg.sender), "Not an approved lender");
         require(activeIssuers[issuer], "Not approved issuer");
         LendingMetadata storage meta = lendingMeta[issuer];
-        meta.totalLending -= amount;
+        subtractFromTotalLending(meta, amount);
 
         getUpdatedHourlyYield(
             issuer,
@@ -234,9 +238,7 @@ contract Lending is RoleAware, HourlyBondSubscriptionLending {
     /// @dev withdraw an hour bond
     function withdrawHourlyBond(address issuer, uint256 amount) external {
         HourlyBond storage bond = hourlyBondAccounts[issuer][msg.sender];
-        // apply all interest
-        updateHourlyBondAmount(issuer, bond);
-        super._withdrawHourlyBond(issuer, bond, amount);
+        super._withdrawHourlyBond(issuer, bond, amount, msg.sender);
 
         if (bond.amount == 0) {
             delete hourlyBondAccounts[issuer][msg.sender];
@@ -250,11 +252,9 @@ contract Lending is RoleAware, HourlyBondSubscriptionLending {
     /// Shut down hourly bond account for `issuer`
     function closeHourlyBondAccount(address issuer) external {
         HourlyBond storage bond = hourlyBondAccounts[issuer][msg.sender];
-        // apply all interest
-        updateHourlyBondAmount(issuer, bond);
 
         uint256 amount = bond.amount;
-        super._withdrawHourlyBond(issuer, bond, amount);
+        super._withdrawHourlyBond(issuer, bond, amount, msg.sender);
 
         disburse(issuer, msg.sender, amount);
 
@@ -285,7 +285,7 @@ contract Lending is RoleAware, HourlyBondSubscriptionLending {
 
         yA.accumulatorFP = FP48;
         yA.lastUpdated = block.timestamp;
-        yA.hourlyYieldFP = FP48 + (FP48 * borrowMinAPR) / 100 / (365 * 24);
+        yA.hourlyYieldFP = FP48 + (FP48 * borrowMinAPR) / 1000 / (365 * 24);
     }
 
     function setBorrowingFactorPercent(uint256 borrowingFactor)
@@ -333,10 +333,45 @@ contract Lending is RoleAware, HourlyBondSubscriptionLending {
         address source,
         uint256 amount
     ) internal {
-        Fund(fund()).depositFor(source, issuer, amount);
+        Fund(fund()).depositFor(source, issuerTokens[issuer], amount);
     }
 
     function haircut(uint256 amount) external {
         haircuts[msg.sender] += amount;
+    }
+
+    function addIncentive(
+        address token,
+        uint256 amount,
+        uint256 endTimestamp
+    ) external onlyOwnerExecActivator {
+        LendingMetadata storage meta = lendingMeta[token];
+        meta.incentiveEnd = endTimestamp;
+        meta.incentiveTarget = amount;
+        meta.incentiveLastUpdated = block.timestamp;
+    }
+
+    function disburseIncentive(
+        HourlyBond storage bond,
+        LendingMetadata storage meta,
+        address holder
+    ) internal override {
+        uint256 allocationDelta =
+            meta.cumulIncentiveAllocationFP - bond.incentiveAllocationStart;
+        if (allocationDelta > 0) {
+            uint256 disburseAmount = (allocationDelta * bond.amount) / FP48;
+            Fund(fund()).withdraw(MFI, holder, disburseAmount);
+            bond.incentiveAllocationStart += allocationDelta;
+        }
+    }
+
+    function withdrawIncentive(address token) external {
+        LendingMetadata storage meta = lendingMeta[token];
+        updateIncentiveAllocation(meta);
+        disburseIncentive(
+            hourlyBondAccounts[token][msg.sender],
+            meta,
+            msg.sender
+        );
     }
 }

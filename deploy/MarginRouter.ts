@@ -1,5 +1,6 @@
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
 import { DeployFunction } from 'hardhat-deploy/types';
+import { amm1InitHashes, amm2InitHashes, amm3InitHashes } from './SpotRouter';
 
 const deploy: DeployFunction = async function ({
   getNamedAccounts,
@@ -9,12 +10,25 @@ const deploy: DeployFunction = async function ({
   network
 }: HardhatRuntimeEnvironment) {
   const { deploy } = deployments;
-  const { deployer, weth } = await getNamedAccounts();
+  const { deployer, baseCurrency, amm1Factory, amm2Factory, amm3Factory } = await getNamedAccounts();
   const Roles = await deployments.get('Roles');
+
+  const amm1InitHash = amm1InitHashes[await getChainId()];
+  const amm2InitHash = amm2InitHashes[await getChainId()];
+  const amm3InitHash = amm3InitHashes[await getChainId()];
 
   await deploy('MarginRouter', {
     from: deployer,
-    args: [weth, Roles.address],
+    args: [
+      baseCurrency,
+      amm1Factory,
+      amm2Factory,
+      amm3Factory,
+      amm1InitHash,
+      amm2InitHash,
+      amm3InitHash,
+      Roles.address
+    ],
     log: true,
     skipIfAlreadyDeployed: true
   });

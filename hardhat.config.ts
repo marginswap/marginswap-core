@@ -9,6 +9,7 @@ import * as types from 'hardhat/internal/core/params/argumentTypes';
 import { Deployment } from 'hardhat-deploy/dist/types';
 import 'hardhat-contract-sizer';
 import '@nomiclabs/hardhat-solhint';
+import ethernal from 'hardhat-ethernal';
 
 import { TASK_NODE, TASK_TEST, TASK_NODE_GET_PROVIDER, TASK_NODE_SERVER_READY } from 'hardhat/builtin-tasks/task-names';
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
@@ -122,7 +123,8 @@ task('print-network', 'Print network name', async (args, hre) => console.log(hre
 const homedir = require('os').homedir();
 const privateKey = fs.readFileSync(`${homedir}/.marginswap-secret`).toString().trim();
 function infuraUrl(networkName: string) {
-  return `https://${networkName}.infura.io/v3/ae52aea5aa2b41e287d72e10b1175491`;
+  return `https://eth-${networkName}.alchemyapi.io/v2/AcIJPH41nagmF3o1sPArEns8erN9N691`;
+  //  return `https://${networkName}.infura.io/v3/ae52aea5aa2b41e287d72e10b1175491`;
 }
 
 /**
@@ -138,7 +140,12 @@ export default {
       blockGasLimit: 12000000,
       forking: {
         url: infuraUrl('mainnet')
+        // url: 'https://api.avax.network/ext/bc/C/rpc'
       },
+      // mining: {
+      //   auto: false,
+      //   interval: 20000
+      // },
       accounts: [{ privateKey, balance: '10000168008000000000000' }]
     },
     mainnet: {
@@ -155,6 +162,18 @@ export default {
     ropsten: {
       url: infuraUrl('ropsten'),
       accounts: [privateKey]
+    },
+    avalanche: {
+      url: 'https://api.avax.network/ext/bc/C/rpc',
+      accounts: [privateKey],
+      blockGasLimit: 12000000,
+    },
+    matic: {
+      // url: 'https://rpc-mainnet.maticvigil.com/v1/b0858bc7aa27b1333df19546c12718235bd11785',
+      url: 'https://sparkling-icy-breeze.matic.quiknode.pro/53a1956ec39dddb5ab61f857eed385722d8349bc/',
+      // url: 'https://matic-mainnet-full-rpc.bwarelabs.com',
+      accounts: [privateKey],
+      // gasPrice: 1000000000
     }
   },
   solidity: {
@@ -163,7 +182,7 @@ export default {
       optimizer: {
         enabled: true,
         // TODO
-        runs: 20000
+        runs: 5000
       }
     }
   },
@@ -176,7 +195,11 @@ export default {
       3: ROPSTEN_LIQUI_TOKEN
     },
     mfiAddress: {
-      default: MFI_ADDRESS
+      43114: MAIN_DEPLOYER,
+      1: MFI_ADDRESS,
+      42: MFI_ADDRESS,
+      31337: MFI_ADDRESS,
+      137: '0x7Bc429a2fA7d71C4693424FDcaB5a2521b9FD343'
     },
     lockedMfi: {
       default: LOCKED_MFI
@@ -184,10 +207,13 @@ export default {
     lockedMfiDelegate: {
       default: MAIN_DEPLOYER
     },
-    weth: {
+    baseCurrency: {
       31337: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
+      //31337: '0xB31f66AA3C1e785363F0875A1B74E27b85FD66c7',
       1: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
-      42: '0xd0a1e359811322d97991e03f863a0c30c2cf029c'
+      42: '0xd0a1e359811322d97991e03f863a0c30c2cf029c',
+      '43114': '0xB31f66AA3C1e785363F0875A1B74E27b85FD66c7',
+      137: '0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270',
     },
     dai: {
       1: '0x6b175474e89094c44da98b954eedeac495271d0f',
@@ -199,7 +225,31 @@ export default {
       default: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48'
     },
     usdt: {
-      default: '0xdAC17F958D2ee523a2206206994597C13D831ec7'
+      1: '0xdAC17F958D2ee523a2206206994597C13D831ec7',
+      31337: '0xdAC17F958D2ee523a2206206994597C13D831ec7',
+      //31337: '0xde3A24028580884448a5397872046a019649b084',
+      '43114': '0xde3A24028580884448a5397872046a019649b084',
+      137: '0xc2132D05D31c914a87C6611C10748AEb04B58e8F'
+    },
+    amm1Factory: {
+      default: '0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f',
+      //31337: "0xefa94DE7a4656D787667C749f7E1223D71E9FD88",
+      42: '0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f',
+      '43114': '0xefa94DE7a4656D787667C749f7E1223D71E9FD88',
+      137: '0x5757371414417b8C6CAad45bAeF941aBc7d3Ab32'
+    },
+    amm2Factory: {
+      default: '0xC0AEe478e3658e2610c5F7A4A2E1777cE9e4f2Ac',
+      //31337: "0xBB6e8C136ca537874a6808dBFC5DaebEd9a57554",
+      42: '0xC0AEe478e3658e2610c5F7A4A2E1777cE9e4f2Ac',
+      '43114': '0xc35DADB65012eC5796536bD9864eD8773aBc74C4',
+      137: '0xc35DADB65012eC5796536bD9864eD8773aBc74C4'
+    },
+    amm3Factory: {
+      1: '0x0000000000000000000000000000000000000000',
+      31337: '0x0000000000000000000000000000000000000000',
+      '43114': '0x3587B8c0136c2C3605a9E5B03ab54Da3e4044b50',
+      137: '0xE7Fb3e833eFE5F9c441105EB65Ef8b261266423B'
     }
   }
 };

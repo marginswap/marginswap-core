@@ -7,6 +7,7 @@ struct HourlyBond {
     uint256 amount;
     uint256 yieldQuotientFP;
     uint256 moduloHour;
+    uint256 incentiveAllocationStart;
 }
 
 /// @title Here we offer subscriptions to auto-renewing hourly bonds
@@ -23,9 +24,9 @@ abstract contract HourlyBondSubscriptionLending is BaseLending {
 
     uint256 public borrowingFactorPercent = 200;
 
-    uint256 constant borrowMinAPR = 6;
+    uint256 constant borrowMinAPR = 25;
     uint256 constant borrowMinHourlyYield =
-        FP48 + (borrowMinAPR * FP48) / 100 / hoursPerYear;
+        FP48 + (borrowMinAPR * FP48) / 1000 / hoursPerYear;
 
     function _makeHourlyBond(
         address issuer,
@@ -33,30 +34,34 @@ abstract contract HourlyBondSubscriptionLending is BaseLending {
         uint256 amount
     ) internal {
         HourlyBond storage bond = hourlyBondAccounts[issuer][holder];
-        updateHourlyBondAmount(issuer, bond);
+        LendingMetadata storage meta = lendingMeta[issuer];
+        addToTotalLending(meta, amount);
+        updateHourlyBondAmount(issuer, bond, holder);
 
-        YieldAccumulator storage yieldAccumulator =
-            hourlyBondYieldAccumulators[issuer];
-        bond.yieldQuotientFP = yieldAccumulator.accumulatorFP;
         if (bond.amount == 0) {
             bond.moduloHour = block.timestamp % (1 hours);
         }
         bond.amount += amount;
-        lendingMeta[issuer].totalLending += amount;
     }
 
-    function updateHourlyBondAmount(address issuer, HourlyBond storage bond)
-        internal
-    {
+    function updateHourlyBondAmount(
+        address issuer,
+        HourlyBond storage bond,
+        address holder
+    ) internal {
         uint256 yieldQuotientFP = bond.yieldQuotientFP;
-        if (yieldQuotientFP > 0) {
-            YieldAccumulator storage yA =
-                getUpdatedHourlyYield(
-                    issuer,
-                    hourlyBondYieldAccumulators[issuer],
-                    RATE_UPDATE_WINDOW
-                );
 
+        YieldAccumulator storage yA =
+            getUpdatedHourlyYield(
+                issuer,
+                hourlyBondYieldAccumulators[issuer],
+                RATE_UPDATE_WINDOW
+            );
+
+        LendingMetadata storage meta = lendingMeta[issuer];
+
+        if (yieldQuotientFP > 0) {
+            disburseIncentive(bond, meta, holder);
             uint256 oldAmount = bond.amount;
 
             bond.amount = applyInterest(
@@ -66,8 +71,11 @@ abstract contract HourlyBondSubscriptionLending is BaseLending {
             );
 
             uint256 deltaAmount = bond.amount - oldAmount;
-            lendingMeta[issuer].totalLending += deltaAmount;
+            addToTotalLending(meta, deltaAmount);
+        } else {
+            bond.incentiveAllocationStart = meta.cumulIncentiveAllocationFP;
         }
+        bond.yieldQuotientFP = yA.accumulatorFP;
     }
 
     // Retrieves bond balance for issuer and holder
@@ -95,8 +103,12 @@ abstract contract HourlyBondSubscriptionLending is BaseLending {
     function _withdrawHourlyBond(
         address issuer,
         HourlyBond storage bond,
-        uint256 amount
+        uint256 amount,
+        address holder
     ) internal {
+        subtractFromTotalLending(lendingMeta[issuer], amount);
+        updateHourlyBondAmount(issuer, bond, holder);
+
         // how far the current hour has advanced (relative to acccount hourly clock)
         uint256 currentOffset = (block.timestamp - bond.moduloHour) % (1 hours);
 
@@ -106,7 +118,6 @@ abstract contract HourlyBondSubscriptionLending is BaseLending {
         );
 
         bond.amount -= amount;
-        lendingMeta[issuer].totalLending -= amount;
     }
 
     function calcCumulativeYieldFP(
@@ -234,4 +245,64 @@ abstract contract HourlyBondSubscriptionLending is BaseLending {
             return yA.accumulatorFP;
         }
     }
+
+    function viewYearlyIncentivePer10k(address token)
+        external
+        view
+        returns (uint256)
+    {
+        LendingMetadata storage meta = lendingMeta[token];
+        if (
+            meta.incentiveEnd < block.timestamp ||
+            meta.incentiveLastUpdated > meta.incentiveEnd
+        ) {
+            return 0;
+        } else {
+            uint256 timeDelta = meta.incentiveEnd - meta.incentiveLastUpdated;
+
+            // scale to 1 year
+            return
+                (10_000 * (365 days) * meta.incentiveTarget) /
+                (1 + meta.totalLending * timeDelta);
+        }
+    }
+
+    function updateIncentiveAllocation(LendingMetadata storage meta) internal {
+        uint256 endTime = min(meta.incentiveEnd, block.timestamp);
+        if (meta.incentiveTarget > 0 && endTime > meta.incentiveLastUpdated) {
+            uint256 timeDelta = endTime - meta.incentiveLastUpdated;
+            uint256 targetDelta =
+                min(
+                    meta.incentiveTarget,
+                    (timeDelta * meta.incentiveTarget) /
+                        (meta.incentiveEnd - meta.incentiveLastUpdated)
+                );
+            meta.incentiveTarget -= targetDelta;
+            meta.cumulIncentiveAllocationFP +=
+                (targetDelta * FP48) /
+                (1 + meta.totalLending);
+            meta.incentiveLastUpdated = block.timestamp;
+        }
+    }
+
+    function addToTotalLending(LendingMetadata storage meta, uint256 amount)
+        internal
+    {
+        updateIncentiveAllocation(meta);
+        meta.totalLending += amount;
+    }
+
+    function subtractFromTotalLending(
+        LendingMetadata storage meta,
+        uint256 amount
+    ) internal {
+        updateIncentiveAllocation(meta);
+        meta.totalLending -= amount;
+    }
+
+    function disburseIncentive(
+        HourlyBond storage bond,
+        LendingMetadata storage meta,
+        address holder
+    ) internal virtual;
 }

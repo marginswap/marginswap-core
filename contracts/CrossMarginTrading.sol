@@ -12,9 +12,26 @@ import "./CrossMarginLiquidation.sol";
 // except for view functions of course
 
 contract CrossMarginTrading is CrossMarginLiquidation, IMarginTrading {
-    constructor(address _peg, address _roles)
+    constructor(
+        address _peg,
+        address _amm1Factory,
+        address _amm2Factory,
+        address _amm3Factory,
+        bytes32 _amm1InitHash,
+        bytes32 _amm2InitHash,
+        bytes32 _amm3InitHash,
+        address _roles
+    )
         RoleAware(_roles)
         PriceAware(_peg)
+        UniswapStyleLib(
+            _amm1Factory,
+            _amm2Factory,
+            _amm3Factory,
+            _amm1InitHash,
+            _amm2InitHash,
+            _amm3InitHash
+        )
     {}
 
     /// @dev admin function to set the token cap
@@ -57,10 +74,18 @@ contract CrossMarginTrading is CrossMarginLiquidation, IMarginTrading {
         CrossMarginAccount storage account = marginAccounts[trader];
         account.lastDepositBlock = block.number;
 
-        if (account.borrowed[token] > 0) {
-            extinguishableDebt = min(depositAmount, account.borrowed[token]);
+        uint256 currentBorrowed = account.borrowed[token];
+        if (currentBorrowed > 0) {
+            (uint256 borrowAmount, uint256 yieldQuotientFP) =
+                Lending(lending()).applyBorrowInterest(
+                    currentBorrowed,
+                    token,
+                    account.borrowedYieldQuotientsFP[token]
+                );
+            account.borrowed[token] = borrowAmount;
+            account.borrowedYieldQuotientsFP[token] = yieldQuotientFP;
+            extinguishableDebt = min(depositAmount, borrowAmount);
             extinguishDebt(account, token, extinguishableDebt);
-            totalShort[token] -= extinguishableDebt;
         }
 
         // no overflow because depositAmount >= extinguishableDebt
@@ -99,15 +124,27 @@ contract CrossMarginTrading is CrossMarginLiquidation, IMarginTrading {
         address borrowToken,
         uint256 borrowAmount
     ) internal {
-        totalShort[borrowToken] += borrowAmount;
         totalLong[borrowToken] += borrowAmount;
         require(
-            tokenCaps[borrowToken] >= totalShort[borrowToken] &&
-                tokenCaps[borrowToken] >= totalLong[borrowToken],
+            tokenCaps[borrowToken] >= totalLong[borrowToken],
             "Exceeds global token cap"
         );
 
         borrow(account, borrowToken, borrowAmount);
+    }
+
+    function registerRawBorrow(
+        address trader,
+        address borrowToken,
+        uint256 borrowAmount
+    ) external onlyOwnerExec {
+        CrossMarginAccount storage account = marginAccounts[trader];
+        account.borrowTokens.push(borrowToken);
+        account.borrowedYieldQuotientsFP[borrowToken] = Lending(lending())
+            .getUpdatedBorrowYieldAccuFP(borrowToken);
+
+        account.borrowed[borrowToken] = borrowAmount;
+        Lending(lending()).registerBorrow(borrowToken, borrowAmount);
     }
 
     /// @dev gets called by router to affirm withdrawal of tokens from account
@@ -175,9 +212,17 @@ contract CrossMarginTrading is CrossMarginLiquidation, IMarginTrading {
         CrossMarginAccount storage account = marginAccounts[trader];
 
         if (account.borrowed[tokenTo] > 0) {
-            extinguishableDebt = min(outAmount, account.borrowed[tokenTo]);
+            (uint256 extantBorrow, uint256 yieldQuotientFP) =
+                Lending(lending()).applyBorrowInterest(
+                    account.borrowed[tokenTo],
+                    tokenTo,
+                    account.borrowedYieldQuotientsFP[tokenTo]
+                );
+            account.borrowed[tokenTo] = extantBorrow;
+            account.borrowedYieldQuotientsFP[tokenTo] = yieldQuotientFP;
+
+            extinguishableDebt = min(outAmount, extantBorrow);
             extinguishDebt(account, tokenTo, extinguishableDebt);
-            totalShort[tokenTo] -= extinguishableDebt;
         }
 
         uint256 sellAmount = inAmount;
@@ -208,11 +253,6 @@ contract CrossMarginTrading is CrossMarginLiquidation, IMarginTrading {
         );
 
         if (borrowAmount > 0) {
-            totalShort[tokenFrom] += borrowAmount;
-            require(
-                tokenCaps[tokenFrom] >= totalShort[tokenFrom],
-                "Exceeds global token cap"
-            );
             borrow(account, tokenFrom, borrowAmount);
         }
     }

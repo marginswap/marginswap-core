@@ -8,11 +8,11 @@ abstract contract BaseLending {
     uint256 constant ACCUMULATOR_INIT = 10**18;
 
     uint256 constant hoursPerYear = 365 days / (1 hours);
-    uint256 constant CHANGE_POINT = 79;
+    uint256 constant CHANGE_POINT = 82;
     uint256 public normalRatePerPercent =
-        (FP48 * 15) / hoursPerYear / CHANGE_POINT / 100;
+        (FP48 * 12) / hoursPerYear / CHANGE_POINT / 100;
     uint256 public highRatePerPercent =
-        (FP48 * (194 - 15)) / hoursPerYear / (100 - CHANGE_POINT) / 100;
+        (FP48 * (135 - 12)) / hoursPerYear / (100 - CHANGE_POINT) / 100;
 
     struct YieldAccumulator {
         uint256 accumulatorFP;
@@ -24,6 +24,10 @@ abstract contract BaseLending {
         uint256 totalLending;
         uint256 totalBorrowed;
         uint256 lendingCap;
+        uint256 cumulIncentiveAllocationFP;
+        uint256 incentiveLastUpdated;
+        uint256 incentiveEnd;
+        uint256 incentiveTarget;
     }
     mapping(address => LendingMetadata) public lendingMeta;
 
@@ -46,7 +50,8 @@ abstract contract BaseLending {
         returns (uint256 rate)
     {
         rate = FP48;
-        uint256 utilizationPercent = (100 * totalBorrowing) / totalLending;
+        uint256 utilizationPercent =
+            totalLending > 0 ? (100 * totalBorrowing) / totalLending : 0;
         if (utilizationPercent < CHANGE_POINT) {
             rate += utilizationPercent * normalRatePerPercent;
         } else {

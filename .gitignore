@@ -4,3 +4,4 @@ build/
 deployments/localhost
 .vscode
 yarn-error.log
+flattened/

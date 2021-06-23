@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: BUSL-1.1
 pragma solidity ^0.8.0;
-import "./RoleAware.sol";
-import "./Lending.sol";
-import "./PriceAware.sol";
+import "../RoleAware.sol";
+import "../Lending.sol";
+import "../PriceAware.sol";
 
 abstract contract IsolatedMarginAccounts is RoleAware {
     struct IsolatedMarginAccount {
@@ -14,8 +14,6 @@ abstract contract IsolatedMarginAccounts is RoleAware {
 
     address public borrowToken;
     address public holdingToken;
-
-    uint256 public totalDebt;
 
     bytes32 public amms;
     address[] public liquidationTokens;

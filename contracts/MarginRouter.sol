@@ -4,18 +4,43 @@ pragma solidity ^0.8.0;
 import "./RoleAware.sol";
 import "../interfaces/IMarginTrading.sol";
 import "./Lending.sol";
-import "./Admin.sol";
 import "./BaseRouter.sol";
 import "../libraries/IncentiveReporter.sol";
 
 /// @title Top level transaction controller
 contract MarginRouter is RoleAware, BaseRouter {
     event AccountUpdated(address indexed trader);
+    event MarginTrade(
+        address indexed trader,
+        address fromToken,
+        address toToken,
+        uint256 fromAmount,
+        uint256 toAmount
+    );
 
     uint256 public constant mswapFeesPer10k = 10;
     address public immutable WETH;
 
-    constructor(address _WETH, address _roles) RoleAware(_roles) {
+    constructor(
+        address _WETH,
+        address _amm1Factory,
+        address _amm2Factory,
+        address _amm3Factory,
+        bytes32 _amm1InitHash,
+        bytes32 _amm2InitHash,
+        bytes32 _amm3InitHash,
+        address _roles
+    )
+        UniswapStyleLib(
+            _amm1Factory,
+            _amm2Factory,
+            _amm3Factory,
+            _amm1InitHash,
+            _amm2InitHash,
+            _amm3InitHash
+        )
+        RoleAware(_roles)
+    {
         WETH = _WETH;
     }
 
@@ -98,6 +123,7 @@ contract MarginRouter is RoleAware, BaseRouter {
             borrowToken,
             borrowAmount
         );
+        Lending(lending()).updateHourlyYield(borrowToken);
 
         IncentiveReporter.addToClaimAmount(
             borrowToken,
@@ -127,6 +153,7 @@ contract MarginRouter is RoleAware, BaseRouter {
             borrowToken,
             withdrawAmount
         );
+        Lending(lending()).updateHourlyYield(borrowToken);
 
         Fund(fund()).withdraw(borrowToken, msg.sender, withdrawAmount);
         IncentiveReporter.addToClaimAmount(
@@ -168,7 +195,7 @@ contract MarginRouter is RoleAware, BaseRouter {
         uint256 fees = takeFeesFromInput(amountIn);
 
         address[] memory pairs;
-        (amounts, pairs) = UniswapStyleLib.getAmountsOut(
+        (amounts, pairs) = UniswapStyleLib._getAmountsOut(
             amountIn - fees,
             amms,
             tokens
@@ -195,7 +222,7 @@ contract MarginRouter is RoleAware, BaseRouter {
         uint256 deadline
     ) external ensure(deadline) returns (uint256[] memory amounts) {
         address[] memory pairs;
-        (amounts, pairs) = UniswapStyleLib.getAmountsIn(
+        (amounts, pairs) = UniswapStyleLib._getAmountsIn(
             amountOut + takeFeesFromOutput(amountOut),
             amms,
             tokens
@@ -232,6 +259,7 @@ contract MarginRouter is RoleAware, BaseRouter {
             );
         if (extinguishAmount > 0) {
             Lending(lending()).payOff(outToken, extinguishAmount);
+            Lending(lending()).updateHourlyYield(outToken);
             IncentiveReporter.subtractFromClaimAmount(
                 outToken,
                 trader,
@@ -240,10 +268,12 @@ contract MarginRouter is RoleAware, BaseRouter {
         }
         if (borrowAmount > 0) {
             Lending(lending()).registerBorrow(inToken, borrowAmount);
+            Lending(lending()).updateHourlyYield(inToken);
             IncentiveReporter.addToClaimAmount(inToken, trader, borrowAmount);
         }
 
         emit AccountUpdated(trader);
+        emit MarginTrade(trader, inToken, outToken, inAmount, outAmount);
     }
 
     /////////////
@@ -277,7 +307,7 @@ contract MarginRouter is RoleAware, BaseRouter {
             "Calling contract is not authorized to trade with protocl funds"
         );
         address[] memory pairs;
-        (amounts, pairs) = UniswapStyleLib.getAmountsOut(
+        (amounts, pairs) = UniswapStyleLib._getAmountsOut(
             amountIn,
             amms,
             tokens
@@ -313,7 +343,7 @@ contract MarginRouter is RoleAware, BaseRouter {
         );
 
         address[] memory pairs;
-        (amounts, pairs) = UniswapStyleLib.getAmountsIn(
+        (amounts, pairs) = UniswapStyleLib._getAmountsIn(
             amountOut,
             amms,
             tokens
@@ -342,7 +372,7 @@ contract MarginRouter is RoleAware, BaseRouter {
         bytes32 amms,
         address[] calldata tokens
     ) external view returns (uint256[] memory amounts) {
-        (amounts, ) = UniswapStyleLib.getAmountsOut(inAmount, amms, tokens);
+        (amounts, ) = UniswapStyleLib._getAmountsOut(inAmount, amms, tokens);
     }
 
     function getAmountsIn(
@@ -350,6 +380,6 @@ contract MarginRouter is RoleAware, BaseRouter {
         bytes32 amms,
         address[] calldata tokens
     ) external view returns (uint256[] memory amounts) {
-        (amounts, ) = UniswapStyleLib.getAmountsIn(outAmount, amms, tokens);
+        (amounts, ) = UniswapStyleLib._getAmountsIn(outAmount, amms, tokens);
     }
 }

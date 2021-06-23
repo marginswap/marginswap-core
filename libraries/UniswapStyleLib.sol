@@ -1,11 +1,31 @@
 pragma solidity >=0.5.0;
 
 import "@uniswap/v2-core/contracts/interfaces/IUniswapV2Pair.sol";
+import "hardhat/console.sol";
 
-library UniswapStyleLib {
-    address constant UNISWAP_FACTORY =
-        0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f;
-    address constant SUSHI_FACTORY = 0xC0AEe478e3658e2610c5F7A4A2E1777cE9e4f2Ac;
+abstract contract UniswapStyleLib {
+    address public immutable amm1Factory;
+    address public immutable amm2Factory;
+    address public immutable amm3Factory;
+    bytes32 public amm1InitHash;
+    bytes32 public amm2InitHash;
+    bytes32 public amm3InitHash;
+
+    constructor(
+        address _amm1Factory,
+        address _amm2Factory,
+        address _amm3Factory,
+        bytes32 _amm1InitHash,
+        bytes32 _amm2InitHash,
+        bytes32 _amm3InitHash
+    ) {
+        amm1Factory = _amm1Factory;
+        amm2Factory = _amm2Factory;
+        amm3Factory = _amm3Factory;
+        amm1InitHash = _amm1InitHash;
+        amm2InitHash = _amm2InitHash;
+        amm3InitHash = _amm3InitHash;
+    }
 
     // returns sorted token addresses, used to handle return values from pairs sorted in this order
     function sortTokens(address tokenA, address tokenB)
@@ -70,7 +90,7 @@ library UniswapStyleLib {
     }
 
     // performs chained getAmountOut calculations on any number of pairs
-    function getAmountsOut(
+    function _getAmountsOut(
         uint256 amountIn,
         bytes32 amms,
         address[] memory tokens
@@ -88,8 +108,10 @@ library UniswapStyleLib {
 
             address pair =
                 amms[i] == 0
-                    ? pairForUni(inToken, outToken)
-                    : pairForSushi(inToken, outToken);
+                    ? pairForAMM1(inToken, outToken)
+                    : (amms[i] == 0x01
+                       ? pairForAMM2(inToken, outToken)
+                       : pairForAMM3(inToken, outToken));
             pairs[i] = pair;
 
             (uint256 reserveIn, uint256 reserveOut) =
@@ -100,7 +122,7 @@ library UniswapStyleLib {
     }
 
     // performs chained getAmountIn calculations on any number of pairs
-    function getAmountsIn(
+    function _getAmountsIn(
         uint256 amountOut,
         bytes32 amms,
         address[] memory tokens
@@ -118,8 +140,10 @@ library UniswapStyleLib {
 
             address pair =
                 amms[i - 1] == 0
-                    ? pairForUni(inToken, outToken)
-                    : pairForSushi(inToken, outToken);
+                    ? pairForAMM1(inToken, outToken)
+                    : (amms[i -1 ] == 0x01
+                       ? pairForAMM2(inToken, outToken)
+                       : pairForAMM3(inToken, outToken));
             pairs[i - 1] = pair;
 
             (uint256 reserveIn, uint256 reserveOut) =
@@ -129,9 +153,9 @@ library UniswapStyleLib {
     }
 
     // calculates the CREATE2 address for a pair without making any external calls
-    function pairForUni(address tokenA, address tokenB)
+    function pairForAMM1(address tokenA, address tokenB)
         internal
-        pure
+        view
         returns (address pair)
     {
         (address token0, address token1) = sortTokens(tokenA, tokenB);
@@ -141,9 +165,9 @@ library UniswapStyleLib {
                     keccak256(
                         abi.encodePacked(
                             hex"ff",
-                            UNISWAP_FACTORY,
+                            amm1Factory,
                             keccak256(abi.encodePacked(token0, token1)),
-                            hex"96e8ac4277198ff8b6f785478aa9a39f403cb768dd02cbee326c3e7da348845f" // init code hash
+                            amm1InitHash
                         )
                     )
                 )
@@ -151,9 +175,9 @@ library UniswapStyleLib {
         );
     }
 
-    function pairForSushi(address tokenA, address tokenB)
+    function pairForAMM2(address tokenA, address tokenB)
         internal
-        pure
+        view
         returns (address pair)
     {
         (address token0, address token1) = sortTokens(tokenA, tokenB);
@@ -163,9 +187,31 @@ library UniswapStyleLib {
                     keccak256(
                         abi.encodePacked(
                             hex"ff",
-                            SUSHI_FACTORY,
+                            amm2Factory,
                             keccak256(abi.encodePacked(token0, token1)),
-                            hex"e18a34eb0e04b04f7a0ac29a6e80748dca96319b42c54d679cb821dca90c6303" // init code hash
+                            amm2InitHash
+                        )
+                    )
+                )
+            )
+        );
+    }
+
+    function pairForAMM3(address tokenA, address tokenB)
+        internal
+        view
+        returns (address pair)
+    {
+        (address token0, address token1) = sortTokens(tokenA, tokenB);
+        pair = address(
+            uint160(
+                uint256(
+                    keccak256(
+                        abi.encodePacked(
+                            hex"ff",
+                            amm3Factory,
+                            keccak256(abi.encodePacked(token0, token1)),
+                            amm3InitHash
                         )
                     )
                 )
