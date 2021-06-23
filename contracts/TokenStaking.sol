@@ -44,13 +44,13 @@ abstract contract TokenStaking {
         updateCumulativeReward();
         totalCurrentRewardPerBlock = rewardPerBlock;
     }
-    
+
     function add2RewardTarget(uint256 amount) external {
         MFI.safeTransferFrom(msg.sender, address(this), amount);
         updateCumulativeReward();
         rewardTarget += amount;
     }
-    
+
     function removeFromRewardTarget(uint256 amount) external {
         require(msg.sender == roles.owner(), "Not authorized");
         MFI.safeTransfer(msg.sender, amount);
@@ -95,10 +95,11 @@ abstract contract TokenStaking {
 
     function viewUpdatedCumulativeReward() public view returns (uint256) {
         return
-            min(rewardTarget,
+            min(
+                rewardTarget,
                 cumulativeReward +
-                (block.number - lastCumulativeUpdateBlock) *
-                totalCurrentRewardPerBlock
+                    (block.number - lastCumulativeUpdateBlock) *
+                    totalCurrentRewardPerBlock
             );
     }
 
