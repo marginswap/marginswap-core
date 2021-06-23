@@ -25,6 +25,7 @@ abstract contract TokenStaking {
     uint256 public lastCumulativeUpdateBlock;
     uint256 public totalCurrentWeights;
     uint256 public totalCurrentRewardPerBlock;
+    uint256 public rewardTarget;
 
     constructor(
         address _MFI,
@@ -41,6 +42,18 @@ abstract contract TokenStaking {
     function setTotalRewardPerBlock(uint256 rewardPerBlock) external {
         require(msg.sender == roles.owner(), "Not authorized");
         totalCurrentRewardPerBlock = rewardPerBlock;
+    }
+    
+    function add2RewardTarget(uint256 amount) external {
+        MFI.safeTransferFrom(msg.sender, address(this), amount);
+        rewardTarget += amount;
+    }
+    
+    function removeFromRewardTarget(uint256 amount) external {
+        require(msg.sender == roles.owner(), "Not authorized");
+        MFI.safeTransfer(msg.sender, amount);
+        rewardTarget -= amount;
+        require(rewardTarget >= cumulativeReward, "Trying to remove too much");
     }
 
     function stake(uint256 amount, uint256 duration) external {
@@ -79,9 +92,11 @@ abstract contract TokenStaking {
 
     function viewUpdatedCumulativeReward() public view returns (uint256) {
         return
-            cumulativeReward +
-            (block.number - lastCumulativeUpdateBlock) *
-            totalCurrentRewardPerBlock;
+            min(rewardTarget,
+                cumulativeReward +
+                (block.number - lastCumulativeUpdateBlock) *
+                totalCurrentRewardPerBlock
+            );
     }
 
     function updateCumulativeReward() public returns (uint256) {
