@@ -8,8 +8,9 @@ contract LiquidityMiningReward is TokenStaking {
     constructor(
         address _MFI,
         address LiquidityToken,
+        uint256 initialRewardPerBlock,
         address _roles
-    ) TokenStaking(_MFI, LiquidityToken, _roles) {}
+    ) TokenStaking(_MFI, LiquidityToken, initialRewardPerBlock, _roles) {}
 }
 
 // USDC - MFI pair token

@@ -25,22 +25,42 @@ abstract contract TokenStaking {
     uint256 public lastCumulativeUpdateBlock;
     uint256 public totalCurrentWeights;
     uint256 public totalCurrentRewardPerBlock;
+    uint256 public rewardTarget;
 
     constructor(
         address _MFI,
         address _stakeToken,
+        uint256 initialRewardPerBlock,
         address _roles
     ) {
         MFI = IERC20(_MFI);
         stakeToken = IERC20(_stakeToken);
         roles = Roles(_roles);
+
+        lastCumulativeUpdateBlock = block.number;
+        totalCurrentRewardPerBlock = initialRewardPerBlock;
     }
 
     // TODO: function to load up with MFI
 
     function setTotalRewardPerBlock(uint256 rewardPerBlock) external {
-        require(msg.sender == roles.owner(), "Not authorized");
+        require(msg.sender == roles.owner() || msg.sender == roles.executor(), "Not authorized");
+        updateCumulativeReward();
         totalCurrentRewardPerBlock = rewardPerBlock;
+    }
+
+    function add2RewardTarget(uint256 amount) external {
+        MFI.safeTransferFrom(msg.sender, address(this), amount);
+        updateCumulativeReward();
+        rewardTarget += amount;
+    }
+
+    function removeFromRewardTarget(uint256 amount, address recipient) external {
+        require(msg.sender == roles.owner() || msg.sender == roles.executor(), "Not authorized");
+        MFI.safeTransfer(recipient, amount);
+        updateCumulativeReward();
+        rewardTarget -= amount;
+        require(rewardTarget >= cumulativeReward, "Trying to remove too much");
     }
 
     function stake(uint256 amount, uint256 duration) external {
@@ -79,9 +99,12 @@ abstract contract TokenStaking {
 
     function viewUpdatedCumulativeReward() public view returns (uint256) {
         return
-            cumulativeReward +
-            (block.number - lastCumulativeUpdateBlock) *
-            totalCurrentRewardPerBlock;
+            min(
+                rewardTarget,
+                cumulativeReward +
+                    (block.number - lastCumulativeUpdateBlock) *
+                    totalCurrentRewardPerBlock
+            );
     }
 
     function updateCumulativeReward() public returns (uint256) {
@@ -110,11 +133,12 @@ abstract contract TokenStaking {
     function _withdrawReward(address recipient, StakeAccount storage account)
         internal
     {
-        require(account.cumulativeStart > 0, "Account not active");
-        uint256 reward =
-            min(_viewRewardAmount(account), MFI.balanceOf(address(this)));
+        if (account.stakeWeight > 0) {
+            uint256 reward =
+                min(_viewRewardAmount(account), MFI.balanceOf(address(this)));
 
-        MFI.safeTransfer(recipient, reward);
+            MFI.safeTransfer(recipient, reward);
+        }
     }
 
     function withdrawReward() external {
