@@ -30,17 +30,21 @@ abstract contract TokenStaking {
     constructor(
         address _MFI,
         address _stakeToken,
+        uint256 initialRewardPerBlock,
         address _roles
     ) {
         MFI = IERC20(_MFI);
         stakeToken = IERC20(_stakeToken);
         roles = Roles(_roles);
+
+        lastCumulativeUpdateBlock = block.number;
+        totalCurrentRewardPerBlock = initialRewardPerBlock;
     }
 
     // TODO: function to load up with MFI
 
     function setTotalRewardPerBlock(uint256 rewardPerBlock) external {
-        require(msg.sender == roles.owner(), "Not authorized");
+        require(msg.sender == roles.owner() || msg.sender == roles.executor(), "Not authorized");
         updateCumulativeReward();
         totalCurrentRewardPerBlock = rewardPerBlock;
     }
@@ -51,9 +55,9 @@ abstract contract TokenStaking {
         rewardTarget += amount;
     }
 
-    function removeFromRewardTarget(uint256 amount) external {
-        require(msg.sender == roles.owner(), "Not authorized");
-        MFI.safeTransfer(msg.sender, amount);
+    function removeFromRewardTarget(uint256 amount, address recipient) external {
+        require(msg.sender == roles.owner() || msg.sender == roles.executor(), "Not authorized");
+        MFI.safeTransfer(recipient, amount);
         updateCumulativeReward();
         rewardTarget -= amount;
         require(rewardTarget >= cumulativeReward, "Trying to remove too much");
