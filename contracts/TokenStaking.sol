@@ -125,7 +125,7 @@ abstract contract TokenStaking {
     function _withdrawReward(address recipient, StakeAccount storage account)
         internal
     {
-        require(account.cumulativeStart > 0, "Account not active");
+        require(account.stakeWeight > 0, "Account not active");
         uint256 reward =
             min(_viewRewardAmount(account), MFI.balanceOf(address(this)));
 
