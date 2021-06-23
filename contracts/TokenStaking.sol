@@ -133,11 +133,12 @@ abstract contract TokenStaking {
     function _withdrawReward(address recipient, StakeAccount storage account)
         internal
     {
-        require(account.stakeWeight > 0, "Account not active");
-        uint256 reward =
-            min(_viewRewardAmount(account), MFI.balanceOf(address(this)));
+        if (account.stakeWeight > 0) {
+            uint256 reward =
+                min(_viewRewardAmount(account), MFI.balanceOf(address(this)));
 
-        MFI.safeTransfer(recipient, reward);
+            MFI.safeTransfer(recipient, reward);
+        }
     }
 
     function withdrawReward() external {
