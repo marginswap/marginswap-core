@@ -16,7 +16,7 @@ const deploy: DeployFunction = async function ({
 
   const roles = await deployments.get('Roles').then(Roles => ethers.getContractAt('Roles', Roles.address));
 
-  const liquidityMiningReward = await deploy('LiquidityMiningReward', {
+  const Staking = await deploy('LiquidityMiningReward', {
     from: deployer,
     args: [mfiAddress, liquidityToken, roles.address],
     log: true,
