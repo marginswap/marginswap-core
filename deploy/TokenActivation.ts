@@ -69,6 +69,16 @@ export const tokensPerNetwork: Record<string, Record<string, string>> = {
     USDT: "0xc2132D05D31c914a87C6611C10748AEb04B58e8F",
     LINK: "0x53E0bca35eC356BD5ddDFebbD1Fc0fD03FaBad39",
     AAVE: "0xD6DF932A45C0f255f85145f286eA0b292B21C90B",
+  },
+  bsc: {
+    wBNB: '0xbb4cdb9cbd36b01bd1cbaebf2de08d9173bc095c',
+    CAKE: '0x0e09fabb73bd3ade0a17ecc321fd13a19e81ce82',
+    ETH: '0x2170ed0880ac9a755fd29b2688956bd959f933f8',
+    USDC: '0x8ac76a51cc950d9822d68b83fe1ad97b32cd580d',
+    BUSD: '0xe9e7cea3dedca5984780bafc599bd69add087d56',
+    DAI: '0x1af3f329e8be154074d8769d1ffa4ee058b1dbc3',
+    BTCB: '0x7130d2a12b9bcbfae4f2634d864a1ee1ce3ead9c',
+    USDT: '0x55d398326f99059ff775485246999027b3197955'
   }
 };
 
@@ -86,6 +96,35 @@ export type TokenInitRecord = {
   ammPath?: AMMs[];
 };
 export const tokenParams: { [tokenName: string]: TokenInitRecord } = {
+  WBNB: {
+    exposureCap: 1000000,
+    lendingBuffer: 10000,
+    incentiveWeight: 3,
+    liquidationTokenPath: ['WMATIC'],
+    decimals: 18
+  },
+  CAKE: {
+    exposureCap: 200000,
+    lendingBuffer: 100,
+    incentiveWeight: 1,
+    liquidationTokenPath: ['LINK', 'BASE'],
+    decimals: 18,
+    ammPath: [AMMs.UNISWAP, AMMs.UNISWAP]
+  },
+  BUSD: {
+    exposureCap: 10000000,
+    lendingBuffer: 10000,
+    incentiveWeight: 3,
+    liquidationTokenPath: ['DAI', 'BASE'],
+    decimals: 18
+  },
+  BTCB: {
+    exposureCap: 2000,
+    lendingBuffer: 20,
+    incentiveWeight: 3,
+    liquidationTokenPath: ['WBTC', 'BASE'],
+    decimals: 18
+  },
   DAI: {
     exposureCap: 10000000,
     lendingBuffer: 10000,
