@@ -174,6 +174,12 @@ export default {
       // url: 'https://matic-mainnet-full-rpc.bwarelabs.com',
       accounts: [privateKey],
       // gasPrice: 1000000000
+    },
+    bsc: {
+      url: "https://bsc-dataseed.binance.org/",
+      chainId: 56,
+      gasPrice: 20000000000,
+      accounts: [privateKey]
     }
   },
   solidity: {
