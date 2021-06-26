@@ -16,7 +16,8 @@ const baseCurrency = {
   mainnet: 'WETH',
   avalanche: 'WAVAX',
   localhost: 'WETH',
-  matic: 'WETH'
+  matic: 'WETH',
+  bsc: 'WBNB'
 };
 
 export const tokensPerNetwork: Record<string, Record<string, string>> = {
@@ -71,7 +72,7 @@ export const tokensPerNetwork: Record<string, Record<string, string>> = {
     AAVE: "0xD6DF932A45C0f255f85145f286eA0b292B21C90B",
   },
   bsc: {
-    wBNB: '0xbb4cdb9cbd36b01bd1cbaebf2de08d9173bc095c',
+    WBNB: '0xbb4cdb9cbd36b01bd1cbaebf2de08d9173bc095c',
     CAKE: '0x0e09fabb73bd3ade0a17ecc321fd13a19e81ce82',
     ETH: '0x2170ed0880ac9a755fd29b2688956bd959f933f8',
     USDC: '0x8ac76a51cc950d9822d68b83fe1ad97b32cd580d',
