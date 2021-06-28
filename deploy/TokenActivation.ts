@@ -101,14 +101,14 @@ export const tokenParams: { [tokenName: string]: TokenInitRecord } = {
     exposureCap: 1000000,
     lendingBuffer: 10000,
     incentiveWeight: 3,
-    liquidationTokenPath: ['WMATIC'],
+    liquidationTokenPath: ['WBNB'],
     decimals: 18
   },
   CAKE: {
     exposureCap: 200000,
     lendingBuffer: 100,
     incentiveWeight: 1,
-    liquidationTokenPath: ['LINK', 'BASE'],
+    liquidationTokenPath: ['CAKE', 'BASE'],
     decimals: 18,
     ammPath: [AMMs.UNISWAP, AMMs.UNISWAP]
   },
@@ -116,14 +116,14 @@ export const tokenParams: { [tokenName: string]: TokenInitRecord } = {
     exposureCap: 10000000,
     lendingBuffer: 10000,
     incentiveWeight: 3,
-    liquidationTokenPath: ['DAI', 'BASE'],
+    liquidationTokenPath: ['BUSD', 'BASE'],
     decimals: 18
   },
   BTCB: {
     exposureCap: 2000,
     lendingBuffer: 20,
     incentiveWeight: 3,
-    liquidationTokenPath: ['WBTC', 'BASE'],
+    liquidationTokenPath: ['BTCB', 'BASE'],
     decimals: 18
   },
   DAI: {
