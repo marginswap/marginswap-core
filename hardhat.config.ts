@@ -204,7 +204,8 @@ export default {
       1: MFI_ADDRESS,
       42: MFI_ADDRESS,
       31337: MFI_ADDRESS,
-      137: '0x7Bc429a2fA7d71C4693424FDcaB5a2521b9FD343'
+      137: '0x7Bc429a2fA7d71C4693424FDcaB5a2521b9FD343',
+      56: '0x37bdfd6ed491ee0e0fe2ce49de2cb573880e3734'
     },
     lockedMfi: {
       default: LOCKED_MFI
