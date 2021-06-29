@@ -71,7 +71,7 @@ abstract contract UniswapStyleLib {
         );
         uint256 amountInWithFee = amountIn * feeBase;
         uint256 numerator = amountInWithFee * reserveOut;
-        uint256 denominator = reserveIn * 1_000 + amountInWithFee;
+        uint256 denominator = reserveIn * 10_000 + amountInWithFee;
         amountOut = numerator / denominator;
     }
 
@@ -86,7 +86,7 @@ abstract contract UniswapStyleLib {
             reserveIn > 0 && reserveOut > 0,
             "UniswapV2Library: INSUFFICIENT_LIQUIDITY"
         );
-        uint256 numerator = reserveIn * amountOut * 1_000;
+        uint256 numerator = reserveIn * amountOut * 10_000;
 
         uint256 denominator = (reserveOut - amountOut) * feeBase;
         amountIn = (numerator / denominator) + 1;

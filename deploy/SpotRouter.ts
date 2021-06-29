@@ -32,11 +32,11 @@ export const amm3InitHashes = {
 };
 
 const feeBases = {
-  56: 998
+  56: 9975
 }
 
 export function getFeeBase(chainId) {
-  return feeBases[chainId] ?? 997;
+  return feeBases[chainId] ?? 9970;
 }
 
 const deploy: DeployFunction = async function ({
