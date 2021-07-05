@@ -5,15 +5,16 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "./Roles.sol";
 
+struct StakeAccount {
+    uint256 stakeAmount;
+    uint256 stakeWeight;
+    uint256 cumulativeStart;
+    uint256 lockEnd;
+}
+
 abstract contract TokenStaking {
     using SafeERC20 for IERC20;
 
-    struct StakeAccount {
-        uint256 stakeAmount;
-        uint256 stakeWeight;
-        uint256 cumulativeStart;
-        uint256 lockEnd;
-    }
     IERC20 public immutable stakeToken;
     /// Margenswap (MFI) token address
     IERC20 public immutable MFI;
