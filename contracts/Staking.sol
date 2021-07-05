@@ -217,10 +217,6 @@ contract StakingRewards is ReentrancyGuard, Ownable {
         external
         onlyOwner
     {
-        require(
-            tokenAddress != address(stakingToken),
-            "Cannot withdraw the staking token"
-        );
         IERC20(tokenAddress).safeTransfer(owner(), tokenAmount);
         emit Recovered(tokenAddress, tokenAmount);
     }
@@ -247,7 +243,12 @@ contract StakingRewards is ReentrancyGuard, Ownable {
         for (uint256 i; accounts.length > i; i++) {
             address accountAddress = accounts[i];
             StakeAccount memory account;
-            (account.stakeAmount, account.stakeWeight, account.cumulativeStart, account.lockEnd) = legacy.stakeAccounts(accountAddress);
+            (
+                account.stakeAmount,
+                account.stakeWeight,
+                account.cumulativeStart,
+                account.lockEnd
+            ) = legacy.stakeAccounts(accountAddress);
             uint256 amount = account.stakeAmount;
 
             _totalSupply = _totalSupply.add(amount);
@@ -261,17 +262,17 @@ contract StakingRewards is ReentrancyGuard, Ownable {
                 if (remaining > 30 days) {
                     // bonus is the additional 1 / 3 of reward that a 3 month should get relative to standard
                     // 1 month lockup
-                    // calculated for reward target scaled to the portion of 90 days remaining months
+                    // calculated for their remaining reward period
                     uint256 bonus =
-                        (_rewardTarget *
-                            (90 days - remaining) *
-                            account.stakeWeight) /
-                            (3 * 90 days * _startingWeights);
+                        (((_rewardTarget * account.stakeWeight) /
+                            _startingWeights) * (90 days - remaining)) /
+                            (90 days) /
+                            3;
                     rewards[accountAddress] += bonus;
                     _legacyCarry += bonus;
                 }
             }
-            legacyCarry = _legacyCarry;
+            legacyCarry += _legacyCarry;
         }
     }
 
