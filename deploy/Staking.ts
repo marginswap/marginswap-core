@@ -12,10 +12,7 @@ const deploy: DeployFunction = async function ({
   const { deploy } = deployments;
   const { deployer, mfiAddress } = await getNamedAccounts();
 
-  const legacyContract =
-    network.name == "localhost"
-      ? "0x6002830D2f02D987B18d01A1CCce842ae09899d5"
-      : (await deployments.get("MFIStaking")).address;
+  const legacyContract = "0x6002830D2f02D987B18d01A1CCce842ae09899d5";
 
   const Staking = await deploy("Staking", {
     from: deployer,
