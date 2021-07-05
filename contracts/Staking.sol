@@ -1,11 +1,10 @@
-//import "openzeppelin-solidity-2.3.0/contracts/math/Math.sol";
-//import "openzeppelin-solidity-2.3.0/contracts/math/SafeMath.sol";
-//import "openzeppelin-solidity-2.3.0/contracts/token/ERC20/ERC20Detailed.sol";
-//import "openzeppelin-solidity-2.3.0/contracts/token/ERC20/SafeERC20.sol";
+pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts/utils/math/SafeMath.sol";
+import "@openzeppelin/contracts/utils/math/Math.sol";
 import "./TokenStaking.sol";
 
 // https://docs.synthetix.io/contracts/source/contracts/stakingrewards
@@ -31,7 +30,7 @@ contract StakingRewards is ReentrancyGuard, Ownable {
     mapping(address => uint256) public rewards;
 
     mapping(address => uint256) public stakeStart;
-    mapping(address => boolean) public migrated;
+    mapping(address => bool) public migrated;
     uint256 constant MAX_WEIGHT = 3 * 10**19;
     uint256 public startingWeights;
     mapping(address => StakeAccount) public legacyStakeAccounts;
@@ -44,15 +43,12 @@ contract StakingRewards is ReentrancyGuard, Ownable {
     /* ========== CONSTRUCTOR ========== */
 
     constructor(
-        address _owner,
-        address _rewardsDistribution,
         address _rewardsToken,
         address _stakingToken,
         address legacyContract
-    ) public Owned(_owner) {
+    ) Ownable() {
         rewardsToken = IERC20(_rewardsToken);
         stakingToken = IERC20(_stakingToken);
-        rewardsDistribution = _rewardsDistribution;
         legacy = TokenStaking(legacyContract);
     }
 
@@ -147,8 +143,10 @@ contract StakingRewards is ReentrancyGuard, Ownable {
         _balances[msg.sender] = _balances[msg.sender].sub(amount);
 
         if (migrated[msg.sender]) {
-            StakeAccount memory account = legacy.stakeAccounts(msg.sender);
-            require(account.stakeWeight < MAX_WEIGHT, "Migrate account first");
+            uint256 w;
+            uint256 __;
+            (__, w, __, __) = legacy.stakeAccounts(msg.sender);
+            require(w < MAX_WEIGHT, "Migrate account first");
 
             uint256 rewardDiff = _rewardDiff(legacyStakeAccounts[msg.sender]);
             if (rewardDiff >= amount) {
@@ -175,7 +173,7 @@ contract StakingRewards is ReentrancyGuard, Ownable {
 
     function notifyRewardAmount(uint256 reward)
         external
-        onlyRewardsDistribution
+        onlyOwner
         updateReward(address(0))
     {
         if (legacyCarry > 0) {
@@ -223,7 +221,7 @@ contract StakingRewards is ReentrancyGuard, Ownable {
             tokenAddress != address(stakingToken),
             "Cannot withdraw the staking token"
         );
-        IERC20(tokenAddress).safeTransfer(owner, tokenAmount);
+        IERC20(tokenAddress).safeTransfer(owner(), tokenAmount);
         emit Recovered(tokenAddress, tokenAmount);
     }
 
@@ -234,13 +232,6 @@ contract StakingRewards is ReentrancyGuard, Ownable {
         );
         rewardsDuration = _rewardsDuration;
         emit RewardsDurationUpdated(rewardsDuration);
-    }
-
-    function setRewardsDistribution(address _rewardsDistribution)
-        external
-        onlyOwner
-    {
-        rewardsDistribution = _rewardsDistribution;
     }
 
     function setLockTime(uint256 t) external onlyOwner {
@@ -255,7 +246,8 @@ contract StakingRewards is ReentrancyGuard, Ownable {
         uint256 _legacyCarry;
         for (uint256 i; accounts.length > i; i++) {
             address accountAddress = accounts[i];
-            StakeAccount memory account = legacy.stakeAccounts(accountAddress);
+            StakeAccount memory account;
+            (account.stakeAmount, account.stakeWeight, account.cumulativeStart, account.lockEnd) = legacy.stakeAccounts(accountAddress);
             uint256 amount = account.stakeAmount;
 
             _totalSupply = _totalSupply.add(amount);
@@ -292,14 +284,6 @@ contract StakingRewards is ReentrancyGuard, Ownable {
             rewards[account] = viewRewardAmount(account);
             userRewardPerTokenPaid[account] = rewardPerTokenStored;
         }
-        _;
-    }
-
-    modifier onlyRewardsDistribution() {
-        require(
-            msg.sender == rewardsDistribution,
-            "Caller is not RewardsDistribution contract"
-        );
         _;
     }
 
