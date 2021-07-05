@@ -1,29 +1,42 @@
-pragma solidity ^0.5.16;
+//import "openzeppelin-solidity-2.3.0/contracts/math/Math.sol";
+//import "openzeppelin-solidity-2.3.0/contracts/math/SafeMath.sol";
+//import "openzeppelin-solidity-2.3.0/contracts/token/ERC20/ERC20Detailed.sol";
+//import "openzeppelin-solidity-2.3.0/contracts/token/ERC20/SafeERC20.sol";
 
-import "openzeppelin-solidity-2.3.0/contracts/math/Math.sol";
-import "openzeppelin-solidity-2.3.0/contracts/math/SafeMath.sol";
-import "openzeppelin-solidity-2.3.0/contracts/token/ERC20/ERC20Detailed.sol";
-import "openzeppelin-solidity-2.3.0/contracts/token/ERC20/SafeERC20.sol";
-import "openzeppelin-solidity-2.3.0/contracts/utils/ReentrancyGuard.sol";
+import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
+import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
+import "./TokenStaking.sol";
 
 // https://docs.synthetix.io/contracts/source/contracts/stakingrewards
-contract StakingRewards is ReentrancyGuard {
+contract StakingRewards is ReentrancyGuard, Ownable {
     using SafeMath for uint256;
     using SafeERC20 for IERC20;
 
     /* ========== STATE VARIABLES ========== */
 
+    TokenStaking legacy;
+
     IERC20 public rewardsToken;
     IERC20 public stakingToken;
     uint256 public periodFinish = 0;
     uint256 public rewardRate = 0;
-    uint256 public rewardsDuration = 7 days;
+    uint256 public rewardsDuration = 30 days;
     uint256 public lastUpdateTime;
     uint256 public rewardPerTokenStored;
 
+    uint256 public lockTime = 30 days;
+
     mapping(address => uint256) public userRewardPerTokenPaid;
     mapping(address => uint256) public rewards;
+
+    mapping(address => uint256) public stakeStart;
+    mapping(address => boolean) public migrated;
+    uint256 constant MAX_WEIGHT = 3 * 10**19;
+    uint256 public startingWeights;
+    mapping(address => StakeAccount) public legacyStakeAccounts;
+
+    uint256 public legacyCarry;
 
     uint256 private _totalSupply;
     mapping(address => uint256) private _balances;
@@ -34,11 +47,13 @@ contract StakingRewards is ReentrancyGuard {
         address _owner,
         address _rewardsDistribution,
         address _rewardsToken,
-        address _stakingToken
+        address _stakingToken,
+        address legacyContract
     ) public Owned(_owner) {
         rewardsToken = IERC20(_rewardsToken);
         stakingToken = IERC20(_stakingToken);
         rewardsDistribution = _rewardsDistribution;
+        legacy = TokenStaking(legacyContract);
     }
 
     /* ========== VIEWS ========== */
@@ -61,37 +76,93 @@ contract StakingRewards is ReentrancyGuard {
         }
         return
             rewardPerTokenStored.add(
-                lastTimeRewardApplicable().sub(lastUpdateTime).mul(rewardRate).mul(1e18).div(_totalSupply)
+                lastTimeRewardApplicable()
+                    .sub(lastUpdateTime)
+                    .mul(rewardRate)
+                    .mul(1e18)
+                    .div(_totalSupply)
             );
     }
 
-    function earned(address account) public view returns (uint256) {
-        return _balances[account].mul(rewardPerToken().sub(userRewardPerTokenPaid[account])).div(1e18).add(rewards[account]);
+    function viewRewardAmount(address account) public view returns (uint256) {
+        return
+            _balances[account]
+                .mul(rewardPerToken().sub(userRewardPerTokenPaid[account]))
+                .div(1e18)
+                .add(rewards[account]);
     }
 
     function getRewardForDuration() external view returns (uint256) {
         return rewardRate.mul(rewardsDuration);
     }
 
+    function _rewardDiff(StakeAccount memory account)
+        internal
+        view
+        returns (uint256)
+    {
+        uint256 totalReward = legacy.viewUpdatedCumulativeReward();
+
+        uint256 startingReward =
+            ((totalReward - account.cumulativeStart) * account.stakeWeight) /
+                (startingWeights + 1);
+
+        uint256 currentReward =
+            ((totalReward - account.cumulativeStart) * account.stakeWeight) /
+                (legacy.totalCurrentWeights() + 1);
+
+        if (startingReward >= currentReward) {
+            return 0;
+        } else {
+            return currentReward - startingReward;
+        }
+    }
+
     /* ========== MUTATIVE FUNCTIONS ========== */
 
-    function stake(uint256 amount) external nonReentrant updateReward(msg.sender) {
+    function stake(uint256 amount)
+        external
+        nonReentrant
+        updateReward(msg.sender)
+    {
         require(amount > 0, "Cannot stake 0");
         _totalSupply = _totalSupply.add(amount);
         _balances[msg.sender] = _balances[msg.sender].add(amount);
         stakingToken.safeTransferFrom(msg.sender, address(this), amount);
         emit Staked(msg.sender, amount);
+        if (stakeStart[msg.sender] == 0) {
+            stakeStart[msg.sender] = block.timestamp;
+        }
     }
 
-    function withdraw(uint256 amount) public nonReentrant updateReward(msg.sender) {
+    function withdrawStake(uint256 amount)
+        external
+        nonReentrant
+        updateReward(msg.sender)
+    {
         require(amount > 0, "Cannot withdraw 0");
+        require(block.timestamp >= stakeStart[msg.sender] + lockTime);
+
         _totalSupply = _totalSupply.sub(amount);
         _balances[msg.sender] = _balances[msg.sender].sub(amount);
+
+        if (migrated[msg.sender]) {
+            StakeAccount memory account = legacy.stakeAccounts(msg.sender);
+            require(account.stakeWeight < MAX_WEIGHT, "Migrate account first");
+
+            uint256 rewardDiff = _rewardDiff(legacyStakeAccounts[msg.sender]);
+            if (rewardDiff >= amount) {
+                amount = 0;
+            } else {
+                amount -= rewardDiff;
+            }
+        }
+
         stakingToken.safeTransfer(msg.sender, amount);
         emit Withdrawn(msg.sender, amount);
     }
 
-    function getReward() public nonReentrant updateReward(msg.sender) {
+    function withdrawReward() public nonReentrant updateReward(msg.sender) {
         uint256 reward = rewards[msg.sender];
         if (reward > 0) {
             rewards[msg.sender] = 0;
@@ -100,14 +171,17 @@ contract StakingRewards is ReentrancyGuard {
         }
     }
 
-    function exit() external {
-        withdraw(_balances[msg.sender]);
-        getReward();
-    }
-
     /* ========== RESTRICTED FUNCTIONS ========== */
 
-    function notifyRewardAmount(uint256 reward) external onlyRewardsDistribution updateReward(address(0)) {
+    function notifyRewardAmount(uint256 reward)
+        external
+        onlyRewardsDistribution
+        updateReward(address(0))
+    {
+        if (legacyCarry > 0) {
+            reward -= legacyCarry;
+            legacyCarry = 0;
+        }
         if (block.timestamp >= periodFinish) {
             rewardRate = reward.div(rewardsDuration);
         } else {
@@ -120,8 +194,11 @@ contract StakingRewards is ReentrancyGuard {
         // This keeps the reward rate in the right range, preventing overflows due to
         // very high values of rewardRate in the earned and rewardsPerToken functions;
         // Reward + leftover must be less than 2^256 / 10^18 to avoid overflow.
-        uint balance = rewardsToken.balanceOf(address(this));
-        require(rewardRate <= balance.div(rewardsDuration), "Provided reward too high");
+        uint256 balance = rewardsToken.balanceOf(address(this));
+        require(
+            rewardRate <= balance.div(rewardsDuration),
+            "Provided reward too high"
+        );
 
         lastUpdateTime = block.timestamp;
         periodFinish = block.timestamp.add(rewardsDuration);
@@ -129,13 +206,23 @@ contract StakingRewards is ReentrancyGuard {
     }
 
     // End rewards emission earlier
-    function updatePeriodFinish(uint timestamp) external onlyOwner updateReward(address(0)) {
+    function updatePeriodFinish(uint256 timestamp)
+        external
+        onlyOwner
+        updateReward(address(0))
+    {
         periodFinish = timestamp;
     }
 
     // Added to support recovering LP Rewards from other systems such as BAL to be distributed to holders
-    function recoverERC20(address tokenAddress, uint256 tokenAmount) external onlyOwner {
-        require(tokenAddress != address(stakingToken), "Cannot withdraw the staking token");
+    function recoverERC20(address tokenAddress, uint256 tokenAmount)
+        external
+        onlyOwner
+    {
+        require(
+            tokenAddress != address(stakingToken),
+            "Cannot withdraw the staking token"
+        );
         IERC20(tokenAddress).safeTransfer(owner, tokenAmount);
         emit Recovered(tokenAddress, tokenAmount);
     }
@@ -149,8 +236,51 @@ contract StakingRewards is ReentrancyGuard {
         emit RewardsDurationUpdated(rewardsDuration);
     }
 
-    function setRewardsDistribution(address _rewardsDistribution) external onlyOwner {
+    function setRewardsDistribution(address _rewardsDistribution)
+        external
+        onlyOwner
+    {
         rewardsDistribution = _rewardsDistribution;
+    }
+
+    function setLockTime(uint256 t) external onlyOwner {
+        lockTime = t;
+    }
+
+    function migrate(address[] calldata accounts) external onlyOwner {
+        startingWeights = legacy.totalCurrentWeights();
+        uint256 _startingWeights = startingWeights;
+        uint256 _rewardTarget = legacy.rewardTarget();
+
+        uint256 _legacyCarry;
+        for (uint256 i; accounts.length > i; i++) {
+            address accountAddress = accounts[i];
+            StakeAccount memory account = legacy.stakeAccounts(accountAddress);
+            uint256 amount = account.stakeAmount;
+
+            _totalSupply = _totalSupply.add(amount);
+            _balances[accountAddress] = _balances[accountAddress].add(amount);
+            stakeStart[accountAddress] = account.lockEnd - lockTime;
+            migrated[accountAddress] = true;
+            legacyStakeAccounts[accountAddress] = account;
+
+            if (account.lockEnd > block.timestamp) {
+                uint256 remaining = account.lockEnd - block.timestamp;
+                if (remaining > 30 days) {
+                    // bonus is the additional 1 / 3 of reward that a 3 month should get relative to standard
+                    // 1 month lockup
+                    // calculated for reward target scaled to the portion of 90 days remaining months
+                    uint256 bonus =
+                        (_rewardTarget *
+                            (90 days - remaining) *
+                            account.stakeWeight) /
+                            (3 * 90 days * _startingWeights);
+                    rewards[accountAddress] += bonus;
+                    _legacyCarry += bonus;
+                }
+            }
+            legacyCarry = _legacyCarry;
+        }
     }
 
     /* ========== MODIFIERS ========== */
@@ -159,14 +289,17 @@ contract StakingRewards is ReentrancyGuard {
         rewardPerTokenStored = rewardPerToken();
         lastUpdateTime = lastTimeRewardApplicable();
         if (account != address(0)) {
-            rewards[account] = earned(account);
+            rewards[account] = viewRewardAmount(account);
             userRewardPerTokenPaid[account] = rewardPerTokenStored;
         }
         _;
     }
 
     modifier onlyRewardsDistribution() {
-        require(msg.sender == rewardsDistribution, "Caller is not RewardsDistribution contract");
+        require(
+            msg.sender == rewardsDistribution,
+            "Caller is not RewardsDistribution contract"
+        );
         _;
     }
 
