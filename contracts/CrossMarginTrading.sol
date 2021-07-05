@@ -20,6 +20,7 @@ contract CrossMarginTrading is CrossMarginLiquidation, IMarginTrading {
         bytes32 _amm1InitHash,
         bytes32 _amm2InitHash,
         bytes32 _amm3InitHash,
+        uint256 _feeBase,
         address _roles
     )
         RoleAware(_roles)
@@ -30,7 +31,8 @@ contract CrossMarginTrading is CrossMarginLiquidation, IMarginTrading {
             _amm3Factory,
             _amm1InitHash,
             _amm2InitHash,
-            _amm3InitHash
+            _amm3InitHash,
+            _feeBase
         )
     {}
 

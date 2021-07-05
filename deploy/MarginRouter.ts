@@ -1,6 +1,6 @@
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
 import { DeployFunction } from 'hardhat-deploy/types';
-import { amm1InitHashes, amm2InitHashes, amm3InitHashes } from './SpotRouter';
+import { amm1InitHashes, amm2InitHashes, amm3InitHashes, getFeeBase } from './SpotRouter';
 
 const deploy: DeployFunction = async function ({
   getNamedAccounts,
@@ -27,6 +27,7 @@ const deploy: DeployFunction = async function ({
       amm1InitHash,
       amm2InitHash,
       amm3InitHash,
+      getFeeBase(await getChainId()),
       Roles.address
     ],
     log: true,

@@ -10,6 +10,7 @@ abstract contract UniswapStyleLib {
     bytes32 public amm1InitHash;
     bytes32 public amm2InitHash;
     bytes32 public amm3InitHash;
+    uint256 public immutable feeBase;
 
     constructor(
         address _amm1Factory,
@@ -17,7 +18,8 @@ abstract contract UniswapStyleLib {
         address _amm3Factory,
         bytes32 _amm1InitHash,
         bytes32 _amm2InitHash,
-        bytes32 _amm3InitHash
+        bytes32 _amm3InitHash,
+        uint256 _feeBase
     ) {
         amm1Factory = _amm1Factory;
         amm2Factory = _amm2Factory;
@@ -25,6 +27,7 @@ abstract contract UniswapStyleLib {
         amm1InitHash = _amm1InitHash;
         amm2InitHash = _amm2InitHash;
         amm3InitHash = _amm3InitHash;
+        feeBase = _feeBase;
     }
 
     // returns sorted token addresses, used to handle return values from pairs sorted in this order
@@ -60,15 +63,15 @@ abstract contract UniswapStyleLib {
         uint256 amountIn,
         uint256 reserveIn,
         uint256 reserveOut
-    ) internal pure returns (uint256 amountOut) {
+    ) internal view returns (uint256 amountOut) {
         require(amountIn > 0, "INSUFFICIENT_INPUT_AMOUNT");
         require(
             reserveIn > 0 && reserveOut > 0,
             "UniswapV2Library: INSUFFICIENT_LIQUIDITY"
         );
-        uint256 amountInWithFee = amountIn * 997;
+        uint256 amountInWithFee = amountIn * feeBase;
         uint256 numerator = amountInWithFee * reserveOut;
-        uint256 denominator = reserveIn * 1_000 + amountInWithFee;
+        uint256 denominator = reserveIn * 10_000 + amountInWithFee;
         amountOut = numerator / denominator;
     }
 
@@ -77,15 +80,15 @@ abstract contract UniswapStyleLib {
         uint256 amountOut,
         uint256 reserveIn,
         uint256 reserveOut
-    ) internal pure returns (uint256 amountIn) {
+    ) internal view returns (uint256 amountIn) {
         require(amountOut > 0, "INSUFFICIENT_OUTPUT_AMOUNT");
         require(
             reserveIn > 0 && reserveOut > 0,
             "UniswapV2Library: INSUFFICIENT_LIQUIDITY"
         );
-        uint256 numerator = reserveIn * amountOut * 1_000;
+        uint256 numerator = reserveIn * amountOut * 10_000;
 
-        uint256 denominator = (reserveOut - amountOut) * 997;
+        uint256 denominator = (reserveOut - amountOut) * feeBase;
         amountIn = (numerator / denominator) + 1;
     }
 

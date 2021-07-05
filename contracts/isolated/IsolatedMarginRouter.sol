@@ -28,6 +28,7 @@ contract IsolatedMarginRouter is RoleAware, BaseRouter {
         bytes32 _amm1InitHash,
         bytes32 _amm2InitHash,
         bytes32 _amm3InitHash,
+        uint256 _feeBase,
         address _roles
     )
         UniswapStyleLib(
@@ -36,7 +37,8 @@ contract IsolatedMarginRouter is RoleAware, BaseRouter {
             _amm3Factory,
             _amm1InitHash,
             _amm2InitHash,
-            _amm3InitHash
+            _amm3InitHash,
+            _feeBase
         )
         RoleAware(_roles)
     {
