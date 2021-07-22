@@ -18,8 +18,29 @@ contract MarginRouter is RoleAware, BaseRouter {
         uint256 toAmount
     );
 
+    event OrderMade(
+        uint256 orderId,
+        address fromToken,
+        address toToken,
+        uint256 inAmount,
+        uint256 outAmout,
+        address maker
+    );
+    event OrderTaken(uint256 orderId);
+
     uint256 public constant mswapFeesPer10k = 10;
     address public immutable WETH;
+
+    struct Order {
+        address fromToken;
+        address toToken;
+        uint256 inAmount;
+        uint256 outAmount;
+        address maker;
+    }
+
+    mapping(uint256 => Order) public orders;
+    uint256 nextOrderId;
 
     constructor(
         address _WETH,
@@ -49,6 +70,49 @@ contract MarginRouter is RoleAware, BaseRouter {
     ///////////////////////////
     // Cross margin endpoints
     ///////////////////////////
+
+    function makeOrder(
+        address _fromToken,
+        address _toToken,
+        uint256 _inAmount,
+        uint256 _outAmount
+    ) external {
+        nextOrderId++;
+        orders[nextOrderId] = Order({
+            fromToken: _fromToken,
+            toToken: _toToken,
+            inAmount: _inAmount,
+            outAmount: _outAmount,
+            maker: msg.sender
+        });
+        emit OrderMade(
+            nextOrderId,
+            _fromToken,
+            _toToken,
+            _inAmount,
+            _outAmount,
+            msg.sender
+        );
+    }
+
+    function takeOrder(uint256 orderId) external {
+        Order storage order = orders[orderId];
+        registerTrade(
+            order.maker,
+            order.fromToken,
+            order.toToken,
+            order.inAmount,
+            order.outAmount
+        );
+        registerTrade(
+            msg.sender,
+            order.toToken,
+            order.fromToken,
+            order.outAmount,
+            order.inAmount
+        );
+        emit OrderTaken(orderId);
+    }
 
     /// @notice traders call this to deposit funds on cross margin
     function crossDeposit(address depositToken, uint256 depositAmount)
