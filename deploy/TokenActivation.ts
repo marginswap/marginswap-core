@@ -39,7 +39,9 @@ export const tokensPerNetwork: Record<string, Record<string, string>> = {
     USDC: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
     WBTC: '0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599',
     SUSHI: '0x6b3595068778dd592e39a122f4f5a5cf09c90fe2',
-    ALCX: '0xdbdb4d16eda451d0503b854cf79d55697f90c8df'
+    ALCX: '0xdbdb4d16eda451d0503b854cf79d55697f90c8df',
+    YFI: '0x0bc529c00C6401aEF6D220BE8C6Ea1667F6Ad93e',
+    FRAX: '0x853d955acef822db058eb8505911ed77f175b99e'
   },
   localhost: {
     DAI: '0x6b175474e89094c44da98b954eedeac495271d0f',
@@ -52,7 +54,9 @@ export const tokensPerNetwork: Record<string, Record<string, string>> = {
     USDC: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
     WBTC: '0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599',
     SUSHI: '0x6b3595068778dd592e39a122f4f5a5cf09c90fe2',
-    ALCX: '0xdbdb4d16eda451d0503b854cf79d55697f90c8df'
+    ALCX: '0xdbdb4d16eda451d0503b854cf79d55697f90c8df',
+    YFI: '0x0bc529c00C6401aEF6D220BE8C6Ea1667F6Ad93e',
+    FRAX: '0x853d955acef822db058eb8505911ed77f175b99e'
   },
   avalanche: {
     WAVAX: '0xB31f66AA3C1e785363F0875A1B74E27b85FD66c7',
@@ -97,6 +101,20 @@ export type TokenInitRecord = {
   ammPath?: AMMs[];
 };
 export const tokenParams: { [tokenName: string]: TokenInitRecord } = {
+  FRAX: {
+    exposureCap: 10000000,
+    lendingBuffer: 10000,
+    incentiveWeight: 3,
+    liquidationTokenPath: ['FRAX', 'BASE'],
+    decimals: 18
+  },
+  YFI: {
+    exposureCap: 200,
+    lendingBuffer: 20,
+    incentiveWeight: 3,
+    liquidationTokenPath: ['YFI', 'BASE'],
+    decimals: 18
+  },
   WBNB: {
     exposureCap: 1000000,
     lendingBuffer: 10000,
