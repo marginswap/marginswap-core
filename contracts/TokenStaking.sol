@@ -45,7 +45,10 @@ abstract contract TokenStaking {
     // TODO: function to load up with MFI
 
     function setTotalRewardPerBlock(uint256 rewardPerBlock) external {
-        require(msg.sender == roles.owner() || msg.sender == roles.executor(), "Not authorized");
+        require(
+            msg.sender == roles.owner() || msg.sender == roles.executor(),
+            "Not authorized"
+        );
         updateCumulativeReward();
         totalCurrentRewardPerBlock = rewardPerBlock;
     }
@@ -56,8 +59,13 @@ abstract contract TokenStaking {
         rewardTarget += amount;
     }
 
-    function removeFromRewardTarget(uint256 amount, address recipient) external {
-        require(msg.sender == roles.owner() || msg.sender == roles.executor(), "Not authorized");
+    function removeFromRewardTarget(uint256 amount, address recipient)
+        external
+    {
+        require(
+            msg.sender == roles.owner() || msg.sender == roles.executor(),
+            "Not authorized"
+        );
         MFI.safeTransfer(recipient, amount);
         updateCumulativeReward();
         rewardTarget -= amount;
