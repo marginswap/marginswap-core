@@ -64,7 +64,8 @@ export const tokensPerNetwork: Record<string, Record<string, string>> = {
     PNG: '0x60781C2586D68229fde47564546784ab3fACA982',
     WBTC: '0x408D4cD0ADb7ceBd1F1A1C33A0Ba2098E1295bAB',
     USDT: '0xde3A24028580884448a5397872046a019649b084',
-    WETHe: '0x49D5c2BdFfac6CE2BFdB6640F4F80f226bc10bAB'
+    WETHe: '0x49D5c2BdFfac6CE2BFdB6640F4F80f226bc10bAB',
+    USDTe: '0xc7198437980c041c805A1EDcbA50c1Ce5db95118'
   },
   matic: {
     USDC: "0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174",
@@ -102,6 +103,13 @@ export type TokenInitRecord = {
   ammPath?: AMMs[];
 };
 export const tokenParams: { [tokenName: string]: TokenInitRecord } = {
+  USDTe: {
+    exposureCap: 100000000,
+    lendingBuffer: 10000,
+    incentiveWeight: 3,
+    liquidationTokenPath: ['USDTe', 'BASE'],
+    decimals: 6
+  },
   FRAX: {
     exposureCap: 10000000,
     lendingBuffer: 10000,
