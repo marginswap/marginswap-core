@@ -76,6 +76,8 @@ export const tokensPerNetwork: Record<string, Record<string, string>> = {
     USDT: "0xc2132D05D31c914a87C6611C10748AEb04B58e8F",
     LINK: "0x53E0bca35eC356BD5ddDFebbD1Fc0fD03FaBad39",
     AAVE: "0xD6DF932A45C0f255f85145f286eA0b292B21C90B",
+    QUICK: "0x831753dd7087cac61ab5644b308642cc1c33dc13",
+    MAI: "0xa3fa99a148fa48d14ed51d610c367c61876997f1"
   },
   bsc: {
     WBNB: '0xbb4cdb9cbd36b01bd1cbaebf2de08d9173bc095c',
@@ -266,6 +268,20 @@ export const tokenParams: { [tokenName: string]: TokenInitRecord } = {
     lendingBuffer: 1,
     incentiveWeight: 3,
     liquidationTokenPath: ['PNG', 'BASE'],
+    decimals: 18
+  },
+  QUICK: {
+    exposureCap: 1000000,
+    lendingBuffer: 1,
+    incentiveWeight: 3,
+    liquidationTokenPath: ['QUICK', 'BASE'],
+    decimals: 18
+  },
+  MAI: {
+    exposureCap: 1000000,
+    lendingBuffer: 1,
+    incentiveWeight: 3,
+    liquidationTokenPath: ['MAI', 'BASE'],
     decimals: 18
   },
   AAVE: {
