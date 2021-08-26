@@ -268,6 +268,13 @@ contract CrossMarginTrading is CrossMarginLiquidation, IMarginTrading {
         deleteAccount(account);
     }
 
+    /// @dev can get called by external liquidator
+    function registerLiquidatorLiquidation(address trader) external {
+        require(isLiquidator(msg.sender), "Calling contr. not authorized");
+        CrossMarginAccount storage account = marginAccounts[trader];
+        deleteAccount(account);
+    }
+
     /// @dev currently holding in this token
     function viewBalanceInToken(address trader, address token)
         external

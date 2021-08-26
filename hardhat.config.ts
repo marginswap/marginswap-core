@@ -167,6 +167,7 @@ export default {
       url: 'https://api.avax.network/ext/bc/C/rpc',
       accounts: [privateKey],
       blockGasLimit: 12000000,
+      gasPrice: 'auto'
     },
     matic: {
       // url: 'https://rpc-mainnet.maticvigil.com/v1/b0858bc7aa27b1333df19546c12718235bd11785',
@@ -187,7 +188,7 @@ export default {
       optimizer: {
         enabled: true,
         // TODO
-        runs: 5000
+        runs: 200
       }
     }
   },
@@ -200,12 +201,16 @@ export default {
       3: ROPSTEN_LIQUI_TOKEN
     },
     mfiAddress: {
-      43114: MAIN_DEPLOYER,
+      43114: '0x9fda7ceec4c18008096c2fe2b85f05dc300f94d0',
       1: MFI_ADDRESS,
       42: MFI_ADDRESS,
       31337: MFI_ADDRESS,
       137: '0x7Bc429a2fA7d71C4693424FDcaB5a2521b9FD343',
       56: '0x37bdfd6ed491ee0e0fe2ce49de2cb573880e3734'
+    },
+    feeRecipient: {
+      default: MAIN_DEPLOYER,
+      43114: '0xBaF3c8431979e10A3204F2DBF5DAb205923B3220'
     },
     lockedMfi: {
       default: LOCKED_MFI
@@ -235,7 +240,7 @@ export default {
       1: '0xdAC17F958D2ee523a2206206994597C13D831ec7',
       31337: '0xdAC17F958D2ee523a2206206994597C13D831ec7',
       //31337: '0xde3A24028580884448a5397872046a019649b084',
-      '43114': '0xde3A24028580884448a5397872046a019649b084',
+      '43114': '0xc7198437980c041c805A1EDcbA50c1Ce5db95118',
       137: '0xc2132D05D31c914a87C6611C10748AEb04B58e8F',
       56: '0x55d398326f99059ff775485246999027b3197955'
     },
