@@ -10,7 +10,7 @@ const deploy: DeployFunction = async function ({
   network
 }: HardhatRuntimeEnvironment) {
   const { deploy } = deployments;
-  const { deployer, baseCurrency, amm1Factory, amm2Factory, amm3Factory } = await getNamedAccounts();
+  const { deployer, baseCurrency, amm1Factory, amm2Factory, amm3Factory, feeRecipient } = await getNamedAccounts();
   const Roles = await deployments.get('Roles');
 
   const amm1InitHash = amm1InitHashes[await getChainId()];
@@ -28,6 +28,7 @@ const deploy: DeployFunction = async function ({
       amm2InitHash,
       amm3InitHash,
       getFeeBase(await getChainId()),
+      feeRecipient,
       Roles.address
     ],
     log: true,

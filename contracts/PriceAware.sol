@@ -4,6 +4,7 @@ pragma solidity ^0.8.0;
 import "./RoleAware.sol";
 import "./MarginRouter.sol";
 import "../libraries/UniswapStyleLib.sol";
+import "../interfaces/IOracle.sol";
 
 /// Stores how many of token you could get for 1k of peg
 struct TokenPrice {
@@ -46,9 +47,10 @@ abstract contract PriceAware is RoleAware, UniswapStyleLib {
 
     mapping(address => TokenPrice) public tokenPrices;
     mapping(address => mapping(address => PairPrice)) public pairPrices;
-    /// update window in blocks
 
-    // TODO
+    mapping(address => IOracle) public oracles;
+
+    /// update window in blocks
     uint256 public priceUpdateWindow = 20 minutes;
     uint256 public voluntaryUpdateWindow = 5 minutes;
 
@@ -57,6 +59,14 @@ abstract contract PriceAware is RoleAware, UniswapStyleLib {
 
     constructor(address _peg) {
         peg = _peg;
+    }
+
+    /// Set price oracle
+    function setPriceOracle(address token, address oracle)
+        external
+        onlyOwnerExecActivator
+    {
+        oracles[token] = IOracle(oracle);
     }
 
     /// Set window for price updates
@@ -113,7 +123,10 @@ abstract contract PriceAware is RoleAware, UniswapStyleLib {
         uint256 inAmount,
         bool voluntary
     ) public returns (uint256 priceInPeg) {
-        if (token == peg) {
+        IOracle o = oracles[token];
+        if (address(o) != address(0)) {
+            return o.getCurrentPrice(token, inAmount);
+        } else if (token == peg) {
             return inAmount;
         } else {
             TokenPrice storage tokenPrice = tokenPrices[token];
@@ -143,7 +156,10 @@ abstract contract PriceAware is RoleAware, UniswapStyleLib {
         view
         returns (uint256 priceInPeg)
     {
-        if (token == peg) {
+        IOracle o = oracles[token];
+        if (address(o) != address(0)) {
+            return o.viewCurrentPrice(token, inAmount);
+        } else if (token == peg) {
             return inAmount;
         } else {
             TokenPrice storage tokenPrice = tokenPrices[token];
