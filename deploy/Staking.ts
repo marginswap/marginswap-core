@@ -14,22 +14,22 @@ const deploy: DeployFunction = async function ({
 
   const legacyContract = "0x6002830D2f02D987B18d01A1CCce842ae09899d5";
 
-  const Staking = await deploy("Staking", {
-    from: deployer,
-    args: [mfiAddress, mfiAddress, legacyContract],
-    log: true,
-    skipIfAlreadyDeployed: true,
-  });
+  // const Staking = await deploy("Staking", {
+  //   from: deployer,
+  //   args: [mfiAddress, mfiAddress, legacyContract],
+  //   log: true,
+  //   skipIfAlreadyDeployed: true,
+  // });
 
-  if (
-    Staking.newlyDeployed &&
-    (network.name == "localhost" || network.name == "mainnet")
-  ) {
-    const staking = await deployments
-      .get("Staking")
-      .then((Staking) => ethers.getContractAt("Staking", Staking.address));
-    const tx = await staking.migrate(migrateAccounts);
-  }
+  // if (
+  //   Staking.newlyDeployed &&
+  //   (network.name == "localhost" || network.name == "mainnet")
+  // ) {
+  //   const staking = await deployments
+  //     .get("Staking")
+  //     .then((Staking) => ethers.getContractAt("Staking", Staking.address));
+  //   const tx = await staking.migrate(migrateAccounts);
+  // }
 };
 
 deploy.tags = ["Staking", "local"];

@@ -19,7 +19,7 @@ contract Lending is RoleAware, HourlyBondSubscriptionLending {
     /// map of available issuers
     mapping(address => bool) public activeIssuers;
 
-    uint256 constant BORROW_RATE_UPDATE_WINDOW = 60 minutes;
+    uint256 constant BORROW_RATE_UPDATE_WINDOW = 1 minutes;
 
     address public immutable MFI;
 

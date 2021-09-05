@@ -26,14 +26,23 @@ const weightsPerNetwork = {
         DAI: 2,
         WBTC: 2,
         WETH: 2
+    },
+    avalanche: {
+        PNG: 3,
+        USDT: 4,
+        ETH: 2,
+        WAVAX: 2
     }
 }
 
 const totalPerNetwork = {
     matic: ethers.utils.parseEther('15000'),
     mainnet: ethers.utils.parseEther('25000'),
-    localhost: ethers.utils.parseEther('25000')
+    localhost: ethers.utils.parseEther('25000'),
+    avalanche: ethers.utils.parseEther('75000')
 }
+
+const DISTRIBUTION_MONTHS = 3;
 
 const deploy: DeployFunction = async function ({
     getNamedAccounts,
@@ -57,7 +66,7 @@ const deploy: DeployFunction = async function ({
         const tokens = Object.keys(weights).map((k) => tokensPerNetwork[network.name][k]);
         const totalWeights = Object.values(weights).reduce((a:number, b:number) => a + b);
         const amounts = Object.keys(weights).map((k) => total.mul(weights[k]).div(totalWeights));
-        const endTimestamp = Math.floor(Date.now() / 1000) + (30 * 24 * 60 * 60)
+        const endTimestamp = Math.floor(Date.now() / 1000) + (DISTRIBUTION_MONTHS * 30 * 24 * 60 * 60)
 
         const keys = Object.keys(weights);
         for (let i = 0; amounts.length > i; i++) {

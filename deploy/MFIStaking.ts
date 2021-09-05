@@ -18,12 +18,12 @@ const deploy: DeployFunction = async function ({
 
   // 15k per month
   const initialRewardPerBlock = ethers.utils.parseEther('15000').div(30 * 24 * 60 * 4);
-  const Staking = await deploy('MFIStaking', {
-    from: deployer,
-    args: [mfiAddress, initialRewardPerBlock, roles.address],
-    log: true,
-    skipIfAlreadyDeployed: true
-  });
+  // const Staking = await deploy('MFIStaking', {
+  //   from: deployer,
+  //   args: [mfiAddress, initialRewardPerBlock, roles.address],
+  //   log: true,
+  //   skipIfAlreadyDeployed: true
+  // });
 };
 
 deploy.tags = ['MFIStaking', 'local'];
