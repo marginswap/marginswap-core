@@ -63,7 +63,8 @@ export const tokensPerNetwork: Record<string, Record<string, string>> = {
     ETH: '0x49D5c2BdFfac6CE2BFdB6640F4F80f226bc10bAB',
     PNG: '0x60781C2586D68229fde47564546784ab3fACA982',
 //    WBTC: '0x408D4cD0ADb7ceBd1F1A1C33A0Ba2098E1295bAB',
-    USDT: '0xc7198437980c041c805A1EDcbA50c1Ce5db95118'
+    USDT: '0xc7198437980c041c805A1EDcbA50c1Ce5db95118',
+    YAK: '0x59414b3089ce2AF0010e7523Dea7E2b35d776ec7'
   },
   matic: {
     USDC: "0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174",
@@ -103,6 +104,14 @@ export type TokenInitRecord = {
   ammPath?: AMMs[];
 };
 export const tokenParams: { [tokenName: string]: TokenInitRecord } = {
+  YAK: {
+    exposureCap: 200000,
+    lendingBuffer: 100,
+    incentiveWeight: 1,
+    liquidationTokenPath: ['YAK', 'BASE'],
+    decimals: 18,
+    ammPath: [AMMs.UNISWAP, AMMs.UNISWAP]
+  },
   USDTe: {
     exposureCap: 100000000,
     lendingBuffer: 10000,
@@ -322,6 +331,10 @@ const deploy: DeployFunction = async function ({
   const tokens = tokensPerNetwork[networkName];
   const tokenNames = Object.keys(tokens);
   const tokenAddresses = Object.values(tokens);
+
+  // const argLists = [
+  //   await prepArgs(['YAK'], [tokens['YAK']], deployments, tokens, peg, baseCurrency[networkName])
+  // ];
 
   const argLists = [
     await prepArgs(tokenNames.slice(0, 5), tokenAddresses.slice(0, 5), deployments, tokens, peg, baseCurrency[networkName])
