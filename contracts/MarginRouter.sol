@@ -101,6 +101,7 @@ contract MarginRouter is RoleAware, BaseRouter {
 
     function takeOrder(uint256 orderId) external {
         Order storage order = orders[orderId];
+
         registerTrade(
             order.maker,
             order.fromToken,
@@ -115,6 +116,18 @@ contract MarginRouter is RoleAware, BaseRouter {
             order.outAmount,
             order.inAmount
         );
+
+        IMarginTrading cmt = IMarginTrading(crossMarginTrading());
+
+        uint256 makerLoan = cmt.viewLoanInPeg(order.maker);
+        uint256 takerLoan = cmt.viewLoanInPeg(msg.sender);
+
+        uint256 newMakerBalance = cmt.viewHoldingsInPeg(order.maker);
+        uint256 newTakerBalance = cmt.viewHoldingsInPeg(msg.sender);
+
+        require(newMakerBalance * 100 / makerLoan > 110, "Maker balance too low to trade");
+        require(newTakerBalance * 100 / takerLoan > 110, "Taker balance too low to trade");
+
         emit OrderTaken(orderId);
     }
 
