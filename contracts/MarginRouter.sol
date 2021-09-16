@@ -26,7 +26,7 @@ contract MarginRouter is RoleAware, BaseRouter {
         uint256 outAmout,
         address maker
     );
-    event OrderTaken(uint256 orderId);
+    event OrderTaken(uint256 orderId, uint256 remainingInAmount);
 
     uint256 public constant mswapFeesPer10k = 10;
     address public immutable WETH;
@@ -99,22 +99,26 @@ contract MarginRouter is RoleAware, BaseRouter {
         );
     }
 
-    function takeOrder(uint256 orderId) external {
+    function takeOrder(uint256 orderId, uint256 maxInAmount) external {
         Order storage order = orders[orderId];
+
+        uint256 inAmount = min(maxInAmount, order.inAmount);
+        // scale down outAmount
+        uint256 outAmount = inAmount * order.outAmount / order.inAmount;
 
         registerTrade(
             order.maker,
             order.fromToken,
             order.toToken,
-            order.inAmount,
-            order.outAmount
+            inAmount,
+            outAmount
         );
         registerTrade(
             msg.sender,
             order.toToken,
             order.fromToken,
-            order.outAmount,
-            order.inAmount
+            outAmount,
+            inAmount
         );
 
         IMarginTrading cmt = IMarginTrading(crossMarginTrading());
@@ -128,7 +132,10 @@ contract MarginRouter is RoleAware, BaseRouter {
         require(newMakerBalance * 100 / makerLoan > 110, "Maker balance too low to trade");
         require(newTakerBalance * 100 / takerLoan > 110, "Taker balance too low to trade");
 
-        emit OrderTaken(orderId);
+        order.inAmount -= inAmount;
+        order.outAmount -= outAmount;
+
+        emit OrderTaken(orderId, order.inAmount);
     }
 
     /// @notice traders call this to deposit funds on cross margin
@@ -471,5 +478,13 @@ contract MarginRouter is RoleAware, BaseRouter {
 
     function setFeeRecipient(address recipient) external onlyOwnerExec {
         feeRecipient = recipient;
+    }
+
+    function min(uint256 a, uint256 b) internal pure returns (uint256) {
+        if (a > b) {
+            return b;
+        } else {
+            return a;
+        }
     }
 }
