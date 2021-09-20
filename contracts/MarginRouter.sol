@@ -106,11 +106,13 @@ contract MarginRouter is RoleAware, BaseRouter {
         // scale down outAmount
         uint256 outAmount = inAmount * order.outAmount / order.inAmount;
 
+        uint256 fees = takeFeesFromOutput(inAmount);
+
         registerTrade(
             order.maker,
             order.fromToken,
             order.toToken,
-            inAmount,
+            inAmount + fees,
             outAmount
         );
         registerTrade(
@@ -118,7 +120,7 @@ contract MarginRouter is RoleAware, BaseRouter {
             order.toToken,
             order.fromToken,
             outAmount,
-            inAmount
+            inAmount - fees
         );
 
         IMarginTrading cmt = IMarginTrading(crossMarginTrading());
@@ -135,6 +137,7 @@ contract MarginRouter is RoleAware, BaseRouter {
         order.inAmount -= inAmount;
         order.outAmount -= outAmount;
 
+        Fund(fund()).withdraw(order.fromToken, feeRecipient, 2 * fees);
         emit OrderTaken(orderId, order.inAmount);
     }
 
