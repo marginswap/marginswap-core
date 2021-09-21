@@ -75,6 +75,8 @@ contract MarginRouter is RoleAware, BaseRouter {
     // Cross margin endpoints
     ///////////////////////////
 
+
+    // TODO expiration
     function makeOrder(
         address _fromToken,
         address _toToken,
@@ -99,12 +101,23 @@ contract MarginRouter is RoleAware, BaseRouter {
         );
     }
 
+    function invalidateOrder(uint256 orderId) external {
+        Order storage order = orders[orderId];
+        require(msg.sender == order.maker, "not authorized maker");
+
+        order.inAmount = 0;
+        order.outAmount = 0;
+        emit OrderTaken(orderId, 0);
+    }
+
     function takeOrder(uint256 orderId, uint256 maxInAmount) external {
         Order storage order = orders[orderId];
 
+        require(order.inAmount > 0, "invalid order");
+
         uint256 inAmount = min(maxInAmount, order.inAmount);
         // scale down outAmount
-        uint256 outAmount = inAmount * order.outAmount / order.inAmount;
+        uint256 outAmount = (inAmount * order.outAmount) / order.inAmount;
 
         uint256 fees = takeFeesFromOutput(inAmount);
 
@@ -131,14 +144,76 @@ contract MarginRouter is RoleAware, BaseRouter {
         uint256 newMakerBalance = cmt.viewHoldingsInPeg(order.maker);
         uint256 newTakerBalance = cmt.viewHoldingsInPeg(msg.sender);
 
-        require(newMakerBalance * 100 / makerLoan > 110, "Maker balance too low to trade");
-        require(newTakerBalance * 100 / takerLoan > 110, "Taker balance too low to trade");
+        require(
+            (newMakerBalance * 100) / makerLoan > 110,
+            "Maker balance too low to trade"
+        );
+        require(
+            (newTakerBalance * 100) / takerLoan > 110,
+            "Taker balance too low to trade"
+        );
 
         order.inAmount -= inAmount;
         order.outAmount -= outAmount;
 
         Fund(fund()).withdraw(order.fromToken, feeRecipient, 2 * fees);
         emit OrderTaken(orderId, order.inAmount);
+    }
+
+    function takeOrderOnAMM(
+        uint256 orderId,
+        bytes32 amms,
+        address[] calldata tokens
+    ) external {
+        Order storage order = orders[orderId];
+
+        require(order.inAmount > 0, "invalid order");
+
+        require(
+            order.fromToken == tokens[0] &&
+                order.toToken == tokens[tokens.length - 1],
+            "Trading path mismatch"
+        );
+
+        // calc fees
+        uint256 fees = takeFeesFromInput(order.inAmount);
+
+        (uint256[] memory amounts, address[] memory pairs) =
+            UniswapStyleLib._getAmountsOut(order.inAmount - fees, amms, tokens);
+
+        // checks that trader is within allowed lending bounds
+        registerTrade(
+            order.maker,
+            tokens[0],
+            tokens[tokens.length - 1],
+            order.inAmount,
+            order.outAmount
+        );
+
+        _fundSwapExactT4T(amounts, order.outAmount, pairs, tokens);
+
+        // deposit remainder to submitting taker's account
+        uint256 depositAmount = amounts[amounts.length - 1] - order.outAmount;
+        uint256 extinguishAmount =
+            IMarginTrading(crossMarginTrading()).registerDeposit(
+                msg.sender,
+                order.toToken,
+                depositAmount
+            );
+        if (extinguishAmount > 0) {
+            Lending(lending()).payOff(order.toToken, extinguishAmount);
+            IncentiveReporter.subtractFromClaimAmount(
+                order.toToken,
+                msg.sender,
+                depositAmount
+            );
+        }
+
+        Fund(fund()).withdraw(tokens[0], feeRecipient, fees);
+        emit AccountUpdated(msg.sender);
+        order.inAmount = 0;
+        order.outAmount = 0;
+        emit OrderTaken(orderId, 0);
     }
 
     /// @notice traders call this to deposit funds on cross margin
