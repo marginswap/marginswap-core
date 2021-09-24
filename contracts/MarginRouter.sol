@@ -26,7 +26,7 @@ contract MarginRouter is RoleAware, BaseRouter {
         uint256 outAmout,
         address maker
     );
-    event OrderTaken(uint256 orderId, uint256 remainingInAmount);
+    event OrderTaken(uint256 orderId, address indexed taker, uint256 remainingInAmount, uint256 amountTaken);
 
     uint256 public constant mswapFeesPer10k = 10;
     address public immutable WETH;
@@ -107,7 +107,7 @@ contract MarginRouter is RoleAware, BaseRouter {
 
         order.inAmount = 0;
         order.outAmount = 0;
-        emit OrderTaken(orderId, 0);
+        emit OrderTaken(orderId, msg.sender, 0, 0);
     }
 
     function takeOrder(uint256 orderId, uint256 maxInAmount) external {
@@ -157,7 +157,7 @@ contract MarginRouter is RoleAware, BaseRouter {
         order.outAmount -= outAmount;
 
         Fund(fund()).withdraw(order.fromToken, feeRecipient, 2 * fees);
-        emit OrderTaken(orderId, order.inAmount);
+        emit OrderTaken(orderId, msg.sender, order.inAmount, inAmount);
     }
 
     function takeOrderOnAMM(
@@ -213,7 +213,7 @@ contract MarginRouter is RoleAware, BaseRouter {
         emit AccountUpdated(msg.sender);
         order.inAmount = 0;
         order.outAmount = 0;
-        emit OrderTaken(orderId, 0);
+        emit OrderTaken(orderId, msg.sender, 0, amounts[0]);
     }
 
     /// @notice traders call this to deposit funds on cross margin
