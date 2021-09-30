@@ -10,17 +10,17 @@ const deploy: DeployFunction = async function ({
   network
 }: HardhatRuntimeEnvironment) {
   const { deploy } = deployments;
-  const { deployer, baseCurrency } = await getNamedAccounts();
+  const { deployer } = await getNamedAccounts();
   const Roles = await deployments.get('Roles');
   const roles = await ethers.getContractAt('Roles', Roles.address);
 
-  const Fund = await deploy('Fund', {
+  const Oracle = await deploy('SnowglobeOracle', {
     from: deployer,
-    args: [baseCurrency, roles.address],
+    args: [6, roles.address],
     log: true,
     skipIfAlreadyDeployed: true
   });
 };
-deploy.tags = ['Fund'];
+deploy.tags = ['SnowglobeOracle'];
 deploy.dependencies = ['Roles', 'RoleAware'];
 export default deploy;

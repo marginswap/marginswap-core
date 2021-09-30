@@ -18,10 +18,29 @@ contract MarginRouter is RoleAware, BaseRouter {
         uint256 toAmount
     );
 
+    event OrderMade(
+        uint256 orderId,
+        address fromToken,
+        address toToken,
+        uint256 inAmount,
+        uint256 outAmout,
+        address maker
+    );
+    event OrderTaken(uint256 orderId, address indexed taker, uint256 remainingInAmount, uint256 amountTaken);
+
     uint256 public constant mswapFeesPer10k = 10;
     address public immutable WETH;
 
-    address public feeRecipient;
+    struct Order {
+        address fromToken;
+        address toToken;
+        uint256 inAmount;
+        uint256 outAmount;
+        address maker;
+    }
+
+    mapping(uint256 => Order) public orders;
+    uint256 nextOrderId;
 
     constructor(
         address _WETH,
@@ -32,7 +51,6 @@ contract MarginRouter is RoleAware, BaseRouter {
         bytes32 _amm2InitHash,
         bytes32 _amm3InitHash,
         uint256 _feeBase,
-        address _feeRecipient,
         address _roles
     )
         UniswapStyleLib(
@@ -47,12 +65,152 @@ contract MarginRouter is RoleAware, BaseRouter {
         RoleAware(_roles)
     {
         WETH = _WETH;
-        feeRecipient = _feeRecipient;
     }
 
     ///////////////////////////
     // Cross margin endpoints
     ///////////////////////////
+
+
+    // TODO expiration
+    function makeOrder(
+        address _fromToken,
+        address _toToken,
+        uint256 _inAmount,
+        uint256 _outAmount
+    ) external {
+        nextOrderId++;
+        orders[nextOrderId] = Order({
+            fromToken: _fromToken,
+            toToken: _toToken,
+            inAmount: _inAmount,
+            outAmount: _outAmount,
+            maker: msg.sender
+        });
+        emit OrderMade(
+            nextOrderId,
+            _fromToken,
+            _toToken,
+            _inAmount,
+            _outAmount,
+            msg.sender
+        );
+    }
+
+    function invalidateOrder(uint256 orderId) external {
+        Order storage order = orders[orderId];
+        require(msg.sender == order.maker, "not authorized maker");
+
+        order.inAmount = 0;
+        order.outAmount = 0;
+        emit OrderTaken(orderId, msg.sender, 0, 0);
+    }
+
+    function takeOrder(uint256 orderId, uint256 maxInAmount) external {
+        Order storage order = orders[orderId];
+
+        require(order.inAmount > 0, "invalid order");
+
+        uint256 inAmount = min(maxInAmount, order.inAmount);
+        // scale down outAmount
+        uint256 outAmount = (inAmount * order.outAmount) / order.inAmount;
+
+        uint256 fees = takeFeesFromOutput(inAmount);
+
+        registerTrade(
+            order.maker,
+            order.fromToken,
+            order.toToken,
+            inAmount + fees,
+            outAmount
+        );
+        registerTrade(
+            msg.sender,
+            order.toToken,
+            order.fromToken,
+            outAmount,
+            inAmount - fees
+        );
+
+        IMarginTrading cmt = IMarginTrading(crossMarginTrading());
+
+        uint256 makerLoan = cmt.viewLoanInPeg(order.maker);
+        uint256 takerLoan = cmt.viewLoanInPeg(msg.sender);
+
+        uint256 newMakerBalance = cmt.viewHoldingsInPeg(order.maker);
+        uint256 newTakerBalance = cmt.viewHoldingsInPeg(msg.sender);
+
+        require(
+            (newMakerBalance * 100) / makerLoan > 110,
+            "Maker balance too low to trade"
+        );
+        require(
+            (newTakerBalance * 100) / takerLoan > 110,
+            "Taker balance too low to trade"
+        );
+
+        order.inAmount -= inAmount;
+        order.outAmount -= outAmount;
+
+        Fund(fund()).withdraw(order.fromToken, feeRecipient, 2 * fees);
+        emit OrderTaken(orderId, msg.sender, order.inAmount, inAmount);
+    }
+
+    function takeOrderOnAMM(
+        uint256 orderId,
+        bytes32 amms,
+        address[] calldata tokens
+    ) external {
+        Order storage order = orders[orderId];
+
+        require(order.inAmount > 0, "invalid order");
+
+        require(
+            order.fromToken == tokens[0] &&
+                order.toToken == tokens[tokens.length - 1],
+            "Trading path mismatch"
+        );
+
+        // calc fees
+        uint256 fees = takeFeesFromInput(order.inAmount);
+
+        (uint256[] memory amounts, address[] memory pairs) =
+            UniswapStyleLib._getAmountsOut(order.inAmount - fees, amms, tokens);
+
+        // checks that trader is within allowed lending bounds
+        registerTrade(
+            order.maker,
+            tokens[0],
+            tokens[tokens.length - 1],
+            order.inAmount,
+            order.outAmount
+        );
+
+        _fundSwapExactT4T(amounts, order.outAmount, pairs, tokens);
+
+        // deposit remainder to submitting taker's account
+        uint256 depositAmount = amounts[amounts.length - 1] - order.outAmount;
+        uint256 extinguishAmount =
+            IMarginTrading(crossMarginTrading()).registerDeposit(
+                msg.sender,
+                order.toToken,
+                depositAmount
+            );
+        if (extinguishAmount > 0) {
+            Lending(lending()).payOff(order.toToken, extinguishAmount);
+            IncentiveReporter.subtractFromClaimAmount(
+                order.toToken,
+                msg.sender,
+                depositAmount
+            );
+        }
+
+        Fund(fund()).withdraw(tokens[0], feeRecipient, fees);
+        emit AccountUpdated(msg.sender);
+        order.inAmount = 0;
+        order.outAmount = 0;
+        emit OrderTaken(orderId, msg.sender, 0, amounts[0]);
+    }
 
     /// @notice traders call this to deposit funds on cross margin
     function crossDeposit(address depositToken, uint256 depositAmount)
@@ -217,7 +375,7 @@ contract MarginRouter is RoleAware, BaseRouter {
         );
 
         _fundSwapExactT4T(amounts, amountOutMin, pairs, tokens);
-        Fund(fund()).withdraw(tokens[0], feeRecipient, fees);
+        Fund(fund()).withdraw(tokens[0], feeRecipient(), fees);
     }
 
     /// @notice entry point for swapping tokens held in cross margin account
@@ -246,7 +404,7 @@ contract MarginRouter is RoleAware, BaseRouter {
         );
 
         _fundSwapT4ExactT(amounts, amountInMax, pairs, tokens);
-        Fund(fund()).withdraw(tokens[tokens.length - 1], feeRecipient, fees);
+        Fund(fund()).withdraw(tokens[tokens.length - 1], feeRecipient(), fees);
     }
 
     /// @dev helper function does all the work of telling other contracts
@@ -392,7 +550,11 @@ contract MarginRouter is RoleAware, BaseRouter {
         (amounts, ) = UniswapStyleLib._getAmountsIn(outAmount, amms, tokens);
     }
 
-    function setFeeRecipient(address recipient) external onlyOwnerExec {
-        feeRecipient = recipient;
+    function min(uint256 a, uint256 b) internal pure returns (uint256) {
+        if (a > b) {
+            return b;
+        } else {
+            return a;
+        }
     }
 }

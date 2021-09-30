@@ -27,6 +27,7 @@ uint256 constant PRICE_CONTROLLER = 106;
 uint256 constant ADMIN = 107;
 uint256 constant INCENTIVE_DISTRIBUTION = 108;
 uint256 constant TOKEN_ADMIN = 109;
+uint256 constant FEE_RECIPIENT = 110;
 
 uint256 constant DISABLER = 1001;
 uint256 constant DEPENDENCY_CONTROLLER = 1002;
