@@ -42,8 +42,6 @@ contract MarginRouter is RoleAware, BaseRouter {
     mapping(uint256 => Order) public orders;
     uint256 nextOrderId;
 
-    address public feeRecipient;
-
     constructor(
         address _WETH,
         address _amm1Factory,
@@ -53,7 +51,6 @@ contract MarginRouter is RoleAware, BaseRouter {
         bytes32 _amm2InitHash,
         bytes32 _amm3InitHash,
         uint256 _feeBase,
-        address _feeRecipient,
         address _roles
     )
         UniswapStyleLib(
@@ -68,7 +65,6 @@ contract MarginRouter is RoleAware, BaseRouter {
         RoleAware(_roles)
     {
         WETH = _WETH;
-        feeRecipient = _feeRecipient;
     }
 
     ///////////////////////////
@@ -379,7 +375,7 @@ contract MarginRouter is RoleAware, BaseRouter {
         );
 
         _fundSwapExactT4T(amounts, amountOutMin, pairs, tokens);
-        Fund(fund()).withdraw(tokens[0], feeRecipient, fees);
+        Fund(fund()).withdraw(tokens[0], feeRecipient(), fees);
     }
 
     /// @notice entry point for swapping tokens held in cross margin account
@@ -408,7 +404,7 @@ contract MarginRouter is RoleAware, BaseRouter {
         );
 
         _fundSwapT4ExactT(amounts, amountInMax, pairs, tokens);
-        Fund(fund()).withdraw(tokens[tokens.length - 1], feeRecipient, fees);
+        Fund(fund()).withdraw(tokens[tokens.length - 1], feeRecipient(), fees);
     }
 
     /// @dev helper function does all the work of telling other contracts
@@ -552,10 +548,6 @@ contract MarginRouter is RoleAware, BaseRouter {
         address[] calldata tokens
     ) external view returns (uint256[] memory amounts) {
         (amounts, ) = UniswapStyleLib._getAmountsIn(outAmount, amms, tokens);
-    }
-
-    function setFeeRecipient(address recipient) external onlyOwnerExec {
-        feeRecipient = recipient;
     }
 
     function min(uint256 a, uint256 b) internal pure returns (uint256) {

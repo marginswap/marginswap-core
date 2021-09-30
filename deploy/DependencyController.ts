@@ -28,6 +28,7 @@ const PRICE_CONTROLLER = 106;
 const ADMIN = 107;
 const INCENTIVE_DISTRIBUTION = 108;
 const TOKEN_ADMIN = 109;
+const FEE_RECIPIENT = 110;
 
 const DISABLER = 1001;
 const DEPENDENCY_CONTROLLER = 1002;
@@ -53,13 +54,18 @@ const managedContracts: ManagedContract[] = [
     contractName: 'MarginRouter',
     charactersPlayed: [ROUTER],
     rolesPlayed: [WITHDRAWER, MARGIN_TRADER, BORROWER, INCENTIVE_REPORTER]
+  },
+  {
+    contractName: 'CrossMarginLiquidationV2',
+    charactersPlayed: [],
+    rolesPlayed: [LIQUIDATOR, MARGIN_TRADER]
   }
 ];
 
 const deploy: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const { getNamedAccounts, deployments, getChainId, getUnnamedAccounts, network } = hre;
   const { deploy } = deployments;
-  const { deployer } = await getNamedAccounts();
+  const { deployer, feeRecipient } = await getNamedAccounts();
   const Roles = await deployments.get('Roles');
 
   const DependencyController = await deploy('DependencyController', {
@@ -76,8 +82,14 @@ const deploy: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     console.log(`Giving dependency controller role: ${givingRole.hash}`);
   }
 
-  // TODO admin wallet
-  // roles.giveRole(DISABLER, deployer);
+
+  if ((await roles.mainCharacters(FEE_RECIPIENT)) != feeRecipient) {
+
+    const dC = await ethers.getContractAt('DependencyController', DependencyController.address);
+
+    const givingRole = await dC.setMainCharacter(FEE_RECIPIENT, feeRecipient, {gasLimit: 8000000});
+    console.log(`Giving fee recipient role: ${givingRole.hash}`);
+  }
 
   for (const mC of managedContracts) {
     await manage(hre, DependencyController.address, mC);

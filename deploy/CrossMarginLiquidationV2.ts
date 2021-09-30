@@ -10,17 +10,17 @@ const deploy: DeployFunction = async function ({
   network
 }: HardhatRuntimeEnvironment) {
   const { deploy } = deployments;
-  const { deployer, baseCurrency } = await getNamedAccounts();
+  const { deployer } = await getNamedAccounts();
   const Roles = await deployments.get('Roles');
   const roles = await ethers.getContractAt('Roles', Roles.address);
 
-  const Fund = await deploy('Fund', {
+  const Liquidation = await deploy('CrossMarginLiquidationV2', {
     from: deployer,
-    args: [baseCurrency, roles.address],
+    args: [roles.address],
     log: true,
     skipIfAlreadyDeployed: true
   });
 };
-deploy.tags = ['Fund'];
+deploy.tags = ['CrossMarginLiquidationV2'];
 deploy.dependencies = ['Roles', 'RoleAware'];
 export default deploy;
