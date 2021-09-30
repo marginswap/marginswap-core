@@ -6,7 +6,7 @@ import "./Roles.sol";
 /// @title Role management behavior
 /// Main characters are for service discovery
 /// Whereas roles are for access control
-contract RoleAware {
+abstract contract RoleAware {
     Roles public immutable roles;
     mapping(uint256 => address) public mainCharacterCache;
     mapping(address => mapping(uint256 => bool)) public roleCache;
