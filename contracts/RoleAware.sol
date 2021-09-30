@@ -101,6 +101,10 @@ abstract contract RoleAware {
         return mainCharacterCache[ADMIN];
     }
 
+    function feeRecipient() internal view returns (address) {
+        return mainCharacterCache[FEE_RECIPIENT];
+    }
+
     function incentiveDistributor() internal view returns (address) {
         return mainCharacterCache[INCENTIVE_DISTRIBUTION];
     }
