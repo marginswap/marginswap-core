@@ -152,7 +152,7 @@ contract MarginRouter is RoleAware, BaseRouter {
         order.inAmount -= inAmount;
         order.outAmount -= outAmount;
 
-        Fund(fund()).withdraw(order.fromToken, feeRecipient, 2 * fees);
+        Fund(fund()).withdraw(order.fromToken, feeRecipient(), 2 * fees);
         emit OrderTaken(orderId, msg.sender, order.inAmount, inAmount);
     }
 
@@ -205,7 +205,7 @@ contract MarginRouter is RoleAware, BaseRouter {
             );
         }
 
-        Fund(fund()).withdraw(tokens[0], feeRecipient, fees);
+        Fund(fund()).withdraw(tokens[0], feeRecipient(), fees);
         emit AccountUpdated(msg.sender);
         order.inAmount = 0;
         order.outAmount = 0;
