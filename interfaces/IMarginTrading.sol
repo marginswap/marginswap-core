@@ -50,4 +50,14 @@ interface IMarginTrading {
         external
         view
         returns (address[] memory borrowTokens, uint256[] memory borrowAmounts);
+
+    function viewHoldingsInPeg(address trader)
+        external
+        view
+        returns (uint256);
+
+    function viewLoanInPeg(address trader)
+        external
+        view
+        returns (uint256 amount);
 }
