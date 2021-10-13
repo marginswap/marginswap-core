@@ -62,11 +62,14 @@ export const tokensPerNetwork: Record<string, Record<string, string>> = {
     WAVAX: '0xB31f66AA3C1e785363F0875A1B74E27b85FD66c7',
     ETH: '0x49D5c2BdFfac6CE2BFdB6640F4F80f226bc10bAB',
     PNG: '0x60781C2586D68229fde47564546784ab3fACA982',
-//    WBTC: '0x408D4cD0ADb7ceBd1F1A1C33A0Ba2098E1295bAB',
     USDT: '0xc7198437980c041c805A1EDcbA50c1Ce5db95118',
     YAK: '0x59414b3089ce2AF0010e7523Dea7E2b35d776ec7',
     QI: '0x8729438EB15e2C8B576fCc6AeCdA6A148776C0F5',
-    XAVA: '0xd1c3f94DE7e5B45fa4eDBBA472491a9f4B166FC4'
+    XAVA: '0xd1c3f94DE7e5B45fa4eDBBA472491a9f4B166FC4',
+    JOE: '0x6e84a6216ea6dacc71ee8e6b0a5b7322eebc0fdd',
+    USDC: '0xA7D7079b0FEaD91F3e65f86E8915Cb59c1a4C664',
+    DAI: '0xd586e7f844cea2f87f50152665bcbc2c279d8d70',
+    WBTC: '0x50b7545627a5162f82a992c33b87adc75187b218'
   },
   matic: {
     USDC: "0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174",
@@ -107,6 +110,15 @@ export type TokenInitRecord = {
   oracleContract?: string;
 };
 export const tokenParams: { [tokenName: string]: TokenInitRecord } = {
+  JOE: {
+    exposureCap: 200000,
+    lendingBuffer: 100,
+    incentiveWeight: 1,
+    liquidationTokenPath: ['JOE', 'BASE'],
+    decimals: 18,
+    ammPath: [AMMs.SUSHISWAP, AMMs.SUSHISWAP],
+    oracleContract: 'TwapOracle'
+  },
   XAVA: {
     exposureCap: 200000,
     lendingBuffer: 100,
@@ -186,7 +198,9 @@ export const tokenParams: { [tokenName: string]: TokenInitRecord } = {
     lendingBuffer: 10000,
     incentiveWeight: 3,
     liquidationTokenPath: ['DAI', 'BASE'],
-    decimals: 18
+    decimals: 18,
+    ammPath: [AMMs.SUSHISWAP, AMMs.SUSHISWAP],
+    oracleContract: 'TwapOracle'
   },
   WETH: {
     exposureCap: 100000,
@@ -236,14 +250,18 @@ export const tokenParams: { [tokenName: string]: TokenInitRecord } = {
     lendingBuffer: 10000,
     incentiveWeight: 3,
     liquidationTokenPath: ['USDC', 'BASE'],
-    decimals: 6
+    decimals: 6,
+    ammPath: [AMMs.SUSHISWAP, AMMs.SUSHISWAP],
+    oracleContract: 'TwapOracle'
   },
   WBTC: {
     exposureCap: 2000,
     lendingBuffer: 20,
     incentiveWeight: 3,
     liquidationTokenPath: ['WBTC', 'BASE'],
-    decimals: 8
+    decimals: 8,
+    ammPath: [AMMs.SUSHISWAP, AMMs.SUSHISWAP],
+    oracleContract: 'TwapOracle'
   },
   SUSHI: {
     exposureCap: 300000,
