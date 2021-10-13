@@ -5,10 +5,12 @@ import "../Executor.sol";
 
 import "../CrossMarginTrading.sol";
 import "../MarginRouter.sol";
+import "../PriceAware.sol";
 
 contract TokenActivation is Executor {
     address[] public tokens;
     uint256[] public exposureCaps;
+    address[] public oracleContracts;
 
     uint256 constant initHourlyYieldAPRPercent = 0;
 
@@ -20,13 +22,15 @@ contract TokenActivation is Executor {
         address[] memory tokens2activate,
         uint256[] memory _exposureCaps,
         bytes32[] memory _amms,
-        address[][] memory _liquidationTokens
+        address[][] memory _liquidationTokens,
+        address[] memory _oracleContracts
     ) RoleAware(_roles) {
         tokens = tokens2activate;
         exposureCaps = _exposureCaps;
 
         amms = _amms;
         liquidationTokens = _liquidationTokens;
+        oracleContracts = _oracleContracts;
     }
 
     function requiredRoles()
@@ -61,15 +65,30 @@ contract TokenActivation is Executor {
             Lending(lending()).initBorrowYieldAccumulator(token);
 
             require(
-                liquidationTokenPath[0] == token &&
+                liquidationTokenPath.length == 0 || (
+                    liquidationTokenPath[0] == token &&
                     liquidationTokenPath[liquidationTokenPath.length - 1] ==
-                    CrossMarginTrading(crossMarginTrading()).peg(),
+                    CrossMarginTrading(crossMarginTrading()).peg()),
                 "Invalid liquidationTokens -- should go from token to peg"
             );
-            CrossMarginTrading(crossMarginTrading()).setLiquidationPath(
-                ammPath,
-                liquidationTokenPath
-            );
+
+            if (oracleContracts[i] != address(0)) {
+                if (liquidationTokenPath.length > 0) {
+                    PriceAware(oracleContracts[i]).setLiquidationPath(
+                        ammPath,
+                        liquidationTokenPath
+                    );
+                }
+                CrossMarginTrading(crossMarginTrading()).setPriceOracle(
+                    token,
+                    oracleContracts[i]
+                );
+            } else {
+                CrossMarginTrading(crossMarginTrading()).setLiquidationPath(
+                    ammPath,
+                    liquidationTokenPath
+                );
+            }
         }
 
         delete tokens;

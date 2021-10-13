@@ -186,7 +186,7 @@ abstract contract PriceAware is RoleAware, UniswapStyleLib {
 
     /// add path from token to current liquidation peg
     function setLiquidationPath(bytes32 amms, address[] memory tokens)
-        external
+        public
         onlyOwnerExecActivator
     {
         address token = tokens[0];

@@ -104,6 +104,7 @@ export type TokenInitRecord = {
   liquidationTokenPath?: string[];
   decimals: number;
   ammPath?: AMMs[];
+  oracleContract?: string;
 };
 export const tokenParams: { [tokenName: string]: TokenInitRecord } = {
   XAVA: {
@@ -469,7 +470,7 @@ const deploy: DeployFunction = async function ({
 };
 
 deploy.tags = ['TokenActivation', 'local'];
-deploy.dependencies = ['DependencyController'];
+deploy.dependencies = ['DependencyController', 'TwapOracle', 'SnowglobeOracle'];
 export default deploy;
 
 async function prepArgs(
@@ -479,7 +480,7 @@ async function prepArgs(
   tokens,
   peg,
   baseCurrencyName
-): Promise<[string, string[], BigNumber[], string[], any[][]]> {
+): Promise<[string, string[], BigNumber[], string[], any[][], string[]]> {
   const exposureCaps = tokenNames.map(name => {
     return ethers.utils.parseUnits(`${tokenParams[name].exposureCap}`, tokenParams[name].decimals);
   });
@@ -495,17 +496,22 @@ async function prepArgs(
     tokenParams[name].ammPath ? encodeAMMPath(tokenParams[name].ammPath) : ethers.utils.hexZeroPad('0x00', 32)
   );
 
+  const oracleAddresses = await Promise.all(tokenNames.map(async name => {
+    return tokenParams[name].oracleContract ? (await deployments.get(tokenParams[name].oracleContract)).address : ethers.constants.AddressZero
+  }));
+
   const Roles = await deployments.get('Roles');
   const roles = await ethers.getContractAt('Roles', Roles.address);
 
-  const args: [string, string[], BigNumber[], string[], any[][]] = [
+  const args: [string, string[], BigNumber[], string[], any[][], string[]] = [
     roles.address,
     tokenAddresses,
     exposureCaps,
     //lendingBuffers,
     //incentiveWeights,
     liquidationAmms,
-    liquidationTokens
+    liquidationTokens,
+    oracleAddresses
   ];
   return args;
 }
