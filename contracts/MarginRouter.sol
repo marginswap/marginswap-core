@@ -24,7 +24,8 @@ contract MarginRouter is RoleAware, BaseRouter {
         address toToken,
         uint256 inAmount,
         uint256 outAmout,
-        address maker
+        address maker,
+        uint256 expiration
     );
     event OrderTaken(uint256 orderId, address indexed taker, uint256 remainingInAmount, uint256 amountTaken);
 
@@ -37,6 +38,7 @@ contract MarginRouter is RoleAware, BaseRouter {
         uint256 inAmount;
         uint256 outAmount;
         address maker;
+        uint256 expiration;
     }
 
     mapping(uint256 => Order) public orders;
@@ -72,12 +74,12 @@ contract MarginRouter is RoleAware, BaseRouter {
     ///////////////////////////
 
 
-    // TODO expiration
     function makeOrder(
         address _fromToken,
         address _toToken,
         uint256 _inAmount,
-        uint256 _outAmount
+        uint256 _outAmount,
+        uint256 _expiration
     ) external {
         nextOrderId++;
         orders[nextOrderId] = Order({
@@ -85,7 +87,8 @@ contract MarginRouter is RoleAware, BaseRouter {
             toToken: _toToken,
             inAmount: _inAmount,
             outAmount: _outAmount,
-            maker: msg.sender
+            maker: msg.sender,
+            expiration: _expiration
         });
         emit OrderMade(
             nextOrderId,
@@ -93,7 +96,8 @@ contract MarginRouter is RoleAware, BaseRouter {
             _toToken,
             _inAmount,
             _outAmount,
-            msg.sender
+            msg.sender,
+            _expiration
         );
     }
 
@@ -110,6 +114,8 @@ contract MarginRouter is RoleAware, BaseRouter {
         Order storage order = orders[orderId];
 
         require(order.inAmount > 0, "invalid order");
+        require(order.expiration == 0 || order.expiration >= block.timestamp);
+
 
         uint256 inAmount = min(maxInAmount, order.inAmount);
         // scale down outAmount
@@ -164,6 +170,7 @@ contract MarginRouter is RoleAware, BaseRouter {
         Order storage order = orders[orderId];
 
         require(order.inAmount > 0, "invalid order");
+        require(order.expiration == 0 || order.expiration >= block.timestamp);
 
         require(
             order.fromToken == tokens[0] &&
