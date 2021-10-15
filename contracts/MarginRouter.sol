@@ -7,8 +7,11 @@ import "./Lending.sol";
 import "./BaseRouter.sol";
 import "../libraries/IncentiveReporter.sol";
 
+import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
+
 /// @title Top level transaction controller
 contract MarginRouter is RoleAware, BaseRouter {
+    using EnumerableSet for EnumerableSet.UintSet;
     event AccountUpdated(address indexed trader);
     event MarginTrade(
         address indexed trader,
@@ -28,6 +31,8 @@ contract MarginRouter is RoleAware, BaseRouter {
         uint256 expiration
     );
     event OrderTaken(uint256 orderId, address indexed taker, uint256 remainingInAmount, uint256 amountTaken);
+
+    EnumerableSet.UintSet pendingOrders;
 
     uint256 public constant mswapFeesPer10k = 10;
     address public immutable WETH;
@@ -101,6 +106,10 @@ contract MarginRouter is RoleAware, BaseRouter {
         );
     }
 
+    function getPendingOrders() external view returns (uint256[] memory) {
+        return pendingOrders.values();
+    }
+
     function invalidateOrder(uint256 orderId) external {
         Order storage order = orders[orderId];
         require(msg.sender == order.maker, "not authorized maker");
@@ -108,16 +117,19 @@ contract MarginRouter is RoleAware, BaseRouter {
         order.inAmount = 0;
         order.outAmount = 0;
         emit OrderTaken(orderId, msg.sender, 0, 0);
+        pendingOrders.remove(orderId);
     }
 
     function takeOrder(uint256 orderId, uint256 maxInAmount) external {
         Order storage order = orders[orderId];
 
         require(order.inAmount > 0, "invalid order");
-        require(order.expiration == 0 || order.expiration >= block.timestamp);
-
+        require(order.expiration == 0 || order.expiration >= block.timestamp, "order expired");
 
         uint256 inAmount = min(maxInAmount, order.inAmount);
+        if (inAmount == order.inAmount) {
+            pendingOrders.remove(orderId);
+        }
         // scale down outAmount
         uint256 outAmount = (inAmount * order.outAmount) / order.inAmount;
 
@@ -170,7 +182,8 @@ contract MarginRouter is RoleAware, BaseRouter {
         Order storage order = orders[orderId];
 
         require(order.inAmount > 0, "invalid order");
-        require(order.expiration == 0 || order.expiration >= block.timestamp);
+        require(order.expiration == 0 || order.expiration >= block.timestamp, "order expired");
+        pendingOrders.remove(orderId);
 
         require(
             order.fromToken == tokens[0] &&
@@ -196,6 +209,7 @@ contract MarginRouter is RoleAware, BaseRouter {
         _fundSwapExactT4T(amounts, order.outAmount, pairs, tokens);
 
         // deposit remainder to submitting taker's account
+        // This breaks in case out amoutn is lower than order.outAmount
         uint256 depositAmount = amounts[amounts.length - 1] - order.outAmount;
         uint256 extinguishAmount =
             IMarginTrading(crossMarginTrading()).registerDeposit(
