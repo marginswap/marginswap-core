@@ -65,10 +65,10 @@ contract TokenActivation is Executor {
             Lending(lending()).initBorrowYieldAccumulator(token);
 
             require(
-                liquidationTokenPath.length == 0 || (
-                    liquidationTokenPath[0] == token &&
-                    liquidationTokenPath[liquidationTokenPath.length - 1] ==
-                    CrossMarginTrading(crossMarginTrading()).peg()),
+                liquidationTokenPath.length == 0 ||
+                    (liquidationTokenPath[0] == token &&
+                        liquidationTokenPath[liquidationTokenPath.length - 1] ==
+                        CrossMarginTrading(crossMarginTrading()).peg()),
                 "Invalid liquidationTokens -- should go from token to peg"
             );
 

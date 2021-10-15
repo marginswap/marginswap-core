@@ -72,16 +72,16 @@ export const tokensPerNetwork: Record<string, Record<string, string>> = {
     WBTC: '0x50b7545627a5162f82a992c33b87adc75187b218'
   },
   matic: {
-    USDC: "0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174",
-    WBTC: "0x1BFD67037B42Cf73acF2047067bd4F2C47D9BfD6",
-    DAI: "0x8f3Cf7ad23Cd3CaDbD9735AFf958023239c6A063",
-    WETH: "0x7ceB23fD6bC0adD59E62ac25578270cFf1b9f619",
-    WMATIC: "0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270",
-    USDT: "0xc2132D05D31c914a87C6611C10748AEb04B58e8F",
-    LINK: "0x53E0bca35eC356BD5ddDFebbD1Fc0fD03FaBad39",
-    AAVE: "0xD6DF932A45C0f255f85145f286eA0b292B21C90B",
-    QUICK: "0x831753dd7087cac61ab5644b308642cc1c33dc13",
-    MAI: "0xa3fa99a148fa48d14ed51d610c367c61876997f1"
+    USDC: '0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174',
+    WBTC: '0x1BFD67037B42Cf73acF2047067bd4F2C47D9BfD6',
+    DAI: '0x8f3Cf7ad23Cd3CaDbD9735AFf958023239c6A063',
+    WETH: '0x7ceB23fD6bC0adD59E62ac25578270cFf1b9f619',
+    WMATIC: '0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270',
+    USDT: '0xc2132D05D31c914a87C6611C10748AEb04B58e8F',
+    LINK: '0x53E0bca35eC356BD5ddDFebbD1Fc0fD03FaBad39',
+    AAVE: '0xD6DF932A45C0f255f85145f286eA0b292B21C90B',
+    QUICK: '0x831753dd7087cac61ab5644b308642cc1c33dc13',
+    MAI: '0xa3fa99a148fa48d14ed51d610c367c61876997f1'
   },
   bsc: {
     WBNB: '0xbb4cdb9cbd36b01bd1cbaebf2de08d9173bc095c',
@@ -374,23 +374,43 @@ const deploy: DeployFunction = async function ({
   // ];
 
   const argLists = [
-    await prepArgs(tokenNames.slice(0, 5), tokenAddresses.slice(0, 5), deployments, tokens, peg, baseCurrency[networkName])
+    await prepArgs(
+      tokenNames.slice(0, 5),
+      tokenAddresses.slice(0, 5),
+      deployments,
+      tokens,
+      peg,
+      baseCurrency[networkName]
+    )
   ];
 
   if (tokenNames.length > 5) {
     argLists.push(
-      await prepArgs(tokenNames.slice(5, 8), tokenAddresses.slice(5, 8), deployments, tokens, peg, baseCurrency[networkName])
+      await prepArgs(
+        tokenNames.slice(5, 8),
+        tokenAddresses.slice(5, 8),
+        deployments,
+        tokens,
+        peg,
+        baseCurrency[networkName]
+      )
     );
     if (tokenNames.length > 8) {
       argLists.push(
-        await prepArgs(tokenNames.slice(8), tokenAddresses.slice(8), deployments, tokens, peg, baseCurrency[networkName])
+        await prepArgs(
+          tokenNames.slice(8),
+          tokenAddresses.slice(8),
+          deployments,
+          tokens,
+          peg,
+          baseCurrency[networkName]
+        )
       );
     }
   }
 
   let skipIfAlreadyDeployed = true;
   for (const args of argLists) {
-
     const TokenActivation = await deploy('TokenActivation', {
       from: deployer,
       args,
@@ -514,9 +534,13 @@ async function prepArgs(
     tokenParams[name].ammPath ? encodeAMMPath(tokenParams[name].ammPath) : ethers.utils.hexZeroPad('0x00', 32)
   );
 
-  const oracleAddresses = await Promise.all(tokenNames.map(async name => {
-    return tokenParams[name].oracleContract ? (await deployments.get(tokenParams[name].oracleContract)).address : ethers.constants.AddressZero
-  }));
+  const oracleAddresses = await Promise.all(
+    tokenNames.map(async name => {
+      return tokenParams[name].oracleContract
+        ? (await deployments.get(tokenParams[name].oracleContract)).address
+        : ethers.constants.AddressZero;
+    })
+  );
 
   const Roles = await deployments.get('Roles');
   const roles = await ethers.getContractAt('Roles', Roles.address);

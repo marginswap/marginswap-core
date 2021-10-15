@@ -21,7 +21,6 @@ contract IncentivizeLending is Executor {
         endTimestamp = _endTimestamp;
     }
 
-
     function requiredRoles()
         external
         override

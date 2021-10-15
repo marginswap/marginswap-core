@@ -23,6 +23,7 @@
   },
   "homepage": "https://github.com/marginswap/marginswap-core#readme",
   "dependencies": {
+    "@chainlink/contracts": "^0.2.1",
     "@marginswap/core-abi": "1.2.11",
     "@nomiclabs/hardhat-ethers": "^2.0.1",
     "@nomiclabs/hardhat-solhint": "^2.0.0",
@@ -30,8 +31,7 @@
     "@truffle/hdwallet-provider": "1.2.1",
     "@uniswap/v2-core": "^1.0.1",
     "hardhat-ethernal": "^0.3.2",
-    "sol-merger": "^3.1.0",
-    "@chainlink/contracts": "^0.2.1"
+    "sol-merger": "^3.1.0"
   },
   "devDependencies": {
     "@ethersproject/address": "^5.1.0",

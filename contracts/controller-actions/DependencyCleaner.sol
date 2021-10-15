@@ -9,12 +9,21 @@ contract DependencyCleaner is Executor {
     address[] contracts;
     uint256[] roles2nix;
 
-    constructor(address[] memory _contracts, uint256[] memory _roles2nix, address _roles) RoleAware(_roles) {
+    constructor(
+        address[] memory _contracts,
+        uint256[] memory _roles2nix,
+        address _roles
+    ) RoleAware(_roles) {
         contracts = _contracts;
         roles2nix = _roles2nix;
     }
 
-    function requiredRoles() external pure override returns (uint256[] memory required) {
+    function requiredRoles()
+        external
+        pure
+        override
+        returns (uint256[] memory required)
+    {
         return new uint256[](0);
     }
 

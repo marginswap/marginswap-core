@@ -20,7 +20,6 @@ export const amm2InitHashes = {
   43114: hexlify('0x0bbca9af0511ad1a1da383135cf3a8d2ac620e549ef9f6ae3a4c33c2fed0af91'),
   137: hexlify('0xe18a34eb0e04b04f7a0ac29a6e80748dca96319b42c54d679cb821dca90c6303'),
   56: hexlify('0xf4ccce374816856d11f00e4069e7cada164065686fbef53c6167a63ec2fd8c5b')
-
 };
 
 export const amm3InitHashes = {
@@ -28,12 +27,12 @@ export const amm3InitHashes = {
   31337: hexlify('0x0000000000000000000000000000000000000000000000000000000000000000'),
   '43114': hexlify('0xe18a34eb0e04b04f7a0ac29a6e80748dca96319b42c54d679cb821dca90c6303'),
   137: hexlify('0xf187ed688403aa4f7acfada758d8d53698753b998a3071b06f1b777f4330eaf3'),
-  56: hexlify('0x0000000000000000000000000000000000000000000000000000000000000000'),
+  56: hexlify('0x0000000000000000000000000000000000000000000000000000000000000000')
 };
 
 const feeBases = {
   56: 9975
-}
+};
 
 export function getFeeBase(chainId) {
   return feeBases[chainId] ?? 9970;
@@ -54,7 +53,16 @@ const deploy: DeployFunction = async function ({
   const amm2InitHash = amm2InitHashes[await getChainId()];
   const amm3InitHash = amm3InitHashes[await getChainId()];
 
-  const args = [baseCurrency, amm1Factory, amm2Factory, amm3Factory, amm1InitHash, amm2InitHash, amm3InitHash, getFeeBase(await getChainId())];
+  const args = [
+    baseCurrency,
+    amm1Factory,
+    amm2Factory,
+    amm3Factory,
+    amm1InitHash,
+    amm2InitHash,
+    amm3InitHash,
+    getFeeBase(await getChainId())
+  ];
   const SpotRouter = await deploy('SpotRouter', {
     from: deployer,
     args,

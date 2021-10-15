@@ -124,7 +124,7 @@ const homedir = require('os').homedir();
 const privateKey = fs.readFileSync(`${homedir}/.marginswap-secret`).toString().trim();
 function infuraUrl(networkName: string) {
   // return `https://eth-${networkName}.alchemyapi.io/v2/AcIJPH41nagmF3o1sPArEns8erN9N691`;
-   return `https://${networkName}.infura.io/v3/ae52aea5aa2b41e287d72e10b1175491`;
+  return `https://${networkName}.infura.io/v3/ae52aea5aa2b41e287d72e10b1175491`;
 }
 
 /**
@@ -173,11 +173,11 @@ export default {
       // url: 'https://rpc-mainnet.maticvigil.com/v1/b0858bc7aa27b1333df19546c12718235bd11785',
       url: 'https://sparkling-icy-breeze.matic.quiknode.pro/53a1956ec39dddb5ab61f857eed385722d8349bc/',
       // url: 'https://matic-mainnet-full-rpc.bwarelabs.com',
-      accounts: [privateKey],
+      accounts: [privateKey]
       // gasPrice: 1000000000
     },
     bsc: {
-      url: "https://bsc-dataseed.binance.org/",
+      url: 'https://bsc-dataseed.binance.org/',
       chainId: 56,
       accounts: [privateKey]
     }
@@ -225,7 +225,7 @@ export default {
       42: '0xd0a1e359811322d97991e03f863a0c30c2cf029c',
       '43114': '0xB31f66AA3C1e785363F0875A1B74E27b85FD66c7',
       137: '0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270',
-      56: '0xbb4cdb9cbd36b01bd1cbaebf2de08d9173bc095c',
+      56: '0xbb4cdb9cbd36b01bd1cbaebf2de08d9173bc095c'
     },
     dai: {
       1: '0x6b175474e89094c44da98b954eedeac495271d0f',

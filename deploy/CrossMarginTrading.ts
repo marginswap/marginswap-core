@@ -24,7 +24,17 @@ const deploy: DeployFunction = async function ({
 
   await deploy('CrossMarginTrading', {
     from: deployer,
-    args: [peg.address, amm1Factory, amm2Factory, amm3Factory, amm1InitHash, amm2InitHash, amm3InitHash, getFeeBase(await getChainId()), Roles.address],
+    args: [
+      peg.address,
+      amm1Factory,
+      amm2Factory,
+      amm3Factory,
+      amm1InitHash,
+      amm2InitHash,
+      amm3InitHash,
+      getFeeBase(await getChainId()),
+      Roles.address
+    ],
     log: true,
     skipIfAlreadyDeployed: true
   });
