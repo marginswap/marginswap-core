@@ -17,13 +17,21 @@ contract CrossMarginLiquidationV2 is RoleAware {
 
     mapping(address => LiquidationRecord) liquidationRecords;
     uint256 public BID_WINDOW = 5 minutes;
-    uint256 public liqCutPercent = 5;
+    uint256 public liqMaxCutPercent = 7;
+
+    mapping(address => mapping(address => bool)) public authorizedLiquidator;
 
     /// Liquidate an account
     function liquidate(
         address[] memory liquidationCandidates,
-        uint256[] memory bids
+        uint256[] memory bids,
+        address targetAccount
     ) external {
+        require(
+            authorizedLiquidator[targetAccount][msg.sender],
+            "Not authorized to liquidate to target account"
+        );
+
         CrossMarginTrading cmt = CrossMarginTrading(crossMarginTrading());
         address peg = cmt.peg();
 
@@ -38,7 +46,7 @@ contract CrossMarginLiquidationV2 is RoleAware {
 
             bool properLiquidation =
                 cmt.canBeLiquidated(trader) &&
-                    currentBid * (100 + liqCutPercent) >=
+                    currentBid * (100 + liqMaxCutPercent) >=
                     100 *
                         (cmt.viewHoldingsInPeg(trader) -
                             cmt.viewLoanInPeg(trader));
@@ -54,23 +62,24 @@ contract CrossMarginLiquidationV2 is RoleAware {
                     (lR.borrowTokens, lR.borrowAmounts) = cmt.getBorrowAmounts(
                         trader
                     );
-                    transferAssets(trader, msg.sender, lR);
+                    transferAssets(trader, targetAccount, lR);
                 } else {
                     // repay previous liquidator
                     cmt.registerDeposit(lR.liquidator, peg, lR.liquidationBid);
                     currentBid -= lR.liquidationBid;
-                    transferAssets(lR.liquidator, msg.sender, lR);
+                    transferAssets(lR.liquidator, targetAccount, lR);
                 }
 
                 lR.liquidationBid += currentBid;
-                lR.liquidator = msg.sender;
+                lR.liquidator = targetAccount;
                 lR.lastBidTimestamp = block.timestamp;
 
                 cmt.registerDeposit(trader, peg, currentBid / 2);
                 Fund(fund()).withdraw(peg, feeRecipient(), currentBid / 2);
 
+                // checks positive balance
                 cmt.registerTradeAndBorrow(
-                    msg.sender,
+                    targetAccount,
                     peg,
                     peg,
                     lR.liquidationBid,
@@ -138,11 +147,17 @@ contract CrossMarginLiquidationV2 is RoleAware {
         );
     }
 
-    function setLiqCutPercent(uint256 liqCut) external onlyOwnerExec {
-        liqCutPercent = liqCut;
+    function setliqMaxCutPercent(uint256 liqCut) external onlyOwnerExec {
+        liqMaxCutPercent = liqCut;
     }
 
     function setBidWindow(uint256 window) external onlyOwnerExec {
         BID_WINDOW = window;
+    }
+
+    function setLiquidatorAuthorization(address liquidator, bool auth)
+        external
+    {
+        authorizedLiquidator[msg.sender][liquidator] = auth;
     }
 }
