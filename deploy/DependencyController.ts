@@ -58,7 +58,7 @@ const managedContracts: ManagedContract[] = [
   {
     contractName: 'CrossMarginLiquidationV2',
     charactersPlayed: [],
-    rolesPlayed: [LIQUIDATOR, MARGIN_TRADER]
+    rolesPlayed: [LIQUIDATOR, MARGIN_TRADER, WITHDRAWER]
   }
 ];
 

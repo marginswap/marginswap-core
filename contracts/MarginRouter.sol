@@ -30,7 +30,12 @@ contract MarginRouter is RoleAware, BaseRouter {
         address maker,
         uint256 expiration
     );
-    event OrderTaken(uint256 orderId, address indexed taker, uint256 remainingInAmount, uint256 amountTaken);
+    event OrderTaken(
+        uint256 orderId,
+        address indexed taker,
+        uint256 remainingInAmount,
+        uint256 amountTaken
+    );
 
     EnumerableSet.UintSet pendingOrders;
 
@@ -78,7 +83,6 @@ contract MarginRouter is RoleAware, BaseRouter {
     // Cross margin endpoints
     ///////////////////////////
 
-
     function makeOrder(
         address _fromToken,
         address _toToken,
@@ -124,7 +128,10 @@ contract MarginRouter is RoleAware, BaseRouter {
         Order storage order = orders[orderId];
 
         require(order.inAmount > 0, "invalid order");
-        require(order.expiration == 0 || order.expiration >= block.timestamp, "order expired");
+        require(
+            order.expiration == 0 || order.expiration >= block.timestamp,
+            "order expired"
+        );
 
         uint256 inAmount = min(maxInAmount, order.inAmount);
         if (inAmount == order.inAmount) {
@@ -182,7 +189,10 @@ contract MarginRouter is RoleAware, BaseRouter {
         Order storage order = orders[orderId];
 
         require(order.inAmount > 0, "invalid order");
-        require(order.expiration == 0 || order.expiration >= block.timestamp, "order expired");
+        require(
+            order.expiration == 0 || order.expiration >= block.timestamp,
+            "order expired"
+        );
         pendingOrders.remove(orderId);
 
         require(

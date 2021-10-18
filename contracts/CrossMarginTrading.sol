@@ -329,8 +329,8 @@ contract CrossMarginTrading is CrossMarginLiquidation, IMarginTrading {
     /// @dev view function to get loan amount in peg
     function viewLoanInPeg(address trader)
         external
-        override
         view
+        override
         returns (uint256 amount)
     {
         CrossMarginAccount storage account = marginAccounts[trader];
@@ -343,7 +343,12 @@ contract CrossMarginTrading is CrossMarginLiquidation, IMarginTrading {
     }
 
     /// @dev total of assets of account, expressed in reference currency
-    function viewHoldingsInPeg(address trader) external override view returns (uint256) {
+    function viewHoldingsInPeg(address trader)
+        external
+        view
+        override
+        returns (uint256)
+    {
         CrossMarginAccount storage account = marginAccounts[trader];
         return viewTokensInPeg(account.holdingTokens, account.holdings);
     }

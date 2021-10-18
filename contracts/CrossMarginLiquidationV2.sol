@@ -8,22 +8,22 @@ contract CrossMarginLiquidationV2 is RoleAware {
     struct LiquidationRecord {
         address[] holdingTokens;
         uint256[] holdingAmounts;
-
         address[] borrowTokens;
         uint256[] borrowAmounts;
-
         uint256 liquidationBid;
         address liquidator;
         uint256 lastBidTimestamp;
     }
 
     mapping(address => LiquidationRecord) liquidationRecords;
-    uint256 BID_WINDOW = 5 minutes;
+    uint256 public BID_WINDOW = 5 minutes;
+    uint256 public liqCutPercent = 5;
 
     /// Liquidate an account
-    function liquidate(address[] memory liquidationCandidates, uint256[] memory bids)
-        external
-    {
+    function liquidate(
+        address[] memory liquidationCandidates,
+        uint256[] memory bids
+    ) external {
         CrossMarginTrading cmt = CrossMarginTrading(crossMarginTrading());
         address peg = cmt.peg();
 
@@ -35,19 +35,31 @@ contract CrossMarginLiquidationV2 is RoleAware {
             address trader = liquidationCandidates[traderIdx];
             uint256 currentBid = bids[traderIdx];
             LiquidationRecord storage lR = liquidationRecords[trader];
-            if (cmt.canBeLiquidated(trader) || (currentBid > lR.liquidationBid && lR.lastBidTimestamp + BID_WINDOW > block.timestamp)) {
-                
-                if (lR.lastBidTimestamp == 0) {
-                    (lR.holdingTokens, lR.holdingAmounts) = cmt.getHoldingAmounts(trader);
-                    (lR.borrowTokens, lR.borrowAmounts) = cmt.getBorrowAmounts(trader);
-                    transferAssets(trader, msg.sender, lR);
 
+            bool properLiquidation =
+                cmt.canBeLiquidated(trader) &&
+                    currentBid * (100 + liqCutPercent) >=
+                    100 *
+                        (cmt.viewHoldingsInPeg(trader) -
+                            cmt.viewLoanInPeg(trader));
+
+            if (
+                properLiquidation ||
+                (currentBid > lR.liquidationBid &&
+                    lR.lastBidTimestamp + BID_WINDOW > block.timestamp)
+            ) {
+                if (lR.lastBidTimestamp == 0) {
+                    (lR.holdingTokens, lR.holdingAmounts) = cmt
+                        .getHoldingAmounts(trader);
+                    (lR.borrowTokens, lR.borrowAmounts) = cmt.getBorrowAmounts(
+                        trader
+                    );
+                    transferAssets(trader, msg.sender, lR);
                 } else {
                     // repay previous liquidator
                     cmt.registerDeposit(lR.liquidator, peg, lR.liquidationBid);
                     currentBid -= lR.liquidationBid;
                     transferAssets(lR.liquidator, msg.sender, lR);
-
                 }
 
                 lR.liquidationBid += currentBid;
@@ -57,7 +69,13 @@ contract CrossMarginLiquidationV2 is RoleAware {
                 cmt.registerDeposit(trader, peg, currentBid / 2);
                 Fund(fund()).withdraw(peg, feeRecipient(), currentBid / 2);
 
-                cmt.registerTradeAndBorrow(msg.sender, peg, peg, lR.liquidationBid, 0);
+                cmt.registerTradeAndBorrow(
+                    msg.sender,
+                    peg,
+                    peg,
+                    lR.liquidationBid,
+                    0
+                );
             }
         }
     }
@@ -76,7 +94,11 @@ contract CrossMarginLiquidationV2 is RoleAware {
             holdingTokens.length > holdingIdx;
             holdingIdx++
         ) {
-            cmt.registerDeposit(recipient, holdingTokens[holdingIdx], holdingAmounts[holdingIdx]);
+            cmt.registerDeposit(
+                recipient,
+                holdingTokens[holdingIdx],
+                holdingAmounts[holdingIdx]
+            );
         }
         for (
             uint256 borrowIdx = 0;
@@ -84,7 +106,13 @@ contract CrossMarginLiquidationV2 is RoleAware {
             borrowIdx++
         ) {
             // since at the time we didn't anticipate raw borrowing, we make a bunch of poor trades to simulate it
-            cmt.registerTradeAndBorrow(recipient, borrowTokens[borrowIdx], holdingTokens[0], borrowAmounts[borrowIdx], 0);
+            cmt.registerTradeAndBorrow(
+                recipient,
+                borrowTokens[borrowIdx],
+                holdingTokens[0],
+                borrowAmounts[borrowIdx],
+                0
+            );
         }
     }
 
@@ -94,7 +122,27 @@ contract CrossMarginLiquidationV2 is RoleAware {
         address to,
         LiquidationRecord storage lR
     ) internal {
-        applyAssets(from, lR.borrowTokens, lR.borrowAmounts, lR.holdingTokens, lR.holdingAmounts);
-        applyAssets(to, lR.holdingTokens, lR.holdingAmounts, lR.borrowTokens, lR.borrowAmounts);
+        applyAssets(
+            from,
+            lR.borrowTokens,
+            lR.borrowAmounts,
+            lR.holdingTokens,
+            lR.holdingAmounts
+        );
+        applyAssets(
+            to,
+            lR.holdingTokens,
+            lR.holdingAmounts,
+            lR.borrowTokens,
+            lR.borrowAmounts
+        );
+    }
+
+    function setLiqCutPercent(uint256 liqCut) external onlyOwnerExec {
+        liqCutPercent = liqCut;
+    }
+
+    function setBidWindow(uint256 window) external onlyOwnerExec {
+        BID_WINDOW = window;
     }
 }

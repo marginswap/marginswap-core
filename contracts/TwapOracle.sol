@@ -2,7 +2,7 @@ import "./PriceAware.sol";
 
 contract TwapOracle is PriceAware, IOracle {
     constructor(
-        address _peg, 
+        address _peg,
         address _amm1Factory,
         address _amm2Factory,
         address _amm3Factory,
@@ -25,11 +25,20 @@ contract TwapOracle is PriceAware, IOracle {
         )
     {}
 
-    function getCurrentPrice(address token, uint256 inAmount) external override returns (uint256) {
+    function getCurrentPrice(address token, uint256 inAmount)
+        external
+        override
+        returns (uint256)
+    {
         return getCurrentPriceInPeg(token, inAmount, true);
     }
 
-    function viewCurrentPrice(address token, uint256 inAmount) external override view returns (uint256) {
+    function viewCurrentPrice(address token, uint256 inAmount)
+        external
+        view
+        override
+        returns (uint256)
+    {
         return viewCurrentPriceInPeg(token, inAmount);
     }
 }
