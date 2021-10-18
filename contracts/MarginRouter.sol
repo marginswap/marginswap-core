@@ -52,7 +52,7 @@ contract MarginRouter is RoleAware, BaseRouter {
     }
 
     mapping(uint256 => Order) public orders;
-    uint256 nextOrderId;
+    uint256 nextOrderId = 1;
 
     constructor(
         address _WETH,
@@ -90,7 +90,6 @@ contract MarginRouter is RoleAware, BaseRouter {
         uint256 _outAmount,
         uint256 _expiration
     ) external {
-        nextOrderId++;
         orders[nextOrderId] = Order({
             fromToken: _fromToken,
             toToken: _toToken,
@@ -108,6 +107,8 @@ contract MarginRouter is RoleAware, BaseRouter {
             msg.sender,
             _expiration
         );
+        pendingOrders.add(nextOrderId);
+        nextOrderId++;
     }
 
     function getPendingOrders() external view returns (uint256[] memory) {
