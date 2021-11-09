@@ -37,47 +37,47 @@ const deploy: DeployFunction = async function ({
   //   // skipIfAlreadyDeployed: true
   // });
 
-  if (//Staking.newlyDeployed &&
-     (network.name == 'localhost' || network.name == 'mainnet')) {
-    const staking = await deployments.get('Staking').then(Staking => ethers.getContractAt('Staking', Staking.address));
+  // if (//Staking.newlyDeployed &&
+  //    (network.name == 'localhost' || network.name == 'mainnet')) {
+  //   const staking = await deployments.get('Staking').then(Staking => ethers.getContractAt('Staking', Staking.address));
 
-    const userRewardPerTokenPaid: BigNumber[] = [];
-    const rewards: BigNumber[] = [];
-    const stakeStart: BigNumber[] = [];
-    const accountBalances: BigNumber[] = [];
-    const isMigrated: boolean[] = [];
+  //   const userRewardPerTokenPaid: BigNumber[] = [];
+  //   const rewards: BigNumber[] = [];
+  //   const stakeStart: BigNumber[] = [];
+  //   const accountBalances: BigNumber[] = [];
+  //   const isMigrated: boolean[] = [];
 
-    for (const account of migrateAccounts) {
-      userRewardPerTokenPaid.push(await interim.userRewardPerTokenPaid(account));
-      rewards.push(await interim.rewards(account));
-      stakeStart.push(await interim.stakeStart(account));
-      accountBalances.push(await interim.balanceOf(account));
-      isMigrated.push(await interim.migrated(account));
-    }
+  //   for (const account of migrateAccounts) {
+  //     userRewardPerTokenPaid.push(await interim.userRewardPerTokenPaid(account));
+  //     rewards.push(await interim.rewards(account));
+  //     stakeStart.push(await interim.stakeStart(account));
+  //     accountBalances.push(await interim.balanceOf(account));
+  //     isMigrated.push(await interim.migrated(account));
+  //   }
 
-    let tx = await staking.functions.migrateAccounts(
-      // await interim.rewardPerTokenStored(),
-      // await interim.totalSupply(),
+  //   let tx = await staking.functions.migrateAccounts(
+  //     // await interim.rewardPerTokenStored(),
+  //     // await interim.totalSupply(),
 
-      migrateAccounts,
-      userRewardPerTokenPaid,
-      rewards,
-      stakeStart,
-      accountBalances,
-      isMigrated,
-      {gasLimit: 10626570 }
-    );
-    console.log(`Migrating at ${tx.hash}`);
-    tx = await tx.wait();
-    console.log(`Migrated with ${tx.gasUsed}`);
-    // tx = await staking.migrateAccounts(migrateAccounts.slice(migrateAccounts.length / 2));
-    // console.log(`Migrating at ${tx.hash}`);
-    // await tx.wait();
+  //     migrateAccounts,
+  //     userRewardPerTokenPaid,
+  //     rewards,
+  //     stakeStart,
+  //     accountBalances,
+  //     isMigrated,
+  //     {gasLimit: 10626570 }
+  //   );
+  //   console.log(`Migrating at ${tx.hash}`);
+  //   tx = await tx.wait();
+  //   console.log(`Migrated with ${tx.gasUsed}`);
+  //   // tx = await staking.migrateAccounts(migrateAccounts.slice(migrateAccounts.length / 2));
+  //   // console.log(`Migrating at ${tx.hash}`);
+  //   // await tx.wait();
 
-    // tx = await staking.migrateParams();
-    // console.log(`Migrating params at ${tx.hash}`);
-    // await tx.wait();
-  }
+  //   // tx = await staking.migrateParams();
+  //   // console.log(`Migrating params at ${tx.hash}`);
+  //   // await tx.wait();
+  // }
 };
 
 deploy.tags = ['Staking', 'local'];
