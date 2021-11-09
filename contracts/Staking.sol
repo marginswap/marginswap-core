@@ -14,10 +14,11 @@ contract Staking is ReentrancyGuard, Ownable {
 
     /* ========== STATE VARIABLES ========== */
 
-    TokenStaking legacy;
+    TokenStaking immutable legacy;
+    Staking immutable interim;
 
-    IERC20 public rewardsToken;
-    IERC20 public stakingToken;
+    IERC20 public immutable rewardsToken;
+    IERC20 public immutable stakingToken;
     uint256 public periodFinish = 0;
     uint256 public rewardRate = 0;
     uint256 public rewardsDuration = 30 days;
@@ -45,11 +46,13 @@ contract Staking is ReentrancyGuard, Ownable {
     constructor(
         address _rewardsToken,
         address _stakingToken,
-        address legacyContract
+        address legacyContract,
+        address _interim
     ) Ownable() {
         rewardsToken = IERC20(_rewardsToken);
         stakingToken = IERC20(_stakingToken);
         legacy = TokenStaking(legacyContract);
+        interim = Staking(_interim);
     }
 
     /* ========== VIEWS ========== */
@@ -234,45 +237,43 @@ contract Staking is ReentrancyGuard, Ownable {
         lockTime = t;
     }
 
-    function migrate(address[] calldata accounts) external onlyOwner {
-        startingWeights = legacy.totalCurrentWeights();
-        uint256 _startingWeights = startingWeights;
-        uint256 _rewardTarget = legacy.rewardTarget();
+    function migrateAccounts(
+        address[] calldata accounts,
+        uint256[] calldata _userRewardPerTokenPaid,
+        uint256[] calldata _rewards,
+        uint256[] calldata _stakeStart,
+        uint256[] calldata accountBalances,
+        bool[] calldata isMigrated
+    ) external onlyOwner {
+        rewardRate = 1157407407407407;
+        rewardPerTokenStored = interim.rewardPerTokenStored();
+        startingWeights = 1969129866821224396662477;
+        _totalSupply = interim.totalSupply();
 
-        uint256 _legacyCarry;
+        periodFinish = block.timestamp + 60 days;
+        lastUpdateTime = block.timestamp;
+
+
         for (uint256 i; accounts.length > i; i++) {
             address accountAddress = accounts[i];
-            StakeAccount memory account;
-            (
-                account.stakeAmount,
-                account.stakeWeight,
-                account.cumulativeStart,
-                account.lockEnd
-            ) = legacy.stakeAccounts(accountAddress);
-            uint256 amount = account.stakeAmount;
+            userRewardPerTokenPaid[accountAddress] = _userRewardPerTokenPaid[i];
+            rewards[accountAddress] = _rewards[i];
+            stakeStart[accountAddress] = _stakeStart[i];
+            _balances[accountAddress] = accountBalances[i];
 
-            _totalSupply = _totalSupply.add(amount);
-            _balances[accountAddress] = _balances[accountAddress].add(amount);
-            stakeStart[accountAddress] = account.lockEnd - lockTime;
-            migrated[accountAddress] = true;
-            legacyStakeAccounts[accountAddress] = account;
+            if (isMigrated[i]) {
+                migrated[accountAddress] = true;
 
-            if (account.lockEnd > block.timestamp) {
-                uint256 remaining = account.lockEnd - block.timestamp;
-                if (remaining > 30 days) {
-                    // bonus is the additional 1 / 3 of reward that a 3 month should get relative to standard
-                    // 1 month lockup
-                    // calculated for their remaining reward period
-                    uint256 bonus =
-                        (((_rewardTarget * account.stakeWeight) /
-                            _startingWeights) * (90 days - remaining)) /
-                            (90 days) /
-                            3;
-                    rewards[accountAddress] += bonus;
-                    _legacyCarry += bonus;
-                }
+                StakeAccount memory account;
+
+                (
+                    account.stakeAmount,
+                    account.stakeWeight,
+                    account.cumulativeStart,
+                    account.lockEnd
+                ) = interim.legacyStakeAccounts(accountAddress);
+                legacyStakeAccounts[accountAddress] = account;
             }
-            legacyCarry += _legacyCarry;
         }
     }
 
