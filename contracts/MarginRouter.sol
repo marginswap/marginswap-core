@@ -38,6 +38,7 @@ contract MarginRouter is RoleAware, BaseRouter {
     );
 
     EnumerableSet.UintSet pendingOrders;
+    mapping(address => EnumerableSet.UintSet) private pendingOrdersPerUser;
 
     uint256 public constant mswapFeesPer10k = 10;
     address public immutable WETH;
@@ -108,11 +109,16 @@ contract MarginRouter is RoleAware, BaseRouter {
             _expiration
         );
         pendingOrders.add(nextOrderId);
+        pendingOrdersPerUser[msg.sender].add(nextOrderId);
         nextOrderId++;
     }
 
     function getPendingOrders() external view returns (uint256[] memory) {
         return pendingOrders.values();
+    }
+
+    function getPendingOrderPerUser(address user) external view returns (uint256[] memory) {
+        return pendingOrdersPerUser[user].values();
     }
 
     function invalidateOrder(uint256 orderId) external {
@@ -123,6 +129,7 @@ contract MarginRouter is RoleAware, BaseRouter {
         order.outAmount = 0;
         emit OrderTaken(orderId, msg.sender, 0, 0);
         pendingOrders.remove(orderId);
+        pendingOrdersPerUser[msg.sender].remove(orderId);
     }
 
     function takeOrder(uint256 orderId, uint256 maxInAmount) external {
@@ -137,6 +144,7 @@ contract MarginRouter is RoleAware, BaseRouter {
         uint256 inAmount = min(maxInAmount, order.inAmount);
         if (inAmount == order.inAmount) {
             pendingOrders.remove(orderId);
+            pendingOrdersPerUser[order.maker].remove(orderId);
         }
         // scale down outAmount
         uint256 outAmount = (inAmount * order.outAmount) / order.inAmount;
@@ -195,6 +203,7 @@ contract MarginRouter is RoleAware, BaseRouter {
             "order expired"
         );
         pendingOrders.remove(orderId);
+        pendingOrdersPerUser[order.maker].remove(orderId);
 
         require(
             order.fromToken == tokens[0] &&
