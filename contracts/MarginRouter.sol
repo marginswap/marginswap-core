@@ -117,8 +117,31 @@ contract MarginRouter is RoleAware, BaseRouter {
         return pendingOrders.values();
     }
 
+    function getPendingOrderRecords() external view returns (Order[] memory) {
+        uint256 len = pendingOrders.length();
+        Order[] memory result = new Order[](len);
+
+        for (uint256 i; len > i; i++) {
+            result[i] = orders[pendingOrders.at(i)];
+        }
+
+        return result;
+    }
+
     function getPendingOrderPerUser(address user) external view returns (uint256[] memory) {
         return pendingOrdersPerUser[user].values();
+    }
+
+    function getPendingOrderRecordsPerUser(address user) external view returns (Order[] memory) {
+        EnumerableSet.UintSet storage pendingUserOrders = pendingOrdersPerUser[user];
+        uint256 len = pendingUserOrders.length();
+        Order[] memory result = new Order[](len);
+
+        for (uint256 i; len > i; i++) {
+            result[i] = orders[pendingUserOrders.at(i)];
+        }
+
+        return result;
     }
 
     function invalidateOrder(uint256 orderId) external {
