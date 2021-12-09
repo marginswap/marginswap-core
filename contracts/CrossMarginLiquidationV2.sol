@@ -5,33 +5,12 @@ import "./RoleAware.sol";
 contract CrossMarginLiquidationV2 is RoleAware {
     constructor(address _roles) RoleAware(_roles) {}
 
-    struct LiquidationRecord {
-        address[] holdingTokens;
-        uint256[] holdingAmounts;
-        address[] borrowTokens;
-        uint256[] borrowAmounts;
-        uint256 liquidationBid;
-        address liquidator;
-        uint256 lastBidTimestamp;
-    }
-
-    mapping(address => LiquidationRecord) liquidationRecords;
-    uint256 public BID_WINDOW = 5 minutes;
-    uint256 public liqMaxCutPercent = 7;
-
-    mapping(address => mapping(address => bool)) public authorizedLiquidator;
+    uint256 public liqCutPercent = 5;
 
     /// Liquidate an account
-    function liquidate(
-        address[] memory liquidationCandidates,
-        uint256[] memory bids,
-        address targetAccount
-    ) external {
-        require(
-            authorizedLiquidator[targetAccount][msg.sender],
-            "Not authorized to liquidate to target account"
-        );
-
+    function liquidate(address[] memory liquidationCandidates, bytes32 ammPath)
+        external
+    {
         CrossMarginTrading cmt = CrossMarginTrading(crossMarginTrading());
         address peg = cmt.peg();
 
@@ -41,123 +20,155 @@ contract CrossMarginLiquidationV2 is RoleAware {
             traderIdx++
         ) {
             address trader = liquidationCandidates[traderIdx];
-            uint256 currentBid = bids[traderIdx];
-            LiquidationRecord storage lR = liquidationRecords[trader];
 
-            bool properLiquidation =
-                cmt.canBeLiquidated(trader) &&
-                    currentBid * (100 + liqMaxCutPercent) >=
-                    100 *
-                        (cmt.viewHoldingsInPeg(trader) -
-                            cmt.viewLoanInPeg(trader));
+            if (cmt.canBeLiquidated(trader)) {
+                uint256 debtExtinguished = liquidateDebt(trader, ammPath);
+                uint256 holdingReturns = liquidateHoldings(trader, ammPath);
 
-            if (
-                properLiquidation ||
-                (currentBid > lR.liquidationBid &&
-                    lR.lastBidTimestamp + BID_WINDOW > block.timestamp)
-            ) {
-                if (lR.lastBidTimestamp == 0) {
-                    (lR.holdingTokens, lR.holdingAmounts) = cmt
-                        .getHoldingAmounts(trader);
-                    (lR.borrowTokens, lR.borrowAmounts) = cmt.getBorrowAmounts(
-                        trader
-                    );
-                    transferAssets(trader, targetAccount, lR);
-                } else {
-                    // repay previous liquidator
-                    cmt.registerDeposit(lR.liquidator, peg, lR.liquidationBid);
-                    currentBid -= lR.liquidationBid;
-                    transferAssets(lR.liquidator, targetAccount, lR);
+                if (holdingReturns > debtExtinguished + 100000) {
+                    // liquidator fee is taken out of the total amount of debt extinguished
+                    // though no more than the residual value of the position
+                    uint256 liquidatorFee =
+                        min(
+                            (liqCutPercent * debtExtinguished) / 100,
+                            holdingReturns - debtExtinguished
+                        );
+                    Fund(fund()).withdraw(peg, msg.sender, liquidatorFee);
+
+                    // residula value after liquidator fee
+                    uint256 leftOver =
+                        holdingReturns - debtExtinguished - liquidatorFee;
+
+                    // 1/3 of remainder goes to protocol
+                    if (leftOver > 100000) {
+                        Fund(fund()).withdraw(peg, trader, (2 * leftOver) / 3);
+                        Fund(fund()).withdraw(
+                            peg,
+                            feeRecipient(),
+                            leftOver / 3
+                        );
+                    }
                 }
 
-                lR.liquidationBid += currentBid;
-                lR.liquidator = targetAccount;
-                lR.lastBidTimestamp = block.timestamp;
-
-                cmt.registerDeposit(trader, peg, currentBid / 2);
-                Fund(fund()).withdraw(peg, feeRecipient(), currentBid / 2);
-
-                // checks positive balance
-                cmt.registerTradeAndBorrow(
-                    targetAccount,
-                    peg,
-                    peg,
-                    lR.liquidationBid,
-                    0
-                );
+                // key: this deletes the account without further ado
+                cmt.registerLiquidatorLiquidation(trader);
             }
         }
     }
 
-    /// Apply assets to an account
-    function applyAssets(
-        address recipient,
-        address[] memory holdingTokens,
-        uint256[] memory holdingAmounts,
-        address[] memory borrowTokens,
-        uint256[] memory borrowAmounts
-    ) internal {
-        CrossMarginTrading cmt = CrossMarginTrading(crossMarginTrading());
+    /// Liquidate the holdings of an account by trading for peg currency
+    function liquidateHoldings(address trader, bytes32 ammPath)
+        internal
+        returns (uint256 holdingReturns)
+    {
+        address peg = CrossMarginTrading(crossMarginTrading()).peg();
+        address WETH = MarginRouter(marginRouter()).WETH();
+
+        (address[] memory holdingTokens, uint256[] memory holdingAmounts) =
+            CrossMarginTrading(crossMarginTrading()).getHoldingAmounts(trader);
+
         for (
-            uint256 holdingIdx = 0;
+            uint256 holdingIdx;
             holdingTokens.length > holdingIdx;
             holdingIdx++
         ) {
-            cmt.registerDeposit(
-                recipient,
-                holdingTokens[holdingIdx],
-                holdingAmounts[holdingIdx]
-            );
+            address token = holdingTokens[holdingIdx];
+            uint256 tokenAmount = holdingAmounts[holdingIdx];
+
+            // non-peg tokens get traded for peg tokens
+            if (token != peg) {
+                address[] memory tokens;
+                if (token == WETH) {
+                    tokens = new address[](2);
+                    tokens[0] = token;
+                    tokens[1] = peg;
+                } else {
+                    tokens = new address[](3);
+                    tokens[0] = token;
+                    tokens[1] = WETH;
+                    tokens[2] = peg;
+                }
+
+                // pegAmount used to bound minimum output amount
+                uint256 pegAmount =
+                    CrossMarginTrading(crossMarginTrading())
+                        .getCurrentPriceInPeg(token, tokenAmount, true);
+
+                uint256[] memory amounts =
+                    MarginRouter(marginRouter()).authorizedSwapExactT4T(
+                        tokenAmount,
+                        (pegAmount * 90) / 100,
+                        ammPath,
+                        tokens
+                    );
+                holdingReturns += amounts[amounts.length - 1];
+
+            } else {
+                holdingReturns += holdingAmounts[holdingIdx];
+            }
         }
-        for (
-            uint256 borrowIdx = 0;
-            borrowTokens.length > borrowIdx;
-            borrowIdx++
-        ) {
-            // since at the time we didn't anticipate raw borrowing, we make a bunch of poor trades to simulate it
-            cmt.registerTradeAndBorrow(
-                recipient,
-                borrowTokens[borrowIdx],
-                holdingTokens[0],
-                borrowAmounts[borrowIdx],
-                0
-            );
-        }
     }
 
-    /// Transfer assets from one account to another
-    function transferAssets(
-        address from,
-        address to,
-        LiquidationRecord storage lR
-    ) internal {
-        applyAssets(
-            from,
-            lR.borrowTokens,
-            lR.borrowAmounts,
-            lR.holdingTokens,
-            lR.holdingAmounts
-        );
-        applyAssets(
-            to,
-            lR.holdingTokens,
-            lR.holdingAmounts,
-            lR.borrowTokens,
-            lR.borrowAmounts
-        );
-    }
-
-    function setliqMaxCutPercent(uint256 liqCut) external onlyOwnerExec {
-        liqMaxCutPercent = liqCut;
-    }
-
-    function setBidWindow(uint256 window) external onlyOwnerExec {
-        BID_WINDOW = window;
-    }
-
-    function setLiquidatorAuthorization(address liquidator, bool auth)
-        external
+    function liquidateDebt(address trader, bytes32 ammPath)
+        internal
+        returns (uint256 debtExtinguished)
     {
-        authorizedLiquidator[msg.sender][liquidator] = auth;
+        address peg = CrossMarginTrading(crossMarginTrading()).peg();
+        address WETH = MarginRouter(marginRouter()).WETH();
+
+        (address[] memory borrowTokens, uint256[] memory borrowAmounts) =
+            CrossMarginTrading(crossMarginTrading()).getBorrowAmounts(trader);
+
+        for (uint256 borrowIdx; borrowTokens.length > borrowIdx; borrowIdx++) {
+            address token = borrowTokens[borrowIdx];
+            uint256 tokenAmount = borrowAmounts[borrowIdx];
+
+            // non-peg tokens get bought with peg
+            if (token != peg) {
+                address[] memory tokens;
+                if (token == WETH) {
+                    tokens = new address[](2);
+                    tokens[0] = peg;
+                    tokens[1] = token;
+                } else {
+                    tokens = new address[](3);
+                    tokens[0] = peg;
+                    tokens[1] = WETH;
+                    tokens[2] = token;
+                }
+
+                // pegAmount used to bound maximum input amount
+                uint256 pegAmount =
+                    CrossMarginTrading(crossMarginTrading())
+                        .getCurrentPriceInPeg(token, tokenAmount, true);
+
+                uint256[] memory amounts =
+                    MarginRouter(marginRouter()).authorizedSwapT4ExactT(
+                        tokenAmount,
+                        (pegAmount * 111) / 100,
+                        ammPath,
+                        tokens
+                    );
+                debtExtinguished += amounts[0];
+
+            } else {
+                debtExtinguished += tokenAmount;
+            }
+
+            // reduce the amount of borrowing in this token
+            Lending(lending()).payOff(token, tokenAmount);
+        }
+    }
+
+    function setliqCutPercent(uint256 liqCut) external onlyOwnerExec {
+        liqCutPercent = liqCut;
+    }
+
+    function min(uint256 a, uint256 b) internal pure returns (uint256) {
+        if (a >= b) {
+            return b;
+        } else {
+            return a;
+        }
     }
 }

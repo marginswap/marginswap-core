@@ -152,7 +152,6 @@ contract MarginRouter is RoleAware, BaseRouter {
         order.outAmount = 0;
         emit OrderTaken(orderId, msg.sender, 0, 0);
         pendingOrders.remove(orderId);
-        pendingOrdersPerUser[msg.sender].remove(orderId);
     }
 
     function takeOrder(uint256 orderId, uint256 maxInAmount) external {
